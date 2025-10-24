@@ -1,0 +1,82 @@
+with CurrencyConvertion as ( --Curenncy COnvertion Table--
+SELECT *, 
+         CASE
+         	WHEN sher = 0
+         	THEN FIRST_VALUE(sher) OVER (PARTITION BY value_partition ORDER BY Tarikh) 
+         	ELSE sher
+         END AS new_sher
+         ,CASE
+         	WHEN SHER_EURO = 0
+         	THEN FIRST_VALUE(SHER_EURO) OVER (PARTITION BY value_partitionEuro ORDER BY Tarikh) 
+         	ELSE  SHER_EURO
+         END AS new_sherEuro
+ FROM ( SELECT *
+ ,SUM(CASE WHEN sher=0 THEN 0 ELSE 1 END) OVER (ORDER BY tarikh ) AS value_partition
+ ,SUM(CASE WHEN SHER_EURO=0 THEN 0 ELSE 1 END) OVER (ORDER BY tarikh ) AS value_partitionEuro
+          FROM SHERI_MTBE) m
+		  )
+
+SELECT
+    '1' as EntityID,
+    CC.MS_CHSHBONIT  AS DocID,
+    ROW_NUMBER() OVER (PARTITION BY CC.MS_CHSHBONIT ORDER BY CCS.T_CHSHBONIT) AS InvoiceLineNumber,
+    'Invoice' AS DocName,
+
+    'Additional Expense' AS LineType,
+    1 AS LineTypeCode,
+
+    CONVERT(VARCHAR, CCS.QOD_LQOCH) AS AccountKey,
+    SUBSTRING(CCS.T_CHSHBONIT,1,4) + '-' + SUBSTRING(CCS.T_CHSHBONIT,5,2) + '-' + SUBSTRING(CCS.T_CHSHBONIT,7,2) AS [Date],
+    CAST(CONVERT(INT, CONVERT(VARCHAR, AM2.QOD)) AS VARCHAR) AS AgentKey,
+
+    -- מפתחות פריט (ללא TM/SIM)
+    CAST(CONVERT(VARCHAR, CCS.QOD_MOTSR) AS VARCHAR) + '-' + CAST(CONVERT(VARCHAR, CCS.QOD_MOTSR) AS VARCHAR) AS ItemKey,
+    CAST(CONVERT(VARCHAR, CCS.QOD_MOTSR) AS VARCHAR) + '-' + CAST(CONVERT(VARCHAR, CCS.QOD_MOTSR) AS VARCHAR) AS ItemKey_backup,
+    CAST(CONVERT(VARCHAR, CCS.QOD_MOTSR) AS VARCHAR) AS Item,
+    CAST(CONVERT(VARCHAR, CCS.QOD_MOTSR) AS VARCHAR) AS AdditionalKey,
+
+    NULL AS DiscountPercent,
+    NULL AS LineTotalDiscount,
+    NULL AS UnitGrossPrice,
+
+    CAST(CCS.MCHIR_ICH_LLA_ME_M / (CASE WHEN SHER_LCHISHOB <> 0 THEN SHER_LCHISHOB ELSE 1 END) AS DECIMAL(12,2)) AS UnitNetPriceUSD,
+    CAST(CCS.MCHIR_ICH_LLA_ME_M AS DECIMAL(12,2)) AS UnitNetPriceNIS,
+
+    CCS.MSHQL_NTO AS Quantity,
+    CASE WHEN CCS.QOD_MOTSR <> 0 THEN 0 ELSE CCS.CMOT END AS AdditionalQuantity,
+
+    NULL AS LineTotalCost,
+
+	CCS.CMOT * CAST(CCS.MCHIR_ICH_LLA_ME_M AS DECIMAL(12,2)) AS LineTotalNetNIS,
+
+	CCS.CMOT * CAST(CCS.MCHIR_ICH_LLA_ME_M / (CASE WHEN SHER_LCHISHOB <> 0 THEN SHER_LCHISHOB ELSE CC2.new_sher END) AS DECIMAL(12,2)) AS LineTotalNet_USD,
+
+    NULL AS LineTotalNetVAT,
+    NULL AS LineTotalNetVAT_USD,
+
+    CONVERT(INT, CONVERT(VARCHAR, SUBSTRING(CCS.T_CHSHBONIT,1,4) + SUBSTRING(CCS.T_CHSHBONIT,5,2))) AS YearMonth,
+    NULL AS 'Status',
+
+    NULL AS DeliveryNote,
+    CAST(SUBSTRING(CCS.T_CHSHBONIT,1,4) + '-' + SUBSTRING(CCS.T_CHSHBONIT,5,2) + '-' + SUBSTRING(CCS.T_CHSHBONIT,7,2) AS DATE) AS DeliveryDate,
+
+    NULL AS OrderID,
+    NULL AS SupplierWarehouse,
+    0    AS WarehouseFlag,
+
+    GETDATE() AS RowInsertDatetime,
+    NULL AS ActionType,
+    NULL AS ActionTypeDesc,
+    '1' AS AdjustmentFlag,
+    NULL AS TransactionType,
+	HZMNT_RCSH as PurchaseOrderID
+
+FROM [dbo].[CHIOBI_CHOTS_COTROT] CC
+LEFT JOIN GORMIM G2
+    ON CC.QOD_LQOCH = G2.QOD_GORM
+LEFT JOIN TBLT_ANSHI_MCIROT AM2
+    ON AM2.SHM_AISH_MCIROT = G2.AISH_MCIROT_MTPL
+LEFT JOIN [dbo].[CHIOBI_CHOTS_SHOROT] CCS
+    ON CC.MS_CHSHBONIT = CCS.MS_CHSHBONIT
+LEFT JOIN CurrencyConvertion CC2
+    ON CCS.[TARIKH_MSHLOCH] = CC2.Tarikh
