@@ -60,7 +60,7 @@ SELECT *,
 
 Purchases as (
 
---------------------δζξπεϊ ψλω------------------
+--------------------Χ”Χ–ΧΧ Χ•Χª Χ¨Χ›Χ©------------------
 SELECT 
 
 '1' as 'EntityID'
@@ -162,7 +162,7 @@ SELECT
 		--,case when (i.DEBIT='C')  then round(ii.IVCOST  ,2)*-1*ii.IEXCHANGE else round(ii.IVCOST  ,2)*ii.IEXCHANGE end  as 'LineTotalNet' --always exchange
 		--,case when (i.DEBIT='C')  then round(ii.QPRICE  ,2)*-1*ii.IEXCHANGE else round(ii.QPRICE  ,2)*ii.IEXCHANGE end  as 'LineTotalNet' -- the invoice items price without the total invoice discount
 		----
-		,CAST(HZ.OrderStatus AS varchar) AS 'ρθθερ'
+		,CAST(HZ.OrderStatus AS varchar) AS 'Χ΅ΧΧΧ•Χ΅'
 		,NULL AS 'OrderLineStatus'
 		,OP.ActionType AS 'TransactionType'
 		--,0 as toc
@@ -230,7 +230,7 @@ AND HZ.ActionType IN(2,10)
 UNION ALL
 
 
---------------------δζξπεϊ ψλω - ξςψλϊ ηγωδ------------------
+--------------------Χ”Χ–ΧΧ Χ•Χª Χ¨Χ›Χ© - ΧΧΆΧ¨Χ›Χª Χ—Χ“Χ©Χ”------------------
 SELECT 
 
 '1' as 'EntityID'
@@ -351,7 +351,7 @@ SELECT
 			WHEN t.PO_Family = 2
 				THEN CASE
 						WHEN POL.POL_totalContracts <> 0 
-							THEN CAST((CAST(POL.POL_TotalOpenContract as decimal(18,2))+CAST(POL.POL_TotalInProcessContract as decimal(18,2)))/CAST(POL.POL_totalContracts as decimal(18,2)) AS decimal(18,2))--*POL.POL_QuantityOrdered ---- λξεϊ ωμΰ ϊεξηψδ =λξεϊ δζξπδ λτεμ(ρκ δλμ ηεζιν ΰτωψιιν - ηεζιν ωπηϊξε ημχι ρκ λμ δηεζιν δΰτωψιιν
+							THEN CAST((CAST(POL.POL_TotalOpenContract as decimal(18,2))+CAST(POL.POL_TotalInProcessContract as decimal(18,2)))/CAST(POL.POL_totalContracts as decimal(18,2)) AS decimal(18,2))--*POL.POL_QuantityOrdered ---- Χ›ΧΧ•Χª Χ©ΧΧ ΧªΧ•ΧΧ—Χ¨Χ” =Χ›ΧΧ•Χª Χ”Χ–ΧΧ Χ” Χ›Χ¤Χ•Χ(Χ΅Χ Χ”Χ›Χ Χ—Χ•Χ–Χ™Χ ΧΧ¤Χ©Χ¨Χ™Χ™Χ - Χ—Χ•Χ–Χ™Χ Χ©Χ Χ—ΧªΧΧ• Χ—ΧΧ§Χ™ Χ΅Χ Χ›Χ Χ”Χ—Χ•Χ–Χ™Χ Χ”ΧΧ¤Χ©Χ¨Χ™Χ™Χ
 						ELSE 1--POL.POL_QuantityOrdered
 					END
 			WHEN t.PO_Family = 1
@@ -364,7 +364,7 @@ SELECT
 			WHEN t.PO_Family = 2
 				THEN CASE
 						WHEN POL.POL_totalContracts <> 0
-							THEN CAST(CAST(POL.POL_TotalClosedContract as decimal(18,2))/CAST(POL.POL_totalContracts as decimal(18,2)) as decimal(18,2))---*POL.POL_QuantityOrdered ---- λξεϊ ωϊεξηψδ =λξεϊ δζξπδ λτεμ ηεζιν ωπηϊξε ημχι ρκ λμ δηεζιν δΰτωψιιν
+							THEN CAST(CAST(POL.POL_TotalClosedContract as decimal(18,2))/CAST(POL.POL_totalContracts as decimal(18,2)) as decimal(18,2))---*POL.POL_QuantityOrdered ---- Χ›ΧΧ•Χª Χ©ΧªΧ•ΧΧ—Χ¨Χ” =Χ›ΧΧ•Χª Χ”Χ–ΧΧ Χ” Χ›Χ¤Χ•Χ Χ—Χ•Χ–Χ™Χ Χ©Χ Χ—ΧªΧΧ• Χ—ΧΧ§Χ™ Χ΅Χ Χ›Χ Χ”Χ—Χ•Χ–Χ™Χ Χ”ΧΧ¤Χ©Χ¨Χ™Χ™Χ
 						ELSE NULL
 					END
 			WHEN t.PO_Family = 1
@@ -378,7 +378,7 @@ SELECT
 			WHEN t.PO_Family = 2
 				THEN CASE
 						WHEN POL.POL_totalContracts <> 0 
-							THEN (POL.POL_TotalOpenContract)* pr.QtyTonePerContract--*POL.POL_QuantityOrdered ---- λξεϊ ωμΰ ϊεξηψδ =λξεϊ δζξπδ λτεμ(ρκ δλμ ηεζιν ΰτωψιιν - ηεζιν ωπηϊξε ημχι ρκ λμ δηεζιν δΰτωψιιν   THEN (POL.POL_TotalOpenContract+POL.POL_TotalInProcessContract)* pr.QtyTonePerContract
+							THEN (POL.POL_TotalOpenContract)* pr.QtyTonePerContract--*POL.POL_QuantityOrdered ---- Χ›ΧΧ•Χª Χ©ΧΧ ΧªΧ•ΧΧ—Χ¨Χ” =Χ›ΧΧ•Χª Χ”Χ–ΧΧ Χ” Χ›Χ¤Χ•Χ(Χ΅Χ Χ”Χ›Χ Χ—Χ•Χ–Χ™Χ ΧΧ¤Χ©Χ¨Χ™Χ™Χ - Χ—Χ•Χ–Χ™Χ Χ©Χ Χ—ΧªΧΧ• Χ—ΧΧ§Χ™ Χ΅Χ Χ›Χ Χ”Χ—Χ•Χ–Χ™Χ Χ”ΧΧ¤Χ©Χ¨Χ™Χ™Χ   THEN (POL.POL_TotalOpenContract+POL.POL_TotalInProcessContract)* pr.QtyTonePerContract
 						ELSE POL.POL_TotalClosedContract * pr.QtyTonePerContract--POL.POL_QuantityOrdered
 					END
 			WHEN t.PO_Family = 1
@@ -391,12 +391,12 @@ SELECT
 			WHEN t.PO_Family = 2
 				THEN CASE
 						WHEN POL.POL_totalContracts <> 0
-							--THEN CAST(CAST(POL.POL_TotalClosedContract as decimal(18,2))/CAST(POL.POL_totalContracts as decimal(18,2)) as decimal(18,2))---*POL.POL_QuantityOrdered ---- λξεϊ ωϊεξηψδ =λξεϊ δζξπδ λτεμ ηεζιν ωπηϊξε ημχι ρκ λμ δηεζιν δΰτωψιιν
+							--THEN CAST(CAST(POL.POL_TotalClosedContract as decimal(18,2))/CAST(POL.POL_totalContracts as decimal(18,2)) as decimal(18,2))---*POL.POL_QuantityOrdered ---- Χ›ΧΧ•Χª Χ©ΧªΧ•ΧΧ—Χ¨Χ” =Χ›ΧΧ•Χª Χ”Χ–ΧΧ Χ” Χ›Χ¤Χ•Χ Χ—Χ•Χ–Χ™Χ Χ©Χ Χ—ΧªΧΧ• Χ—ΧΧ§Χ™ Χ΅Χ Χ›Χ Χ”Χ—Χ•Χ–Χ™Χ Χ”ΧΧ¤Χ©Χ¨Χ™Χ™Χ
 						THEN POL.POL_TotalClosedContract * pr.QtyTonePerContract
 						ELSE NULL
 					END
 			WHEN t.PO_Family = 1
-				Then POB.Balance --POL.POL_totalContracts * pr.QtyTonePerContract----POL.POL_QuantityOrdered --- τδ μχεηϊ λξιεϊ FLAT ωμ λμμ δδζξπδ
+				Then POB.Balance --POL.POL_totalContracts * pr.QtyTonePerContract----POL.POL_QuantityOrdered --- Χ¤Χ” ΧΧ§Χ•Χ—Χª Χ›ΧΧ™Χ•Χª FLAT Χ©Χ Χ›ΧΧ Χ”Χ”Χ–ΧΧ Χ”
 			ELSE  POB.Balance--POL.POL_totalContracts ----POL.POL_QuantityOrdered
 		END AS 'FlatQ'
 -------------------
@@ -455,7 +455,7 @@ LEFT JOIN PurchaseOrderStatus pos ON POL.POL_ContractStage = pos.PO_StatusID
 WHERE YEAR(PO.PO_OrderCreateDate)>=2018 and YEAR(PO.PO_OrderCreateDate) <= Year(Getdate())
 --AND HZ.OrderStatus<>3
 --AND HZ.ActionType IN(2,10)
-and POL.POL_OrderLineStatus NOT BETWEEN 30 AND 39 --- μαθμ μτπι 
+and POL.POL_OrderLineStatus NOT BETWEEN 30 AND 39 --- ΧΧ‘ΧΧ ΧΧ¤Χ Χ™ 
 
 --and POL.POL_FinalWeightReceived <>0
  

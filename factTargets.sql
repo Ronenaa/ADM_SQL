@@ -84,7 +84,7 @@ FROM ADM.dbo.tblVacationSettings
 )
 ,TotalDaysInYear AS (
 SELECT DISTINCT DL.*
-,CASE WHEN N.VacationType IS NULL THEN 'ιεν ςαεγδ' ELSE N.VacationType END AS 'VacationType' 
+,CASE WHEN N.VacationType IS NULL THEN 'Χ™Χ•Χ ΧΆΧ‘Χ•Χ“Χ”' ELSE N.VacationType END AS 'VacationType' 
 ,CASE WHEN N.VacationRate IS NULL THEN 0 ELSE N.VacationRate END AS DayOff,N2.DaysInYear
 FROM DateList DL
 LEFT join NumOfDays N

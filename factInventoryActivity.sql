@@ -1,4 +1,4 @@
- ----------------ϊςεγεϊ ξωμεη ξμΰι ιεφΰ-----------------------------
+ ----------------ΧªΧΆΧ•Χ“Χ•Χª ΧΧ©ΧΧ•Χ— ΧΧΧΧ™ Χ™Χ•Χ¦Χ-----------------------------
  
  SELECT 
  '1' as 'EntityID'
@@ -14,7 +14,7 @@
 --,concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR)))+'-'+concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR))) AS 'SubItemKey'
 --,concat('1',CONVERT(INT, CONVERT(VARCHAR, o.BRANCH))) AS 'BranchKey'
 --,null as 'EmployeeKey'
---,null as 'ηαψ ξεςγεο'
+--,null as 'Χ—Χ‘Χ¨ ΧΧ•ΧΆΧ“Χ•Χ'
 --,(1-(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100))*100  as 'DiscountPercent'
 ,null AS 'DiscountPercent'
 --,(round((oi.TQUANT/1000)* oi.PRICE,2)*oi.IEXCHANGE)-((oi.TQUANT/1000)*round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE) as 'LineTotalDiscount' 
@@ -57,9 +57,9 @@
 ,CONVERT(INT, CONVERT(VARCHAR,SUBSTRING(TARIKH_MSHLOCH,1,4) + SUBSTRING(TARIKH_MSHLOCH,5,2))) AS YearMonth
 ,STTOS as 'Status'
 --,null as 'ChargeFlag'  
---,null as 'ρθθερ μιχεθ λεϊψϊ'
---,null as 'ρθθερ μιχεθ ωεψδ'
---,null  as 'γβμ ρθεψπε'
+--,null as 'Χ΅ΧΧΧ•Χ΅ ΧΧ™Χ§Χ•Χ Χ›Χ•ΧªΧ¨Χª'
+--,null as 'Χ΅ΧΧΧ•Χ΅ ΧΧ™Χ§Χ•Χ Χ©Χ•Χ¨Χ”'
+--,null  as 'Χ“Χ’Χ Χ΅ΧΧ•Χ¨Χ Χ•'
 ,TM.QOD_SHOLCH as 'InventoryWarehouse'
 ,GETDATE() AS RowInsertDatetime
 --,NULL AS SubItemID
@@ -92,7 +92,7 @@ AND Cast(SUBSTRING(TARIKH_MSHLOCH,1,4) as int) >=2018 and Cast(SUBSTRING(TARIKH_
 AND STTOS in (0,1)
 AND TM.ActionType in (1,11,12)
 
- ----------------ϊςεγεϊ ξωμεη ξμΰι πλπρ-----------------------------
+ ----------------ΧªΧΆΧ•Χ“Χ•Χª ΧΧ©ΧΧ•Χ— ΧΧΧΧ™ Χ Χ›Χ Χ΅-----------------------------
  Union ALL
 
 
@@ -110,7 +110,7 @@ AND TM.ActionType in (1,11,12)
 --,concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR)))+'-'+concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR))) AS 'SubItemKey'
 --,concat('1',CONVERT(INT, CONVERT(VARCHAR, o.BRANCH))) AS 'BranchKey'
 --,null as 'EmployeeKey'
---,null as 'ηαψ ξεςγεο'
+--,null as 'Χ—Χ‘Χ¨ ΧΧ•ΧΆΧ“Χ•Χ'
 --,(1-(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100))*100  as 'DiscountPercent'
 ,null AS 'DiscountPercent'
 --,(round((oi.TQUANT/1000)* oi.PRICE,2)*oi.IEXCHANGE)-((oi.TQUANT/1000)*round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE) as 'LineTotalDiscount' 
@@ -153,9 +153,9 @@ AND TM.ActionType in (1,11,12)
 ,CONVERT(INT, CONVERT(VARCHAR,SUBSTRING(TARIKH_MSHLOCH,1,4) + SUBSTRING(TARIKH_MSHLOCH,5,2))) AS YearMonth
 ,STTOS as 'Status'
 --,null as 'ChargeFlag'  
---,null as 'ρθθερ μιχεθ λεϊψϊ'
---,null as 'ρθθερ μιχεθ ωεψδ'
---,null  as 'γβμ ρθεψπε'
+--,null as 'Χ΅ΧΧΧ•Χ΅ ΧΧ™Χ§Χ•Χ Χ›Χ•ΧªΧ¨Χª'
+--,null as 'Χ΅ΧΧΧ•Χ΅ ΧΧ™Χ§Χ•Χ Χ©Χ•Χ¨Χ”'
+--,null  as 'Χ“Χ’Χ Χ΅ΧΧ•Χ¨Χ Χ•'
 ,TM.QOD_MQBL as 'InventoryWarehouse'
 ,GETDATE() AS RowInsertDatetime
 --,NULL AS SubItemID
@@ -183,7 +183,7 @@ AND Cast(SUBSTRING(TARIKH_MSHLOCH,1,4) as int) >=2018 and Cast(SUBSTRING(TARIKH_
 AND STTOS in (0,1)
 AND TM.ActionType = 2
 
- ----------------ϊςεγεϊ ξωμεη δημτδ ξμΰι πλπρ-----------------------------
+ ----------------ΧªΧΆΧ•Χ“Χ•Χª ΧΧ©ΧΧ•Χ— Χ”Χ—ΧΧ¤Χ” ΧΧΧΧ™ Χ Χ›Χ Χ΅-----------------------------
  
  Union ALL
 
@@ -202,7 +202,7 @@ AND TM.ActionType = 2
 --,concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR)))+'-'+concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR))) AS 'SubItemKey'
 --,concat('1',CONVERT(INT, CONVERT(VARCHAR, o.BRANCH))) AS 'BranchKey'
 --,null as 'EmployeeKey'
---,null as 'ηαψ ξεςγεο'
+--,null as 'Χ—Χ‘Χ¨ ΧΧ•ΧΆΧ“Χ•Χ'
 --,(1-(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100))*100  as 'DiscountPercent'
 ,null AS 'DiscountPercent'
 --,(round((oi.TQUANT/1000)* oi.PRICE,2)*oi.IEXCHANGE)-((oi.TQUANT/1000)*round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE) as 'LineTotalDiscount' 
@@ -245,9 +245,9 @@ AND TM.ActionType = 2
 ,CONVERT(INT, CONVERT(VARCHAR,SUBSTRING(TARIKH_MSHLOCH,1,4) + SUBSTRING(TARIKH_MSHLOCH,5,2))) AS YearMonth
 ,STTOS as 'Status'
 --,null as 'ChargeFlag'  
---,null as 'ρθθερ μιχεθ λεϊψϊ'
---,null as 'ρθθερ μιχεθ ωεψδ'
---,null  as 'γβμ ρθεψπε'
+--,null as 'Χ΅ΧΧΧ•Χ΅ ΧΧ™Χ§Χ•Χ Χ›Χ•ΧªΧ¨Χª'
+--,null as 'Χ΅ΧΧΧ•Χ΅ ΧΧ™Χ§Χ•Χ Χ©Χ•Χ¨Χ”'
+--,null  as 'Χ“Χ’Χ Χ΅ΧΧ•Χ¨Χ Χ•'
 ,TM.QOD_MQBL as 'InventoryWarehouse'
 ,GETDATE() AS RowInsertDatetime
 --,NULL AS SubItemID
@@ -275,7 +275,7 @@ AND Cast(SUBSTRING(TARIKH_MSHLOCH,1,4) as int) >=2018 and Cast(SUBSTRING(TARIKH_
 AND STTOS in (0,1)
 AND TM.ActionType in (6,7)
 
- ----------------ϊςεγεϊ ξωμεη δημτδ ξμΰι ιεφΰ-----------------------------
+ ----------------ΧªΧΆΧ•Χ“Χ•Χª ΧΧ©ΧΧ•Χ— Χ”Χ—ΧΧ¤Χ” ΧΧΧΧ™ Χ™Χ•Χ¦Χ-----------------------------
  
  Union ALL
 
@@ -294,7 +294,7 @@ AND TM.ActionType in (6,7)
 --,concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR)))+'-'+concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR))) AS 'SubItemKey'
 --,concat('1',CONVERT(INT, CONVERT(VARCHAR, o.BRANCH))) AS 'BranchKey'
 --,null as 'EmployeeKey'
---,null as 'ηαψ ξεςγεο'
+--,null as 'Χ—Χ‘Χ¨ ΧΧ•ΧΆΧ“Χ•Χ'
 --,(1-(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100))*100  as 'DiscountPercent'
 ,null AS 'DiscountPercent'
 --,(round((oi.TQUANT/1000)* oi.PRICE,2)*oi.IEXCHANGE)-((oi.TQUANT/1000)*round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE) as 'LineTotalDiscount' 
@@ -337,9 +337,9 @@ AND TM.ActionType in (6,7)
 ,CONVERT(INT, CONVERT(VARCHAR,SUBSTRING(TARIKH_MSHLOCH,1,4) + SUBSTRING(TARIKH_MSHLOCH,5,2))) AS YearMonth
 ,STTOS as 'Status'
 --,null as 'ChargeFlag'  
---,null as 'ρθθερ μιχεθ λεϊψϊ'
---,null as 'ρθθερ μιχεθ ωεψδ'
---,null  as 'γβμ ρθεψπε'
+--,null as 'Χ΅ΧΧΧ•Χ΅ ΧΧ™Χ§Χ•Χ Χ›Χ•ΧªΧ¨Χª'
+--,null as 'Χ΅ΧΧΧ•Χ΅ ΧΧ™Χ§Χ•Χ Χ©Χ•Χ¨Χ”'
+--,null  as 'Χ“Χ’Χ Χ΅ΧΧ•Χ¨Χ Χ•'
 ,TM.QOD_SHOLCH as 'InventoryWarehouse'
 ,GETDATE() AS RowInsertDatetime
 --,NULL AS SubItemID
@@ -367,19 +367,19 @@ AND Cast(SUBSTRING(TARIKH_MSHLOCH,1,4) as int) >=2018 and Cast(SUBSTRING(TARIKH_
 AND STTOS in (0,1)
 AND TM.ActionType in (6,7)
 
-------------------------------ϊπεςεϊ μεβερ ςαεψ ΰηψιν-------------------------------
+------------------------------ΧªΧ Χ•ΧΆΧ•Χª ΧΧ•Χ’Χ•Χ΅ ΧΆΧ‘Χ•Χ¨ ΧΧ—Χ¨Χ™Χ-------------------------------
 UNION ALL 
  SELECT
  '1' as 'EntityID'
 ,'L' + CAST(NOMRTOR_TNOEH as nvarchar(100)) as 'DocID'
 ,ROW_NUMBER () Over (Partition By NOMRTOR_TNOEH Order By T_TNOEH)  as 'InvoiceLineNumber'
 ,CASE
-	WHEN SOG_TNOEH_CN_ITS_SP_HE LIKE N'%ι%'
+	WHEN SOG_TNOEH_CN_ITS_SP_HE LIKE N'%Χ™%'
 		THEN 'Logos - Out' 
 	ELSE 'Logos - In' 
 END as  'DocName'
 ,CASE
-	WHEN SOG_TNOEH_CN_ITS_SP_HE LIKE N'%ι%'
+	WHEN SOG_TNOEH_CN_ITS_SP_HE LIKE N'%Χ™%'
 		THEN 6 
 	ELSE 5 
 END AS DocType
@@ -391,7 +391,7 @@ END AS DocType
 --,concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR)))+'-'+concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR))) AS 'SubItemKey'
 --,concat('1',CONVERT(INT, CONVERT(VARCHAR, o.BRANCH))) AS 'BranchKey'
 --,null as 'EmployeeKey'
---,null as 'ηαψ ξεςγεο'
+--,null as 'Χ—Χ‘Χ¨ ΧΧ•ΧΆΧ“Χ•Χ'
 --,(1-(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100))*100  as 'DiscountPercent'
 ,null AS 'DiscountPercent'
 --,(round((oi.TQUANT/1000)* oi.PRICE,2)*oi.IEXCHANGE)-((oi.TQUANT/1000)*round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE) as 'LineTotalDiscount' 
@@ -418,9 +418,9 @@ END AS DocType
 ,CONVERT(INT, CONVERT(VARCHAR,SUBSTRING(T_TNOEH,1,4) + SUBSTRING(T_TNOEH,5,2))) AS YearMonth
 ,1 as 'Status'
 --,null as 'ChargeFlag'  
---,null as 'ρθθερ μιχεθ λεϊψϊ'
---,null as 'ρθθερ μιχεθ ωεψδ'
---,null  as 'γβμ ρθεψπε'
+--,null as 'Χ΅ΧΧΧ•Χ΅ ΧΧ™Χ§Χ•Χ Χ›Χ•ΧªΧ¨Χª'
+--,null as 'Χ΅ΧΧΧ•Χ΅ ΧΧ™Χ§Χ•Χ Χ©Χ•Χ¨Χ”'
+--,null  as 'Χ“Χ’Χ Χ΅ΧΧ•Χ¨Χ Χ•'
 ,1144 as 'InventoryWarehouse'
 ,GETDATE() AS RowInsertDatetime
 --,NULL AS SubItemID
@@ -441,4 +441,4 @@ from (
 WHERE 1=1
 AND QOD_GORM <> 1
 AND Cast(SUBSTRING(T_TNOEH,1,4) as int) >=2018 and Cast(SUBSTRING(T_TNOEH,1,4) as int) <= Year(Getdate())
-AND SOG_TNOEH_CN_ITS_SP_HE NOT LIKE N'%δ%'
+AND SOG_TNOEH_CN_ITS_SP_HE NOT LIKE N'%Χ”%'

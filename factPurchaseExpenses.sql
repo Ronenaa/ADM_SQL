@@ -90,8 +90,8 @@ SELECT
 		,SUBSTRING(HS.T_HQLDH,1,4) + '-' + SUBSTRING(HS.T_HQLDH,5,2) + '-' + SUBSTRING(HS.T_HQLDH,7,2) as 'EntryDate'
 		,cast(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_MOTSR)) as varchar)+ '-' + cast(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_MOTSR)) as varchar) AS 'ItemKey_backup'
 		,CASE
-			--WHEN  HST.QOD_SHROT IS NULL THEN cast(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_MOTSR)) as varchar)+ '-' + cast(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_MOTSR)) as varchar) - ìôðé ùéðåé ùì äòîñú òìåéåú
-			WHEN  HST.QOD_SHROT IS NULL OR HS.QOD_SHROT IN (5, 19, 30, 4) THEN cast(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_MOTSR)) as varchar)+ '-' + cast(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_MOTSR)) as varchar) -- äòîñú òìéåú äåáìä åäôøù îçéø òì äîåöø
+			--WHEN  HST.QOD_SHROT IS NULL THEN cast(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_MOTSR)) as varchar)+ '-' + cast(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_MOTSR)) as varchar) - ×œ×¤× ×™ ×©×™× ×•×™ ×©×œ ×”×¢×ž×¡×ª ×¢×œ×•×™×•×ª
+			WHEN  HST.QOD_SHROT IS NULL OR HS.QOD_SHROT IN (5, 19, 30, 4) THEN cast(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_MOTSR)) as varchar)+ '-' + cast(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_MOTSR)) as varchar) -- ×”×¢×ž×¡×ª ×¢×œ×™×•×ª ×”×•×‘×œ×” ×•×”×¤×¨×© ×ž×—×™×¨ ×¢×œ ×”×ž×•×¦×¨
 			ELSE cast(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_MOTSR)) as varchar)+ '-' + cast(CONVERT(INT, CONVERT(VARCHAR,HST.QOD_SHROT)) as varchar)+'S' 
 			END		AS 'ItemKey'
 		/*,CASE
@@ -133,7 +133,7 @@ SELECT
 		,HS.MTBE
 		,HS.CMOT AS 'Quantity'
 		--,POL.POL_FinalWeightReceived as tst
-		--,HZ.CMOT_MOZMNT AS 'OrderQuantity1' -- îåøéã ìáãé÷ä
+		--,HZ.CMOT_MOZMNT AS 'OrderQuantity1' -- ×ž×•×¨×™×“ ×œ×‘×“×™×§×”
 		,CASE WHEN HS.QOD_SHROT = 0 then HS.CMOT
 				ELSE 0
 				END									AS 'OrderQuantity'
@@ -142,7 +142,7 @@ SELECT
 			WHEN HST.QOD_SHROT IN (5, 19, 30, 4) OR HST.QOD_SHROT IS NULL 
 			THEN 999
 			ELSE HST.QOD_SHROT
-		END											AS 'PNLKey'  ----------  äòîñú òìéåú äåáìä òì äîåöø åäôøù îçéø
+		END											AS 'PNLKey'  ----------  ×”×¢×ž×¡×ª ×¢×œ×™×•×ª ×”×•×‘×œ×” ×¢×œ ×”×ž×•×¦×¨ ×•×”×¤×¨×© ×ž×—×™×¨
 		--,HS.QOD_SHROT AS 'PNLKey'
 		,HS.CMOT AS 'Balance'
 		,NULL AS 'LineTotalCost'
@@ -189,7 +189,7 @@ SELECT
 		--,case when (i.DEBIT='C')  then round(ii.IVCOST  ,2)*-1*ii.IEXCHANGE else round(ii.IVCOST  ,2)*ii.IEXCHANGE end  as 'LineTotalNet' --allways exchange
 		--,case when (i.DEBIT='C')  then round(ii.QPRICE  ,2)*-1*ii.IEXCHANGE else round(ii.QPRICE  ,2)*ii.IEXCHANGE end  as 'LineTotalNet' -- the invoice items price without the total invoice discount
 		----
-		,HC.STTOS AS 'ñèèåñ'
+		,HC.STTOS AS '×¡×˜×˜×•×¡'
 		,HC.HEROT AS 'Details'
 		,HST.SHM_SHROT AS 'ServiceDetail' 
 		,sl.ShipID
@@ -202,7 +202,7 @@ SELECT
 			END											as ExpenseSource
 		,OP.ActionType AS 'TransactionType'
 		,CASE 
-		    WHEN HS.QOD_SHROT IN (5, 19, 30) THEN N'ñçåøä'
+		    WHEN HS.QOD_SHROT IN (5, 19, 30) THEN N'×¡×—×•×¨×”'
 		    ELSE HC.SOG_MSMKH
 		END												as DocType
 		--,HC.SHER_MTBE
@@ -263,7 +263,7 @@ SELECT
      CAST(CCS.CMOT * CCS.MCHIR_ICH_LLA_ME_M AS DECIMAL(12,4)) * -1  AS LineTotalNetNIS,
      CAST(CCS.CMOT * CCS.MCHIR_ICH_LLA_ME_M AS DECIMAL(12,4)) * -1  AS LineTotalBalanceNIS,
      CONVERT(INT, CONVERT(VARCHAR, SUBSTRING(CCS.T_CHSHBONIT,1,4) + SUBSTRING(CCS.T_CHSHBONIT,5,2))) AS YearMonth,
-     NULL                                    AS [ñèèåñ],
+     NULL                                    AS [×¡×˜×˜×•×¡],
      NULL                                    AS Details,
      NULL                               AS ServiceDetail,
      NULL                                    AS ShipID,
@@ -340,7 +340,7 @@ SELECT
         ELSE CAST(HZ.MCHIR_ICH * (HZ.CMOT_MOZMNT - HZ.CMOT_SHSOPQH) AS DECIMAL(12,4))
     END                                                                 AS LineTotalBalanceNIS
   , CONVERT(INT, CONVERT(VARCHAR, SUBSTRING(HZ.T_ASPQH,1,4) + SUBSTRING(HZ.T_ASPQH,5,2))) AS YearMonth
-  , HZ.OrderStatus                                                      AS [ñèèåñ]
+  , HZ.OrderStatus                                                      AS [×¡×˜×˜×•×¡]
   , NULL                                                                AS Details
   , NULL                                                                AS ServiceDetail
   , NULL                                                                AS ShipID

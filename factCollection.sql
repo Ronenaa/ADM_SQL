@@ -9,7 +9,7 @@ from [dbo].[QISHOR_QBLOT_CHSHBONIOT] QQC
 inner Join (Select MS_QBLH,T_Preon,Aopn_TSHLOM,SUM(Scom) as 'Total'
 			from QBLOT_SHOROT
 			where 1=1
-			--AND AOPN_TSHLOM <> N'ω'
+			--AND AOPN_TSHLOM <> N'Χ©'
 			AND Cast(SUBSTRING(T_PREON,1,4) as int) >=2018 and Cast(SUBSTRING(T_PREON,1,4) as int) <= Year(Getdate())
 			AND CAST(SUBSTRING(T_PREON,1,4) + '-' + SUBSTRING(T_PREON,5,2) + '-' + SUBSTRING(T_PREON,7,2) as date) < Cast(GETDATE() as date)
 			GROUP BY MS_QBLH,T_Preon,Aopn_TSHLOM
@@ -28,7 +28,7 @@ Select distinct MS_CHSHBONIT,MS_T_MSHLOCH
 
 ,STG_Step1 as (
 
------δζξπεϊ τϊεηεϊ ςν δχφΰδ ----- 
+-----Χ”Χ–ΧΧ Χ•Χª Χ¤ΧªΧ•Χ—Χ•Χª ΧΆΧ Χ”Χ§Χ¦ΧΧ” ----- 
 
 Select MSPR_HZMNH as 'TransactionID'
 ,1 as 'Line'
@@ -93,7 +93,7 @@ from (
   from SHERI_MTBE) m
 
 ) SM 
-	on SM.TARIKH= CONVERT(VARCHAR(8), GETDATE(), 112)--HZ.T_HZMNH --- ωςψ δξψδ μτι ϊΰψικ ωμ διεν
+	on SM.TARIKH= CONVERT(VARCHAR(8), GETDATE(), 112)--HZ.T_HZMNH --- Χ©ΧΆΧ¨ Χ”ΧΧ¨Χ” ΧΧ¤Χ™ ΧªΧΧ¨Χ™Χ Χ©Χ Χ”Χ™Χ•Χ
 Left Join GORMIM G
 	on HZ.QOD_MQBL = G.QOD_GORM
 where OrderStatus in (1,2)
@@ -104,7 +104,7 @@ AND (Hqr.Cmot <> 0 or MCHIR_ICH <> 0)
 --AND MSPR_HZMNH = 139627
 --AND QOD_MQBL = 1041
 
------- ϊςεγεϊ ξωμεη τϊεηεϊ μμΰ ηωαεπιϊ -------------
+------ ΧªΧΆΧ•Χ“Χ•Χª ΧΧ©ΧΧ•Χ— Χ¤ΧªΧ•Χ—Χ•Χª ΧΧΧ Χ—Χ©Χ‘Χ•Χ Χ™Χª -------------
 
 UNION ALL
 
@@ -130,7 +130,7 @@ END AS 'InvoiceAmount'
 ,HEROT_1 as 'Details'
 ,CASE
 	WHEN MTBE_SH = '$'
-		THEN (TM.MCHIR_ICH*SM.new_sher)*TM.MSHQL_NTO * 1.18 -----ϊερτϊ ξςξ
+		THEN (TM.MCHIR_ICH*SM.new_sher)*TM.MSHQL_NTO * 1.18 -----ΧªΧ•Χ΅Χ¤Χª ΧΧΆΧ
 	ELSE TM.MCHIR_ICH*TM.MSHQL_NTO * 1.18
 END AS 'Debt'
 ,CASE
@@ -162,7 +162,7 @@ from (
   from SHERI_MTBE) m
 
 ) SM  
-	on SM.TARIKH=CONVERT(VARCHAR(8), GETDATE(), 112)--HZ.T_HZMNH --- ωςψ δξψδ μτι ϊΰψικ ωμ διεν
+	on SM.TARIKH=CONVERT(VARCHAR(8), GETDATE(), 112)--HZ.T_HZMNH --- Χ©ΧΆΧ¨ Χ”ΧΧ¨Χ” ΧΧ¤Χ™ ΧªΧΧ¨Χ™Χ Χ©Χ Χ”Χ™Χ•Χ
 Left Join GORMIM G
 	on TM.QOD_MQBL = G.QOD_GORM
 WHERE CH.MS_T_MSHLOCH is null
@@ -176,7 +176,7 @@ AND TM.PurchaseOrderType = 0
 --AND TM.QOD_MQBL = 1041
 
 
--------ηωαεπιεϊ τϊεηεϊ ------
+-------Χ—Χ©Χ‘Χ•Χ Χ™Χ•Χª Χ¤ΧªΧ•Χ—Χ•Χª ------
 UNION ALL
 
 
@@ -225,7 +225,7 @@ AND Cast(SUBSTRING(TARIKH_HPQH,1,4) as int) >=2018 and Cast(SUBSTRING(TARIKH_HPQ
 AND CH.IsTemp <> 1
 
 
--------ηωαεπιεϊ ρβεψεϊ ------
+-------Χ—Χ©Χ‘Χ•Χ Χ™Χ•Χª Χ΅Χ’Χ•Χ¨Χ•Χª ------
 UNION ALL
 
 Select CH.MS_CHSHBONIT as 'TransactionID'
@@ -288,7 +288,7 @@ AND Cast(SUBSTRING(ch.TARIKH_HPQH,1,4) as int) >=2018 and Cast(SUBSTRING(ch.TARI
 AND CH.IsTemp <> 1
 
 
---------φ'χιν ςν τψςεο ςϊιγι-----------
+--------Χ¦'Χ§Χ™Χ ΧΆΧ Χ¤Χ¨ΧΆΧ•Χ ΧΆΧªΧ™Χ“Χ™-----------
 UNION ALL
 
 Select QS.MS_QBLH as 'TransactionID'
@@ -319,7 +319,7 @@ Left Join TBLT_ANSHI_MCIROT AM
 	on AM.SHM_AISH_MCIROT = G.AISH_MCIROT_MTPL
 
 WHERE 1=1 
-AND AOPN_TSHLOM = N'ω'
+AND AOPN_TSHLOM = N'Χ©'
 AND Cast(SUBSTRING(T_PREON,1,4) as int) >=2018
 AND CAST(SUBSTRING(T_PREON,1,4) + '-' + SUBSTRING(T_PREON,5,2) + '-' + SUBSTRING(T_PREON,7,2) as date) >= Cast(GETDATE() as date)
 
@@ -421,12 +421,12 @@ Select
 		   ,[PayedDuration]
 		   ,[LateFlag]
 		   ,[Delay]
-		   ,[Invoice] AS 'ηωαεπιϊ'
-		   ,[ExpectedPayDate] AS 'ϊΰψικ ϊωμεν φτει'
-		   ,[ActualPayedDate] AS 'ϊΰψικ χαμδ'
+		   ,[Invoice] AS 'Χ—Χ©Χ‘Χ•Χ Χ™Χª'
+		   ,[ExpectedPayDate] AS 'ΧªΧΧ¨Χ™Χ ΧªΧ©ΧΧ•Χ Χ¦Χ¤Χ•Χ™'
+		   ,[ActualPayedDate] AS 'ΧªΧΧ¨Χ™Χ Χ§Χ‘ΧΧ”'
 		   ,[DeliveryDate]
-           ,[Receipt] AS 'χαμδ'
-		   ,[Details] AS 'τψθιν περτιν'
+           ,[Receipt] AS 'Χ§Χ‘ΧΧ”'
+		   ,[Details] AS 'Χ¤Χ¨ΧΧ™Χ Χ Χ•Χ΅Χ¤Χ™Χ'
 		   ,[Line]
            ,[DocTypeCode]
            
@@ -448,7 +448,7 @@ Select
 			when [Delay] <=0 then 'Current' 
 			else
 			'120+'
-			end as 'ιξι ΰιηεψ'
+			end as 'Χ™ΧΧ™ ΧΧ™Χ—Χ•Χ¨'
 
 			,case
 		    when [Delay] >0 and [Delay] <=7 then 1
@@ -460,9 +460,9 @@ Select
 			when [Delay] <=0 then 0
 			else
 			8
-			end as 'ιξι ΰιηεψ ργψ'
+			end as 'Χ™ΧΧ™ ΧΧ™Χ—Χ•Χ¨ Χ΅Χ“Χ¨'
 
-           ,case when [LateFlag]=1 then 'αΰιηεψ' else 'Not Overdue' end as 'Overdue'
+           ,case when [LateFlag]=1 then 'Χ‘ΧΧ™Χ—Χ•Χ¨' else 'Not Overdue' end as 'Overdue'
 
            ,case 
 				when  [PayedAmount]<>0 or [PayedAmount] is not null 
