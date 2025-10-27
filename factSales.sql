@@ -7,9 +7,9 @@ DECLARE @SubItemsMapping TABLE (
 
 -- Insert values into the table variable
 INSERT INTO @SubItemsMapping (ItemID, ItemDesc)
-VALUES (9990, 'ψιαιϊ'),
-       (9991, 'δεαμδ'),
-       (9992, 'δτψωι ωςψ');
+VALUES (9990, 'Χ¨Χ™Χ‘Χ™Χª'),
+       (9991, 'Χ”Χ•Χ‘ΧΧ”'),
+       (9992, 'Χ”Χ¤Χ¨Χ©Χ™ Χ©ΧΆΧ¨');
 
 with CurrencyConvertion as ( --Curenncy COnvertion Table--
 SELECT *, 
@@ -28,7 +28,7 @@ SELECT *,
  ,SUM(CASE WHEN SHER_EURO=0 THEN 0 ELSE 1 END) OVER (ORDER BY tarikh ) AS value_partitionEuro
           FROM SHERI_MTBE) m
 		  )
-----------------ηωαεπιεϊ--------------------
+----------------Χ—Χ©Χ‘Χ•Χ Χ™Χ•Χª--------------------
 SELECT 
         '1' as 'EntityID'
         ,CH.MS_CHSHBONIT  AS 'DocID'
@@ -59,7 +59,7 @@ SELECT
 		--,CAST('1' as varchar) + CAST(CONVERT(INT, CONVERT(VARCHAR, i.BRANCH)) as varchar) AS 'BranchKey'
 		--,null as 'EmployeeKey'
 		--,NULL AS 'BranchKey'
-		--,null as 'ηαψ ξεςγεο'
+		--,null as 'Χ—Χ‘Χ¨ ΧΧ•ΧΆΧ“Χ•Χ'
 		--,(1 - (1 - ii.[T$PERCENT] / 100) * (1 - i.[T$PERCENT] / 100)) AS 'DiscountPercent' -- the DiscountPercent for the invoice and invoice line
 		,NULL AS 'DiscountPercent'
 		--,(1 - (1 - ii.[T$PERCENT] / 100) * (1 - i.[T$PERCENT] / 100)) * ii.TQUANT / 1000 * ROUND(ii.PRICE, 2) * ii.IEXCHANGE AS 'LineTotalDiscount' -- the discount from gross price to the net
@@ -127,9 +127,9 @@ SELECT
 		----
 		,NULL as 'Status'
 		--,NULL as 'ChargeFlag'  
-		--,null as 'ρθθερ μιχεθ λεϊψϊ'
-	   -- ,null  as 'ρθθερ μιχεθ ωεψδ'
-	--	,NULL as 'γβμ ρθεψπε'
+		--,null as 'Χ΅ΧΧΧ•Χ΅ ΧΧ™Χ§Χ•Χ Χ›Χ•ΧªΧ¨Χª'
+	   -- ,null  as 'Χ΅ΧΧΧ•Χ΅ ΧΧ™Χ§Χ•Χ Χ©Χ•Χ¨Χ”'
+	--	,NULL as 'Χ“Χ’Χ Χ΅ΧΧ•Χ¨Χ Χ•'
 		, TM.MS_TEODH as 'DeliveryNote'
 		,CASE
 			WHEN SUBSTRING(TM.TARIKH_MSHLOCH,1,4) = '0000'
@@ -176,7 +176,7 @@ LEFT JOIN CHSHBONIOT_SHOROT CS
     ON CH.MS_CHSHBONIT = CS.MS_CHSHBONIT
 LEFT JOIN @SubItemsMapping SIM 
 	ON (
-		CASE WHEN (TAOR_MOTSR LIKE '%ψιαιϊ%' OR TAOR_MOTSR LIKE '%δεαμδ%' OR TAOR_MOTSR LIKE '%δτψωι ωςψ%') AND  CS.QOD_MOTSR=0 AND TAOR_MOTSR LIKE '%'+SIM.ItemDesc+'%'
+		CASE WHEN (TAOR_MOTSR LIKE '%Χ¨Χ™Χ‘Χ™Χª%' OR TAOR_MOTSR LIKE '%Χ”Χ•Χ‘ΧΧ”%' OR TAOR_MOTSR LIKE '%Χ”Χ¤Χ¨Χ©Χ™ Χ©ΧΆΧ¨%') AND  CS.QOD_MOTSR=0 AND TAOR_MOTSR LIKE '%'+SIM.ItemDesc+'%'
 		then 1 else 0 end = 1)
 LEFT JOIN TEODOT_MSHLOCH TM 
 	ON CS.MS_T_MSHLOCH = TM.MS_TEODH
@@ -198,7 +198,7 @@ Left Join HZMNOT HZ
 Left Join (
 			Select *
 			From GORMIM
-			Where EntityType Like N'%ξχεν ΰρτχδ%') W
+			Where EntityType Like N'%ΧΧ§Χ•Χ ΧΧ΅Χ¤Χ§Χ”%') W
 	On W.QOD_GORM = TM.QOD_SHOLCH
 left join TBLT_PEOLOT_HZMNH_T_MSHLOCH act
 	on TM.ActionType = act.MS_AOPTSIH
@@ -249,7 +249,7 @@ UNION ALL
 --,concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR)))+'-'+concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR))) AS 'SubItemKey'
 --,concat('1',CONVERT(INT, CONVERT(VARCHAR, o.BRANCH))) AS 'BranchKey'
 --,null as 'EmployeeKey'
---,null as 'ηαψ ξεςγεο'
+--,null as 'Χ—Χ‘Χ¨ ΧΧ•ΧΆΧ“Χ•Χ'
 --,(1-(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100))*100  as 'DiscountPercent'
 ,null AS 'DiscountPercent'
 --,(round((oi.TQUANT/1000)* oi.PRICE,2)*oi.IEXCHANGE)-((oi.TQUANT/1000)*round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE) as 'LineTotalDiscount' 
@@ -293,9 +293,9 @@ UNION ALL
 ,CONVERT(INT, CONVERT(VARCHAR,SUBSTRING(T_ASPQH,1,4) + SUBSTRING(T_ASPQH,5,2))) AS YearMonth
 ,STTOS as 'Status'
 --,null as 'ChargeFlag'  
---,null as 'ρθθερ μιχεθ λεϊψϊ'
---,null as 'ρθθερ μιχεθ ωεψδ'
---,null  as 'γβμ ρθεψπε'
+--,null as 'Χ΅ΧΧΧ•Χ΅ ΧΧ™Χ§Χ•Χ Χ›Χ•ΧªΧ¨Χª'
+--,null as 'Χ΅ΧΧΧ•Χ΅ ΧΧ™Χ§Χ•Χ Χ©Χ•Χ¨Χ”'
+--,null  as 'Χ“Χ’Χ Χ΅ΧΧ•Χ¨Χ Χ•'
 ,TM.MS_TEODH as 'DeliveryNote'
 ,CAST(SUBSTRING(TARIKH_MSHLOCH,1,4) + '-' + SUBSTRING(TARIKH_MSHLOCH,5,2) + '-' + SUBSTRING(TARIKH_MSHLOCH,7,2) as date) as 'DeliveryDate'
 ,HZ.MSPR_HZMNH as 'OrderID'
@@ -319,14 +319,14 @@ END as 'ActionTypeDesc'
 END AS 'AdjustmentFlag'
 ,CASE
 	WHEN TM.MCHIR_ICH = 0 AND W.QOD_GORM IS NOT NULL THEN G.AOPI_PEILOT
-	WHEN TM.MCHIR_ICH = 0 AND W.QOD_GORM IS NULL	 THEN 'δημτδ'
+	WHEN TM.MCHIR_ICH = 0 AND W.QOD_GORM IS NULL	 THEN 'Χ”Χ—ΧΧ¤Χ”'
 	ELSE NULL
 END AS  'TransactionType'
 ,CASE
 	WHEN TM.MCHIR_ICH <> 0 THEN 'Sales'
-	WHEN TM.MCHIR_ICH = 0 and G.AOPI_PEILOT = 'τηϊ' THEN 'Shortage'
-	WHEN TM.MCHIR_ICH = 0 and G.AOPI_PEILOT = 'ΰηρεο' THEN 'Storage'
-	WHEN TM.MCHIR_ICH = 0 and G.AOPI_PEILOT NOT IN ('τηϊ','ΰηρεο') then 'Exchange'
+	WHEN TM.MCHIR_ICH = 0 and G.AOPI_PEILOT = 'Χ¤Χ—Χª' THEN 'Shortage'
+	WHEN TM.MCHIR_ICH = 0 and G.AOPI_PEILOT = 'ΧΧ—Χ΅Χ•Χ' THEN 'Storage'
+	WHEN TM.MCHIR_ICH = 0 and G.AOPI_PEILOT NOT IN ('Χ¤Χ—Χª','ΧΧ—Χ΅Χ•Χ') then 'Exchange'
 END AS 'QuantityCategory'
 --,NULL AS SubItemID
 
@@ -359,7 +359,7 @@ Left Join GORMIM G
 Left Join (
 			Select *
 			From GORMIM
-			Where EntityType Like N'%ξχεν ΰρτχδ%') W
+			Where EntityType Like N'%ΧΧ§Χ•Χ ΧΧ΅Χ¤Χ§Χ”%') W
 	On W.QOD_GORM = TM.QOD_SHOLCH
 left join TBLT_PEOLOT_HZMNH_T_MSHLOCH act
 	on TM.ActionType = act.MS_AOPTSIH
