@@ -90,6 +90,7 @@ SELECT
 		   --THEN CAST(HZ.MCHIR_ICH AS decimal (12,4))
 	         ELSE CAST(HZ.MCHIR_ICH *(1/SM.NEW_SHER)  AS decimal (12,4))
          END AS 'UnitNetPriceUSD'
+		 ,SM.NEW_SHER -- ronen
 		,HZ.CMOT_MOZMNT AS 'Quantity'
 		--,HZ.CMOT_SHSOPQH AS 'Supplied Quantity'
 		,HZ.CMOT_MOZMNT - CMOT_SHSOPQH AS 'Balance'
@@ -265,6 +266,7 @@ SELECT
 		   --THEN CAST(HZ.MCHIR_ICH AS decimal (12,4))
 	         ELSE POL_FinalPrice *(1/CASE WHEN SM.NEW_SHER <> 0 THEN SM.NEW_SHER ELSE 1 END)
          END AS 'UnitNetPriceUSD'
+		 ,SM.NEW_SHER -- ronen
 		,CASE 
 			WHEN POB.FinalWeightReceived = 0
 				THEN Case 
@@ -569,4 +571,4 @@ FROM Purchases p
 --where OrderID IN ('2000484')--,'2000482')
 
 where (p.OriginalQty <> 0 OR p.OriginalQty IS NULL)
---and OrderID IN ('2000483')--,'2000482')
+--and OrderID = 2000490
