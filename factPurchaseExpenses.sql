@@ -205,6 +205,7 @@ SELECT
 		    WHEN HS.QOD_SHROT IN (5, 19, 30) THEN N'סחורה'
 		    ELSE HC.SOG_MSMKH
 		END												as DocType
+		,HC.SHER_MTBE
 		--,HC.SHER_MTBE
 		--,HS.MCHIR_ICH
 		--,(SM.NEW_SHEREURO/SM.NEW_SHER) as tst
@@ -272,7 +273,9 @@ SELECT
      GETDATE()                      AS RowInsertDatetime,
      'Invoice'                          AS ExpenseSource,
      NULL                             AS TransactionType,
-    'Invoice'                                AS DocType
+    'Invoice'                                AS DocType,
+	CASE WHEN SHER_LCHISHOB <> 0 THEN SHER_LCHISHOB ELSE CC2.new_sher END
+
 FROM [dbo].[CHIOBI_CHOTS_COTROT] CC
 LEFT JOIN GORMIM G2
        ON CC.QOD_LQOCH = G2.QOD_GORM
@@ -350,6 +353,7 @@ SELECT
   , 'Orders'                                                            AS ExpenseSource
   , OP.ActionType                                                       AS TransactionType
   , 'Order'                                                             AS DocType
+  ,SM.NEW_SHER
 FROM HZMNOT HZ
 LEFT JOIN (
     SELECT *
@@ -366,4 +370,4 @@ LEFT JOIN OrderPrices OP
 WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
   AND HZ.OrderStatus <> 3
   AND HZ.ActionType IN (6,7)
-  --and hz.MSPR_HZMNH = 141662
+--and hz.MSPR_HZMNH = 141662
