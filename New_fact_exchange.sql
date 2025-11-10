@@ -35,7 +35,7 @@ Left Join SM on SM.TARIKH=TM.TARIKH_MSHLOCH
 --										= CAST(b.MS_HZMNH AS VARCHAR(30))
 
 where 1=1
---and TM.QOD_SHOLCH = 1280 -- δωΰμδ ξξιμεαψ
-and  TM.MCHIR_ICH = 0 and G.AOPI_PEILOT  NOT IN ('τηϊ','ΰηρεο') -- exchange
+--and TM.QOD_SHOLCH = 1280 -- Χ”Χ©ΧΧΧ” ΧΧΧ™ΧΧ•Χ‘Χ¨
+and  TM.MCHIR_ICH = 0 and G.AOPI_PEILOT  NOT IN ('Χ¤Χ—Χª','ΧΧ—Χ΅Χ•Χ') -- exchange
 --and b.MS_HZMNH = 141939
 order by 'Date' desc, Supplier desc
