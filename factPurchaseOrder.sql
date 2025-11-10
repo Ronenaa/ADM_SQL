@@ -566,10 +566,9 @@ SELECT	P.*
     END AS LineTotalFlatValueFOTUSD
 
 		,GETDATE()													AS RowInsertDatetime
-		,p.NEW_SHER
 FROM Purchases p
 --where OrderID IN ('2000416','2000430','2000369','2000274','2000354','2000344','2000343','2000367','2000360') --'2000344'--'2000274'
 --where OrderID IN ('2000484')--,'2000482')
 
 where (p.OriginalQty <> 0 OR p.OriginalQty IS NULL)
---and OrderID IN ('2000483')--,'2000482')
+--and OrderID = 2000490
