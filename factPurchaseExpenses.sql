@@ -205,7 +205,7 @@ SELECT
 		    WHEN HS.QOD_SHROT IN (5, 19, 30) THEN N'סחורה'
 		    ELSE HC.SOG_MSMKH
 		END												as DocType
-		,HC.SHER_MTBE
+		,SM.NEW_SHER
 		--,HC.SHER_MTBE
 		--,HS.MCHIR_ICH
 		--,(SM.NEW_SHEREURO/SM.NEW_SHER) as tst
