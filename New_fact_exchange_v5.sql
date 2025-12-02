@@ -71,7 +71,7 @@ totals AS (
         ) AS OrderSupplierKey,
         CAST(CONVERT(INT, CONVERT(VARCHAR, hz.QOD_MQBL)) AS VARCHAR) AS SourceKey,
         -- NULL AS 'Transport Type'
-        -- Supply / Order dates – commented out
+        -- Supply / Order dates β€“ commented out
         /*
         SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2) as 'Supply Date',
         SUBSTRING(HZ.T_HZMNH,1,4) + '-' + SUBSTRING(HZ.T_HZMNH,5,2) + '-' + SUBSTRING(HZ.T_HZMNH,7,2) as 'Order Date',
@@ -102,11 +102,11 @@ totals AS (
         CAST(CONVERT(INT, CONVERT(VARCHAR, HS.QOD_MOTSR)) AS VARCHAR) + '-' +
         CAST(CONVERT(INT, CONVERT(VARCHAR, HS.QOD_MOTSR)) AS VARCHAR) AS ItemKey_backup,
         CASE
-            -- WHEN HST.QOD_SHROT IS NULL THEN cast(... )  -- μτπι ωιπει ωμ δςξρϊ ςμειεϊ
+            -- WHEN HST.QOD_SHROT IS NULL THEN cast(... )  -- ΧΧ¤Χ Χ™ Χ©Χ™Χ Χ•Χ™ Χ©Χ Χ”ΧΆΧΧ΅Χª ΧΆΧΧ•Χ™Χ•Χª
             WHEN HST.QOD_SHROT IS NULL
               OR HS.QOD_SHROT IN (5, 19, 30, 4)
                 THEN CAST(CONVERT(INT, CONVERT(VARCHAR, HS.QOD_MOTSR)) AS VARCHAR) + '-' +
-                     CAST(CONVERT(INT, CONVERT(VARCHAR, HS.QOD_MOTSR)) AS VARCHAR) -- δςξρϊ ςμιεϊ δεαμδ εδτψω ξηιψ ςμ δξεφψ
+                     CAST(CONVERT(INT, CONVERT(VARCHAR, HS.QOD_MOTSR)) AS VARCHAR) -- Χ”ΧΆΧΧ΅Χª ΧΆΧΧ™Χ•Χª Χ”Χ•Χ‘ΧΧ” Χ•Χ”Χ¤Χ¨Χ© ΧΧ—Χ™Χ¨ ΧΆΧ Χ”ΧΧ•Χ¦Χ¨
             ELSE CAST(CONVERT(INT, CONVERT(VARCHAR, HS.QOD_MOTSR)) AS VARCHAR) + '-' +
                  CAST(CONVERT(INT, CONVERT(VARCHAR, HST.QOD_SHROT)) AS VARCHAR) + 'S'
         END AS ItemKey,
@@ -167,7 +167,7 @@ totals AS (
               OR HST.QOD_SHROT IS NULL
                 THEN 999
             ELSE HST.QOD_SHROT
-        END AS PNLKey,  -- δςξρϊ ςμιεϊ δεαμδ ςμ δξεφψ εδτψω ξηιψ
+        END AS PNLKey,  -- Χ”ΧΆΧΧ΅Χª ΧΆΧΧ™Χ•Χª Χ”Χ•Χ‘ΧΧ” ΧΆΧ Χ”ΧΧ•Χ¦Χ¨ Χ•Χ”Χ¤Χ¨Χ© ΧΧ—Χ™Χ¨
         -- HS.QOD_SHROT AS 'PNLKey'
         HS.CMOT AS Balance,
         NULL AS LineTotalCost,
@@ -219,7 +219,7 @@ totals AS (
             CONVERT(VARCHAR, SUBSTRING(HS.T_ERKH, 1, 4) + SUBSTRING(HS.T_ERKH, 5, 2))
         ) AS YearMonth,
         -- more commented legacy lines...
-        HC.STTOS AS [ρθθερ],
+        HC.STTOS AS [Χ΅ΧΧΧ•Χ΅],
         HC.HEROT AS Details,
         HST.SHM_SHROT AS ServiceDetail,
         sl.ShipID,
@@ -232,7 +232,7 @@ totals AS (
         END AS ExpenseSource,
         OP.ActionType AS TransactionType,
         CASE
-            WHEN HS.QOD_SHROT IN (5, 19, 30) THEN N'ρηεψδ'
+            WHEN HS.QOD_SHROT IN (5, 19, 30) THEN N'Χ΅Χ—Χ•Χ¨Χ”'
             ELSE HC.SOG_MSMKH
         END AS DocType,
         SM.new_sher
@@ -309,9 +309,9 @@ totals AS (
     -- LEFT JOIN HOTSAOT_SHOROT HS ON HS.MS_MSMKH_QSHOR = b.MS_HZMNH
     -- LEFT JOIN PurchaseOrderLines POL ON ...
     WHERE 1 = 1
-      -- AND TM.QOD_SHOLCH = 1280 -- δωΰμδ ξξιμεαψ
+      -- AND TM.QOD_SHOLCH = 1280 -- Χ”Χ©ΧΧΧ” ΧΧΧ™ΧΧ•Χ‘Χ¨
       AND TM.MCHIR_ICH = 0
-      AND G.AOPI_PEILOT NOT IN ('τηϊ','ΰηρεο') -- exchange
+      AND G.AOPI_PEILOT NOT IN ('Χ¤Χ—Χª','ΧΧ—Χ΅Χ•Χ') -- exchange
 	 --AND b.MS_HZMNH = --20005011--
       -- AND TM.MS_TEODH = 540996
       -- AND G.QOD_GORM = 146
