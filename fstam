@@ -1,0 +1,10 @@
+Sales Current (Toggle) = 
+VAR SelectedView = SELECTEDVALUE('View Selector'[View], "תקופה נבחרת מול אשתקד")
+RETURN
+IF(
+    SelectedView <> "תקופה נבחרת",
+    [Switch Parameter Previous Period measures],
+    BLANK()
+)
+
+Avg Price USD (Expenses) = DIVIDE([Total Expenses USD],[Total Order Quantity (Hzmnot)])
