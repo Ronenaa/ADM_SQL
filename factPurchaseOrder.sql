@@ -569,4 +569,4 @@ FROM Purchases p
 --where OrderID IN ('2000484')--,'2000482')
 
 where (p.OriginalQty <> 0 OR p.OriginalQty IS NULL)
---and OrderID IN ('2000483')--,'2000482')
+--and OrderID = 2000490
