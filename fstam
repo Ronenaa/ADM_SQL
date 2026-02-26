@@ -1,10 +1,42 @@
-Sales Current (Toggle) = 
-VAR SelectedView = SELECTEDVALUE('View Selector'[View], "תקופה נבחרת מול אשתקד")
-RETURN
-IF(
-    SelectedView <> "תקופה נבחרת",
-    [Switch Parameter Previous Period measures],
-    BLANK()
+CIF Purchase
+
+CIF Price = 
+CALCULATE([Avg Price USD (Expenses)]
+            ,dimItems[PNL Description] = "Purchase Inventory"
 )
 
 Avg Price USD (Expenses) = DIVIDE([Total Expenses USD],[Total Order Quantity (Hzmnot)])
+
+Total Expenses USD = SUM(factPurchaseExpenses[LineTotalNetUSD])
+
+Total Order Quantity (Hzmnot) = SUM(factPurchaseExpenses[OrderQuantity])
+
+
+in sql:
+sum( 
+    case when then SUM([LineTotalNetUSD])
+)
+----------------------------------------------------------------------------
+
+Avg Unit Price (Sales) = 
+ DIVIDE([Total Sales (Sales)],[Total Quantity (Sales)])
+
+
+--------------------------------------------------------------
+AVG Unit Price (Sales) - FOT = 
+CALCULATE(
+    [Avg Unit Price (Sales) Item],
+    FILTER(factSales,[ActionTypeDesc] = "מכירה")
+    )
+
+Avg Unit Price (Sales) Item = 
+ DIVIDE([Total Sales USD (Sales) Only Item],[Total Quantity (Sales)])    
+
+ Total Sales USD (Sales) Only Item = 
+CALCULATE(SUM(factSales[LineTotalNet_USD]), factSales[AdjustmentFlag] <> 1 && factSales[LineType] = "Item")
+
+Total Quantity (Sales) = 
+CALCULATE(SUM(factSales[Quantity]), factSales[AdjustmentFlag] <> 1)
+
+
+--------------------------------------------------------------
