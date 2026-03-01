@@ -256,7 +256,46 @@ WHERE 1 = 1
 )
 
 -----------------------------------------------------------------------------------------------------------------------------------------------
-, Purchase_Exchange as (
+,Purchase_Exchange as (
+
+----Invoice--
+SELECT
+	 CAST(CCS.HZMNT_RCSH AS VARCHAR)  AS PurchaseOrderID,
+     'Invoice'                                            AS DocName,
+     NULL                          AS SupplierKey,
+     CAST(SUBSTRING(CCS.T_CHSHBONIT,1,4) + '-' + SUBSTRING(CCS.T_CHSHBONIT,5,2) + '-' + SUBSTRING(CCS.T_CHSHBONIT,7,2) AS DATE) AS [Value Date],
+     CAST(CONVERT(VARCHAR, POL_ProductID) AS VARCHAR) + '-' + CAST(CONVERT(VARCHAR, M.ServiceCode) AS VARCHAR) + 'S' AS ItemKey,
+     CAST(CCS.MCHIR_ICH_LLA_ME_M / (CASE WHEN SHER_LCHISHOB <> 0 THEN SHER_LCHISHOB ELSE CC2.new_sher END) AS DECIMAL(12,4)) * -1  AS UnitNetPriceUSD,
+     CCS.MSHQL_NTO                   AS Quantity,
+     CASE WHEN CCS.QOD_MOTSR = 0 THEN CCS.MSHQL_NTO ELSE 0 END AS OrderQuantity,
+     HST.QOD_SHROT                           AS PNLKey,
+	 HST.PNL as [PNL Code],
+     CAST(CCS.CMOT * (CCS.MCHIR_ICH_LLA_ME_M / (CASE WHEN SHER_LCHISHOB <> 0 THEN SHER_LCHISHOB ELSE CC2.new_sher END)) AS DECIMAL(12,4)) * -1 AS LineTotalNetUSD,
+     CONVERT(INT, CONVERT(VARCHAR, SUBSTRING(CCS.T_CHSHBONIT,1,4) + SUBSTRING(CCS.T_CHSHBONIT,5,2))) AS YearMonth,
+	 null as ShipID,
+    'Invoice'                                AS DocType,
+	CASE WHEN SHER_LCHISHOB <> 0 THEN SHER_LCHISHOB ELSE CC2.new_sher END as [NEW_SHER]
+FROM [dbo].[CHIOBI_CHOTS_COTROT] CC
+LEFT JOIN GORMIM G2
+       ON CC.QOD_LQOCH = G2.QOD_GORM
+LEFT JOIN TBLT_ANSHI_MCIROT AM2
+       ON AM2.SHM_AISH_MCIROT = G2.AISH_MCIROT_MTPL
+LEFT JOIN [dbo].[CHIOBI_CHOTS_SHOROT] CCS
+       ON CC.MS_CHSHBONIT = CCS.MS_CHSHBONIT
+LEFT JOIN CurrencyConvertion CC2
+       ON CCS.[TARIKH_MSHLOCH] = CC2.Tarikh
+LEFT JOIN ( ---- Connect to the base purchase in order to get the relative productID
+			select DISTINCT
+			POL_SQL_POID, POL_ProductID
+			from PurchaseOrderLines POL
+			) POL
+		ON CCS.HZMNT_RCSH = POL.POL_SQL_POID
+LEFT JOIN MOTSRIM M
+	ON CCS.QOD_MOTSR = M.QOD_MOTSR
+LEFT JOIN HOTSAOT_SHROTIM_New HST 
+	ON M.ServiceCode = HST.QOD_SHROT
+
+UNION ALL
 	------Import--------
 SELECT
 
@@ -405,7 +444,7 @@ WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
   AND YEAR(CAST(SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2) AS DATE))  >= 2024
 
   )
-, CifP as (
+, P_costs as (
     select 
 	PurchaseOrderID,
 	SUM(CASE WHEN [PNL Code] = 2270 THEN LineTotalNetUSD ELSE 0 END) as DischargeCosts,
@@ -420,17 +459,18 @@ WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
 	SUM(CASE WHEN [PNL Code] = 1496 THEN LineTotalNetUSD ELSE 0 END)/sum(orderquantity) as [Processing],
 	SUM(CASE WHEN [PNL Code] = 1211 THEN LineTotalNetUSD ELSE 0 END)/sum(orderquantity) as [Quality settlement],
 	SUM(CASE WHEN [PNL Code] = 1111 THEN LineTotalNetUSD ELSE 0 END)/sum(orderquantity) as [Shortage],
-	SUM(CASE WHEN [PNL Code] = 1111 THEN LineTotalNetUSD ELSE 0 END) as srtge,
 	SUM(CASE WHEN [PNL Code] = 1497 THEN LineTotalNetUSD ELSE 0 END)/sum(orderquantity) as [Warehouse operation],
 	SUM(CASE WHEN [PNL Code] = 3620 THEN LineTotalNetUSD ELSE 0 END)/sum(orderquantity) as [Warehouse service],
 	SUM(CASE WHEN [PNL Code] = 1571 THEN LineTotalNetUSD ELSE 0 END)/sum(orderquantity) as [Washout],
+	SUM(CASE WHEN [PNL Code] not in (1010,2270) THEN LineTotalNetUSD ELSE 0 END)/sum(orderquantity) as [all_except_purchase],
 	sum(orderquantity) as total_qty,
 	sum(LineTotalNetUSD) as LineTotalNetUSD,
 	SUM(CASE WHEN PNLKey = 999 THEN LineTotalNetUSD ELSE 0 END)
 	/
 	NULLIF(
 	SUM(CASE WHEN PNLKey = 999 THEN OrderQuantity ELSE 0 END),0)
-	AS Cif_price
+	AS Cif_price,
+	sum(LineTotalNetUSD)/sum(orderquantity) as FOT
   from Purchase_Exchange
   group by PurchaseOrderID
   )
@@ -645,40 +685,45 @@ AND TM.PurchaseOrderType = 0
 		)
 
 		--select * from Purchase_Exchange where PurchaseOrderID = 20004841
-		select * from CifP where PurchaseOrderID = 20004841
+		--select 
+		--LineTotalNetUSD/total_qty as FOT
+		--,Cif_price
+		--from P_costs where PurchaseOrderID = 20006021
 
---select 
---	s.DeliveryNote,
---	bl.PurchaseOrderID,
---	s.LineType,
---	s.DeliveryDate,
---	s.AccountKey,
---	s.AgentKey,
---	s.ItemKey,
---	s.SalesType,
---	s.QuantityCategory,
---	s.Quantity,
---	s.LineTotalNet_USD,
---	s.UnitNetPriceUSD,
---	Cif.Cif_price as CIF_Purchase,
---	--p.PNL_Desc  AS [PNL Description Purchase],
---	--nullif(Cif.[PNL Costs]/  sum(Cif.total_qty) over (partition by bl.PurchaseOrderID,p.PNL_Desc),0) as [TotalCost],
---	Cif.DischargeCosts/
---	(Cif.total_qty - sum(case when s.SalesType = 'CIF' then s.Quantity else 0 end) over (partition by bl.PurchaseOrderID)) as DischargeCost,
---	case
---		when s.SalesType = 'CIF' then s.UnitNetPriceUSD - Cif.Cif_price 
---		when s.SalesType = 'FOT' then s.UnitNetPriceUSD - 0
---	else 0 
---	end as 'Gain'
---from sales s
---left join base_link bl
---on bl.DeliveryNote = s.DeliveryNote
---left join CifP cif 
---on cif.PurchaseOrderID = bl.PurchaseOrderID
---	--LEFT JOIN (
--- --   SELECT * 
--- --   FROM tblPnlList 
--- --   WHERE PNL_Type = 'OUT') p ON Cif.[PNL Code] = p.PNL_ID
+select 
+	s.DeliveryNote,
+	bl.PurchaseOrderID,
+	s.LineType,
+	s.DeliveryDate,
+	s.AccountKey,
+	s.AgentKey,
+	s.ItemKey,
+	s.SalesType,
+	s.QuantityCategory,
+	s.Quantity,
+	s.LineTotalNet_USD,
+	s.UnitNetPriceUSD,
+	PC.FOT as FOT_Purchase,
+	PC.Cif_price as CIF_Purchase,
+	--p.PNL_Desc  AS [PNL Description Purchase],
+	--nullif(PC.[PNL Costs]/  sum(PC.total_qty) over (partition by bl.PurchaseOrderID,p.PNL_Desc),0) as [TotalCost],
+	PC.DischargeCosts/
+	(PC.total_qty - sum(case when s.SalesType = 'CIF' then s.Quantity else 0 end) over (partition by bl.PurchaseOrderID)) as DischargeCost,
+	case
+		when s.SalesType = 'CIF' then s.UnitNetPriceUSD - PC.Cif_price 
+		when s.SalesType = 'FOT' then s.UnitNetPriceUSD - PC.FOT
+	else 0 
+	end as 'Gain'
+from sales s
+left join base_link bl
+on bl.DeliveryNote = s.DeliveryNote
+left join P_costs PC 
+on PC.PurchaseOrderID = bl.PurchaseOrderID
+	--LEFT JOIN (
+ --   SELECT * 
+ --   FROM tblPnlList 
+ --   WHERE PNL_Type = 'OUT') p ON PC.[PNL Code] = p.PNL_ID
 
---where s.DeliveryDate >= '2024-01-01' -- transfer to cte
---and bl.PurchaseOrderID = 20004841
+where s.DeliveryDate >= '2024-01-01' -- transfer to cte
+and bl.PurchaseOrderID = 20004841
+and s.SalesType = 'CIF'
