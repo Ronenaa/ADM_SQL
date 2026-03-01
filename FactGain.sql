@@ -710,10 +710,18 @@ select
 	PC.DischargeCosts/
 	(PC.total_qty - sum(case when s.SalesType = 'CIF' then s.Quantity else 0 end) over (partition by bl.PurchaseOrderID)) as DischargeCost,
 	case
-		when s.SalesType = 'CIF' then s.UnitNetPriceUSD - PC.Cif_price 
-		when s.SalesType = 'FOT' then s.UnitNetPriceUSD - PC.FOT
+		when s.SalesType = 'CIF' and s.LineType = 'Item' then s.UnitNetPriceUSD - PC.Cif_price 
+		when s.SalesType = 'FOT' and s.LineType = 'Item' then s.UnitNetPriceUSD - PC.FOT
+		when s.SalesType = 'FOT Premium' and s.LineType = 'Item' then s.UnitNetPriceUSD - PC.FOT
 	else 0 
 	end as 'Gain'
+	,
+	case
+		when s.SalesType = 'CIF' and s.LineType = 'Item' then (s.UnitNetPriceUSD - PC.Cif_price)* s.Quantity
+		when s.SalesType = 'FOT' and s.LineType = 'Item' then (s.UnitNetPriceUSD - PC.FOT)*s.Quantity
+		when s.SalesType = 'FOT Premium' and s.LineType = 'Item' then (s.UnitNetPriceUSD - PC.FOT) * s.Quantity
+	else 0 
+	end as 'TotalGain'
 from sales s
 left join base_link bl
 on bl.DeliveryNote = s.DeliveryNote
@@ -725,5 +733,6 @@ on PC.PurchaseOrderID = bl.PurchaseOrderID
  --   WHERE PNL_Type = 'OUT') p ON PC.[PNL Code] = p.PNL_ID
 
 where s.DeliveryDate >= '2024-01-01' -- transfer to cte
-and bl.PurchaseOrderID = 20004841
-and s.SalesType = 'CIF'
+and bl.PurchaseOrderID = 20006021
+--and s.SalesType = 'FOT'
+--and s.AccountKey = 146
