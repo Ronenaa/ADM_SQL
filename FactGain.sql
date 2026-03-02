@@ -294,6 +294,7 @@ LEFT JOIN MOTSRIM M
 	ON CCS.QOD_MOTSR = M.QOD_MOTSR
 LEFT JOIN HOTSAOT_SHROTIM_New HST 
 	ON M.ServiceCode = HST.QOD_SHROT
+	where CAST(SUBSTRING(CCS.T_CHSHBONIT,1,4) + '-' + SUBSTRING(CCS.T_CHSHBONIT,5,2) + '-' + SUBSTRING(CCS.T_CHSHBONIT,7,2) AS DATE) >= '2024-01-01'
 
 UNION ALL
 	------Import--------
@@ -404,6 +405,7 @@ WHERE 1=1
 and Cast(SUBSTRING(HC.T_MSMKH,1,4) as int) >=2018 and Cast(SUBSTRING(HC.T_MSMKH,1,4) as int) <= YEAR(GETDATE())
 and HS.QOD_SHROT NOT IN (14)
 and CONCAT(CAST(CONVERT(BIGINT, POL.POL_OrderID) AS VARCHAR(20)),CAST(POL.POL_LineID AS VARCHAR(10))) <> ' '
+and  cast( HC.T_ERKH as date) >= '2024-01-01'
 
 UNION ALL
 
@@ -442,35 +444,37 @@ WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
   AND HZ.OrderStatus <> 3
   AND HZ.ActionType IN (6,7)
   AND YEAR(CAST(SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2) AS DATE))  >= 2024
-
   )
 , P_costs as (
     select 
 	PurchaseOrderID,
+	min([Value Date]) as ValueDate,
+	max(case when [PNLKey] = 999 then SupplierKey else null end) as SupplierKey,
+	max(ShipID) as boat,
 	SUM(CASE WHEN [PNL Code] = 2270 THEN LineTotalNetUSD ELSE 0 END) as DischargeCosts,
-	SUM(CASE WHEN [PNL Code] = 1492 THEN LineTotalNetUSD ELSE 0 END)/sum(orderquantity) as [Analysis fees],
-	SUM(CASE WHEN [PNL Code] = 8210 THEN LineTotalNetUSD ELSE 0 END)/sum(orderquantity) as [Back to back haulage],
-	SUM(CASE WHEN [PNL Code] = 8100 THEN LineTotalNetUSD ELSE 0 END)/sum(orderquantity) as [Balance quantities],
-	SUM(CASE WHEN [PNL Code] = 1624 THEN LineTotalNetUSD ELSE 0 END)/sum(orderquantity) as [Delays (Dagon)],
-	SUM(CASE WHEN [PNL Code] = 1201 THEN LineTotalNetUSD ELSE 0 END)/sum(orderquantity) as [demurrage / Despatch],
-	SUM(CASE WHEN [PNL Code] = 7210 THEN LineTotalNetUSD ELSE 0 END)/sum(orderquantity) as [Haulage],
-	SUM(CASE WHEN [PNL Code] = 4103 THEN LineTotalNetUSD ELSE 0 END)/sum(orderquantity) as [Ocean freight],
-	SUM(CASE WHEN [PNL Code] = 4126 THEN LineTotalNetUSD ELSE 0 END)/sum(orderquantity) as [Overage Premium Owner],
-	SUM(CASE WHEN [PNL Code] = 1496 THEN LineTotalNetUSD ELSE 0 END)/sum(orderquantity) as [Processing],
-	SUM(CASE WHEN [PNL Code] = 1211 THEN LineTotalNetUSD ELSE 0 END)/sum(orderquantity) as [Quality settlement],
-	SUM(CASE WHEN [PNL Code] = 1111 THEN LineTotalNetUSD ELSE 0 END)/sum(orderquantity) as [Shortage],
-	SUM(CASE WHEN [PNL Code] = 1497 THEN LineTotalNetUSD ELSE 0 END)/sum(orderquantity) as [Warehouse operation],
-	SUM(CASE WHEN [PNL Code] = 3620 THEN LineTotalNetUSD ELSE 0 END)/sum(orderquantity) as [Warehouse service],
-	SUM(CASE WHEN [PNL Code] = 1571 THEN LineTotalNetUSD ELSE 0 END)/sum(orderquantity) as [Washout],
-	SUM(CASE WHEN [PNL Code] not in (1010,2270) THEN LineTotalNetUSD ELSE 0 END)/sum(orderquantity) as [all_except_purchase],
-	sum(orderquantity) as total_qty,
+	SUM(CASE WHEN [PNL Code] = 1492 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Analysis fees],
+	SUM(CASE WHEN [PNL Code] = 8210 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Back to back haulage],
+	SUM(CASE WHEN [PNL Code] = 8100 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Balance quantities],
+	SUM(CASE WHEN [PNL Code] = 1624 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Delays (Dagon)],
+	SUM(CASE WHEN [PNL Code] = 1201 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [demurrage / Despatch],
+	SUM(CASE WHEN [PNL Code] = 7210 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Haulage],
+	SUM(CASE WHEN [PNL Code] = 4103 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Ocean freight],
+	SUM(CASE WHEN [PNL Code] = 4126 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Overage Premium Owner],
+	SUM(CASE WHEN [PNL Code] = 1496 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Processing],
+	SUM(CASE WHEN [PNL Code] = 1211 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Quality settlement],
+	SUM(CASE WHEN [PNL Code] = 1111 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Shortage],
+	SUM(CASE WHEN [PNL Code] = 1497 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Warehouse operation],
+	SUM(CASE WHEN [PNL Code] = 3620 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Warehouse service],
+	SUM(CASE WHEN [PNL Code] = 1571 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Washout],
+	SUM(CASE WHEN [PNL Code] not in (1010,2270) THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [all_except_purchase],
+	sum (orderquantity) as orderquantity,
 	sum(LineTotalNetUSD) as LineTotalNetUSD,
 	SUM(CASE WHEN PNLKey = 999 THEN LineTotalNetUSD ELSE 0 END)
 	/
 	NULLIF(
 	SUM(CASE WHEN PNLKey = 999 THEN OrderQuantity ELSE 0 END),0)
 	AS Cif_price,
-	sum(LineTotalNetUSD)/sum(orderquantity) as FOT
+	sum(CASE WHEN [PNL Code] in (1010,1201,2270) THEN LineTotalNetUSD ELSE 0 END) as totalFOT
   from Purchase_Exchange
   group by PurchaseOrderID
   )
@@ -684,55 +688,60 @@ AND TM.PurchaseOrderType = 0
 
 		)
 
-		--select * from Purchase_Exchange where PurchaseOrderID = 20004841
+		--select * from Purchase_Exchange where PurchaseOrderID = 143773
 		--select 
+		--SupplierKey,
 		--LineTotalNetUSD/total_qty as FOT
 		--,Cif_price
-		--from P_costs where PurchaseOrderID = 20006021
+		--from P_costs where PurchaseOrderID = 20005901
 
 select 
-	s.DeliveryNote,
-	bl.PurchaseOrderID,
+	cast(s.DeliveryNote as varchar) as DeliveryNote,
+	cast(bl.PurchaseOrderID as varchar) as PurchaseOrderID,
+	cast(PC.SupplierKey as varchar) as SupplierKey,
+	cast(PC.boat as varchar) as ShipID,
+	PC.orderquantity as [Purchase Quantity],
+	PC.ValueDate,
 	s.LineType,
 	s.DeliveryDate,
-	s.AccountKey,
-	s.AgentKey,
-	s.ItemKey,
+	cast(s.AccountKey as varchar) as AccountKey,
+	cast(s.AgentKey as varchar) as AgentKey,
+	cast(s.ItemKey as varchar) as ItemKey,
 	s.SalesType,
 	s.QuantityCategory,
+	s.ActionTypeDesc,
 	s.Quantity,
 	s.LineTotalNet_USD,
 	s.UnitNetPriceUSD,
-	PC.FOT as FOT_Purchase,
 	PC.Cif_price as CIF_Purchase,
-	--p.PNL_Desc  AS [PNL Description Purchase],
-	--nullif(PC.[PNL Costs]/  sum(PC.total_qty) over (partition by bl.PurchaseOrderID,p.PNL_Desc),0) as [TotalCost],
+	PC.[demurrage / Despatch],
 	PC.DischargeCosts/
-	(PC.total_qty - sum(case when s.SalesType = 'CIF' then s.Quantity else 0 end) over (partition by bl.PurchaseOrderID)) as DischargeCost,
+	nullif((PC.orderquantity - sum(case when s.SalesType = 'CIF' then s.Quantity else 0 end) over (partition by bl.PurchaseOrderID)),0) as DischargeCost,
+	PC.Cif_price + PC.[demurrage / Despatch] + (PC.DischargeCosts/
+	nullif((PC.orderquantity - sum(case when s.SalesType = 'CIF' then s.Quantity else 0 end) over (partition by bl.PurchaseOrderID)),0)) as FOT_Purchase,
 	case
 		when s.SalesType = 'CIF' and s.LineType = 'Item' then s.UnitNetPriceUSD - PC.Cif_price 
-		when s.SalesType = 'FOT' and s.LineType = 'Item' then s.UnitNetPriceUSD - PC.FOT
-		when s.SalesType = 'FOT Premium' and s.LineType = 'Item' then s.UnitNetPriceUSD - PC.FOT
+		when s.SalesType in ('FOT','FOT Premium')  and s.LineType = 'Item' then s.UnitNetPriceUSD - (PC.Cif_price + PC.[demurrage / Despatch] + (PC.DischargeCosts/nullif((PC.orderquantity - sum(case when s.SalesType = 'CIF' then s.Quantity else 0 end) over (partition by bl.PurchaseOrderID)),0)))
 	else 0 
 	end as 'Gain'
 	,
 	case
 		when s.SalesType = 'CIF' and s.LineType = 'Item' then (s.UnitNetPriceUSD - PC.Cif_price)* s.Quantity
-		when s.SalesType = 'FOT' and s.LineType = 'Item' then (s.UnitNetPriceUSD - PC.FOT)*s.Quantity
-		when s.SalesType = 'FOT Premium' and s.LineType = 'Item' then (s.UnitNetPriceUSD - PC.FOT) * s.Quantity
+		when s.SalesType in ('FOT','FOT Premium') and s.LineType = 'Item' then (s.UnitNetPriceUSD - (PC.Cif_price + PC.[demurrage / Despatch] + (PC.DischargeCosts/nullif((PC.orderquantity - sum(case when s.SalesType = 'CIF' then s.Quantity else 0 end) over (partition by bl.PurchaseOrderID)),0))))*s.Quantity
 	else 0 
 	end as 'TotalGain'
 from sales s
-left join base_link bl
+inner join base_link bl
 on bl.DeliveryNote = s.DeliveryNote
 left join P_costs PC 
 on PC.PurchaseOrderID = bl.PurchaseOrderID
-	--LEFT JOIN (
+	--LEFT JOIN (TOt
  --   SELECT * 
  --   FROM tblPnlList 
  --   WHERE PNL_Type = 'OUT') p ON PC.[PNL Code] = p.PNL_ID
 
-where s.DeliveryDate >= '2024-01-01' -- transfer to cte
-and bl.PurchaseOrderID = 20006021
+where PC.ValueDate is not null
+--and bl.PurchaseOrderID = 143996
 --and s.SalesType = 'FOT'
 --and s.AccountKey = 146
+--and s.LineType = 'Additional Expense'
