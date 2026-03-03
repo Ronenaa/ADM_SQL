@@ -2,3 +2,7 @@
     Purchase >> orderquantity
 
  Exchange >>> sales.Quantity
+
+ Storage  - #FCFFA5
+ Shortage - #FDBE87
+ Exchange - #E6E6E6

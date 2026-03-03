@@ -305,7 +305,13 @@ SELECT
 			CAST(POL.POL_LineID AS VARCHAR(10))
 		 )	as 'PurchaseOrderID'
 		,'Order Expenses' AS 'DocName'
-		,CAST(CONVERT(INT, CONVERT(VARCHAR,HC.QOD_SPQ))as varchar) AS 'SupplierKey'
+		,CAST(
+		  MAX(
+			CASE WHEN HS.QOD_SHROT = 0
+				 THEN CONVERT(INT, CONVERT(VARCHAR, HC.QOD_SPQ))
+			END
+		  ) OVER (PARTITION BY HS.MS_MSMKH_QSHOR)
+			AS VARCHAR)	 AS 'SupplierKey'
 		,CASE 
 			WHEN HS.MS_MSMKH_QSHOR = 0 
 			  THEN CONVERT(date, HC.T_ERKH, 112)
@@ -413,7 +419,7 @@ UNION ALL
 SELECT
     HZ.MSPR_HZMNH                                                       AS PurchaseOrderID,
     'Orders'                                                            AS DocName,
-    HZ.QOD_SHOLCH                                                       AS SupplierKey,
+    NULL		                                                        AS SupplierKey,
     CAST(SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2)
          AS DATE)                                                       AS [Value Date],
     CAST(CONVERT(INT, CONVERT(VARCHAR,HZ.MOTSR_MOZMN)) AS VARCHAR) + '-' +
@@ -473,8 +479,7 @@ WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
 	/
 	NULLIF(
 	SUM(CASE WHEN PNLKey = 999 THEN OrderQuantity ELSE 0 END),0)
-	AS Cif_price,
-	sum(CASE WHEN [PNL Code] in (1010,1201,2270) THEN LineTotalNetUSD ELSE 0 END) as totalFOT
+	AS Cif_price
   from Purchase_Exchange
   group by PurchaseOrderID
   )
@@ -707,11 +712,17 @@ select
 	cast(s.AccountKey as varchar) as AccountKey,
 	cast(s.AgentKey as varchar) as AgentKey,
 	cast(s.ItemKey as varchar) as ItemKey,
-	s.SalesType,
+	case when s.SalesType is null then s.QuantityCategory
+	else s.SalesType
+	end as [Price Term],
 	s.QuantityCategory,
 	s.ActionTypeDesc,
 	s.Quantity,
 	s.LineTotalNet_USD,
+	case 
+		when s.AdjustmentFlag <> 1 and s.LineType = 'Item' then s.LineTotalNet_USD/s.Quantity
+		else null
+	end as price_usd,
 	s.UnitNetPriceUSD,
 	PC.Cif_price as CIF_Purchase,
 	PC.[demurrage / Despatch],
@@ -720,14 +731,14 @@ select
 	PC.Cif_price + PC.[demurrage / Despatch] + (PC.DischargeCosts/
 	nullif((PC.orderquantity - sum(case when s.SalesType = 'CIF' then s.Quantity else 0 end) over (partition by bl.PurchaseOrderID)),0)) as FOT_Purchase,
 	case
-		when s.SalesType = 'CIF' and s.LineType = 'Item' then s.UnitNetPriceUSD - PC.Cif_price 
-		when s.SalesType in ('FOT','FOT Premium')  and s.LineType = 'Item' then s.UnitNetPriceUSD - (PC.Cif_price + PC.[demurrage / Despatch] + (PC.DischargeCosts/nullif((PC.orderquantity - sum(case when s.SalesType = 'CIF' then s.Quantity else 0 end) over (partition by bl.PurchaseOrderID)),0)))
+		when s.SalesType = 'CIF' and s.LineType = 'Item' then (s.LineTotalNet_USD/s.Quantity)  - PC.Cif_price 
+		when s.SalesType in ('FOT','FOT Premium')  and s.LineType = 'Item' then (s.LineTotalNet_USD/s.Quantity)  - (PC.Cif_price + PC.[demurrage / Despatch] + (PC.DischargeCosts/nullif((PC.orderquantity - sum(case when s.SalesType = 'CIF' then s.Quantity else 0 end) over (partition by bl.PurchaseOrderID)),0)))
 	else 0 
 	end as 'Gain'
 	,
 	case
-		when s.SalesType = 'CIF' and s.LineType = 'Item' then (s.UnitNetPriceUSD - PC.Cif_price)* s.Quantity
-		when s.SalesType in ('FOT','FOT Premium') and s.LineType = 'Item' then (s.UnitNetPriceUSD - (PC.Cif_price + PC.[demurrage / Despatch] + (PC.DischargeCosts/nullif((PC.orderquantity - sum(case when s.SalesType = 'CIF' then s.Quantity else 0 end) over (partition by bl.PurchaseOrderID)),0))))*s.Quantity
+		when s.SalesType = 'CIF' and s.LineType = 'Item' then ((s.LineTotalNet_USD/s.Quantity)  - PC.Cif_price)* s.Quantity
+		when s.SalesType in ('FOT','FOT Premium') and s.LineType = 'Item' then ((s.LineTotalNet_USD/s.Quantity) - (PC.Cif_price + PC.[demurrage / Despatch] + (PC.DischargeCosts/nullif((PC.orderquantity - sum(case when s.SalesType = 'CIF' then s.Quantity else 0 end) over (partition by bl.PurchaseOrderID)),0))))*s.Quantity
 	else 0 
 	end as 'TotalGain'
 from sales s
@@ -735,13 +746,10 @@ inner join base_link bl
 on bl.DeliveryNote = s.DeliveryNote
 left join P_costs PC 
 on PC.PurchaseOrderID = bl.PurchaseOrderID
-	--LEFT JOIN (TOt
- --   SELECT * 
- --   FROM tblPnlList 
- --   WHERE PNL_Type = 'OUT') p ON PC.[PNL Code] = p.PNL_ID
-
 where PC.ValueDate is not null
---and bl.PurchaseOrderID = 143996
+-- and bl.PurchaseOrderID = 20003932
 --and s.SalesType = 'FOT'
---and s.AccountKey = 146
+--and s.AccountKey = 462
 --and s.LineType = 'Additional Expense'
+
+
