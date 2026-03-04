@@ -702,6 +702,10 @@ AND TM.PurchaseOrderType = 0
 
 select 
 	cast(s.DeliveryNote as varchar) as DeliveryNote,
+	case when 
+	row_number () over (partition by bl.PurchaseOrderID order by s.DeliveryNote asc) = 1 then '1'
+	else '0'
+	end as Qty_flag,
 	cast(bl.PurchaseOrderID as varchar) as PurchaseOrderID,
 	cast(PC.SupplierKey as varchar) as SupplierKey,
 	cast(PC.boat as varchar) as ShipID,
@@ -709,6 +713,7 @@ select
 	PC.ValueDate,
 	s.LineType,
 	s.DeliveryDate,
+	s.AdjustmentFlag,
 	cast(s.AccountKey as varchar) as AccountKey,
 	cast(s.AgentKey as varchar) as AgentKey,
 	cast(s.ItemKey as varchar) as ItemKey,
@@ -747,9 +752,10 @@ on bl.DeliveryNote = s.DeliveryNote
 left join P_costs PC 
 on PC.PurchaseOrderID = bl.PurchaseOrderID
 where PC.ValueDate is not null
--- and bl.PurchaseOrderID = 20003932
+--and bl.PurchaseOrderID = 143996
 --and s.SalesType = 'FOT'
 --and s.AccountKey = 462
 --and s.LineType = 'Additional Expense'
+--and s.DeliveryDate between '2026-03-01' and '2026-03-04'
 
 
