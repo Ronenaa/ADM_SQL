@@ -454,6 +454,7 @@ WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
 , P_costs as (
     select 
 	PurchaseOrderID,
+	max(DocName) as DocName,
 	min([Value Date]) as ValueDate,
 	max(case when [PNLKey] = 999 then SupplierKey else null end) as SupplierKey,
 	max(ShipID) as boat,
@@ -695,10 +696,8 @@ AND TM.PurchaseOrderType = 0
 
 		--select * from Purchase_Exchange where PurchaseOrderID = 143773
 		--select 
-		--SupplierKey,
-		--LineTotalNetUSD/total_qty as FOT
-		--,Cif_price
-		--from P_costs where PurchaseOrderID = 20005901
+		--PurchaseOrderID,DocName,Cif_price
+		--from P_costs where PurchaseOrderID = 143520
 
 select 
 	cast(s.DeliveryNote as varchar) as DeliveryNote,
@@ -709,7 +708,11 @@ select
 	cast(bl.PurchaseOrderID as varchar) as PurchaseOrderID,
 	cast(PC.SupplierKey as varchar) as SupplierKey,
 	cast(PC.boat as varchar) as ShipID,
-	PC.orderquantity as [Purchase Quantity],
+	PC.DocName as Purchase_DocName,
+	case 
+		when PC.DocName = 'Orders' then sum(s.Quantity) over (partition by bl.PurchaseOrderID)
+		else PC.orderquantity
+	end as [Purchase Quantity],
 	PC.ValueDate,
 	s.LineType,
 	s.DeliveryDate,
@@ -752,7 +755,9 @@ on bl.DeliveryNote = s.DeliveryNote
 left join P_costs PC 
 on PC.PurchaseOrderID = bl.PurchaseOrderID
 where PC.ValueDate is not null
---and bl.PurchaseOrderID = 143996
+--and bl.PurchaseOrderID 
+--in 
+--(144000,143901,143830,143773,20006231,20005901)
 --and s.SalesType = 'FOT'
 --and s.AccountKey = 462
 --and s.LineType = 'Additional Expense'
