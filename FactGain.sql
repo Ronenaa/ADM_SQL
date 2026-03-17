@@ -459,21 +459,21 @@ WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
 	max(case when [PNLKey] = 999 then SupplierKey else null end) as SupplierKey,
 	max(ShipID) as boat,
 	SUM(CASE WHEN [PNL Code] = 2270 THEN LineTotalNetUSD ELSE 0 END) as DischargeCosts,
-	SUM(CASE WHEN [PNL Code] = 1492 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Analysis fees],
-	SUM(CASE WHEN [PNL Code] = 8210 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Back to back haulage],
-	SUM(CASE WHEN [PNL Code] = 8100 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Balance quantities],
-	SUM(CASE WHEN [PNL Code] = 1624 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Delays (Dagon)],
+	--SUM(CASE WHEN [PNL Code] = 1492 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Analysis fees],
+	--SUM(CASE WHEN [PNL Code] = 8210 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Back to back haulage],
+	--SUM(CASE WHEN [PNL Code] = 8100 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Balance quantities],
+	--SUM(CASE WHEN [PNL Code] = 1624 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Delays (Dagon)],
+	--SUM(CASE WHEN [PNL Code] = 1497 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Warehouse operation],
+	--SUM(CASE WHEN [PNL Code] = 3620 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Warehouse service],
+	--SUM(CASE WHEN [PNL Code] = 1571 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Washout],
+	--SUM(CASE WHEN [PNL Code] = 7210 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Haulage],
+	--SUM(CASE WHEN [PNL Code] = 4103 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Ocean freight],
+	--SUM(CASE WHEN [PNL Code] = 4126 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Overage Premium Owner],
+	--SUM(CASE WHEN [PNL Code] = 1496 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Processing],
+	--SUM(CASE WHEN [PNL Code] = 1211 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Quality settlement],
 	SUM(CASE WHEN [PNL Code] = 1201 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [demurrage / Despatch],
-	SUM(CASE WHEN [PNL Code] = 7210 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Haulage],
-	SUM(CASE WHEN [PNL Code] = 4103 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Ocean freight],
-	SUM(CASE WHEN [PNL Code] = 4126 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Overage Premium Owner],
-	SUM(CASE WHEN [PNL Code] = 1496 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Processing],
-	SUM(CASE WHEN [PNL Code] = 1211 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Quality settlement],
 	SUM(CASE WHEN [PNL Code] = 1111 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Shortage],
-	SUM(CASE WHEN [PNL Code] = 1497 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Warehouse operation],
-	SUM(CASE WHEN [PNL Code] = 3620 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Warehouse service],
-	SUM(CASE WHEN [PNL Code] = 1571 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Washout],
-	SUM(CASE WHEN [PNL Code] not in (1010,2270) THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [all_except_purchase],
+	SUM(CASE WHEN [PNL Code] not in (1010,2270,1201,1111) THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Other_Expenses],
 	sum (orderquantity) as orderquantity,
 	sum(LineTotalNetUSD) as LineTotalNetUSD,
 	SUM(CASE WHEN PNLKey = 999 THEN LineTotalNetUSD ELSE 0 END)
@@ -694,10 +694,10 @@ AND TM.PurchaseOrderType = 0
 
 		)
 
-		--select * from Purchase_Exchange where PurchaseOrderID = 143773
+		--select * from Purchase_Exchange where PurchaseOrderID = 20005901
 		--select 
-		--PurchaseOrderID,DocName,Cif_price
-		--from P_costs where PurchaseOrderID = 143520
+		--PurchaseOrderID,Shortage
+		--from P_costs where PurchaseOrderID = 20005901
 
 select 
 	cast(s.DeliveryNote as varchar) as DeliveryNote,
@@ -716,6 +716,7 @@ select
 	PC.ValueDate,
 	s.LineType,
 	s.DeliveryDate,
+	FORMAT(s.DeliveryDate, 'yyyy-MM') as 'Year-Month',
 	s.AdjustmentFlag,
 	cast(s.AccountKey as varchar) as AccountKey,
 	cast(s.AgentKey as varchar) as AgentKey,
@@ -734,6 +735,8 @@ select
 	s.UnitNetPriceUSD,
 	PC.Cif_price as CIF_Purchase,
 	PC.[demurrage / Despatch],
+	PC.[Other_Expenses],
+	PC.Shortage,
 	PC.DischargeCosts/
 	nullif((PC.orderquantity - sum(case when s.SalesType = 'CIF' then s.Quantity else 0 end) over (partition by bl.PurchaseOrderID)),0) as DischargeCost,
 	PC.Cif_price + PC.[demurrage / Despatch] + (PC.DischargeCosts/
@@ -755,7 +758,8 @@ on bl.DeliveryNote = s.DeliveryNote
 left join P_costs PC 
 on PC.PurchaseOrderID = bl.PurchaseOrderID
 where PC.ValueDate is not null
---and bl.PurchaseOrderID 
+-- and bl.PurchaseOrderID = 20000311
+--and  (s.SalesType = '20000311' or s.QuantityCategory = 'Shortage')
 --in 
 --(144000,143901,143830,143773,20006231,20005901)
 --and s.SalesType = 'FOT'
