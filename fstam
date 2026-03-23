@@ -6,3 +6,26 @@
  Storage  - #FCFFA5
  Shortage - #FDBE87
  Exchange - #E6E6E6
+
+
+ 1,[Quantity Orders DynamicTable],
+2,[Quantity Supply Date DynamicTable],
+3,[Quantity Execution DynamicTable],
+
+Quantity Dynamic Table Switch = 
+// VAR _Blank = IF(HASONEVALUE(Sub_DimDates[MonthInCalendarName]),"-",0)
+// Return
+SWITCH(MIN('OrderSupplyExecution Parameter'[OrderSupplyExecution Parameter Order]),
+1,[Quantity Orders DynamicTable],
+2,[Quantity Supply Date DynamicTable],
+3,[Quantity Execution DynamicTable],
+[Quantity Orders DynamicTable]
+)
+
+Quantity weekly Switch = 
+ SWITCH(MAX(OrderVSExecutionVSSupply[ID]),
+    1,[Quantity Orders DynamicTable],
+    2,[Quantity Supply Date DynamicTable],
+    3,[Quantity Execution DynamicTable],
+    [Quantity Orders DynamicTable]
+    )

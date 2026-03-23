@@ -1,5 +1,3 @@
-
-
 WITH
 -- =========================
 -- 1) Exchange Orders (parse dates once)
