@@ -29,3 +29,7 @@ Quantity weekly Switch =
     3,[Quantity Execution DynamicTable],
     [Quantity Orders DynamicTable]
     )
+
+    1,[Quantity Orders DynamicTable],
+2,[Quantity Supply Date DynamicTable],
+3,[Quantity Execution DynamicTable],

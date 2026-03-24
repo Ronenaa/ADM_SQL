@@ -329,8 +329,6 @@ END AS  'TransactionType'
 	WHEN TM.MCHIR_ICH = 0 and G.AOPI_PEILOT NOT IN ('פחת','אחסון') then 'Exchange'
 END AS 'QuantityCategory'
 --,NULL AS SubItemID
-
-
 FROM TEODOT_MSHLOCH TM
 Left Join (SELECT distinct MS_T_MSHLOCH
 			FROM CHSHBONIOT_SHOROT
