@@ -1,8 +1,7 @@
 --Inventory--
---with inv as (....)
-
+with inv as (
 SELECT
-    FINAL.ItemKey,
+	CONVERT(VARCHAR, FINAL.ItemKey) + '-' + CONVERT(VARCHAR, FINAL.ItemKey) as ItemKey,
     FINAL.SupplierKey,
     CONVERT(char(7), FINAL.Date, 126) AS YearMonth,
 
@@ -69,7 +68,7 @@ FROM (
             /* STG_2 inline */
             SELECT 
                 TM.QOD_PRIT AS ItemKey,
-                CAST(SUBSTRING(T_TNOEH,1,4) + '-' + SUBSTRING(T_TNOEH,5,2) + '-' + SUBSTRING(T_TNOEH,7,2) AS DATE) AS Date,
+                CAST(SUBSTRING(T_TNOEH,1,4) + '-' + SUBSTRING(T_TNOEH,5,2) + '-' + SUBSTRING(T_TNOEH,7,2) AS DATE) AS [Date],
                 SUM(TM.CMOT_LOGOS) AS Quantity
             FROM BT.dbo.TNOEOT_MLAI_CLLI TM
             WHERE QOD_GORM <> 1
@@ -81,7 +80,7 @@ FROM (
 
             SELECT 
                 TM.QOD_PRIT,
-                CAST(SUBSTRING(T_TNOEH,1,4) + '-' + SUBSTRING(T_TNOEH,5,2) + '-' + SUBSTRING(T_TNOEH,7,2) AS DATE),
+                CAST(SUBSTRING(T_TNOEH,1,4) + '-' + SUBSTRING(T_TNOEH,5,2) + '-' + SUBSTRING(T_TNOEH,7,2) AS DATE) AS [Date],
                 SUM(TM.CMOT_LOGOS) * -1
             FROM BT.dbo.TNOEOT_MLAI_CLLI TM
             WHERE QOD_GORM <> 1
@@ -124,8 +123,7 @@ GROUP BY
     FINAL.ItemKey,
     FINAL.SupplierKey,
     CONVERT(char(7), FINAL.Date, 126)
-
-ORDER BY
-    FINAL.SupplierKey,
-    FINAL.ItemKey,
-    YearMonth;
+	)
+select * from inv
+--where SupplierKey = 746
+order by YearMonth desc
