@@ -763,16 +763,22 @@ select
 	s.AccountKey,
 	s.[Date],
 	s.AgentKey,
-	case when s.LineType = 'Item' then s.ItemKey else null end as [ItemKey]
+	max(case when s.LineType = 'Item' then s.ItemKey else null end) as [ItemKey],
+	s.ActionType,
+	s.ActionTypeDesc,
+	sum(s.Quantity) as [Quantity],
+	sum(s.AdditionalQuantity) as [AdditionalQuantity]
 from sales s
  left outer join base_link bl
 on bl.DeliveryNote = s.DeliveryNote
 where s.DeliveryNote = 520299
 group by s.DocName,
-	s.LineType,
 	s.AccountKey,
+	s.LineType,
 	s.[Date],
-	s.AgentKey
+	s.AgentKey,
+	s.ActionType,
+	s.ActionTypeDesc
 
 --) 
 
