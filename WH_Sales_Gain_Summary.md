@@ -61,6 +61,8 @@ CurrencyConvertion
 ### 7. Warehouse branch — field improvements (latest)
 
 - **`ShipID`** (boat): NULL — not applicable for warehouse rows
+- **`Qty_flag`**: `ROW_NUMBER() OVER (PARTITION BY SupplierWarehouse, ItemKey, inv.YearMonth ORDER BY inv.YearMonth DESC)` — flags the first row per warehouse/item/month combination
+- **`WarehouseName`** and GORMIM W join in `WH_sales`: currently commented out
 - **`ValueDate`**: `CAST(inv.YearMonth + '-01' AS DATE)` — first day of the inventory month; NULL if no inv match
 - **`[Purchase Quantity]`**: `SUM(Quantity) OVER (PARTITION BY SupplierWarehouse, [Year-Month])` — total qty shipped out of that warehouse in that month
 - **`CIF_Purchase`**: NULL (no CIF concept for warehouse sales)
@@ -102,6 +104,12 @@ Delivery note branch of `sales` previously re-computed the full `SHERI_MTBE` win
 | `final` + `final2` | `exchange_priced` — ROW_NUMBER + rn=1 filter in a single CTE using an inner subquery |
 
 `Purchase_Exchange` Exchange branch updated: `final2` → `exchange_priced`.
+
+### 8. `DocName` in P_costs — replaced MAX with `po_doctype` CTE
+
+`MAX(DocName)` was unreliable because a single PurchaseOrderID can have rows of multiple doc types (e.g. Import rows + Invoice rows). Added `po_doctype` CTE before `P_costs` that uses `EXISTS` checks with explicit priority: **Import > Exchange > Invoice**. `P_costs` now joins to `po_doctype` instead of aggregating DocName directly.
+
+---
 
 ### 6. `Purchase_DocName` values — renamed in `Purchase_Exchange` CTE
 

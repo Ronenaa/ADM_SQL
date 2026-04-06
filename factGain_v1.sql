@@ -763,7 +763,7 @@ AND TM.QOD_SHOLCH <> TM.QOD_MQBL   -- exclude internal docs (same source and des
         s.ActionType,
         s.ActionTypeDesc,
         s.SupplierWarehouse,
-        W.SHM_GORM                                                                  AS WarehouseName,
+        --W.SHM_GORM                                                                  AS WarehouseName,
         s.AdjustmentFlag,
         s.QuantityCategory,
         MAX(s.TransactionType)                                                      AS TransactionType,
@@ -779,12 +779,13 @@ AND TM.QOD_SHOLCH <> TM.QOD_MQBL   -- exclude internal docs (same source and des
         CASE WHEN COUNT(*) > 1 THEN 1 ELSE 0 END                                   AS MultiLineFlag
     FROM sales s
     LEFT OUTER JOIN base_link bl ON bl.DeliveryNote = s.DeliveryNote
-    LEFT JOIN GORMIM W           ON W.QOD_GORM = s.SupplierWarehouse
+    --LEFT JOIN GORMIM W           ON W.QOD_GORM = s.SupplierWarehouse
     GROUP BY
         s.DeliveryNote, s.DeliveryDate,
         s.AccountKey, s.AgentKey,
         s.ActionType, s.ActionTypeDesc,
-        s.SupplierWarehouse, W.SHM_GORM,
+        s.SupplierWarehouse, 
+		--W.SHM_GORM,
         s.AdjustmentFlag, s.QuantityCategory
 )
 
@@ -862,7 +863,8 @@ UNION ALL
 -- ============================================================
 SELECT
     CAST(s.DeliveryNote AS VARCHAR)                                         AS DeliveryNote,
-    '0'                                                                     AS Qty_flag,
+    case when row_number() over (partition by s.SupplierWarehouse,s.ItemKey,inv.YearMonth order by inv.YearMonth desc) = 1
+         then '1' else '0' end                                              AS Qty_flag, 
     NULL                                                                    AS PurchaseOrderID,
     CAST(s.SupplierWarehouse AS VARCHAR)                                    AS SupplierKey,
     NULL                                                                    AS ShipID,
@@ -909,4 +911,5 @@ LEFT JOIN inv
 	)
 
 	select * from gain
-	--where Purchase_DocName = 'Import'
+	--where Purchase_DocName = 'Warehouse'
+	--and [Year-Month] = '2026-03'
