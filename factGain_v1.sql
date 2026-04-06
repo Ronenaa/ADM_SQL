@@ -842,7 +842,7 @@ SELECT
     '0'                                                                     AS Qty_flag,
     NULL                                                                    AS PurchaseOrderID,
     CAST(s.SupplierWarehouse AS VARCHAR)                                    AS SupplierKey,
-    null                                                     AS ShipID,  -- warehouse name (was: NULL)
+    NULL                                                                    AS ShipID,
     'Warehouse'                                                             AS Purchase_DocName,
     SUM(s.Quantity) OVER (PARTITION BY s.SupplierWarehouse, s.[Year-Month]) AS [Purchase Quantity],  -- total qty out of warehouse that month
     CAST(inv.YearMonth + '-01' AS DATE)                                     AS ValueDate,  -- first day of inv month (NULL if no inv match)
