@@ -844,11 +844,11 @@ SELECT
     CAST(s.SupplierWarehouse AS VARCHAR)                                    AS SupplierKey,
     NULL                                                                    AS ShipID,
     'Warehouse'                                                             AS Purchase_DocName,
-    SUM(s.Quantity) OVER (PARTITION BY s.SupplierWarehouse, s.[Year-Month]) AS [Purchase Quantity],  -- total qty out of warehouse that month
+    SUM(s.Quantity) OVER (PARTITION BY s.SupplierWarehouse, ISNULL(inv.YearMonth, s.[Year-Month])) AS [Purchase Quantity],  -- total qty out of warehouse that month
     CAST(inv.YearMonth + '-01' AS DATE)                                     AS ValueDate,  -- first day of inv month (NULL if no inv match)
     'Item'                                                                  AS LineType,
     s.DeliveryDate,
-    s.[Year-Month],
+    ISNULL(inv.YearMonth, s.[Year-Month])                                   AS [Year-Month],
     s.AdjustmentFlag,
     CAST(s.AccountKey AS VARCHAR)                                           AS AccountKey,
     CAST(s.AgentKey AS VARCHAR)                                             AS AgentKey,
