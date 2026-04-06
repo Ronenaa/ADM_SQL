@@ -591,6 +591,7 @@ GROUP BY
 		END										as 'ActionTypeDesc'										
 		,'0'									as 'AdjustmentFlag'
 		,'Sales'								as  'QuantityCategory'
+		,NULL									as  'TransactionType'  -- invoices are always direct sales
 FROM CHSHBONIOT_COTROT CH
 Left Join GORMIM G
 	on CH.QOD_LQOCH = G.QOD_GORM
@@ -621,6 +622,7 @@ left join CurrencyConvertion CC
 	ON cs.[TARIKH_MSHLOCH] = cc.Tarikh
 WHERE 1=1  
 AND Cast(SUBSTRING(cs.T_CHSHBONIT,1,4) as int) >= 2025
+AND TM.QOD_SHOLCH <> TM.QOD_MQBL 
 
 -------OPEN Orders----------------------------------------------------------------------------------
 UNION ALL
@@ -678,6 +680,11 @@ UNION ALL
 		WHEN TM.MCHIR_ICH = 0 and G.AOPI_PEILOT = 'אחסון' THEN 'Storage'
 		WHEN TM.MCHIR_ICH = 0 and G.AOPI_PEILOT NOT IN ('פחת','אחסון') then 'Exchange'
 	END AS 'QuantityCategory'
+	,CASE
+		WHEN TM.MCHIR_ICH = 0 AND W.QOD_GORM IS NOT NULL THEN G.AOPI_PEILOT
+		WHEN TM.MCHIR_ICH = 0 AND W.QOD_GORM IS NULL     THEN 'החלפה'
+		ELSE NULL
+	END AS 'TransactionType'
 FROM TEODOT_MSHLOCH TM
 Left Join (SELECT distinct MS_T_MSHLOCH
 			FROM CHSHBONIOT_SHOROT
@@ -693,6 +700,11 @@ LEFT JOIN CurrencyConvertion SM  -- reuse top-level CTE instead of repeating SHE
 	ON SM.TARIKH = HZ.T_HZMNH
 Left Join GORMIM G
 	on TM.QOD_MQBL = G.QOD_GORM
+Left Join (
+			Select *
+			From GORMIM
+			Where EntityType Like N'%מקום אספקה%') W
+	On W.QOD_GORM = TM.QOD_SHOLCH
 left join TBLT_PEOLOT_HZMNH_T_MSHLOCH act
 	on TM.ActionType = act.MS_AOPTSIH
 WHERE
@@ -700,6 +712,7 @@ CH.MS_T_MSHLOCH is null
 AND Cast(SUBSTRING(TARIKH_MSHLOCH,1,4) as int) >= 2025
 AND STTOS in (0,1)
 AND TM.PurchaseOrderType = 0
+AND TM.QOD_SHOLCH <> TM.QOD_MQBL   -- exclude internal docs (same source and destination)
   )
 
 
@@ -727,8 +740,10 @@ AND TM.PurchaseOrderType = 0
         s.ActionType,
         s.ActionTypeDesc,
         s.SupplierWarehouse,
+        W.SHM_GORM                                                                  AS WarehouseName,
         s.AdjustmentFlag,
         s.QuantityCategory,
+        MAX(s.TransactionType)                                                      AS TransactionType,
         -- ItemKey, sale price, and SalesType come from the 'Item' line only
         MAX(CASE WHEN s.LineType = 'Item' THEN s.ItemKey        ELSE NULL END)      AS ItemKey,
         MAX(CASE WHEN s.LineType = 'Item' THEN s.SalesType      ELSE NULL END)      AS SalesType,
@@ -741,13 +756,16 @@ AND TM.PurchaseOrderType = 0
         CASE WHEN COUNT(*) > 1 THEN 1 ELSE 0 END                                   AS MultiLineFlag
     FROM sales s
     LEFT OUTER JOIN base_link bl ON bl.DeliveryNote = s.DeliveryNote
-   -- WHERE bl.DeliveryNote IS NULL  -- not linked to any purchase order = warehouse origin
+    LEFT JOIN GORMIM W           ON W.QOD_GORM = s.SupplierWarehouse
     GROUP BY
         s.DeliveryNote, s.DeliveryDate,
         s.AccountKey, s.AgentKey,
         s.ActionType, s.ActionTypeDesc,
-        s.SupplierWarehouse, s.AdjustmentFlag, s.QuantityCategory
+        s.SupplierWarehouse, W.SHM_GORM,
+        s.AdjustmentFlag, s.QuantityCategory
 )
+
+,gain as(
 -- ============================================================
 -- Branch 1: Import / Exchange orders — cost from P_costs
 -- ============================================================
@@ -807,11 +825,12 @@ SELECT
                          over (partition by bl.PurchaseOrderID)), 0)))) * s.Quantity
         else 0
     end                                                                     AS TotalGain,
-    0                                                                       AS MultiLineFlag  -- individual lines, not aggregated
+    0                                                                       AS MultiLineFlag,  -- individual lines, not aggregated
+    s.TransactionType
 FROM sales s
 INNER JOIN base_link bl ON bl.DeliveryNote = s.DeliveryNote
 LEFT JOIN  P_costs PC   ON PC.PurchaseOrderID = bl.PurchaseOrderID
-WHERE PC.ValueDate IS NOT NULL
+WHERE PC.ValueDate IS NOT NULL 
 
 UNION ALL
 
@@ -823,10 +842,10 @@ SELECT
     '0'                                                                     AS Qty_flag,
     NULL                                                                    AS PurchaseOrderID,
     CAST(s.SupplierWarehouse AS VARCHAR)                                    AS SupplierKey,
-    NULL                                                                    AS ShipID,
+    null                                                     AS ShipID,  -- warehouse name (was: NULL)
     'Warehouse'                                                             AS Purchase_DocName,
-    NULL                                                                    AS [Purchase Quantity],
-    s.DeliveryDate                                                          AS ValueDate,
+    SUM(s.Quantity) OVER (PARTITION BY s.SupplierWarehouse, s.[Year-Month]) AS [Purchase Quantity],  -- total qty out of warehouse that month
+    CAST(inv.YearMonth + '-01' AS DATE)                                     AS ValueDate,  -- first day of inv month (NULL if no inv match)
     'Item'                                                                  AS LineType,
     s.DeliveryDate,
     s.[Year-Month],
@@ -844,11 +863,11 @@ SELECT
          THEN s.LineTotalNet_USD / NULLIF(s.Quantity, 0)
          ELSE NULL END                                                      AS price_usd,
     s.UnitNetPriceUSD,
-    inv.LastCFPrice                                                         AS CIF_Purchase,
+    NULL                                                                    AS CIF_Purchase,  -- no CIF concept for warehouse
     NULL                                                                    AS [demurrage / Despatch],
     NULL                                                                    AS [Other_Expenses],
     NULL                                                                    AS Shortage,
-    NULL                                                                    AS DischargeCost,
+    50                                                                      AS DischargeCost,  -- fixed warehouse discharge cost
     inv.LastCFPrice                                                         AS FOT_Purchase,
     CASE WHEN s.AdjustmentFlag <> 1
          THEN (s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - inv.LastCFPrice
@@ -856,9 +875,15 @@ SELECT
     CASE WHEN s.AdjustmentFlag <> 1
          THEN ((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - inv.LastCFPrice) * s.Quantity
          ELSE 0 END                                                         AS TotalGain,
-    s.MultiLineFlag
+    s.MultiLineFlag,
+    s.TransactionType
 FROM WH_sales s
 LEFT JOIN inv
     ON  inv.ItemKey     = s.ItemKey
     AND inv.SupplierKey = s.SupplierWarehouse
     AND inv.YearMonth   = s.[Year-Month]
+
+	)
+
+	select * from gain 
+	--where DeliveryNote = 520263

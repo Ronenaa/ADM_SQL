@@ -58,6 +58,19 @@ CurrencyConvertion
 
 ## factGain_v1.sql — Full Change Log
 
+### 7. Warehouse branch — field improvements (latest)
+
+- **`ShipID`** (boat): NULL — not applicable for warehouse rows
+- **`ValueDate`**: `CAST(inv.YearMonth + '-01' AS DATE)` — first day of the inventory month; NULL if no inv match
+- **`[Purchase Quantity]`**: `SUM(Quantity) OVER (PARTITION BY SupplierWarehouse, [Year-Month])` — total qty shipped out of that warehouse in that month
+- **`CIF_Purchase`**: NULL (no CIF concept for warehouse sales)
+- **`DischargeCost`**: hardcoded `50` for all warehouse rows
+- **`TransactionType`**: added to `sales` delivery note branch and propagated through `WH_sales` to final output. Logic: `MCHIR_ICH=0 AND W.QOD_GORM IS NOT NULL → G.AOPI_PEILOT`, `MCHIR_ICH=0 AND W.QOD_GORM IS NULL → 'החלפה'`, else NULL. Invoice branch = NULL.
+- **Internal doc filter**: `AND TM.QOD_SHOLCH <> TM.QOD_MQBL` added to delivery note WHERE — removes rows where source = destination (internal transfers)
+- **`WH_sales` no WHERE filter**: all sales rows are included in `WH_sales`; warehouse identification is done downstream via the `base_link` join. `WHERE bl.DeliveryNote IS NULL` is intentionally not used here.
+
+---
+
 ### 1. Warehouse Sales branch added
 - **`WH_sales` CTE** (after `base_link`): identifies warehouse delivery notes by LEFT OUTER JOIN to `base_link` — rows where `bl.DeliveryNote IS NULL` have no purchase order link and therefore come from a warehouse.
 - Aggregates multiple lines per delivery note into one row: `ItemKey`, `UnitNetPriceUSD`, `SalesType` from `'Item'` line only; `Quantity` = item qty only; `LineTotalNet_USD` = sum of all lines (item + storage fees).
