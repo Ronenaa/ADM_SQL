@@ -372,30 +372,30 @@ WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
   )
 
 ,inv as (
-SELECT
-	CONVERT(VARCHAR, FINAL.ItemKey) + '-' + CONVERT(VARCHAR, FINAL.ItemKey) as ItemKey,
-    FINAL.SupplierKey,
-    CONVERT(char(7), FINAL.Date, 126) AS YearMonth,
+		SELECT
+			CONVERT(VARCHAR, FINAL.ItemKey) + '-' + CONVERT(VARCHAR, FINAL.ItemKey) as ItemKey,
+			FINAL.SupplierKey,
+			CONVERT(char(7), FINAL.Date, 126) AS YearMonth,
 
-    SUM(FINAL.Quantity) AS TotalQuantity,
+			SUM(FINAL.Quantity) AS TotalQuantity,
 
-    CAST(ROUND(MAX(CASE WHEN FINAL.rn = 1 THEN FINAL.UnitPrice END), 2) AS FLOAT) AS LastUnitPrice,
-    CAST(ROUND(MAX(CASE WHEN FINAL.rn = 1 THEN FINAL.FOTprice END), 2) AS FLOAT) AS LastFOTPrice,
-    CAST(ROUND(MAX(CASE WHEN FINAL.rn = 1 THEN FINAL.CFPrice END), 2) AS FLOAT) AS LastCFPrice
+			CAST(ROUND(MAX(CASE WHEN FINAL.rn = 1 THEN FINAL.UnitPrice END), 2) AS FLOAT) AS LastUnitPrice,
+			CAST(ROUND(MAX(CASE WHEN FINAL.rn = 1 THEN FINAL.FOTprice END), 2) AS FLOAT) AS LastFOTPrice,
+			CAST(ROUND(MAX(CASE WHEN FINAL.rn = 1 THEN FINAL.CFPrice END), 2) AS FLOAT) AS LastCFPrice
 
-FROM (
-    SELECT
-        Inv.*,
-        ROW_NUMBER() OVER (
-            PARTITION BY 
-                Inv.ItemKey,
-                Inv.SupplierKey,
-                CONVERT(char(7), Inv.Date, 126)
-            ORDER BY 
-                Inv.Date DESC,
-                Inv.Version DESC
-        ) AS rn
-    FROM (
+		FROM (
+			SELECT
+				Inv.*,
+				ROW_NUMBER() OVER (
+					PARTITION BY 
+						Inv.ItemKey,
+						Inv.SupplierKey,
+						CONVERT(char(7), Inv.Date, 126)
+					ORDER BY 
+						Inv.Date DESC,
+						Inv.Version DESC
+				) AS rn
+		FROM (
 
         /* ===== STG_1 ===== */
         SELECT 
@@ -493,10 +493,32 @@ GROUP BY
     CONVERT(char(7), FINAL.Date, 126)
 	)
 
+-- Resolves the primary DocName per PurchaseOrderID before aggregation.
+-- A PO can have rows of multiple types (e.g. Import + Invoice).
+-- Priority: Import > Exchange > Invoice.
+,po_doctype AS (
+    SELECT DISTINCT
+        PurchaseOrderID,
+        CASE
+            WHEN EXISTS (
+                SELECT 1 FROM Purchase_Exchange pe2
+                WHERE pe2.PurchaseOrderID = pe.PurchaseOrderID
+                  AND pe2.DocName = 'Import'
+            ) THEN 'Import'
+            WHEN EXISTS (
+                SELECT 1 FROM Purchase_Exchange pe2
+                WHERE pe2.PurchaseOrderID = pe.PurchaseOrderID
+                  AND pe2.DocName = 'Exchange'
+            ) THEN 'Exchange'
+            ELSE 'Invoice'
+        END AS DocName
+    FROM Purchase_Exchange pe
+)
+
 ,P_costs as (
-    select 
-	PurchaseOrderID,
-	max(DocName) as DocName,
+    select
+	pe.PurchaseOrderID,
+	dt.DocName,
 	min([Value Date]) as ValueDate,
 	max(case when [PNLKey] = 999 then SupplierKey else null end) as SupplierKey,
 	max(ShipID) as boat,
@@ -523,10 +545,11 @@ GROUP BY
 	NULLIF(
 	SUM(CASE WHEN PNLKey = 999 THEN OrderQuantity ELSE 0 END),0)
 	AS Cif_price
-  from Purchase_Exchange
-  group by PurchaseOrderID
+  from Purchase_Exchange pe
+  LEFT JOIN po_doctype dt ON dt.PurchaseOrderID = pe.PurchaseOrderID
+  group by pe.PurchaseOrderID, dt.DocName
   )
-  , sales as (
+,sales as (
   SELECT 
 	'Invoice' AS 'DocName'
 		,Case
@@ -782,7 +805,7 @@ SELECT
     PC.ValueDate,
     s.LineType,
     s.DeliveryDate,
-    FORMAT(s.DeliveryDate, 'yyyy-MM')                                       AS [Year-Month],
+    FORMAT(PC.ValueDate, 'yyyy-MM')                                       AS [Year-Month],
     s.AdjustmentFlag,
     cast(s.AccountKey as varchar)                                           AS AccountKey,
     cast(s.AgentKey as varchar)                                             AS AgentKey,
@@ -848,7 +871,7 @@ SELECT
     CAST(inv.YearMonth + '-01' AS DATE)                                     AS ValueDate,  -- first day of inv month (NULL if no inv match)
     'Item'                                                                  AS LineType,
     s.DeliveryDate,
-    ISNULL(inv.YearMonth, s.[Year-Month])                                   AS [Year-Month],
+    inv.YearMonth                                  AS [Year-Month],
     s.AdjustmentFlag,
     CAST(s.AccountKey AS VARCHAR)                                           AS AccountKey,
     CAST(s.AgentKey AS VARCHAR)                                             AS AgentKey,
@@ -885,5 +908,5 @@ LEFT JOIN inv
 
 	)
 
-	select * from gain 
-	--where DeliveryNote = 520263
+	select * from gain
+	--where Purchase_DocName = 'Import'
