@@ -1,15 +1,3 @@
--- Create a temporary table with the values
-DECLARE @SubItemsMapping TABLE (
-    ItemID varchar(10),
-    ItemDesc varchar(20)
-);
-
--- Insert values into the table variable
-INSERT INTO @SubItemsMapping (ItemID, ItemDesc)
-VALUES (9990, 'ריבית'),
-       (9991, 'הובלה'),
-       (9992, 'הפרשי שער');
-
 with CurrencyConvertion as (
 SELECT *, 
          CASE
@@ -29,31 +17,9 @@ SELECT *,
           FROM SHERI_MTBE
  ) m
 )
-,LastCreation as (
-Select OrderId,MAX(CreateDate) AS LastCreation
-From tblOrderPriceS
-Group By OrderID
-)
 
-,LastVersion as (
-Select o.OrderId,Max(DayVersion) as LastVersion
-From tblOrderPriceS o
-Inner Join LastCreation LC
-	ON o.OrderID=LC.OrderID AND o.CreateDate=LC.LastCreation
-Group By o.OrderID
-)
-
-,OrderPrices as (
-Select O.*
-from tblOrderPriceS o
-Inner Join LastCreation LC
-	ON o.OrderID=LC.OrderID And o.CreateDate=LC.LastCreation
-Inner Join LastVersion LV
-	ON o.OrderID=LV.OrderID AND o.DayVersion = LV.LastVersion
-Where 1=1
-),
 --------------------------------------------------------------- the below part should be a view is the database ----------------------------------------------------
-totals_raw AS (
+,totals_raw AS (
     -- Step 1: per-row calculations
     SELECT
         CONCAT(
@@ -116,147 +82,149 @@ totals AS (
     FROM totals_raw
     GROUP BY
         PurchaseOrderID,
-        ItemKey--,
-        --PNLKey
+        ItemKey
 ),
---select * from totals
---where PurchaseOrderID = 20005431
-main AS (
-    -- Monthly quantity of items loaned between parties (exchanges), by PO and item
+
+-- exchange_movements: merges former 'main' + 'base' — raw free shipments enriched with purchase cost
+exchange_movements AS (
     SELECT
-        TM.QOD_SHOLCH AS DeliveredFrom,
-        W.SHM_GORM AS DeliveredFromName,
+        TM.QOD_SHOLCH  AS DeliveredFrom,
+        W.SHM_GORM     AS DeliveredFromName,
         ISNULL(b.MS_HZMNH, bb.MS_HZMNH) AS PurchaseOrderID,
-        CASE 
+        CASE
             WHEN ISNULL(b.MS_HZMNH, bb.MS_HZMNH) LIKE '2000%' THEN 'P' -- Purchase order
-            ELSE 'E'                                                   -- Expense / other
+            ELSE 'E'                                                     -- Expense / other
         END AS Order_Type,
         CONVERT(VARCHAR, TM.QOD_MOTSR) + '-' + CONVERT(VARCHAR, TM.QOD_MOTSR) AS ItemKey,
         SUM(TM.MSHQL_NTO) AS qty_loaned,
-        G.QOD_GORM AS DeliveredTo,
-        G.SHM_GORM AS DeliveredToName,
-        SUBSTRING(TARIKH_MSHLOCH, 1, 4) + '-' + SUBSTRING(TARIKH_MSHLOCH, 5, 2) AS [Date]
+        G.QOD_GORM     AS DeliveredTo,
+        G.SHM_GORM     AS DeliveredToName,
+        SUBSTRING(TARIKH_MSHLOCH, 1, 4) + '-' + SUBSTRING(TARIKH_MSHLOCH, 5, 2) AS [Date],
+        -- price columns from totals (previously joined in the separate 'base' CTE)
+        t.UnitNetPriceUSD,
+        t.LineTotalNetUSD,
+        t.OrderQuantity
     FROM TEODOT_MSHLOCH TM
-    LEFT JOIN GORMIM G
-        ON TM.QOD_MQBL = G.QOD_GORM    -- Customer
-    LEFT JOIN GORMIM W
-        ON TM.QOD_SHOLCH = W.QOD_GORM  -- Supplier / source
-    LEFT JOIN QISHOR_RCSH_LMCIRH a
-        ON a.MS_TEODT_MCIRH = TM.MS_TEODH
-    LEFT JOIN QISHOR_T_MSHLOCH_HZMNOT b
-        ON a.MS_TEODT_RCSH = b.MS_T_MSHLOCH
-    LEFT JOIN QISHOR_T_MSHLOCH_HZMNOT bb
-        ON bb.MS_T_MSHLOCH = TM.MS_TEODH
-    WHERE 1 = 1
-      AND TM.MCHIR_ICH = 0                          -- Only free/loaned shipments
-      AND G.AOPI_PEILOT NOT IN (N'פחת', N'אחסון')  -- Exclude waste/storage
-    GROUP BY
-        SUBSTRING(TARIKH_MSHLOCH, 1, 4) + '-' + SUBSTRING(TARIKH_MSHLOCH, 5, 2),
-        TM.QOD_SHOLCH,
-        W.SHM_GORM,
-        b.MS_HZMNH,
-        CONVERT(VARCHAR, TM.QOD_MOTSR) + '-' + CONVERT(VARCHAR, TM.QOD_MOTSR),
-        G.QOD_GORM,
-        G.SHM_GORM,
-        bb.MS_HZMNH
-),
-
-base AS (
-    -- Link exchange movements to USD unit price from totals (only PNLKey=999 and non-zero order qty)
-    SELECT DISTINCT
-        a.*,
-        b.UnitNetPriceUSD,
-		b.LineTotalNetUSD,
-		b.OrderQuantity 
-    FROM main a
+    LEFT JOIN GORMIM G                   ON TM.QOD_MQBL        = G.QOD_GORM
+    LEFT JOIN GORMIM W                   ON TM.QOD_SHOLCH       = W.QOD_GORM
+    LEFT JOIN QISHOR_RCSH_LMCIRH a       ON a.MS_TEODT_MCIRH   = TM.MS_TEODH
+    LEFT JOIN QISHOR_T_MSHLOCH_HZMNOT b  ON a.MS_TEODT_RCSH    = b.MS_T_MSHLOCH
+    LEFT JOIN QISHOR_T_MSHLOCH_HZMNOT bb ON bb.MS_T_MSHLOCH    = TM.MS_TEODH
     LEFT JOIN (
-        SELECT *
+        SELECT PurchaseOrderID, ItemKey, UnitNetPriceUSD, LineTotalNetUSD, OrderQuantity
         FROM totals
         WHERE PNLKey = 999
           AND OrderQuantity <> 0
-    ) b
-        ON a.PurchaseOrderID = b.PurchaseOrderID
-    WHERE a.[Date] >= '2024-01'
+    ) t ON ISNULL(b.MS_HZMNH, bb.MS_HZMNH) = t.PurchaseOrderID
+    WHERE TM.MCHIR_ICH = 0                         -- Only free/loaned shipments
+      AND G.AOPI_PEILOT NOT IN (N'פחת', N'אחסון') -- Exclude waste/storage
+      AND SUBSTRING(TARIKH_MSHLOCH, 1, 4) + '-' + SUBSTRING(TARIKH_MSHLOCH, 5, 2) >= '2024-01'
+    GROUP BY
+        SUBSTRING(TARIKH_MSHLOCH, 1, 4) + '-' + SUBSTRING(TARIKH_MSHLOCH, 5, 2),
+        TM.QOD_SHOLCH, W.SHM_GORM,
+        b.MS_HZMNH, bb.MS_HZMNH,
+        CONVERT(VARCHAR, TM.QOD_MOTSR) + '-' + CONVERT(VARCHAR, TM.QOD_MOTSR),
+        G.QOD_GORM, G.SHM_GORM,
+        t.UnitNetPriceUSD, t.LineTotalNetUSD, t.OrderQuantity
 ),
 
 purchase_orders AS (
-    -- Aggregate original purchase orders (P-type) by item and counterparty
-    SELECT 
+    -- P-type movements only: the original purchases that exchanges are matched against
+    SELECT
         DeliveredFrom,
         DeliveredFromName,
         PurchaseOrderID,
         ItemKey,
-        SUM(qty_loaned) AS quantity,
+        SUM(qty_loaned)        AS quantity,
         DeliveredTo,
         DeliveredToName,
-        [Date] AS Purchase_Date,
-        MAX(UnitNetPriceUSD) AS max_unit_price,
-		MAX(LineTotalNetUSD) as max_LineTotalNetUSD,
-		MAX(OrderQuantity)	 as max_OrderQuantity
-    FROM base
+        [Date]                 AS Purchase_Date,
+        MAX(UnitNetPriceUSD)   AS max_unit_price,
+        MAX(LineTotalNetUSD)   AS max_LineTotalNetUSD,
+        MAX(OrderQuantity)     AS max_OrderQuantity
+    FROM exchange_movements
     WHERE Order_Type = 'P'
-    GROUP BY 
-        DeliveredFrom,
-        DeliveredFromName,
-        PurchaseOrderID,
-        ItemKey,
-        DeliveredTo,
-        DeliveredToName,
+    GROUP BY
+        DeliveredFrom, DeliveredFromName,
+        PurchaseOrderID, ItemKey,
+        DeliveredTo, DeliveredToName,
         [Date]
 ),
 
-final AS (
-    -- Match exchange (E/P) movements to the most recent purchase within 0–3 months
-    SELECT 
-        b.DeliveredFrom,
-        b.DeliveredFromName,
-        b.PurchaseOrderID AS Exchange_order,
-        b.[Date] AS Exchange_Order_Date,
-        b.ItemKey,
-        b.qty_loaned AS Qty_Sold,
-        p.PurchaseOrderID AS Purchase,
-        p.Purchase_Date,
-        ROW_NUMBER() OVER (
-            PARTITION BY b.ItemKey, b.PurchaseOrderID
-            ORDER BY p.Purchase_Date DESC
-        ) AS rn,
-        p.quantity,
-        p.max_unit_price AS UnitNetPriceUSD,
-		p.max_LineTotalNetUSD as LineTotalNetUSD,
-		p.max_OrderQuantity as OrderQuantity
-    FROM base b 
-    LEFT JOIN purchase_orders p
-        ON b.DeliveredFrom = p.DeliveredTo
-       AND b.ItemKey = p.ItemKey
-    WHERE 1 = 1
-      -- Month-diff between exchange date and purchase date between 0 and 3
-      AND CONVERT(INT, SUBSTRING(b.[Date], 1, 4) + SUBSTRING(b.[Date], 6, 2))
-        - CONVERT(INT, SUBSTRING(p.Purchase_Date, 1, 4) + SUBSTRING(p.Purchase_Date, 6, 2))
-        BETWEEN 0 AND 3
-),
-final2 as (
-SELECT 
-    DeliveredFrom,
-    DeliveredFromName,
-    Exchange_order,
-    Exchange_Order_Date,
-    ItemKey,
-    Qty_Sold,
-    Purchase,
-    Purchase_Date,
-    UnitNetPriceUSD,
-	LineTotalNetUSD,
-	OrderQuantity
-FROM final
-WHERE 1 = 1 
-  AND rn = 1
-  AND Exchange_order IS NOT NULL 
-  AND UnitNetPriceUSD IS NOT NULL
-
+-- exchange_priced: merges former 'final' + 'final2' — ranks and keeps only the best purchase match
+exchange_priced AS (
+    SELECT
+        DeliveredFrom, DeliveredFromName,
+        Exchange_order, Exchange_Order_Date,
+        ItemKey, Qty_Sold,
+        Purchase, Purchase_Date,
+        UnitNetPriceUSD, LineTotalNetUSD, OrderQuantity
+    FROM (
+        SELECT
+            b.DeliveredFrom,
+            b.DeliveredFromName,
+            b.PurchaseOrderID  AS Exchange_order,
+            b.[Date]           AS Exchange_Order_Date,
+            b.ItemKey,
+            b.qty_loaned       AS Qty_Sold,
+            p.PurchaseOrderID  AS Purchase,
+            p.Purchase_Date,
+            p.max_unit_price   AS UnitNetPriceUSD,
+            p.max_LineTotalNetUSD AS LineTotalNetUSD,
+            p.max_OrderQuantity   AS OrderQuantity,
+            ROW_NUMBER() OVER (
+                PARTITION BY b.ItemKey, b.PurchaseOrderID
+                ORDER BY p.Purchase_Date DESC
+            ) AS rn
+        FROM exchange_movements b
+        LEFT JOIN purchase_orders p
+            ON  b.DeliveredFrom = p.DeliveredTo
+            AND b.ItemKey       = p.ItemKey
+        WHERE CONVERT(INT, SUBSTRING(b.[Date], 1, 4) + SUBSTRING(b.[Date], 6, 2))
+            - CONVERT(INT, SUBSTRING(p.Purchase_Date, 1, 4) + SUBSTRING(p.Purchase_Date, 6, 2))
+            BETWEEN 0 AND 3
+    ) ranked
+    WHERE rn = 1
+      AND Exchange_order  IS NOT NULL
+      AND UnitNetPriceUSD IS NOT NULL
 )
 
 -----------------------------------------------------------------------------------------------------------------------------------------------
-, Purchase_Exchange as (
+,Purchase_Exchange as (
+
+----Invoice--
+SELECT
+	 CAST(CCS.HZMNT_RCSH AS VARCHAR)			AS PurchaseOrderID,
+     'Invoice'									AS DocName,
+     NULL										AS SupplierKey,
+     CAST(SUBSTRING(CCS.T_CHSHBONIT,1,4) + '-' + SUBSTRING(CCS.T_CHSHBONIT,5,2) + '-' + SUBSTRING(CCS.T_CHSHBONIT,7,2) AS DATE) AS [Value Date],
+     CAST(CONVERT(VARCHAR, POL_ProductID) AS VARCHAR) + '-' + CAST(CONVERT(VARCHAR, M.ServiceCode) AS VARCHAR) + 'S' AS ItemKey,
+     CAST(CCS.MCHIR_ICH_LLA_ME_M / (CASE WHEN SHER_LCHISHOB <> 0 THEN SHER_LCHISHOB ELSE CC2.new_sher END) AS DECIMAL(12,4)) * -1  AS UnitNetPriceUSD,
+     CCS.MSHQL_NTO                   AS Quantity,
+     CASE WHEN CCS.QOD_MOTSR = 0 THEN CCS.MSHQL_NTO ELSE 0 END AS OrderQuantity,
+     HST.QOD_SHROT                           AS PNLKey,
+	 HST.PNL as [PNL Code],
+     CAST(CCS.CMOT * (CCS.MCHIR_ICH_LLA_ME_M / (CASE WHEN SHER_LCHISHOB <> 0 THEN SHER_LCHISHOB ELSE CC2.new_sher END)) AS DECIMAL(12,4)) * -1 AS LineTotalNetUSD,
+     CONVERT(INT, CONVERT(VARCHAR, SUBSTRING(CCS.T_CHSHBONIT,1,4) + SUBSTRING(CCS.T_CHSHBONIT,5,2))) AS YearMonth,
+	 null as ShipID,
+    'Invoice'                                AS DocType,
+	CASE WHEN SHER_LCHISHOB <> 0 THEN SHER_LCHISHOB ELSE CC2.new_sher END as [NEW_SHER]
+FROM [dbo].[CHIOBI_CHOTS_COTROT] CC
+LEFT JOIN [dbo].[CHIOBI_CHOTS_SHOROT] CCS
+       ON CC.MS_CHSHBONIT = CCS.MS_CHSHBONIT
+LEFT JOIN CurrencyConvertion CC2
+       ON CCS.[TARIKH_MSHLOCH] = CC2.Tarikh
+LEFT JOIN (select DISTINCT
+			POL_SQL_POID, POL_ProductID
+			from PurchaseOrderLines POL	) POL
+		ON CCS.HZMNT_RCSH = POL.POL_SQL_POID
+LEFT JOIN MOTSRIM M
+	ON CCS.QOD_MOTSR = M.QOD_MOTSR
+LEFT JOIN HOTSAOT_SHROTIM_New HST 
+	ON M.ServiceCode = HST.QOD_SHROT
+	where CAST(SUBSTRING(CCS.T_CHSHBONIT,1,4) + '-' + SUBSTRING(CCS.T_CHSHBONIT,5,2) + '-' + SUBSTRING(CCS.T_CHSHBONIT,7,2) AS DATE) >= '2024-01-01'
+
+UNION ALL
 	------Import--------
 SELECT
 
@@ -264,13 +232,18 @@ SELECT
 			CAST(CONVERT(BIGINT, POL.POL_OrderID) AS VARCHAR(20)),
 			CAST(POL.POL_LineID AS VARCHAR(10))
 		 )	as 'PurchaseOrderID'
-		,'Order Expenses' AS 'DocName'
-		,CAST(CONVERT(INT, CONVERT(VARCHAR,HC.QOD_SPQ))as varchar) AS 'SupplierKey'
+		,'Import' AS 'DocName'  -- was: 'Order Expenses'
+		,CAST(
+		  MAX(
+			CASE WHEN HS.QOD_SHROT = 0
+				 THEN CONVERT(INT, CONVERT(VARCHAR, HC.QOD_SPQ))
+			END
+		  ) OVER (PARTITION BY HS.MS_MSMKH_QSHOR)
+			AS VARCHAR)	 AS 'SupplierKey'
 		,CASE 
 			WHEN HS.MS_MSMKH_QSHOR = 0 
 			  THEN CONVERT(date, HC.T_ERKH, 112)
 			ELSE
-			  -- pull the header-row date per order (using corrected key)
 			  MAX(
 				CASE WHEN HS.QOD_SHROT = 0 
 					 THEN CONVERT(date, HC.T_ERKH, 112) 
@@ -285,7 +258,6 @@ SELECT
 			  )
 		  END AS 'Value Date'
 		,CASE
-			--WHEN  HST.QOD_SHROT IS NULL THEN cast(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_MOTSR)) as varchar)+ '-' + cast(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_MOTSR)) as varchar) - לפני שינוי של העמסת עלויות
 			WHEN  HST.QOD_SHROT IS NULL OR HS.QOD_SHROT IN (5, 19, 30, 4) THEN cast(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_MOTSR)) as varchar)+ '-' + cast(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_MOTSR)) as varchar) -- העמסת עליות הובלה והפרש מחיר על המוצר
 			ELSE cast(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_MOTSR)) as varchar)+ '-' + cast(CONVERT(INT, CONVERT(VARCHAR,HST.QOD_SHROT)) as varchar)+'S' 
 			END		AS 'ItemKey'
@@ -330,7 +302,8 @@ SELECT
 			THEN 999
 			ELSE HST.QOD_SHROT
 		END											AS 'PNLKey' ----------  העמסת עליות הובלה על המוצר והפרש מחיר
-			,HST.PNL as [PNL Code]
+			,case when HST.QOD_SHROT IN (5, 19, 30, 4,18) OR HST.QOD_SHROT IS NULL  then 1010 
+			else HST.PNL end as [PNL Code]
 			,CASE
 	         WHEN HS.MTBE = '$' THEN HS.MCHIR_ICH*HS.CMOT 
 			 WHEN HS.MTBE = 'Eur' THEN HS.MCHIR_ICH*HS.CMOT * (SM.NEW_SHEREURO/SM.NEW_SHER)
@@ -357,27 +330,23 @@ LEFT JOIN ShipList sl ON sa.SA_ShipID = sl.ShipID
 LEFT JOIN PurchaseOrder PO ON POL.POL_OrderID = PO.PO_OrderID
 LEFT JOIN CurrencyConvertion SM  ON SM.TARIKH=HC.T_ERKH
 
-LEFT JOIN OrderPrices OP
-	ON op.OrderID = POL_OrderID AND op.OrderIDLine = POL.POL_LineID
-
 WHERE 1=1
 and Cast(SUBSTRING(HC.T_MSMKH,1,4) as int) >=2018 and Cast(SUBSTRING(HC.T_MSMKH,1,4) as int) <= YEAR(GETDATE())
 and HS.QOD_SHROT NOT IN (14)
 and CONCAT(CAST(CONVERT(BIGINT, POL.POL_OrderID) AS VARCHAR(20)),CAST(POL.POL_LineID AS VARCHAR(10))) <> ' '
+and  cast( HC.T_ERKH as date) >= '2024-01-01'
 
 UNION ALL
 
 -----Exchange----
 SELECT
     HZ.MSPR_HZMNH                                                       AS PurchaseOrderID,
-    'Orders'                                                            AS DocName,
-    HZ.QOD_SHOLCH                                                       AS SupplierKey,
+    'Exchange'                                                          AS DocName,  -- was: 'Orders'
+    NULL		                                                        AS SupplierKey,
     CAST(SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2)
          AS DATE)                                                       AS [Value Date],
     CAST(CONVERT(INT, CONVERT(VARCHAR,HZ.MOTSR_MOZMN)) AS VARCHAR) + '-' +
     CAST(CONVERT(INT, CONVERT(VARCHAR,HZ.MOTSR_MOZMN)) AS VARCHAR)      AS ItemKey,
-
-    -- >>> Take unit price from totals (Avg Price USD (Expenses))
     t.UnitNetPriceUSD                                                   AS UnitNetPriceUSD,
     HZ.CMOT_MOZMNT                                                      AS Quantity,
     t.OrderQuantity                                                     AS OrderQuantity,
@@ -391,24 +360,163 @@ SELECT
 FROM HZMNOT HZ
 LEFT JOIN CurrencyConvertion SM
     ON SM.TARIKH = HZ.T_HZMNH
-LEFT JOIN final2 t
+LEFT JOIN exchange_priced t
     ON t.Exchange_order = HZ.MSPR_HZMNH
    AND t.ItemKey =
         CAST(CONVERT(INT, CONVERT(VARCHAR,HZ.MOTSR_MOZMN)) AS VARCHAR) + '-' +
         CAST(CONVERT(INT, CONVERT(VARCHAR,HZ.MOTSR_MOZMN)) AS VARCHAR)
-LEFT JOIN OrderPrices OP
-    ON OP.OrderID = HZ.MSPR_HZMNH
 WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
   AND HZ.OrderStatus <> 3
   AND HZ.ActionType IN (6,7)
   AND YEAR(CAST(SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2) AS DATE))  >= 2024
-
   )
-  , CifP as (
+
+,inv as (
+SELECT
+	CONVERT(VARCHAR, FINAL.ItemKey) + '-' + CONVERT(VARCHAR, FINAL.ItemKey) as ItemKey,
+    FINAL.SupplierKey,
+    CONVERT(char(7), FINAL.Date, 126) AS YearMonth,
+
+    SUM(FINAL.Quantity) AS TotalQuantity,
+
+    CAST(ROUND(MAX(CASE WHEN FINAL.rn = 1 THEN FINAL.UnitPrice END), 2) AS FLOAT) AS LastUnitPrice,
+    CAST(ROUND(MAX(CASE WHEN FINAL.rn = 1 THEN FINAL.FOTprice END), 2) AS FLOAT) AS LastFOTPrice,
+    CAST(ROUND(MAX(CASE WHEN FINAL.rn = 1 THEN FINAL.CFPrice END), 2) AS FLOAT) AS LastCFPrice
+
+FROM (
+    SELECT
+        Inv.*,
+        ROW_NUMBER() OVER (
+            PARTITION BY 
+                Inv.ItemKey,
+                Inv.SupplierKey,
+                CONVERT(char(7), Inv.Date, 126)
+            ORDER BY 
+                Inv.Date DESC,
+                Inv.Version DESC
+        ) AS rn
+    FROM (
+
+        /* ===== STG_1 ===== */
+        SELECT 
+            ProductID AS ItemKey,
+            inv.DueDate AS Date,
+            SupplierID AS SupplierKey,
+            AvgPrice AS UnitPrice,
+            FotFlat AS FOTprice,
+            CFFlat AS CFPrice,
+            INV.TotalInventory AS Quantity,
+            PCOST.WeightedExpenses,
+            Inv.Version,
+            ROW_NUMBER() OVER (
+                PARTITION BY inv.DueDate, inv.SupplierID, inv.ProductID 
+                ORDER BY inv.Version DESC
+            ) AS MaxVersion
+        FROM tblInventory Inv
+        LEFT JOIN tblProductsCost PCost
+            ON INV.DueDate = PCost.DueDate
+            AND INV.ProductID = PCost.ProductCode
+            AND INV.Version = PCost.Version
+        UNION ALL
+        /* ===== STG_3 (including STG_2 inline) ===== */
+        SELECT
+            TM.ItemKey,
+            PC.DueDate AS Date,
+            1144 AS SupplierKey,
+            PC.AvgPrice AS UnitPrice,
+            PC.FotFlat AS FOTprice,
+            PC.CFFlat AS CFPrice,
+            SUM(TM.Quantity) AS Quantity,
+            PC.WeightedExpenses,
+            MV.MAXVERSION AS Version,
+            ROW_NUMBER() OVER (
+                PARTITION BY PC.DueDate, TM.ItemKey
+                ORDER BY MV.MAXVERSION DESC
+            ) AS MaxVersion
+
+        FROM (
+            /* STG_2 inline */
+            SELECT 
+                TM.QOD_PRIT AS ItemKey,
+                CAST(SUBSTRING(T_TNOEH,1,4) + '-' + SUBSTRING(T_TNOEH,5,2) + '-' + SUBSTRING(T_TNOEH,7,2) AS DATE) AS [Date],
+                SUM(TM.CMOT_LOGOS) AS Quantity
+            FROM BT.dbo.TNOEOT_MLAI_CLLI TM
+            WHERE QOD_GORM <> 1
+              AND CAST(SUBSTRING(TM.T_TNOEH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
+              AND SOG_TNOEH_CN_ITS_SP_HE LIKE N'%כ%'
+            GROUP BY TM.QOD_PRIT, TM.T_TNOEH
+            UNION ALL
+            SELECT 
+                TM.QOD_PRIT,
+                CAST(SUBSTRING(T_TNOEH,1,4) + '-' + SUBSTRING(T_TNOEH,5,2) + '-' + SUBSTRING(T_TNOEH,7,2) AS DATE) AS [Date],
+                SUM(TM.CMOT_LOGOS) * -1
+            FROM BT.dbo.TNOEOT_MLAI_CLLI TM
+            WHERE QOD_GORM <> 1
+              AND CAST(SUBSTRING(TM.T_TNOEH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
+              AND SOG_TNOEH_CN_ITS_SP_HE LIKE N'%י%'
+            GROUP BY TM.QOD_PRIT, TM.T_TNOEH
+        ) TM
+
+        LEFT JOIN (
+            SELECT 
+                DueDate,
+                ProductCode,
+                MAX(Version) AS MAXVERSION
+            FROM tblProductsCost
+            GROUP BY DueDate, ProductCode
+        ) MV
+            ON MV.DueDate = TM.Date
+            AND MV.ProductCode = TM.ItemKey
+
+        LEFT JOIN tblProductsCost PC
+            ON PC.Version = MV.MAXVERSION
+            AND PC.DueDate = MV.DueDate
+            AND PC.ProductCode = MV.ProductCode
+
+        GROUP BY 
+            TM.ItemKey,
+            PC.DueDate,
+            PC.AvgPrice,
+            PC.CFFlat,
+            PC.FotFlat,
+            PC.WeightedExpenses,
+            MV.MAXVERSION
+
+    ) Inv
+    WHERE Inv.MaxVersion = 1
+
+) FINAL
+
+GROUP BY
+    FINAL.ItemKey,
+    FINAL.SupplierKey,
+    CONVERT(char(7), FINAL.Date, 126)
+	)
+
+,P_costs as (
     select 
 	PurchaseOrderID,
+	max(DocName) as DocName,
+	min([Value Date]) as ValueDate,
+	max(case when [PNLKey] = 999 then SupplierKey else null end) as SupplierKey,
+	max(ShipID) as boat,
 	SUM(CASE WHEN [PNL Code] = 2270 THEN LineTotalNetUSD ELSE 0 END) as DischargeCosts,
-	sum(orderquantity) as total_qty,
+	--SUM(CASE WHEN [PNL Code] = 1492 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Analysis fees],
+	--SUM(CASE WHEN [PNL Code] = 8210 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Back to back haulage],
+	--SUM(CASE WHEN [PNL Code] = 8100 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Balance quantities],
+	--SUM(CASE WHEN [PNL Code] = 1624 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Delays (Dagon)],
+	--SUM(CASE WHEN [PNL Code] = 1497 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Warehouse operation],
+	--SUM(CASE WHEN [PNL Code] = 3620 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Warehouse service],
+	--SUM(CASE WHEN [PNL Code] = 1571 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Washout],
+	--SUM(CASE WHEN [PNL Code] = 7210 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Haulage],
+	--SUM(CASE WHEN [PNL Code] = 4103 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Ocean freight],
+	--SUM(CASE WHEN [PNL Code] = 4126 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Overage Premium Owner],
+	--SUM(CASE WHEN [PNL Code] = 1496 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Processing],
+	--SUM(CASE WHEN [PNL Code] = 1211 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Quality settlement],
+	SUM(CASE WHEN [PNL Code] = 1201 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [demurrage / Despatch],
+	SUM(CASE WHEN [PNL Code] = 1111 THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Shortage],
+	SUM(CASE WHEN [PNL Code] not in (1010,2270,1201,1111) THEN LineTotalNetUSD ELSE 0 END)/nullif(sum(orderquantity),0) as [Other_Expenses],
+	sum (orderquantity) as orderquantity,
 	sum(LineTotalNetUSD) as LineTotalNetUSD,
 	SUM(CASE WHEN PNLKey = 999 THEN LineTotalNetUSD ELSE 0 END)
 	/
@@ -490,10 +598,6 @@ Left Join TBLT_ANSHI_MCIROT AM
 	on AM.SHM_AISH_MCIROT = G.AISH_MCIROT_MTPL
 LEFT JOIN CHSHBONIOT_SHOROT CS 
     ON CH.MS_CHSHBONIT = CS.MS_CHSHBONIT
-LEFT JOIN @SubItemsMapping SIM 
-	ON (
-		CASE WHEN (TAOR_MOTSR LIKE '%ריבית%' OR TAOR_MOTSR LIKE '%הובלה%' OR TAOR_MOTSR LIKE '%הפרשי שער%') AND  CS.QOD_MOTSR=0 AND TAOR_MOTSR LIKE '%'+SIM.ItemDesc+'%'
-		then 1 else 0 end = 1)
 LEFT JOIN TEODOT_MSHLOCH TM 
 	ON CS.MS_T_MSHLOCH = TM.MS_TEODH
 LEFT JOIN (SELECT MS_CHSHBONIT , Min (TM.TARIKH_MSHLOCH) as 'FirstDeliveryDateTM',Min (CHS.TARIKH_MSHLOCH) as 'FirstDeliveryDateCHS'
@@ -511,17 +615,12 @@ Left Join (SELECT MS_HZMNH,MS_T_MSHLOCH
 	on TM.MS_TEODH = HZT.MS_T_MSHLOCH
 Left Join HZMNOT HZ
 	on HZ.MSPR_HZMNH = HZT.MS_HZMNH
-Left Join (
-			Select *
-			From GORMIM
-			Where EntityType Like N'%מקום אספקה%') W
-	On W.QOD_GORM = TM.QOD_SHOLCH
 left join TBLT_PEOLOT_HZMNH_T_MSHLOCH act
 	on TM.ActionType = act.MS_AOPTSIH
 left join CurrencyConvertion CC 
 	ON cs.[TARIKH_MSHLOCH] = cc.Tarikh
 WHERE 1=1  
-AND Cast(SUBSTRING(cs.T_CHSHBONIT,1,4) as int) >=2018 and Cast(SUBSTRING(cs.T_CHSHBONIT,1,4) as int) <= Year(Getdate())
+AND Cast(SUBSTRING(cs.T_CHSHBONIT,1,4) as int) >= 2025
 
 -------OPEN Orders----------------------------------------------------------------------------------
 UNION ALL
@@ -535,7 +634,6 @@ UNION ALL
 	,CONVERT(VARCHAR, TM.QOD_MOTSR)+'-'+CONVERT(VARCHAR, TM.QOD_MOTSR) AS 'ItemKey'
 	,CASE
 	         WHEN TM.MTBE_SH = '$' THEN CAST(TM.MCHIR_ICH as decimal(12,2))
-		   --THEN CAST(HZ.MCHIR_ICH AS decimal (12,4))
 	         ELSE CAST(TM.MCHIR_ICH *(1/SM.NEW_SHER)  AS decimal (12,2))
          END AS 'UnitNetPriceUSD'
 	,TM.MSHQL_NTO as 'Quantity'
@@ -591,34 +689,23 @@ Left Join (SELECT MS_HZMNH,MS_T_MSHLOCH
 	on TM.MS_TEODH = HZT.MS_T_MSHLOCH
 Left Join HZMNOT HZ
 	on HZ.MSPR_HZMNH = HZT.MS_HZMNH
-Left Join (select *, 
-Case
-	when sher = 0
-		then first_value(sher) over (partition by value_partition order by Tarikh) 
-	else sher
-end as new_sher
-from (
-  select *, sum(case when sher=0 then 0 else 1 end) over (order by tarikh ) as value_partition
-  from SHERI_MTBE) m
-
-) SM  
-	on SM.TARIKH=HZ.T_HZMNH
+LEFT JOIN CurrencyConvertion SM  -- reuse top-level CTE instead of repeating SHERI_MTBE inline
+	ON SM.TARIKH = HZ.T_HZMNH
 Left Join GORMIM G
 	on TM.QOD_MQBL = G.QOD_GORM
-Left Join (
-			Select *
-			From GORMIM
-			Where EntityType Like N'%מקום אספקה%') W
-	On W.QOD_GORM = TM.QOD_SHOLCH
 left join TBLT_PEOLOT_HZMNH_T_MSHLOCH act
 	on TM.ActionType = act.MS_AOPTSIH
-WHERE CH.MS_T_MSHLOCH is null
-AND Cast(SUBSTRING(TARIKH_MSHLOCH,1,4) as int) >=2018 and Cast(SUBSTRING(TARIKH_MSHLOCH,1,4) as int) <= Year(Getdate())
+WHERE
+CH.MS_T_MSHLOCH is null
+AND Cast(SUBSTRING(TARIKH_MSHLOCH,1,4) as int) >= 2025
 AND STTOS in (0,1)
 AND TM.PurchaseOrderType = 0
   )
 
-  , base_link as (
+
+
+
+,base_link as (
   SELECT distinct
         a.MS_TEODT_MCIRH AS DeliveryNote,
         b.MS_HZMNH AS PurchaseOrderID
@@ -628,32 +715,150 @@ AND TM.PurchaseOrderType = 0
 
 		)
 
+-- Warehouse sales: delivery notes that have no entry in base_link are not linked to any
+-- purchase order, meaning they originate from a warehouse (not import or exchange).
+,WH_sales AS (
+    SELECT
+        s.DeliveryNote,
+        s.DeliveryDate,
+        FORMAT(s.DeliveryDate, 'yyyy-MM')                                           AS [Year-Month],
+        s.AccountKey,
+        s.AgentKey,
+        s.ActionType,
+        s.ActionTypeDesc,
+        s.SupplierWarehouse,
+        s.AdjustmentFlag,
+        s.QuantityCategory,
+        -- ItemKey, sale price, and SalesType come from the 'Item' line only
+        MAX(CASE WHEN s.LineType = 'Item' THEN s.ItemKey        ELSE NULL END)      AS ItemKey,
+        MAX(CASE WHEN s.LineType = 'Item' THEN s.SalesType      ELSE NULL END)      AS SalesType,
+        MAX(CASE WHEN s.LineType = 'Item' THEN s.UnitNetPriceUSD ELSE NULL END)     AS UnitNetPriceUSD,
+        -- Quantity = item qty only (excludes storage/additional-expense qty)
+        SUM(CASE WHEN s.LineType = 'Item' THEN s.Quantity       ELSE 0   END)       AS Quantity,
+        -- Total revenue = all lines combined (item + storage fee)
+        SUM(s.LineTotalNet_USD)                                                     AS LineTotalNet_USD,
+        -- 1 = delivery note had multiple lines (e.g. item + warehouse storage fee), 0 = single line
+        CASE WHEN COUNT(*) > 1 THEN 1 ELSE 0 END                                   AS MultiLineFlag
+    FROM sales s
+    LEFT OUTER JOIN base_link bl ON bl.DeliveryNote = s.DeliveryNote
+   -- WHERE bl.DeliveryNote IS NULL  -- not linked to any purchase order = warehouse origin
+    GROUP BY
+        s.DeliveryNote, s.DeliveryDate,
+        s.AccountKey, s.AgentKey,
+        s.ActionType, s.ActionTypeDesc,
+        s.SupplierWarehouse, s.AdjustmentFlag, s.QuantityCategory
+)
+-- ============================================================
+-- Branch 1: Import / Exchange orders — cost from P_costs
+-- ============================================================
+SELECT
+    cast(s.DeliveryNote as varchar)                                         AS DeliveryNote,
+    case when row_number() over (partition by bl.PurchaseOrderID order by s.DeliveryNote asc) = 1
+         then '1' else '0' end                                              AS Qty_flag,
+    cast(bl.PurchaseOrderID as varchar)                                     AS PurchaseOrderID,
+    cast(PC.SupplierKey as varchar)                                         AS SupplierKey,
+    cast(PC.boat as varchar)                                                AS ShipID,
+    PC.DocName                                                              AS Purchase_DocName,
+    case when PC.DocName = 'Exchange' then sum(s.Quantity) over (partition by bl.PurchaseOrderID)
+         else PC.orderquantity end                                          AS [Purchase Quantity],
+    PC.ValueDate,
+    s.LineType,
+    s.DeliveryDate,
+    FORMAT(s.DeliveryDate, 'yyyy-MM')                                       AS [Year-Month],
+    s.AdjustmentFlag,
+    cast(s.AccountKey as varchar)                                           AS AccountKey,
+    cast(s.AgentKey as varchar)                                             AS AgentKey,
+    cast(s.ItemKey as varchar)                                              AS ItemKey,
+    case when s.SalesType is null then s.QuantityCategory
+         else s.SalesType end                                               AS [Price Term],
+    s.QuantityCategory,
+    s.ActionTypeDesc,
+    s.Quantity,
+    s.LineTotalNet_USD,
+    case when s.AdjustmentFlag <> 1 and s.LineType = 'Item'
+         then s.LineTotalNet_USD / s.Quantity
+         else null end                                                      AS price_usd,
+    s.UnitNetPriceUSD,
+    PC.Cif_price                                                            AS CIF_Purchase,
+    PC.[demurrage / Despatch],
+    PC.[Other_Expenses],
+    PC.Shortage,
+    PC.DischargeCosts /
+        nullif((PC.orderquantity - sum(case when s.SalesType = 'CIF' then s.Quantity else 0 end)
+                over (partition by bl.PurchaseOrderID)), 0)                AS DischargeCost,
+    PC.Cif_price + PC.[demurrage / Despatch] + (PC.DischargeCosts /
+        nullif((PC.orderquantity - sum(case when s.SalesType = 'CIF' then s.Quantity else 0 end)
+                over (partition by bl.PurchaseOrderID)), 0))               AS FOT_Purchase,
+    case
+        when s.SalesType = 'CIF'                   and s.LineType = 'Item'
+            then (s.LineTotalNet_USD / s.Quantity) - PC.Cif_price
+        when s.SalesType in ('FOT', 'FOT Premium') and s.LineType = 'Item'
+            then (s.LineTotalNet_USD / s.Quantity) - (PC.Cif_price + PC.[demurrage / Despatch] + (PC.DischargeCosts /
+                 nullif((PC.orderquantity - sum(case when s.SalesType = 'CIF' then s.Quantity else 0 end)
+                         over (partition by bl.PurchaseOrderID)), 0)))
+        else 0
+    end                                                                     AS Gain,
+    case
+        when s.SalesType = 'CIF'                   and s.LineType = 'Item'
+            then ((s.LineTotalNet_USD / s.Quantity) - PC.Cif_price) * s.Quantity
+        when s.SalesType in ('FOT', 'FOT Premium') and s.LineType = 'Item'
+            then ((s.LineTotalNet_USD / s.Quantity) - (PC.Cif_price + PC.[demurrage / Despatch] + (PC.DischargeCosts /
+                 nullif((PC.orderquantity - sum(case when s.SalesType = 'CIF' then s.Quantity else 0 end)
+                         over (partition by bl.PurchaseOrderID)), 0)))) * s.Quantity
+        else 0
+    end                                                                     AS TotalGain,
+    0                                                                       AS MultiLineFlag  -- individual lines, not aggregated
+FROM sales s
+INNER JOIN base_link bl ON bl.DeliveryNote = s.DeliveryNote
+LEFT JOIN  P_costs PC   ON PC.PurchaseOrderID = bl.PurchaseOrderID
+WHERE PC.ValueDate IS NOT NULL
 
-select 
-	s.DeliveryNote,
-	bl.PurchaseOrderID,
-	s.LineType,
-	s.DeliveryDate,
-	s.AccountKey,
-	s.AgentKey,
-	s.ItemKey,
-	s.SalesType,
-	s.QuantityCategory,
-	s.Quantity,
-	s.LineTotalNet_USD,
-	s.UnitNetPriceUSD,
-	Cif.Cif_price as CIF_Purchase,
-	Cif.DischargeCosts/
-	(Cif.total_qty - sum(case when s.SalesType = 'CIF' then s.Quantity else 0 end) over (partition by bl.PurchaseOrderID))
-	as DischargeCost,
-	case
-		when s.SalesType = 'CIF' then s.UnitNetPriceUSD - Cif.Cif_price 
-		when s.SalesType = 'FOT' then s.UnitNetPriceUSD - 0
-	else 0 
-	end as 'Gain'
-from sales s
-left join base_link bl
-on bl.DeliveryNote = s.DeliveryNote
-left join CifP cif 
-on cif.PurchaseOrderID = bl.PurchaseOrderID
-where s.DeliveryDate >= '2024-01-01' -- transfer to cte
+UNION ALL
+
+-- ============================================================
+-- Branch 2: Warehouse orders — cost from inv (LastCFPrice)
+-- ============================================================
+SELECT
+    CAST(s.DeliveryNote AS VARCHAR)                                         AS DeliveryNote,
+    '0'                                                                     AS Qty_flag,
+    NULL                                                                    AS PurchaseOrderID,
+    CAST(s.SupplierWarehouse AS VARCHAR)                                    AS SupplierKey,
+    NULL                                                                    AS ShipID,
+    'Warehouse'                                                             AS Purchase_DocName,
+    NULL                                                                    AS [Purchase Quantity],
+    s.DeliveryDate                                                          AS ValueDate,
+    'Item'                                                                  AS LineType,
+    s.DeliveryDate,
+    s.[Year-Month],
+    s.AdjustmentFlag,
+    CAST(s.AccountKey AS VARCHAR)                                           AS AccountKey,
+    CAST(s.AgentKey AS VARCHAR)                                             AS AgentKey,
+    CAST(s.ItemKey AS VARCHAR)                                              AS ItemKey,
+    CASE WHEN s.SalesType IS NULL THEN s.QuantityCategory
+         ELSE s.SalesType END                                               AS [Price Term],
+    s.QuantityCategory,
+    s.ActionTypeDesc,
+    s.Quantity,
+    s.LineTotalNet_USD,
+    CASE WHEN s.AdjustmentFlag <> 1
+         THEN s.LineTotalNet_USD / NULLIF(s.Quantity, 0)
+         ELSE NULL END                                                      AS price_usd,
+    s.UnitNetPriceUSD,
+    inv.LastCFPrice                                                         AS CIF_Purchase,
+    NULL                                                                    AS [demurrage / Despatch],
+    NULL                                                                    AS [Other_Expenses],
+    NULL                                                                    AS Shortage,
+    NULL                                                                    AS DischargeCost,
+    inv.LastCFPrice                                                         AS FOT_Purchase,
+    CASE WHEN s.AdjustmentFlag <> 1
+         THEN (s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - inv.LastCFPrice
+         ELSE 0 END                                                         AS Gain,
+    CASE WHEN s.AdjustmentFlag <> 1
+         THEN ((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - inv.LastCFPrice) * s.Quantity
+         ELSE 0 END                                                         AS TotalGain,
+    s.MultiLineFlag
+FROM WH_sales s
+LEFT JOIN inv
+    ON  inv.ItemKey     = s.ItemKey
+    AND inv.SupplierKey = s.SupplierWarehouse
+    AND inv.YearMonth   = s.[Year-Month]
