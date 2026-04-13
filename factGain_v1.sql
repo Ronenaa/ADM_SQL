@@ -892,7 +892,7 @@ SELECT
     NULL                                                                    AS [demurrage / Despatch],
     NULL                                                                    AS [Other_Expenses],
     NULL                                                                    AS Shortage,
-    50                                                                      AS DischargeCost,  -- fixed warehouse discharge cost
+    NULL                                                                    AS DischargeCost,  -- fixed warehouse discharge cost
     inv.LastCFPrice                                                         AS FOT_Purchase,
     CASE WHEN s.AdjustmentFlag <> 1
          THEN (s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - inv.LastCFPrice
@@ -910,6 +910,7 @@ LEFT JOIN inv
 
 	)
 
-	select * from gain
+	select * 
+    from gain
 	--where Purchase_DocName = 'Warehouse'
 	--and [Year-Month] = '2026-03'
