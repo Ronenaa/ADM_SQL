@@ -164,6 +164,7 @@ exchange_priced AS (
             p.max_unit_price   AS UnitNetPriceUSD,
             p.max_LineTotalNetUSD AS LineTotalNetUSD,
             p.max_OrderQuantity   AS OrderQuantity,
+            ship_sub.ShipID,   -- ship from the related purchase order
             ROW_NUMBER() OVER (
                 PARTITION BY b.ItemKey,b.PurchaseOrderID
                 ORDER BY p.Purchase_Date DESC
@@ -172,6 +173,21 @@ exchange_priced AS (
         LEFT JOIN purchase_orders p
             ON  b.DeliveredFrom = p.DeliveredTo
             AND b.ItemKey       = p.ItemKey
+        -- Look up the ship that delivered the related purchase order.
+        -- p.PurchaseOrderID = CONCAT(POL_OrderID, POL_LineID) — same format as totals_raw.
+        -- Must include POL_LineID in the key, otherwise it never matches.
+        LEFT JOIN (
+            SELECT
+                CONCAT(
+                    CAST(CONVERT(BIGINT, POL.POL_OrderID) AS VARCHAR(20)),
+                    CAST(POL.POL_LineID AS VARCHAR(10))
+                )              AS PurchaseOrderID,
+                MAX(sl.ShipID) AS ShipID
+            FROM PurchaseOrderLines POL
+            JOIN ShipsArrivals sa ON POL.POL_ShipArrivalID = sa.SA_ID
+            JOIN ShipList      sl ON sa.SA_ShipID          = sl.ShipID
+            GROUP BY POL.POL_OrderID, POL.POL_LineID
+        ) ship_sub ON ship_sub.PurchaseOrderID = CAST(p.PurchaseOrderID AS VARCHAR(20))
         WHERE DATEDIFF(MONTH,
 				CAST(b.[Date] + '-01' AS DATE),
 				CAST(p.Purchase_Date + '-01' AS DATE)
@@ -325,9 +341,9 @@ UNION ALL
 
 -----Exchange----
 SELECT
-    CAST(HZ.MSPR_HZMNH AS VARCHAR)                                         AS PurchaseOrderID,
+    CAST(HZ.MSPR_HZMNH AS VARCHAR)                                      AS PurchaseOrderID,
     'Exchange'                                                          AS DocName,  -- was: 'Orders'
-    NULL		                                                        AS SupplierKey,
+    t.DeliveredFrom	                                            AS SupplierKey,
     CAST(SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2)
          AS DATE)                                                       AS [Value Date],
     CAST(CONVERT(INT, CONVERT(VARCHAR,HZ.MOTSR_MOZMN)) AS VARCHAR) + '-' +
@@ -339,7 +355,7 @@ SELECT
 	1010  as [PNL Code],
     t.LineTotalNetUSD                                                  AS LineTotalNetUSD,
     CONVERT(INT, CONVERT(VARCHAR, SUBSTRING(HZ.T_ASPQH,1,4) + SUBSTRING(HZ.T_ASPQH,5,2))) AS YearMonth,
-    NULL                                                                AS ShipID,
+    t.ShipID                                                            AS ShipID,  -- ship from the related purchase order
     'Order'                                                             AS DocType,
     SM.NEW_SHER
 FROM HZMNOT HZ
@@ -888,15 +904,3 @@ LEFT JOIN CurrencyConvertion CC ON CC.TARIKH = s.DeliveryDate
 	)
 
 	select * from gain 
-	--where AccountKey = 146 and LineType = 'Item' and [Year-Month] = '2026-04' 
-
-	--select 
-	--AccountKey,
-	--[Year-Month],
-	--ItemKey,
-	--SUM(LineTotalNet_USD),
-	--sum(quantity),
-	--SUM(LineTotalNet_USD)/sum(quantity)
-	--from gain
-	--where AccountKey = 146 and LineType = 'Item' and [Year-Month] = '2026-04' 
-	--group by AccountKey,[Year-Month],ItemKey 
