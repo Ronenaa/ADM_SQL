@@ -153,13 +153,6 @@ purchase_orders AS (
 -- exchange_priced: merges former 'final' + 'final2' — ranks and keeps only the best purchase match
 exchange_priced AS (
     SELECT
-        DeliveredFrom, DeliveredFromName,
-        Exchange_order, Exchange_Order_Date,
-        ItemKey, Qty_Sold,
-        Purchase, Purchase_Date,
-        UnitNetPriceUSD, LineTotalNetUSD, OrderQuantity
-    FROM (
-        SELECT
             b.DeliveredFrom,
             b.DeliveredFromName,
             b.PurchaseOrderID  AS Exchange_order,
@@ -172,20 +165,17 @@ exchange_priced AS (
             p.max_LineTotalNetUSD AS LineTotalNetUSD,
             p.max_OrderQuantity   AS OrderQuantity,
             ROW_NUMBER() OVER (
-                PARTITION BY b.ItemKey, b.PurchaseOrderID
+                PARTITION BY b.ItemKey,b.PurchaseOrderID
                 ORDER BY p.Purchase_Date DESC
             ) AS rn
         FROM exchange_movements b
         LEFT JOIN purchase_orders p
             ON  b.DeliveredFrom = p.DeliveredTo
             AND b.ItemKey       = p.ItemKey
-        WHERE CONVERT(INT, SUBSTRING(b.[Date], 1, 4) + SUBSTRING(b.[Date], 6, 2))
-            - CONVERT(INT, SUBSTRING(p.Purchase_Date, 1, 4) + SUBSTRING(p.Purchase_Date, 6, 2))
-            BETWEEN 0 AND 3
-    ) ranked
-    WHERE rn = 1
-      AND Exchange_order  IS NOT NULL
-      AND UnitNetPriceUSD IS NOT NULL
+        WHERE DATEDIFF(MONTH,
+				CAST(b.[Date] + '-01' AS DATE),
+				CAST(p.Purchase_Date + '-01' AS DATE)
+				)    BETWEEN -3 AND 0
 )
 
 -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -335,7 +325,7 @@ UNION ALL
 
 -----Exchange----
 SELECT
-    HZ.MSPR_HZMNH                                                       AS PurchaseOrderID,
+    CAST(HZ.MSPR_HZMNH AS VARCHAR)                                         AS PurchaseOrderID,
     'Exchange'                                                          AS DocName,  -- was: 'Orders'
     NULL		                                                        AS SupplierKey,
     CAST(SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2)
@@ -849,7 +839,7 @@ SELECT
     CAST(s.DeliveryNote AS VARCHAR)                                         AS DeliveryNote,
     case when row_number() over (partition by s.SupplierWarehouse,s.ItemKey,inv.YearMonth order by inv.YearMonth desc) = 1
          then '1' else '0' end                                              AS Qty_flag, 
-    NULL                                                                    AS PurchaseOrderID,
+    CAST(s.SupplierWarehouse AS VARCHAR(10)) + '_' + SUBSTRING(inv.YearMonth, 1, 4) + SUBSTRING(inv.YearMonth, 6, 2) AS PurchaseOrderID,
     CAST(s.SupplierWarehouse AS VARCHAR)                                    AS SupplierKey,
     NULL                                                                    AS ShipID,
     'Warehouse'                                                             AS Purchase_DocName,
@@ -887,7 +877,7 @@ SELECT
     s.MultiLineFlag,
     s.TransactionType,
     inv.WeightedExpenses                                                    AS WeightedExpenses,
-    16																		AS [16_Fee]
+    16																		AS [ExtraFeeWH]
 FROM WH_sales s
 LEFT JOIN inv
     ON  inv.ItemKey     = s.ItemKey
