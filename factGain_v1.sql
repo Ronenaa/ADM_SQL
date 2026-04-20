@@ -764,6 +764,9 @@ AND TM.QOD_SHOLCH <> TM.QOD_MQBL   -- exclude internal docs (same source and des
         SUM(CASE WHEN s.LineType = 'Item' THEN s.Quantity       ELSE 0   END)       AS Quantity,
         -- Total revenue = all lines combined (item + storage fee)
         SUM(s.LineTotalNet_USD)                                                     AS LineTotalNet_USD,
+        -- Additional-line cost: the value of non-item lines (e.g. warehouse storage fee).
+        -- Non-zero only when MultiLineFlag = 1; use this to compare WH additional costs vs other order types.
+        SUM(CASE WHEN s.LineType <> 'Item' THEN s.LineTotalNet_USD ELSE 0 END)      AS AdditionalLineCost,
         -- 1 = delivery note had multiple lines (e.g. item + warehouse storage fee), 0 = single line
         CASE WHEN COUNT(*) > 1 THEN 1 ELSE 0 END                                   AS MultiLineFlag
     FROM sales s
@@ -839,8 +842,8 @@ SELECT
     END, 2) AS FLOAT)                                                       AS TotalGain,
     0                                                                       AS MultiLineFlag,  -- individual lines, not aggregated
     s.TransactionType,
-    NULL                                                                    AS WeightedExpenses,
-    0                                        AS [16_Fee]
+    0                                                                       AS [16_Fee],
+    NULL                                                                    AS AdditionalLineCost
 FROM sales s
 INNER JOIN base_link bl ON bl.DeliveryNote = s.DeliveryNote
 LEFT JOIN  P_costs PC   ON PC.PurchaseOrderID = bl.PurchaseOrderID
@@ -853,8 +856,9 @@ UNION ALL
 -- ============================================================
 SELECT
     CAST(s.DeliveryNote AS VARCHAR)                                         AS DeliveryNote,
-    case when row_number() over (partition by s.SupplierWarehouse,s.ItemKey,inv.YearMonth order by inv.YearMonth desc) = 1
-         then '1' else '0' end                                              AS Qty_flag, 
+    --case when row_number() over (partition by s.SupplierWarehouse,s.ItemKey,inv.YearMonth order by inv.YearMonth desc) = 1
+    --     then '1' else '0' end                                              
+	'0'	  AS Qty_flag, 
     CAST(s.SupplierWarehouse AS VARCHAR(10)) + '_' + SUBSTRING(inv.YearMonth, 1, 4) + SUBSTRING(inv.YearMonth, 6, 2) AS PurchaseOrderID,
     CAST(s.SupplierWarehouse AS VARCHAR)                                    AS SupplierKey,
     NULL                                                                    AS ShipID,
@@ -883,7 +887,7 @@ SELECT
     NULL                                                                    AS [Other_Expenses],
     NULL                                                                    AS Shortage,
     NULL                                                                    AS DischargeCost,  -- fixed warehouse discharge cost
-    inv.LastFOTPrice                                                        AS FOT_Purchase,
+    COALESCE(NULLIF(inv.WeightedExpenses, 0), inv.LastFOTPrice)             AS FOT_Purchase,
     CASE WHEN s.AdjustmentFlag <> 1
          THEN cast(ROUND((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - (16 + COALESCE(NULLIF(inv.WeightedExpenses, 0), inv.LastFOTPrice)), 2) AS FLOAT)
          ELSE 0 END                                                         AS Gain,
@@ -892,8 +896,8 @@ SELECT
          ELSE 0 END                                                         AS TotalGain,
     s.MultiLineFlag,
     s.TransactionType,
-    inv.WeightedExpenses                                                    AS WeightedExpenses,
-    16																		AS [ExtraFeeWH]
+    16                                                                         AS [ExtraFeeWH],
+    s.AdditionalLineCost
 FROM WH_sales s
 LEFT JOIN inv
     ON  inv.ItemKey     = s.ItemKey
@@ -903,4 +907,6 @@ LEFT JOIN CurrencyConvertion CC ON CC.TARIKH = s.DeliveryDate
 
 	)
 
-	select * from gain 
+	select * from gain
+	--select sum(dischargecost)
+	--from gain where Qty_flag = 1
