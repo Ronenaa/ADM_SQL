@@ -859,7 +859,7 @@ SELECT
     --case when row_number() over (partition by s.SupplierWarehouse,s.ItemKey,inv.YearMonth order by inv.YearMonth desc) = 1
     --     then '1' else '0' end                                              
 	'0'	  AS Qty_flag, 
-    CAST(s.SupplierWarehouse AS VARCHAR(10)) + '_' + SUBSTRING(inv.YearMonth, 1, 4) + SUBSTRING(inv.YearMonth, 6, 2) AS PurchaseOrderID,
+    CAST(s.SupplierWarehouse AS VARCHAR(10)) + '_' + SUBSTRING(inv.YearMonth, 1, 4) + SUBSTRING(inv.YearMonth, 6, 2)+ '_' +CAST(s.ItemKey AS VARCHAR)  AS PurchaseOrderID,
     CAST(s.SupplierWarehouse AS VARCHAR)                                    AS SupplierKey,
     NULL                                                                    AS ShipID,
     'Warehouse'                                                             AS Purchase_DocName,
@@ -887,7 +887,7 @@ SELECT
     NULL                                                                    AS [Other_Expenses],
     NULL                                                                    AS Shortage,
     NULL                                                                    AS DischargeCost,  -- fixed warehouse discharge cost
-    COALESCE(NULLIF(inv.WeightedExpenses, 0), inv.LastFOTPrice)             AS FOT_Purchase,
+    16 + COALESCE(NULLIF(inv.WeightedExpenses, 0), inv.LastFOTPrice)             AS FOT_Purchase,
     CASE WHEN s.AdjustmentFlag <> 1
          THEN cast(ROUND((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - (16 + COALESCE(NULLIF(inv.WeightedExpenses, 0), inv.LastFOTPrice)), 2) AS FLOAT)
          ELSE 0 END                                                         AS Gain,
@@ -905,8 +905,10 @@ LEFT JOIN inv
     AND inv.YearMonth   = s.[Year-Month]
 LEFT JOIN CurrencyConvertion CC ON CC.TARIKH = s.DeliveryDate
 
+
 	)
 
 	select * from gain
+	--where PurchaseOrderID = '1367_202604'
 	--select sum(dischargecost)
 	--from gain where Qty_flag = 1
