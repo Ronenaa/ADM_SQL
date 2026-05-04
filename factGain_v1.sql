@@ -811,6 +811,7 @@ SELECT
     CASE WHEN s.AdjustmentFlag <> 1 AND s.LineType = 'Item'
          THEN CAST(ROUND(s.LineTotalNet_USD / NULLIF(s.Quantity, 0), 2) AS FLOAT)
          ELSE NULL END                                                      AS price_usd,
+    NULL                                                                    AS [price_before_fee],
     s.UnitNetPriceUSD,
     PC.Cif_price                                                            AS CIF_Purchase,
     PC.[demurrage / Despatch],
@@ -842,7 +843,6 @@ SELECT
     END, 2) AS FLOAT)                                                       AS TotalGain,
     0                                                                       AS MultiLineFlag,  -- individual lines, not aggregated
     s.TransactionType,
-    0                                                                       AS [16_Fee],
     NULL                                                                    AS AdditionalLineCost
 FROM sales s
 INNER JOIN base_link bl ON bl.DeliveryNote = s.DeliveryNote
@@ -881,13 +881,16 @@ SELECT
     CASE WHEN s.AdjustmentFlag <> 1
          THEN cast(ROUND(s.LineTotalNet_USD / NULLIF(s.Quantity, 0),2) AS FLOAT)
          ELSE NULL END                                                      AS price_usd,
+    CASE WHEN s.AdjustmentFlag <> 1
+         THEN CAST(ROUND(s.LineTotalNet_USD / NULLIF(s.Quantity, 0) - 16, 2) AS FLOAT)
+         ELSE NULL END                                                      AS [price_before_fee],
     s.UnitNetPriceUSD,
     NULL                                                                    AS CIF_Purchase,  -- no CIF concept for warehouse
     NULL                                                                    AS [demurrage / Despatch],
     NULL                                                                    AS [Other_Expenses],
     NULL                                                                    AS Shortage,
     NULL                                                                    AS DischargeCost,  -- fixed warehouse discharge cost
-    16 + COALESCE(NULLIF(inv.WeightedExpenses, 0), inv.LastFOTPrice)             AS FOT_Purchase,
+    COALESCE(NULLIF(inv.WeightedExpenses, 0), inv.LastFOTPrice)                  AS FOT_Purchase,
     CASE WHEN s.AdjustmentFlag <> 1
          THEN cast(ROUND((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - (16 + COALESCE(NULLIF(inv.WeightedExpenses, 0), inv.LastFOTPrice)), 2) AS FLOAT)
          ELSE 0 END                                                         AS Gain,
@@ -896,7 +899,6 @@ SELECT
          ELSE 0 END                                                         AS TotalGain,
     s.MultiLineFlag,
     s.TransactionType,
-    16                                                                         AS [ExtraFeeWH],
     s.AdditionalLineCost
 FROM WH_sales s
 LEFT JOIN inv
