@@ -372,128 +372,59 @@ WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
   AND YEAR(CAST(SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2) AS DATE))  >= 2024
   )
 
-,inv as (
-		SELECT
-			CONVERT(VARCHAR, FINAL.ItemKey) + '-' + CONVERT(VARCHAR, FINAL.ItemKey) as ItemKey,
-			FINAL.SupplierKey,
-			CONVERT(char(7), FINAL.Date, 126) AS YearMonth,
-
-			SUM(FINAL.Quantity) AS TotalQuantity,
-
-			CAST(ROUND(MAX(CASE WHEN FINAL.rn = 1 THEN FINAL.UnitPrice END), 2) AS FLOAT) AS LastUnitPrice,
-			CAST(ROUND(MAX(CASE WHEN FINAL.rn = 1 THEN FINAL.FOTprice END), 2) AS FLOAT) AS LastFOTPrice,
-			CAST(ROUND(MAX(CASE WHEN FINAL.rn = 1 THEN FINAL.CFPrice END), 2) AS FLOAT) AS LastCFPrice,
-			CAST(ROUND(MAX(CASE WHEN FINAL.rn = 1 THEN FINAL.WeightedExpenses END), 2) AS FLOAT) AS WeightedExpenses
-
-		FROM (
-			SELECT
-				Inv.*,
-				ROW_NUMBER() OVER (
-					PARTITION BY 
-						Inv.ItemKey,
-						Inv.SupplierKey,
-						CONVERT(char(7), Inv.Date, 126)
-					ORDER BY 
-						Inv.Date DESC,
-						Inv.Version DESC
-				) AS rn
-		FROM (
-
-        /* ===== STG_1 ===== */
-        SELECT 
-            ProductID AS ItemKey,
-            inv.DueDate AS Date,
-            SupplierID AS SupplierKey,
-            AvgPrice AS UnitPrice,
-            FotFlat AS FOTprice,
-            CFFlat AS CFPrice,
-            INV.TotalInventory AS Quantity,
-            PCOST.WeightedExpenses,
-            Inv.Version,
-            ROW_NUMBER() OVER (
-                PARTITION BY inv.DueDate, inv.SupplierID, inv.ProductID 
-                ORDER BY inv.Version DESC
-            ) AS MaxVersion
-        FROM tblInventory Inv
-        LEFT JOIN tblProductsCost PCost
-            ON INV.DueDate = PCost.DueDate
-            AND INV.ProductID = PCost.ProductCode
-            AND INV.Version = PCost.Version
-        UNION ALL
-        /* ===== STG_3 (including STG_2 inline) ===== */
-        SELECT
-            TM.ItemKey,
-            PC.DueDate AS Date,
-            1144 AS SupplierKey,
-            PC.AvgPrice AS UnitPrice,
-            PC.FotFlat AS FOTprice,
-            PC.CFFlat AS CFPrice,
-            SUM(TM.Quantity) AS Quantity,
-            PC.WeightedExpenses,
-            MV.MAXVERSION AS Version,
-            ROW_NUMBER() OVER (
-                PARTITION BY PC.DueDate, TM.ItemKey
-                ORDER BY MV.MAXVERSION DESC
-            ) AS MaxVersion
-
+,inv AS (
+    SELECT
+        CONVERT(VARCHAR, src.ItemKey) + '-' + CONVERT(VARCHAR, src.ItemKey)               AS ItemKey,
+        src.SupplierKey,
+        CONVERT(char(7), src.[Date], 126)                                                  AS YearMonth,
+        CAST(ROUND(MAX(CASE WHEN src.rn = 1 THEN src.LastFOTPrice     END), 2) AS FLOAT)  AS LastFOTPrice,
+        CAST(ROUND(MAX(CASE WHEN src.rn = 1 THEN src.WeightedExpenses END), 2) AS FLOAT)  AS WeightedExpenses,
+        CAST(ROUND(COALESCE(
+            NULLIF(MAX(CASE WHEN src.rn = 1 THEN src.WeightedExpenses END), 0),
+                   MAX(CASE WHEN src.rn = 1 THEN src.LastFOTPrice     END)
+        ), 2) AS FLOAT)                                                                    AS WH_Price
+    FROM (
+        SELECT *, ROW_NUMBER() OVER (
+            PARTITION BY ItemKey, SupplierKey, CONVERT(char(7), [Date], 126)
+            ORDER BY [Date] DESC, Version DESC
+        ) AS rn
         FROM (
-            /* STG_2 inline */
-            SELECT 
-                TM.QOD_PRIT AS ItemKey,
-                CAST(SUBSTRING(T_TNOEH,1,4) + '-' + SUBSTRING(T_TNOEH,5,2) + '-' + SUBSTRING(T_TNOEH,7,2) AS DATE) AS [Date],
-                SUM(TM.CMOT_LOGOS) AS Quantity
-            FROM BT.dbo.TNOEOT_MLAI_CLLI TM
-            WHERE QOD_GORM <> 1
-              AND CAST(SUBSTRING(TM.T_TNOEH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
-              AND SOG_TNOEH_CN_ITS_SP_HE LIKE N'%כ%'
-            GROUP BY TM.QOD_PRIT, TM.T_TNOEH
+            -- Regular warehouses
+            SELECT inv.ProductID AS ItemKey, inv.DueDate AS [Date], inv.SupplierID AS SupplierKey,
+                   pcost.FotFlat AS LastFOTPrice, pcost.WeightedExpenses, inv.Version,
+                   ROW_NUMBER() OVER (PARTITION BY inv.DueDate, inv.SupplierID, inv.ProductID ORDER BY inv.Version DESC) AS MaxVersion
+            FROM tblInventory inv
+            LEFT JOIN tblProductsCost pcost
+                ON inv.DueDate = pcost.DueDate AND inv.ProductID = pcost.ProductCode AND inv.Version = pcost.Version
+            WHERE inv.SupplierID IN (1411, 1367, 1366, 1289, 1101, 943)
+
             UNION ALL
-            SELECT 
-                TM.QOD_PRIT,
-                CAST(SUBSTRING(T_TNOEH,1,4) + '-' + SUBSTRING(T_TNOEH,5,2) + '-' + SUBSTRING(T_TNOEH,7,2) AS DATE) AS [Date],
-                SUM(TM.CMOT_LOGOS) * -1
-            FROM BT.dbo.TNOEOT_MLAI_CLLI TM
-            WHERE QOD_GORM <> 1
-              AND CAST(SUBSTRING(TM.T_TNOEH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
-              AND SOG_TNOEH_CN_ITS_SP_HE LIKE N'%י%'
-            GROUP BY TM.QOD_PRIT, TM.T_TNOEH
-        ) TM
 
-        LEFT JOIN (
-            SELECT 
-                DueDate,
-                ProductCode,
-                MAX(Version) AS MAXVERSION
-            FROM tblProductsCost
-            GROUP BY DueDate, ProductCode
-        ) MV
-            ON MV.DueDate = TM.Date
-            AND MV.ProductCode = TM.ItemKey
-
-        LEFT JOIN tblProductsCost PC
-            ON PC.Version = MV.MAXVERSION
-            AND PC.DueDate = MV.DueDate
-            AND PC.ProductCode = MV.ProductCode
-
-        GROUP BY 
-            TM.ItemKey,
-            PC.DueDate,
-            PC.AvgPrice,
-            PC.CFFlat,
-            PC.FotFlat,
-            PC.WeightedExpenses,
-            MV.MAXVERSION
-
-    ) Inv
-    WHERE Inv.MaxVersion = 1
-
-) FINAL
-
-GROUP BY
-    FINAL.ItemKey,
-    FINAL.SupplierKey,
-    CONVERT(char(7), FINAL.Date, 126)
-	)
+            -- Warehouse 1144: items from BT movements, prices from tblProductsCost
+            SELECT tm.ItemKey, pc.DueDate AS [Date], 1144 AS SupplierKey,
+                   pc.FotFlat AS LastFOTPrice, pc.WeightedExpenses, mv.MAXVERSION AS Version,
+                   ROW_NUMBER() OVER (PARTITION BY pc.DueDate, tm.ItemKey ORDER BY mv.MAXVERSION DESC) AS MaxVersion
+            FROM (
+                SELECT DISTINCT QOD_PRIT AS ItemKey,
+                       CAST(SUBSTRING(T_TNOEH,1,4)+'-'+SUBSTRING(T_TNOEH,5,2)+'-'+SUBSTRING(T_TNOEH,7,2) AS DATE) AS [Date]
+                FROM BT.dbo.TNOEOT_MLAI_CLLI
+                WHERE QOD_GORM <> 1
+                  AND CAST(SUBSTRING(T_TNOEH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
+                  AND (SOG_TNOEH_CN_ITS_SP_HE LIKE N'%כ%' OR SOG_TNOEH_CN_ITS_SP_HE LIKE N'%י%')
+            ) tm
+            LEFT JOIN (SELECT DueDate, ProductCode, MAX(Version) AS MAXVERSION FROM tblProductsCost GROUP BY DueDate, ProductCode) mv
+                ON mv.DueDate = tm.[Date] AND mv.ProductCode = tm.ItemKey
+            LEFT JOIN tblProductsCost pc
+                ON pc.Version = mv.MAXVERSION AND pc.DueDate = mv.DueDate AND pc.ProductCode = mv.ProductCode
+            GROUP BY tm.ItemKey, pc.DueDate, pc.FotFlat, pc.WeightedExpenses, mv.MAXVERSION
+        ) base
+        WHERE MaxVersion = 1
+    ) src
+    GROUP BY
+        CONVERT(VARCHAR, src.ItemKey) + '-' + CONVERT(VARCHAR, src.ItemKey),
+        src.SupplierKey,
+        CONVERT(char(7), src.[Date], 126)
+)
 
 -- Resolves the primary DocName per PurchaseOrderID before aggregation.
 -- A PO can have rows of multiple types (e.g. Import + Invoice).
@@ -890,12 +821,12 @@ SELECT
     NULL                                                                    AS [Other_Expenses],
     NULL                                                                    AS Shortage,
     NULL                                                                    AS DischargeCost,  -- fixed warehouse discharge cost
-    COALESCE(NULLIF(inv.WeightedExpenses, 0), inv.LastFOTPrice)                  AS FOT_Purchase,
+    inv.WH_Price                                                                AS FOT_Purchase,
     CASE WHEN s.AdjustmentFlag <> 1
-         THEN cast(ROUND((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - (16 + COALESCE(NULLIF(inv.WeightedExpenses, 0), inv.LastFOTPrice)), 2) AS FLOAT)
+         THEN CAST(ROUND((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - (16 + inv.WH_Price), 2) AS FLOAT)
          ELSE 0 END                                                         AS Gain,
     CASE WHEN s.AdjustmentFlag <> 1
-         THEN cast(ROUND((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - (16 + COALESCE(NULLIF(inv.WeightedExpenses, 0), inv.LastFOTPrice)), 2) AS FLOAT) * s.Quantity
+         THEN CAST(ROUND((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - (16 + inv.WH_Price), 2) AS FLOAT) * s.Quantity
          ELSE 0 END                                                         AS TotalGain,
     s.MultiLineFlag,
     s.TransactionType,
