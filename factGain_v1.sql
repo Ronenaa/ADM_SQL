@@ -342,7 +342,7 @@ UNION ALL
 -----Exchange----
 SELECT
     CAST(HZ.MSPR_HZMNH AS VARCHAR)                                      AS PurchaseOrderID,
-    'Exchange'                                                          AS DocName,  -- was: 'Orders'
+    'Swap'                                                          AS DocName,  -- was: 'Orders'
     t.DeliveredFrom	                                            AS SupplierKey,
     CAST(SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2)
          AS DATE)                                                       AS [Value Date],
@@ -441,8 +441,8 @@ WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
             WHEN EXISTS (
                 SELECT 1 FROM Purchase_Exchange pe2
                 WHERE pe2.PurchaseOrderID = pe.PurchaseOrderID
-                  AND pe2.DocName = 'Exchange'
-            ) THEN 'Exchange'
+                  AND pe2.DocName = 'Swap'
+            ) THEN 'Swap'
             ELSE 'Invoice'
         END AS DocName
     FROM Purchase_Exchange pe
@@ -622,7 +622,7 @@ UNION ALL
 		WHEN TM.MCHIR_ICH <> 0 THEN 'Sales'
 		WHEN TM.MCHIR_ICH = 0 and G.AOPI_PEILOT = 'פחת' THEN 'Shortage'
 		WHEN TM.MCHIR_ICH = 0 and G.AOPI_PEILOT = 'אחסון' THEN 'Storage'
-		WHEN TM.MCHIR_ICH = 0 and G.AOPI_PEILOT NOT IN ('פחת','אחסון') then 'Exchange'
+		WHEN TM.MCHIR_ICH = 0 and G.AOPI_PEILOT NOT IN ('פחת','אחסון') then 'Swap'
 	END AS 'QuantityCategory'
 	,CASE
 		WHEN TM.MCHIR_ICH = 0 AND W.QOD_GORM IS NOT NULL THEN G.AOPI_PEILOT
@@ -723,7 +723,7 @@ SELECT
     cast(PC.SupplierKey as varchar)                                         AS SupplierKey,
     cast(PC.boat as varchar)                                                AS ShipID,
     PC.DocName                                                              AS Purchase_DocName,
-    case when PC.DocName = 'Exchange' then sum(s.Quantity) over (partition by bl.PurchaseOrderID)
+    case when PC.DocName = 'Swap' then sum(s.Quantity) over (partition by bl.PurchaseOrderID)
          else PC.orderquantity end                                          AS [Purchase Quantity],
     PC.ValueDate,
     s.LineType,
@@ -742,7 +742,6 @@ SELECT
     CASE WHEN s.AdjustmentFlag <> 1 AND s.LineType = 'Item'
          THEN CAST(ROUND(s.LineTotalNet_USD / NULLIF(s.Quantity, 0), 2) AS FLOAT)
          ELSE NULL END                                                      AS price_usd,
-    NULL                                                                    AS [price_before_fee],
     s.UnitNetPriceUSD,
     PC.Cif_price                                                            AS CIF_Purchase,
     PC.[demurrage / Despatch],
@@ -754,6 +753,7 @@ SELECT
     CAST(ROUND(PC.Cif_price + PC.[demurrage / Despatch] + (PC.DischargeCosts /
         NULLIF((PC.orderquantity - SUM(CASE WHEN s.SalesType = 'CIF' THEN s.Quantity ELSE 0 END)
                 OVER (PARTITION BY bl.PurchaseOrderID)), 0)), 2) AS FLOAT) AS FOT_Purchase,
+    NULL                                                                    AS [Price_including_storage],
     CAST(ROUND(CASE
         WHEN s.SalesType = 'CIF'                   AND s.LineType = 'Item'
             THEN (s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - PC.Cif_price
@@ -812,9 +812,6 @@ SELECT
     CASE WHEN s.AdjustmentFlag <> 1
          THEN cast(ROUND(s.LineTotalNet_USD / NULLIF(s.Quantity, 0),2) AS FLOAT)
          ELSE NULL END                                                      AS price_usd,
-    CASE WHEN s.AdjustmentFlag <> 1
-         THEN CAST(ROUND(s.LineTotalNet_USD / NULLIF(s.Quantity, 0) - 16, 2) AS FLOAT)
-         ELSE NULL END                                                      AS [price_before_fee],
     s.UnitNetPriceUSD,
     NULL                                                                    AS CIF_Purchase,  -- no CIF concept for warehouse
     NULL                                                                    AS [demurrage / Despatch],
@@ -822,6 +819,7 @@ SELECT
     NULL                                                                    AS Shortage,
     NULL                                                                    AS DischargeCost,  -- fixed warehouse discharge cost
     inv.WH_Price                                                                AS FOT_Purchase,
+    CAST(ROUND(16 + inv.WH_Price, 2) AS FLOAT)                             AS [Price_including_storage],
     CASE WHEN s.AdjustmentFlag <> 1
          THEN CAST(ROUND((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - (16 + inv.WH_Price), 2) AS FLOAT)
          ELSE 0 END                                                         AS Gain,
