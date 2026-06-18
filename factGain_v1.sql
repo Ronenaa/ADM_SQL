@@ -716,65 +716,63 @@ AND TM.QOD_SHOLCH <> TM.QOD_MQBL   -- exclude internal docs (same source and des
 -- Branch 1: Import / Exchange orders — cost from P_costs
 -- ============================================================
 SELECT
-    cast(s.DeliveryNote as varchar)                                         AS DeliveryNote,
-    case when row_number() over (partition by bl.PurchaseOrderID order by s.DeliveryNote asc) = 1
-         then '1' else '0' end                                              AS Qty_flag,
-    cast(bl.PurchaseOrderID as varchar)                                     AS PurchaseOrderID,
-    cast(PC.SupplierKey as varchar)                                         AS SupplierKey,
-    cast(PC.boat as varchar)                                                AS ShipID,
-    PC.DocName                                                              AS Purchase_DocName,
-    case when PC.DocName = 'Swap' then sum(s.Quantity) over (partition by bl.PurchaseOrderID)
-         else PC.orderquantity end                                          AS [Purchase Quantity],
-    PC.ValueDate,
-    s.LineType,
-    s.DeliveryDate,
-    FORMAT(PC.ValueDate, 'yyyy-MM')                                       AS [Year-Month],
-    s.AdjustmentFlag,
-    cast(s.AccountKey as varchar)                                           AS AccountKey,
-    cast(s.AgentKey as varchar)                                             AS AgentKey,
-    cast(s.ItemKey as varchar)                                              AS ItemKey,
-    case when s.SalesType is null then s.QuantityCategory
-         else s.SalesType end                                               AS [Price Term],
-    s.QuantityCategory,
-    s.ActionTypeDesc,
-    s.Quantity,
-    s.LineTotalNet_USD,
-    CASE WHEN s.AdjustmentFlag <> 1 AND s.LineType = 'Item'
-         THEN CAST(ROUND(s.LineTotalNet_USD / NULLIF(s.Quantity, 0), 2) AS FLOAT)
-         ELSE NULL END                                                      AS price_usd,
-    s.UnitNetPriceUSD,
-    PC.Cif_price                                                            AS CIF_Purchase,
-    PC.[demurrage / Despatch],
-    PC.[Other_Expenses],
-    PC.Shortage,
-    CAST(ROUND(PC.DischargeCosts /
-        NULLIF((PC.orderquantity - SUM(CASE WHEN s.SalesType = 'CIF' THEN s.Quantity ELSE 0 END)
-                OVER (PARTITION BY bl.PurchaseOrderID)), 0), 2) AS FLOAT)  AS DischargeCost,
-    CAST(ROUND(PC.Cif_price + PC.[demurrage / Despatch] + (PC.DischargeCosts /
-        NULLIF((PC.orderquantity - SUM(CASE WHEN s.SalesType = 'CIF' THEN s.Quantity ELSE 0 END)
-                OVER (PARTITION BY bl.PurchaseOrderID)), 0)), 2) AS FLOAT) AS FOT_Purchase,
-    NULL                                                                    AS [Price_including_storage],
-    CAST(ROUND(CASE
-        WHEN s.SalesType = 'CIF'                   AND s.LineType = 'Item'
-            THEN (s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - PC.Cif_price
-        WHEN s.SalesType IN ('FOT', 'FOT Premium') AND s.LineType = 'Item'
-            THEN (s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - (PC.Cif_price + PC.[demurrage / Despatch] + (PC.DischargeCosts /
-                 NULLIF((PC.orderquantity - SUM(CASE WHEN s.SalesType = 'CIF' THEN s.Quantity ELSE 0 END)
-                         OVER (PARTITION BY bl.PurchaseOrderID)), 0)))
-        ELSE 0
-    END, 2) AS FLOAT)                                                       AS Gain,
-    CAST(ROUND(CASE
-        WHEN s.SalesType = 'CIF'                   AND s.LineType = 'Item'
-            THEN ((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - PC.Cif_price) * s.Quantity
-        WHEN s.SalesType IN ('FOT', 'FOT Premium') AND s.LineType = 'Item'
-            THEN ((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - (PC.Cif_price + PC.[demurrage / Despatch] + (PC.DischargeCosts /
-                 NULLIF((PC.orderquantity - SUM(CASE WHEN s.SalesType = 'CIF' THEN s.Quantity ELSE 0 END)
-                         OVER (PARTITION BY bl.PurchaseOrderID)), 0)))) * s.Quantity
-        ELSE 0
-    END, 2) AS FLOAT)                                                       AS TotalGain,
-    0                                                                       AS MultiLineFlag,  -- individual lines, not aggregated
-    s.TransactionType,
-    NULL                                                                    AS AdditionalLineCost
+	cast(s.DeliveryNote as varchar)																							AS DeliveryNote,
+	s.LineType																												AS LineType,
+	s.TransactionType																										AS TransactionType,
+	s.QuantityCategory																										AS QuantityCategory,
+	s.ActionTypeDesc																										AS ActionTypeDesc,
+	PC.DocName																												AS Purchase_DocName,
+	s.AdjustmentFlag																										AS AdjustmentFlag,
+	case when row_number() over (partition by bl.PurchaseOrderID order by s.DeliveryNote asc) = 1
+		 then '1' else '0' end																								AS Qty_flag,
+	0																														AS MultiLineFlag,
+	'0'																														AS wh_flag,
+	cast(bl.PurchaseOrderID as varchar)																						AS PurchaseOrderID,
+	cast(PC.SupplierKey as varchar)																							AS SupplierKey,
+	cast(s.AccountKey as varchar)																							AS AccountKey,
+	cast(s.AgentKey as varchar)																								AS AgentKey,
+	cast(s.ItemKey as varchar)																								AS ItemKey,
+	cast(PC.boat as varchar)																								AS ShipID,
+	FORMAT(PC.ValueDate, 'yyyy-MM')																							AS [Year-Month],
+	PC.ValueDate																											AS ValueDate,
+	s.DeliveryDate																											AS DeliveryDate,
+	case when s.SalesType is null then s.QuantityCategory
+		 else s.SalesType end																								AS [Price Term],
+	s.Quantity																												AS Quantity,
+	s.LineTotalNet_USD																										AS LineTotalNet_USD,
+	CASE WHEN s.AdjustmentFlag <> 1
+		 THEN CAST(ROUND(s.LineTotalNet_USD / NULLIF(s.Quantity, 0), 2) AS FLOAT)
+		 ELSE NULL END																										AS price_usd,
+	s.UnitNetPriceUSD																										AS UnitNetPriceUSD,
+	PC.Cif_price																											AS CIF_Purchase,
+	PC.[demurrage / Despatch]																								AS [demurrage / Despatch],
+	PC.[Other_Expenses]																										AS [Other_Expenses],
+	PC.Shortage																												AS Shortage,
+	CAST(ROUND(PC.DischargeCosts /
+		NULLIF((PC.orderquantity - SUM(CASE WHEN s.SalesType = 'CIF' THEN s.Quantity ELSE 0 END)
+				OVER (PARTITION BY bl.PurchaseOrderID)), 0), 2) AS FLOAT)													AS DischargeCost,
+	CAST(ROUND(PC.Cif_price + PC.[demurrage / Despatch] + (PC.DischargeCosts /
+		NULLIF((PC.orderquantity - SUM(CASE WHEN s.SalesType = 'CIF' THEN s.Quantity ELSE 0 END)
+				OVER (PARTITION BY bl.PurchaseOrderID)), 0)), 2) AS FLOAT)													AS FOT_Purchase,
+	CAST(ROUND(CASE
+		WHEN s.SalesType = 'CIF'                   AND s.LineType = 'Item'
+			THEN (s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - PC.Cif_price
+		WHEN s.SalesType IN ('FOT', 'FOT Premium') AND s.LineType = 'Item'
+			THEN (s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - (PC.Cif_price + PC.[demurrage / Despatch] + (PC.DischargeCosts /
+				 NULLIF((PC.orderquantity - SUM(CASE WHEN s.SalesType = 'CIF' THEN s.Quantity ELSE 0 END)
+						 OVER (PARTITION BY bl.PurchaseOrderID)), 0)))
+		ELSE 0
+	END, 2) AS FLOAT)																										AS Gain,
+	CAST(ROUND(CASE
+		WHEN s.SalesType = 'CIF'                   AND s.LineType = 'Item'
+			THEN ((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - PC.Cif_price) * s.Quantity
+		WHEN s.SalesType IN ('FOT', 'FOT Premium') AND s.LineType = 'Item'
+			THEN ((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - (PC.Cif_price + PC.[demurrage / Despatch] + (PC.DischargeCosts /
+				 NULLIF((PC.orderquantity - SUM(CASE WHEN s.SalesType = 'CIF' THEN s.Quantity ELSE 0 END)
+						 OVER (PARTITION BY bl.PurchaseOrderID)), 0)))) * s.Quantity
+		ELSE 0
+	END, 2) AS FLOAT)																										AS TotalGain,
+	NULL																													AS AdditionalLineCost
 FROM sales s
 INNER JOIN base_link bl ON bl.DeliveryNote = s.DeliveryNote
 LEFT JOIN  P_costs PC   ON PC.PurchaseOrderID = bl.PurchaseOrderID
@@ -786,60 +784,60 @@ UNION ALL
 -- Branch 2: Warehouse orders — cost from inv (LastCFPrice)
 -- ============================================================
 SELECT
-    CAST(s.DeliveryNote AS VARCHAR)                                         AS DeliveryNote,
-    --case when row_number() over (partition by s.SupplierWarehouse,s.ItemKey,inv.YearMonth order by inv.YearMonth desc) = 1
-    --     then '1' else '0' end                                              
-	'0'	  AS Qty_flag, 
-    CAST(s.SupplierWarehouse AS VARCHAR(10)) + '_' + SUBSTRING(inv.YearMonth, 1, 4) + SUBSTRING(inv.YearMonth, 6, 2)+ '_' +CAST(s.ItemKey AS VARCHAR)  AS PurchaseOrderID,
-    CAST(s.SupplierWarehouse AS VARCHAR)                                    AS SupplierKey,
-    NULL                                                                    AS ShipID,
-    'Warehouse'                                                             AS Purchase_DocName,
-	s.Quantity AS [Purchase Quantity],
-    CAST(inv.YearMonth + '-01' AS DATE)                                     AS ValueDate,  -- first day of inv month (NULL if no inv match)
-    'Item'                                                                  AS LineType,
-    s.DeliveryDate,
-    inv.YearMonth                                  AS [Year-Month],
-    s.AdjustmentFlag,
-    CAST(s.AccountKey AS VARCHAR)                                           AS AccountKey,
-    CAST(s.AgentKey AS VARCHAR)                                             AS AgentKey,
-    CAST(s.ItemKey AS VARCHAR)                                              AS ItemKey,
+    CAST(s.DeliveryNote AS VARCHAR)																							AS DeliveryNote,
+	'Item'																													AS LineType,
+	s.TransactionType																										AS [TransactionType],
+	s.QuantityCategory																										AS [QuantityCategory],
+    s.ActionTypeDesc																										AS [ActionTypeDesc],
+    'Warehouse'																												AS Purchase_DocName,
+	s.AdjustmentFlag																										AS [AdjustmentFlag],
+	'0'																														AS Qty_flag,
+	s.MultiLineFlag																											AS [MultiLineFlag],
+	case when row_number() over 
+	(partition by s.SupplierWarehouse,inv.YearMonth,s.ItemKey  
+	order by s.DeliveryNote asc) = 1
+         then '1' else '0' end																								AS wh_flag,
+    CAST(s.SupplierWarehouse AS VARCHAR(10)) + '_' + 
+	SUBSTRING(inv.YearMonth, 1, 4) + 
+	SUBSTRING(inv.YearMonth, 6, 2)+ '_' +CAST(s.ItemKey AS VARCHAR)															AS PurchaseOrderID,
+    CAST(s.SupplierWarehouse AS VARCHAR)																					AS SupplierKey,
+	CAST(s.AccountKey AS VARCHAR)																							AS AccountKey,
+    CAST(s.AgentKey AS VARCHAR)																								AS AgentKey,
+    CAST(s.ItemKey AS VARCHAR)																								AS ItemKey,
+    NULL																													AS ShipID,
+	inv.YearMonth																											AS [Year-Month],
+    CAST(inv.YearMonth + '-01' AS DATE)																						AS ValueDate,  -- first day of inv month (NULL if no inv match)
+    s.DeliveryDate																											AS [DeliveryDate],			
     CASE WHEN s.SalesType IS NULL THEN s.QuantityCategory
-         ELSE s.SalesType END                                               AS [Price Term],
-    s.QuantityCategory,
-    s.ActionTypeDesc,
-    s.Quantity,
-    s.LineTotalNet_USD,
+         ELSE s.SalesType END																								AS [Price Term],
+	s.Quantity																												AS [Quantity],
+    s.LineTotalNet_USD																										AS [LineTotalNet_USD],
     CASE WHEN s.AdjustmentFlag <> 1
          THEN cast(ROUND(s.LineTotalNet_USD / NULLIF(s.Quantity, 0),2) AS FLOAT)
-         ELSE NULL END                                                      AS price_usd,
-    s.UnitNetPriceUSD,
-    NULL                                                                    AS CIF_Purchase,  -- no CIF concept for warehouse
-    NULL                                                                    AS [demurrage / Despatch],
-    NULL                                                                    AS [Other_Expenses],
-    NULL                                                                    AS Shortage,
-    NULL                                                                    AS DischargeCost,  -- fixed warehouse discharge cost
-    inv.WH_Price                                                                AS FOT_Purchase,
-    CAST(ROUND(16 + inv.WH_Price, 2) AS FLOAT)                             AS [Price_including_storage],
+         ELSE NULL END													                                                    AS price_usd,
+    s.UnitNetPriceUSD																										AS [UnitNetPriceUSD],
+    NULL																													AS CIF_Purchase,  -- no CIF concept for warehouse
+    NULL																													AS [demurrage / Despatch],
+    NULL																													AS [Other_Expenses],
+    NULL																													AS Shortage,
+    NULL																													AS DischargeCost, 
+    inv.WH_Price																											AS FOT_Purchase,
     CASE WHEN s.AdjustmentFlag <> 1
          THEN CAST(ROUND((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - (16 + inv.WH_Price), 2) AS FLOAT)
-         ELSE 0 END                                                         AS Gain,
+         ELSE 0 END																											AS Gain,
     CASE WHEN s.AdjustmentFlag <> 1
          THEN CAST(ROUND((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - (16 + inv.WH_Price), 2) AS FLOAT) * s.Quantity
-         ELSE 0 END                                                         AS TotalGain,
-    s.MultiLineFlag,
-    s.TransactionType,
-    s.AdditionalLineCost
+         ELSE 0 END																											AS TotalGain,
+    s.AdditionalLineCost																									AS [AdditionalLineCost] --wh charge cost
 FROM WH_sales s
 LEFT JOIN inv
     ON  inv.ItemKey     = s.ItemKey
     AND inv.SupplierKey = s.SupplierWarehouse
     AND inv.YearMonth   = s.[Year-Month]
 LEFT JOIN CurrencyConvertion CC ON CC.TARIKH = s.DeliveryDate
+)
 
-
-	)
-
-	select * from gain
+select * from gain 
 	--where PurchaseOrderID = '1367_202604'
 	--select sum(dischargecost)
 	--from gain where Qty_flag = 1
