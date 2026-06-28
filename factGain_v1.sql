@@ -374,18 +374,18 @@ WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
   )
 
 ,inv AS (
-    -- One row per (ItemKey, SupplierKey, calendar-month): price from the last day with data in that month.
-    SELECT ItemKey, SupplierKey, [Date], LastFOTPrice, WeightedExpenses, WH_Price
+    -- One row per (ItemKey, calendar-month): last day's price in that month.
+    -- Price is set by item+date, not by warehouse — any warehouse shares the same item price.
+    SELECT ItemKey, [Date], WH_Price
     FROM (
         SELECT
             CONVERT(VARCHAR, src.ItemKey) + '-' + CONVERT(VARCHAR, src.ItemKey) AS ItemKey,
-            src.SupplierKey,
             src.[Date],
             CAST(ROUND(src.LastFOTPrice,     2) AS FLOAT) AS LastFOTPrice,
             CAST(ROUND(src.WeightedExpenses, 2) AS FLOAT) AS WeightedExpenses,
             CAST(ROUND(COALESCE(NULLIF(src.WeightedExpenses, 0), src.LastFOTPrice), 2) AS FLOAT) AS WH_Price,
             ROW_NUMBER() OVER (
-                PARTITION BY src.ItemKey, src.SupplierKey, YEAR(src.[Date]), MONTH(src.[Date])
+                PARTITION BY src.ItemKey, YEAR(src.[Date]), MONTH(src.[Date])
                 ORDER BY src.[Date] DESC
             ) AS month_rn
         FROM (
@@ -393,7 +393,6 @@ WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
             SELECT
                 inv.ProductID      AS ItemKey,
                 inv.DueDate        AS [Date],
-                inv.SupplierID     AS SupplierKey,
                 pcost.FotFlat      AS LastFOTPrice,
                 pcost.WeightedExpenses,
                 inv.Version,
@@ -413,7 +412,6 @@ WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
             SELECT
                 tm.ItemKey,
                 pc.DueDate         AS [Date],
-                1144               AS SupplierKey,
                 pc.FotFlat         AS LastFOTPrice,
                 pc.WeightedExpenses,
                 mv.MAXVERSION      AS Version,
@@ -715,6 +713,7 @@ AND TM.QOD_SHOLCH <> TM.QOD_MQBL   -- exclude internal docs (same source and des
         -- Additional-line cost: the value of non-item lines (e.g. warehouse storage fee).
         -- Non-zero only when MultiLineFlag = 1; use this to compare WH additional costs vs other order types.
         SUM(CASE WHEN s.LineType <> 'Item' THEN s.LineTotalNet_USD ELSE 0 END)      AS AdditionalLineCost,
+        SUM(s.AdditionalQuantity)                                                       AS AdditionalQuantity,
         -- 1 = delivery note had multiple lines (e.g. item + warehouse storage fee), 0 = single line
         CASE WHEN COUNT(*) > 1 THEN '1' ELSE '0' END                                   AS MultiLineFlag
     FROM sales s
@@ -726,6 +725,24 @@ AND TM.QOD_SHOLCH <> TM.QOD_MQBL   -- exclude internal docs (same source and des
         s.ActionType, s.ActionTypeDesc,
         s.SupplierWarehouse, 
         s.AdjustmentFlag, s.QuantityCategory
+)
+
+,WH_prices AS (
+    SELECT
+        *,
+        CASE WHEN Quantity > 0
+             THEN CAST(ROUND((LineTotalNet_USD - AdditionalLineCost) / NULLIF(Quantity, 0), 2) AS FLOAT)
+             ELSE NULL END                                                                       AS Item_Price,
+        CASE WHEN AdditionalQuantity > 0
+             THEN CAST(ROUND(AdditionalLineCost / NULLIF(AdditionalQuantity, 0), 2) AS FLOAT)
+             ELSE NULL END                                                                       AS Storage_Price,
+        CASE WHEN AdjustmentFlag <> '1'
+             THEN CAST(ROUND(
+                 (LineTotalNet_USD - AdditionalLineCost) / NULLIF(Quantity, 0) +
+                 ISNULL(AdditionalLineCost / NULLIF(AdditionalQuantity, 0), 0),
+                 2) AS FLOAT)
+             ELSE NULL END                                                                       AS Total_Price
+    FROM WH_sales
 )
 
 ,gain as(
@@ -759,9 +776,11 @@ SELECT
 	case when s.rn = 1
 	then PC.orderquantity else 0 end																							AS PurchaseQuantity,
 	s.LineTotalNet_USD																										AS LineTotalNet_USD,
+	NULL																													AS Item_Price,
+	NULL																													AS Storage_Price,
 	CASE WHEN s.AdjustmentFlag <> 1
 		 THEN CAST(ROUND(s.LineTotalNet_USD / NULLIF(s.Quantity, 0), 2) AS FLOAT)
-		 ELSE NULL END																										AS price_usd,
+		 ELSE NULL END																										AS Total_Price,
 	s.UnitNetPriceUSD																										AS UnitNetPriceUSD,
 	case when s.rn = 1
 	then PC.Cif_price else 0 end																							AS CIF_Purchase,
@@ -830,7 +849,7 @@ SELECT
     CAST(s.AgentKey AS VARCHAR)																								AS AgentKey,
     CAST(s.ItemKey AS VARCHAR)																								AS ItemKey,
     NULL																													AS ShipID,
-	FORMAT(s.DeliveryDate, 'yyyy-MM')																							AS [Year-Month],
+	FORMAT(s.DeliveryDate, 'yyyy-MM')																						AS [Year-Month],
     CAST(FORMAT(s.DeliveryDate, 'yyyy-MM') + '-01' AS DATE)																	AS ValueDate,
     s.DeliveryDate																											AS [DeliveryDate],			
     CASE WHEN s.SalesType IS NULL THEN s.QuantityCategory
@@ -838,9 +857,9 @@ SELECT
 	s.Quantity																												AS [Quantity],
 	s.Quantity																												AS PurchaseQuantity,
     s.LineTotalNet_USD																										AS [LineTotalNet_USD],
-    CASE WHEN s.AdjustmentFlag <> 1
-         THEN cast(ROUND(s.LineTotalNet_USD / NULLIF(s.Quantity, 0),2) AS FLOAT)
-         ELSE NULL END													                                                    AS price_usd,
+    s.Item_Price                                                                                                            AS Item_Price,
+    s.Storage_Price                                                                                                         AS Storage_Price,
+    s.Total_Price                                                                                                           AS Total_Price,
     s.UnitNetPriceUSD																										AS [UnitNetPriceUSD],
     NULL																													AS CIF_Purchase,  -- no CIF concept for warehouse
     NULL																													AS [demurrage / Despatch],
@@ -855,12 +874,10 @@ SELECT
          THEN CAST(ROUND((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - (16 + inv.WH_Price), 2) AS FLOAT) * s.Quantity
          ELSE 0 END																											AS TotalGain,
     s.AdditionalLineCost																									AS [AdditionalLineCost] --wh charge cost
-FROM WH_sales s
+FROM WH_prices s
 LEFT JOIN inv
-    ON  inv.ItemKey     = s.ItemKey
-    AND inv.SupplierKey = s.SupplierWarehouse
+    ON  inv.ItemKey = s.ItemKey
     AND FORMAT(inv.[Date], 'yyyyMM') = FORMAT(s.DeliveryDate, 'yyyyMM')
-LEFT JOIN CurrencyConvertion CC ON CC.TARIKH = s.DeliveryDate
 )
 
 select * from gain 
