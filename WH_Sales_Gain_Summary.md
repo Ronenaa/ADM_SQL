@@ -49,7 +49,7 @@ CurrencyConvertion
                       └─ P_costs
                            └─ sales (Invoices | Delivery Notes)
                                 └─ base_link
-                                     └─ WH_sales
+                                     └─ WH_sales → WH_prices
                                           └─ gain (Branch 1: Import/Exchange | Branch 2: Warehouse)
                                                └─ SELECT * FROM gain
 ```
@@ -58,7 +58,27 @@ CurrencyConvertion
 
 ## factGain_v1.sql — Full Change Log
 
-### 7. Warehouse branch — field improvements (latest)
+### 9. `inv` decoupled from supplier + `WH_prices` CTE + price columns renamed (latest)
+
+- **`inv` keyed by item + month only**: dropped `SupplierKey` from both the output and the
+  `PARTITION BY` (and from the regular-warehouse and 1144 source subqueries). Price is set by
+  item+date, not by warehouse — any warehouse shares the same item price for a given month.
+  Output is now just `ItemKey, [Date], WH_Price`.
+- **Warehouse branch join simplified**: `gain` Branch 2 now joins `inv` on `ItemKey` + month only
+  (removed `inv.SupplierKey = s.SupplierWarehouse`). The redundant `LEFT JOIN CurrencyConvertion CC`
+  in Branch 2 was removed.
+- **New `WH_prices` CTE** (after `WH_sales`): derives three price columns from the aggregated
+  warehouse sale —
+  - `Item_Price` = `(LineTotalNet_USD - AdditionalLineCost) / Quantity`
+  - `Storage_Price` = `AdditionalLineCost / AdditionalQuantity`
+  - `Total_Price` = `Item_Price + Storage_Price` (NULL when `AdjustmentFlag = '1'`)
+- **`AdditionalQuantity`** added to `WH_sales` (`SUM(s.AdditionalQuantity)`) to support `Storage_Price`.
+- **Price column rename in `gain`**: single `price_usd` column replaced by `Item_Price`,
+  `Storage_Price`, `Total_Price` in both branches. Branch 1 (Import/Exchange) sets
+  `Item_Price`/`Storage_Price` to NULL and maps the old per-unit calc to `Total_Price`;
+  Branch 2 (Warehouse) passes the three values through from `WH_prices`.
+
+### 7. Warehouse branch — field improvements
 
 - **`ShipID`** (boat): NULL — not applicable for warehouse rows
 - **`Qty_flag`**: `ROW_NUMBER() OVER (PARTITION BY SupplierWarehouse, ItemKey, inv.YearMonth ORDER BY inv.YearMonth DESC)` — flags the first row per warehouse/item/month combination
