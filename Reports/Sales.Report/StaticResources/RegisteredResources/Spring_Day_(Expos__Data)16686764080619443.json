@@ -1,0 +1,116 @@
+{
+  "name": "Spring Day (Exposé Data)",
+  "dataColors": [
+    "#28225E",
+    "#B7F1A2",
+    "#E56590",
+    "#FFB88C",
+    "#FE6D6A",
+    "#7F9FFF",
+    "#A858E5",
+    "#B6B6B7"
+  ],
+  "tableAccent": "#5cbae5",
+  "textClasses": {
+    "label": {
+      "color": "#FFFFFF"
+    }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [
+          {
+            "transparency": 0
+          }
+        ],
+        "filterCard": [
+          {
+            "$id": "Applied",
+            "backgroundColor": {
+              "solid": {
+                "color": "#E9E9E9"
+              }
+            },
+            "textSize": 11,
+            "transparency": 0,
+            "foregroundColor": {
+              "solid": {
+                "color": "#374649"
+              }
+            }
+          },
+          {
+            "$id": "Available",
+            "backgroundColor": {
+              "solid": {
+                "color": "#374649"
+              }
+            },
+            "foregroundColor": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            },
+            "transparency": 0
+          }
+        ],
+        "border": [
+          {
+            "color": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            },
+            "show": true,
+            "radius": 6
+          }
+        ],
+        "visualTooltip": [
+          {
+            "titleFontColor": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            },
+            "valueFontColor": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            }
+          }
+        ],
+        "outspacePane": [
+          {
+            "backgroundColor": {
+              "solid": {
+                "color": "#374649"
+              }
+            },
+            "foregroundColor": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "page": {
+      "*": {
+        "background": [
+          {
+            "color": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            },
+            "transparency": 0
+          }
+        ]
+      }
+    }
+  },
+  "bad": "#F78272",
+  "good": "#4CCBAB"
+}

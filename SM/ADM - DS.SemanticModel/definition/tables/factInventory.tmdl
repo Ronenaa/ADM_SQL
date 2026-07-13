@@ -1,0 +1,637 @@
+table factInventory
+	lineageTag: 5c2991d7-89de-49bd-8607-1fd07bbdec7d
+
+	measure 'כמות מלאי' = [Inventory Balance - Quantity]
+		formatString: #,0
+		displayFolder: כמות מלאי
+		lineageTag: de7f9a7c-10d0-4147-9c23-e95540d8aa5d
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'כמות מלאי כולל רכש והזמנות לקוח' = [Inventory Balance - Including Purchase and Orders]
+		formatString: #,0
+		displayFolder: כמות מלאי
+		lineageTag: d96d7e83-e635-4bec-aee1-2de61097c25d
+
+		changedProperty = IsHidden
+
+	measure 'יתרת מלאי בחישוב הזמנות ורכש' = [Cumulative Inventory]
+		formatString: #,0
+		displayFolder: כמות מלאי
+		lineageTag: 4a09100c-61f5-4f9c-8d5d-5ddd6fa08997
+
+		changedProperty = IsHidden
+
+	measure 'מספר פריטים במלאי' = ```
+			
+			
+			COUNTROWS(
+			CALCULATETABLE(VALUES(dimItems[שם מוצר])
+			    ,FILTER(dimItems,[Stock Months Including Purchase and Orders]>3)
+			)
+			    )
+			    
+			```
+		formatString: 0
+		displayFolder: כמות מלאי
+		lineageTag: 404b7990-cbcd-4d55-b88b-a2eacfe2d60a
+
+		changedProperty = IsHidden
+
+	measure 'חודשי מלאי' = [Stock Months]
+		formatString: #,0.0
+		displayFolder: חודשי מלאי
+		lineageTag: 38f981c1-0fc1-4dbc-9cd4-ee4ed87412e0
+
+		changedProperty = IsHidden
+
+	measure 'חודשי מלאי כולל רכש והזמנות' = [Stock Months Including Purchase and Orders]
+		displayFolder: חודשי מלאי
+		lineageTag: 54e6610d-e4a5-42dc-80b8-853ffbfb71d0
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'חודשי מלאי עבור מכירות 3 חודשים' = CALCULATE([Stock Months Including Purchase and Orders],FILTER(ALL(Inventory_MeasureSelctionTable),Inventory_MeasureSelctionTable[ID]=2))
+		displayFolder: חודשי מלאי
+		lineageTag: e9369fab-8e01-466f-bdc3-e6baa4f492bd
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'חודשי מלאי עבור מכירות חודש אחרון' = CALCULATE([Stock Months Including Purchase and Orders],FILTER(ALL(Inventory_MeasureSelctionTable),Inventory_MeasureSelctionTable[ID]=1))
+		displayFolder: חודשי מלאי
+		lineageTag: 2c634d3c-4156-41c0-939b-a56359e5f22c
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'שווי מלאי' = [Inventory Balance - Value]
+		formatString: #,0
+		displayFolder: שווי מלאי
+		lineageTag: dbff9401-9809-4d7e-aa56-cfc80106561a
+
+		changedProperty = IsHidden
+
+	measure 'שווי מלאי בבנק' = [Inventory Balance - Value]*([BankCostPrecentageParameter Value]/100)
+		displayFolder: שווי מלאי
+		lineageTag: a822f09f-f491-4f70-ae72-223adc55124c
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'ימי מלאי - כולל הזמנות ורכש' = [Inventory Days - Including Purchase and Orders]
+		formatString: #,0
+		displayFolder: מדדי אחוז
+		lineageTag: ff4cf1ba-77b8-4aad-83be-20c207b4d0d7
+
+		changedProperty = IsHidden
+
+	measure 'המלצת רכש' = ```
+			SUMX(VALUES(dimItems[ItemKey]), CALCULATE(IF([כמות נדרשת לעמידה בחודשי מלאי] >
+			[כמות מלאי כולל רכש והזמנות לקוח] , [כמות נדרשת לעמידה בחודשי מלאי] -[כמות מלאי כולל רכש והזמנות לקוח] ,0)))
+			
+			/* if calculating the recom according to parameters
+			
+			
+			*/
+			
+			/* if calculatin the recom according to future date 
+			
+			IF( [Inventory Days - Including Purchase and Orders] > ([PurchaseMonthsParameter Value] *30 *[Daily Inventory Chosen Analysis]) 
+			,0,
+			([PurchaseMonthsParameter Value] *30 *[Daily Inventory Chosen Analysis]) - [Inventory Days - Including Purchase and Orders])
+			*/
+			
+			
+			///V1 IF([Purchase Recomendation - Days]>0,[Avg Lead Time]*[ממוצע יומי לתקופה שנבחרה],
+			//(ABS([Purchase Recomendation - Days]+[Avg Lead Time])*[ממוצע יומי לתקופה שנבחרה]))
+			```
+		formatString: #,0
+		displayFolder: מדדי אחוז
+		lineageTag: 89feac09-abdc-48cf-a35b-fb6115b48fc3
+
+		changedProperty = IsHidden
+
+	measure 'Inventory Balance - Quantity' = ```
+			
+			VAR _LastUpdated=CALCULATE(MAX(factInventory[Date]),ALL(factInventory))
+			
+			RETURN 
+			CALCULATE(SUM(factInventory[Quantity]),factInventory[Date]=_LastUpdated)
+			```
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: d1a59b4c-3451-43eb-8a92-17c1ea9e8671
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Inventory Balance - Value' =
+			
+			var LastUpdated=CALCULATE(MAX(factInventory[Date]),ALL(factInventory))
+			return CALCULATE(SUM(factInventory[StockValue]),factInventory[Date]=LastUpdated)
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: da5e55ad-259e-4cb2-abca-464d475894de
+
+		changedProperty = IsHidden
+
+	measure 'Stock Months' = DIVIDE([Inventory Balance - Quantity],[Inventory Chosen Analysis])
+		formatString: 0.0
+		lineageTag: a28727db-0be5-4b14-b73e-9bfa0a767ca3
+
+		changedProperty = IsHidden
+
+	measure 'Inventory Balance - Including Purchase and Orders' = [Inventory Balance - Quantity]-[Open Orders Quantity By Supply Date]+[Open Purchase Quantity By Supply Date]
+		lineageTag: c193d490-59f5-4b0e-97bb-b0c27aa9ab55
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Stock Months Including Purchase and Orders' = DIVIDE([Inventory Balance - Including Purchase and Orders],[Inventory Chosen Analysis])
+		lineageTag: 0afe64c4-968b-42af-a9e1-f5c2cb8a4e65
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Inventory Days - Including Purchase and Orders' = DIVIDE([Inventory Balance - Including Purchase and Orders],[Daily Inventory Chosen Analysis])
+		lineageTag: 5a3bb23a-1471-4955-94ba-3a1c2bb22311
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Cumulative Inventory' = [InventoryBalance - Today]+[Cumulative Open Purchase]-[Cumulative Open Orders]-[Daily Sales - Inventory Recomendaiton]
+		lineageTag: 60aa8670-5e7f-46ce-9b11-e69f64ce8c56
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure MonthforstockselectedPeriod = DISTINCTCOUNT(dimDates[Date])/30
+		lineageTag: dafdfb2d-2a7b-40e0-ad5e-51e3c2d1fdb1
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'InventoryBalance - Today' = CALCULATE([Inventory Balance - Quantity],ALL(dimDates))
+		lineageTag: bc53fc98-efc2-45ec-ba37-b63102fa50d6
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Inventory Days' =
+			
+			VAR _Date = CALCULATE(MAX(dimDates[Date]),dimDates[IsHistory]=1)
+			VAR _90Days = DATE(YEAR(_Date),MONTH(_Date),DAY(_Date)-90)
+			VAR _Inventory = CALCULATE(SUM(factInventory[Quantity]),FILTER(All(dimDates),dimDates[Date]>=_90Days && dimDates[Date]<=_Date))
+			VAR _Sales = CALCULATE([Total Quantity OUT],FILTER(All(dimDates),dimDates[Date]>=_90Days && dimDates[Date]<=_Date))
+			VAR _Sales_noExchange = CALCULATE([Total Quantity OUT],factInventoryActivity[DocType]<>4,FILTER(All(dimDates),dimDates[Date]>=_90Days && dimDates[Date]<=_Date))
+			
+			RETURN
+			SWITCH(TRUE(),
+			HASONEVALUE(dimWarehouses[WarehsKey]),
+			DIVIDE(_Inventory,_Sales),
+			DIVIDE(_Inventory,_Sales_noExchange)
+			)
+		lineageTag: 7fc74a2f-48d2-4e76-b533-c5220e38c331
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Inventory Balance - Avg Value' =
+			
+			var LastUpdated=CALCULATE(MAX(factInventory[Date]),ALL(factInventory))
+			return CALCULATE(DIVIDE([Inventory Balance - Value],[Inventory Balance - Quantity],BLANK()),factInventory[Date]=LastUpdated)
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: e28d5217-da1e-459d-bbf4-3c6f1af4ef99
+
+		changedProperty = IsHidden
+
+	measure 'Inventory Balance - Quantity Other' =
+			
+			VAR _tbl = SELECTCOLUMNS(dimSuppliersCompare,"Supplier",dimSuppliersCompare[Supplier Name],"TotalQty",CALCULATE([Inventory Balance - Quantity]-[Total Allocation Messages QTY],All(dimItemsSimple),REMOVEFILTERS(dimSuppliers)))
+			VAR _Above350 = FILTER(SUMMARIZE(_tbl,[Supplier],[TotalQty],"Qty",[Inventory Balance - Quantity]-[Total Allocation Messages QTY]),[TotalQty]>=350)
+			VAR _Under350 = FILTER(SUMMARIZE(_tbl,[Supplier],[TotalQty],"Qty",CALCULATE([Inventory Balance - Quantity]-[Total Allocation Messages QTY],REMOVEFILTERS(dimSuppliers))),[TotalQty]<350)
+			VAR _UnderOTHER = FILTER(SELECTCOLUMNS(_Under350,"Supplier",[Supplier],"Quantity",CALCULATE(SUMX(_Under350,[Qty]),ALL(dimSuppliersCompare))),[Supplier]="OTHER")
+			
+			Return
+			SWITCH(TRUE(),
+			        HASONEVALUE(dimSuppliers[Supplier Name]),
+			        SWITCH(MAX(dimSuppliers[Supplier Name]),
+			        "Other",SUMX(_UnderOTHER,[Quantity]),
+			        SUMX(_Above350,[Qty])
+			        ),
+			[Inventory Balance - Quantity]-[Total Allocation Messages QTY])
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: f395f4e9-5799-4669-9593-35024760fa20
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Inventory Balance - Quantity -' = ```
+			
+			IF(ISBLANK([Inventory Balance - Quantity]-[Total Allocation Messages QTY]),
+			    IF(ISBLANK(CALCULATE([Inventory Balance - Quantity]-[Total Allocation Messages QTY],ALL(dimItemsSimple)))
+			        ,Blank(),"-")
+			   ,[Inventory Balance - Quantity]-[Total Allocation Messages QTY]
+			   )
+			   
+			```
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 90f3d8f0-c2f0-4d9c-824a-58ccce228ae6
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Inventory Balance - Quantity Other -' = ```
+			
+			IF(ISBLANK([Inventory Balance - Quantity Other]),
+			    IF(ISBLANK(CALCULATE([Inventory Balance - Quantity Other],ALL(dimItemsSimple)))
+			        ,Blank(),"-")
+			   ,[Inventory Balance - Quantity Other]
+			   )
+			   
+			```
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 61d534db-6429-4ee0-8467-d34dd0442565
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'Inventory Balance - Quantity - Monthly' = ```
+			
+			VAR _LastUpdated=CALCULATE(MAX(factInventory[Date]))
+			
+			RETURN 
+			CALCULATE(SUM(factInventory[Quantity]),factInventory[Date]=_LastUpdated)
+			```
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 305386b5-04a3-45aa-9a57-8d575e5e2592
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure MAXInventoryMonth =
+			
+			VAR _Tbl = SUMMARIZE(dimDates,dimDates[MonthInCalendarName],"MAXInOut",MAX([Total Quantity IN],[Total Quantity OUT]),"Inventory",[Inventory Balance - Quantity - Monthly])
+			
+			RETURN
+			MAXX(_Tbl,MAX([MAXInOut],[Inventory]))*1.1
+		lineageTag: 8b43dcab-d931-4ca1-a7d6-df1904b306fd
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Inventory Balance - Value Other' = ```
+			
+			VAR _tbl = SELECTCOLUMNS(dimSuppliersCompare,"Supplier",dimSuppliersCompare[Supplier Name],"TotalQty",CALCULATE([Inventory Balance - Quantity],All(dimItemsSimple),REMOVEFILTERS(dimSuppliers)))
+			VAR _Above350 = FILTER(SUMMARIZE(_tbl,[Supplier],[TotalQty],"Value", factInventory[Inventory Balance - Value FOT]),[TotalQty]>=350)
+			VAR _Under350 = FILTER(SUMMARIZE(_tbl,[Supplier],[TotalQty],"Value", CALCULATE(factInventory[Inventory Balance - Value FOT],REMOVEFILTERS(dimSuppliers))),[TotalQty]<350)
+			VAR _UnderOTHER = FILTER(SELECTCOLUMNS(_Under350,"Supplier",[Supplier],"Value",CALCULATE(SUMX(_Under350,[Value]),ALL(dimSuppliersCompare))),[Supplier]="OTHER")
+			
+			Return
+			
+			SWITCH(TRUE(),
+			HASONEVALUE(dimSuppliers[Supplier Name]),
+			    SWITCH(MAX(dimSuppliers[Supplier Name]),
+			        "אחר",
+			            CALCULATE(SUMX(_UnderOTHER,[Value]),ALL(dimSuppliers)),
+			        SUMX(_Above350,[Value])
+			    ),
+			[Inventory Balance - Value FOT])
+			
+			```
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 14f8f22f-c917-419a-a14c-dedcdd7d4fd6
+
+		changedProperty = IsHidden
+
+	measure 'Inventory Balance - Avg Value Other' = ```
+			
+			
+			VAR _tbl = SELECTCOLUMNS(dimSuppliersCompare,"Supplier",dimSuppliersCompare[Supplier Name],"TotalQty",CALCULATE([Inventory Balance - Quantity],All(dimItemsSimple),REMOVEFILTERS(dimSuppliers)))
+			VAR _Above350 = FILTER(SUMMARIZE(_tbl,[Supplier],[TotalQty],"Qty",[Inventory Balance - Quantity],"Value", factInventory[Inventory Balance - Value FOT]),[TotalQty]>=350)
+			VAR _Under350 = FILTER(SUMMARIZE(_tbl,[Supplier],[TotalQty],"Qty",CALCULATE([Inventory Balance - Quantity],REMOVEFILTERS(dimSuppliers)),"Value", CALCULATE(factInventory[Inventory Balance - Value FOT],REMOVEFILTERS(dimSuppliers))),[TotalQty]<350)
+			VAR _UnderOTHER = FILTER(SELECTCOLUMNS(_Under350,"Supplier",[Supplier],"Quantity",CALCULATE(SUMX(_Under350,[Qty]),ALL(dimSuppliersCompare)),"Value",CALCULATE(SUMX(_Under350,[Value]),ALL(dimSuppliersCompare))),[Supplier]="OTHER")
+			
+			Return
+			
+			SWITCH(TRUE(),
+			HASONEVALUE(dimSuppliers[Supplier Name]),
+			    SWITCH(MAX(dimSuppliers[Supplier Name]),
+			        "OTHER",
+			            DIVIDE(CALCULATE(SUMX(_UnderOTHER,[Value]),ALL(dimSuppliers)),CALCULATE(SUMX(_UnderOTHER,[Quantity]),ALL(dimSuppliers))),
+			        DIVIDE(SUMX(_Above350,[Value]),SUMX(_Above350,[QTY]))
+			    ),
+			[Inventory Balance - Avg Value FOT])
+			
+			```
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: b2226d8f-be69-407e-a57d-2546354e96ed
+
+		changedProperty = IsHidden
+
+	measure 'Inventory Balance - Value FOT' =
+			
+			var LastUpdated=CALCULATE(MAX(factInventory[Date]),ALL(factInventory))
+			return CALCULATE(SUM(factInventory[FOTStockValue]),factInventory[Date]=LastUpdated)
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: FOT
+		lineageTag: 4bf67f68-4f27-413e-b6c1-b5e3665a4da1
+
+		changedProperty = IsHidden
+
+	measure 'Inventory Balance - Value CF' =
+			
+			var LastUpdated=CALCULATE(MAX(factInventory[Date]),ALL(factInventory))
+			return CALCULATE(SUM(factInventory[CFStockValue]),factInventory[Date]=LastUpdated)
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: CF
+		lineageTag: fd80f2f1-3a9a-4323-bc04-ccf7ce10603e
+
+		changedProperty = IsHidden
+
+	measure 'Inventory Balance - Avg Value FOT' =
+			
+			var LastUpdated=CALCULATE(MAX(factInventory[Date]),ALL(factInventory))
+			return CALCULATE(DIVIDE([Inventory Balance - Value FOT],[Inventory Balance - Quantity],BLANK()),factInventory[Date]=LastUpdated)
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: FOT
+		lineageTag: ed1e8ab3-dc20-4ec1-b8a3-c8456553cfc9
+
+		changedProperty = IsHidden
+
+	measure 'Inventory Balance - Avg Value CF' =
+			
+			var LastUpdated=CALCULATE(MAX(factInventory[Date]),ALL(factInventory))
+			return CALCULATE(DIVIDE([Inventory Balance - Value CF],[Inventory Balance - Quantity],BLANK()),factInventory[Date]=LastUpdated)
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: CF
+		lineageTag: b188884a-976c-450d-9e16-30feaf9371a8
+
+		changedProperty = IsHidden
+
+	measure 'Inventory Value Switch' =
+			
+			SWITCH(MIN(PriceType[ID]),
+			1,[Inventory Balance - Value],
+			2,[Inventory Balance - Value CF],
+			3,[Inventory Balance - Value FOT],
+			[Inventory Balance - Value]
+			)
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: a5f15c6b-04e1-47ed-b493-1ba9ce69b0d2
+
+		changedProperty = IsHidden
+
+	measure 'Inventory Avg Value Switch' =
+			
+			SWITCH(MIN(PriceType[ID]),
+			1,[Inventory Balance - Avg Value],
+			2,[Inventory Balance - Avg Value CF],
+			3,[Inventory Balance - Avg Value FOT],
+			[Inventory Balance - Avg Value]
+			)
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 05f63db9-c7c8-479e-8b71-810f0a7ff584
+
+		changedProperty = IsHidden
+
+	column EntityID
+		dataType: string
+		lineageTag: f7f0c1b8-67c8-4323-8cbc-e23a4900de0e
+		summarizeBy: none
+		sourceColumn: EntityID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ItemKey
+		dataType: string
+		lineageTag: 08e92958-8931-4e6a-a0b6-ce95257c6b18
+		summarizeBy: none
+		sourceColumn: ItemKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Date
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 7b5aec66-495b-48d0-a074-394ddd0c2fd8
+		summarizeBy: none
+		sourceColumn: Date
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Type
+		dataType: int64
+		formatString: 0
+		lineageTag: f1d55117-261e-43f6-8626-87b6e891b501
+		summarizeBy: sum
+		sourceColumn: Type
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Status
+		dataType: int64
+		formatString: 0
+		lineageTag: a554999b-1a84-4ee3-ab41-38ac799a6496
+		summarizeBy: sum
+		sourceColumn: Status
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SupplierKey
+		dataType: string
+		lineageTag: af96e216-b2ba-462f-906c-af713f4800cb
+		summarizeBy: none
+		sourceColumn: SupplierKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column WarehsKey
+		dataType: string
+		lineageTag: 574dd4b4-fccc-4ffd-b5b7-0f1cf7ca1bd0
+		summarizeBy: none
+		sourceColumn: WarehsKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column BranchKey
+		dataType: string
+		lineageTag: a9898d2d-a014-47a2-854a-b25748175de8
+		summarizeBy: none
+		sourceColumn: BranchKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column CostperUnit
+		dataType: int64
+		formatString: 0
+		lineageTag: 704bb534-a84a-4434-9b99-b18d1dbd0935
+		summarizeBy: sum
+		sourceColumn: CostperUnit
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quantity
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: ec340e52-f4a0-4173-90fd-4d33eb0fbcb5
+		summarizeBy: sum
+		sourceColumn: Quantity
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column RowInsertDatetime
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 5471e426-244f-4713-b7ec-15f57bc2a30d
+		summarizeBy: none
+		sourceColumn: RowInsertDatetime
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column StockValue
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: e2527161-4adf-47a8-8e0d-a0a78a13a344
+		summarizeBy: sum
+		sourceColumn: StockValue
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column WeightedExpenses
+		dataType: double
+		lineageTag: ccc0f5fa-ad60-4a1b-96c8-0341c42c564c
+		summarizeBy: sum
+		sourceColumn: WeightedExpenses
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column UnitPrice
+		dataType: double
+		lineageTag: 7a0e182b-61c9-4edf-896f-20206d3ee4a0
+		summarizeBy: sum
+		sourceColumn: UnitPrice
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column FOTprice
+		dataType: double
+		lineageTag: 1fdfeaf4-5ca2-4f80-94fb-94cabaf70cca
+		summarizeBy: sum
+		sourceColumn: FOTprice
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column CFPrice
+		dataType: double
+		lineageTag: 5f60f47a-66fc-4e97-b57a-53368ba1396b
+		summarizeBy: sum
+		sourceColumn: CFPrice
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column FOTStockValue
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: fc291a92-17e5-4273-8804-bad984ce3d3f
+		summarizeBy: sum
+		sourceColumn: FOTStockValue
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column CFStockValue
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 36692a8f-4954-40fa-9348-705c9a6d5169
+		summarizeBy: sum
+		sourceColumn: CFStockValue
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition factInventory = m
+		mode: import
+		queryGroup: 'fact Tables'
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="#(lf)WITH STG_1 AS(#(lf)#(tab)#(tab) SELECT #(lf)#(tab)#(tab)ProductID AS 'ItemKey'#(lf)#(tab)#(tab),inv.DueDate AS 'Date'#(lf)#(tab)#(tab),NULL as 'Type'#(lf)#(tab)#(tab),NULL AS 'Status'#(lf)#(tab)#(tab),NULL AS 'WarehsKey'#(lf)#(tab)#(tab),SupplierID AS 'SupplierKey'#(lf)#(tab)#(tab)--,null AS 'BranchKey'#(lf)#(tab)#(tab),NULL AS 'BranchKey' -- Only Retail with POS#(lf)#(tab)#(tab)--,CONVERT(INT, CONVERT(VARCHAR, b.BRANCH)) AS 'BranchKey' -- Only Retail without POS#(lf)#(tab)#(tab),NULL as 'CostperUnit'#(lf)#(tab)#(tab),AvgPrice AS 'UnitPrice'#(lf)#(tab)#(tab),FotFlat AS 'FOTprice'#(lf)#(tab)#(tab),CFFlat AS 'CFPrice'#(lf)#(tab)#(tab),INV.TotalInventory 'Quantity' #(lf)#(tab)#(tab),ROUND(CAST(PCOST.AvgPrice AS decimal),2) * INV.TotalInventory as 'StockValue'#(lf)#(tab)#(tab),ROUND(CAST(PCOST.FotFlat AS decimal),2) * INV.TotalInventory as 'FOTStockValue'#(lf)#(tab)#(tab),ROUND(CAST(PCOST.CFFlat AS decimal),2) * INV.TotalInventory as 'CFStockValue'#(lf)#(tab)#(tab),CASE WHEN PCOST.FotFlat IS NULL THEN LAG(PCOST.FotFlat) OVER (PARTITION BY ProductCode order by PCOST.DueDate)* INV.TotalInventory ELSE PCOST.FotFlat* INV.TotalInventory END AS 'SVal'#(lf)#(tab)#(tab),WeightedExpenses#(lf)#(tab)#(tab),GETDATE() AS RowInsertDatetime#(lf)#(tab)#(tab),Inv.Version#(lf)#(tab)#(tab),ROW_NUMBER() OVER (partition by inv.DueDate,inv.SupplierID,inv.ProductID ORDER BY inv.DueDate,inv.Version desc) AS 'MaxVersion' --row num 1 will be the latest#(lf)FROM  tblInventory Inv#(lf)/*INNER JOIN (#(lf)SELECT MAX(DueDate) AS MD#(lf)from tblInventory#(lf))DD#(lf)ON INV.DueDate = DD.MD*/#(lf)LEFT JOIN tblProductsCost PCost#(lf)ON (INV.DueDate = PCost.DueDate#(lf)AND INV.ProductID = PCost.ProductCode#(lf)AND INV.Version = PCost.Version)#(lf)LEFT JOIN MOTSRIM M ON INV.ProductID=M.QOD_MOTSR#(lf)WHERE  1 = 1 #(lf))#(lf)#(lf),STG_2 AS (#(lf)SELECT TM.QOD_PRIT AS 'ItemKey'#(lf)#(tab)#(tab),SUBSTRING(T_TNOEH,1,4) + '-' + SUBSTRING(T_TNOEH,5,2) + '-' + SUBSTRING(T_TNOEH,7,2) AS 'Date'#(lf)#(tab)#(tab),1144 AS 'SupplierKey'#(lf)#(tab)#(tab),SUM(TM.CMOT_LOGOS) AS 'Quantity' #(lf) --row num 1 will be the latest#(lf)#(lf)FROM BT.[dbo].[TNOEOT_MLAI_CLLI] TM#(lf)WHERE 1=1#(lf)AND QOD_GORM <> 1#(lf)AND Cast(SUBSTRING(TM.T_TNOEH,1,4) as int) >=2018 and Cast(SUBSTRING(TM.T_TNOEH,1,4) as int) <= Year(Getdate())#(lf)AND SOG_TNOEH_CN_ITS_SP_HE LIKE N'%כ%'#(lf)GROUP BY TM.QOD_PRIT,TM.T_TNOEH#(lf)#(lf)Union ALL#(lf)#(lf)SELECT TM.QOD_PRIT AS 'ItemKey'#(lf)#(tab)#(tab),SUBSTRING(T_TNOEH,1,4) + '-' + SUBSTRING(T_TNOEH,5,2) + '-' + SUBSTRING(T_TNOEH,7,2) AS 'Date'#(lf)#(tab)#(tab),1144 AS 'SupplierKey'#(lf)#(tab)#(tab),SUM(TM.CMOT_LOGOS)*-1 AS 'Quantity' #(lf) --row num 1 will be the latest#(lf)#(lf)FROM BT.[dbo].[TNOEOT_MLAI_CLLI] TM#(lf)WHERE 1=1#(lf)AND QOD_GORM <> 1#(lf)AND Cast(SUBSTRING(TM.T_TNOEH,1,4) as int) >=2018 and Cast(SUBSTRING(TM.T_TNOEH,1,4) as int) <= Year(Getdate())#(lf)AND SOG_TNOEH_CN_ITS_SP_HE LIKE N'%י%'#(lf)GROUP BY TM.QOD_PRIT,TM.T_TNOEH#(lf))#(lf)#(lf),STG_3 AS (#(lf)SELECT TM.ItemKey AS 'ItemKey'#(lf)#(tab)#(tab),PC.DueDate AS 'Date'#(lf)#(tab)#(tab),NULL as 'Type'#(lf)#(tab)#(tab),NULL AS 'Status'#(lf)#(tab)#(tab),NULL AS 'WarehsKey'#(lf)#(tab)#(tab),1144 AS 'SupplierKey'#(lf)#(tab)#(tab)--,null AS 'BranchKey'#(lf)#(tab)#(tab),NULL AS 'BranchKey' -- Only Retail with POS#(lf)#(tab)#(tab)--,CONVERT(INT, CONVERT(VARCHAR, b.BRANCH)) AS 'BranchKey' -- Only Retail without POS#(lf)#(tab)#(tab),NULL as 'CostperUnit'#(lf)#(tab)#(tab),AvgPrice AS 'UnitPrice'#(lf)#(tab)#(tab),FotFlat AS 'FOTprice'#(lf)#(tab)#(tab),CFFlat AS 'CFPrice'#(lf)#(tab)#(tab),SUM(TM.Quantity) AS 'Quantity' #(lf)#(tab)#(tab),ROUND(CAST(PC.AvgPrice AS decimal),2) * SUM(TM.Quantity) as 'StockValue'#(lf)#(tab)#(tab),ROUND(CAST(PC.FotFlat AS decimal),2) * SUM(TM.Quantity) as 'FOTStockValue'#(lf)#(tab)#(tab),ROUND(CAST(PC.CFFlat AS decimal),2) * SUM(TM.Quantity) as 'CFStockValue'#(lf)#(tab)#(tab),CASE WHEN PC.FotFlat IS NULL THEN LAG(PC.FotFlat) OVER (PARTITION BY TM.ItemKey order by PC.DueDate)* SUM(TM.Quantity) ELSE PC.FotFlat* SUM(TM.Quantity) END AS 'SVal'#(lf)#(tab)#(tab),PC.WeightedExpenses#(lf)#(tab)#(tab),GETDATE() AS RowInsertDatetime#(lf)#(tab)#(tab),MV.MAXVERSION as 'Version'#(lf)#(tab)#(tab),ROW_NUMBER() OVER (partition by PC.DueDate,TM.ItemKey ORDER BY PC.DueDate,MV.MAXVERSION desc) AS 'MaxVersion' --row num 1 will be the latest#(lf)#(lf)FROM STG_2 TM#(lf)LEFT JOIN (SELECT DueDate,ProductCode,MAX([Version]) as MAXVERSION#(lf)#(tab)#(tab)#(tab)FROM tblProductsCost#(lf)#(tab)#(tab)#(tab)Group By DueDate,ProductCode) MV#(lf)#(tab)#(tab)ON MV.DueDate=TM.Date#(lf)#(tab)#(tab)AND MV.ProductCode = TM.ItemKey#(lf)LEFT JOIN tblProductsCost PC#(lf)#(tab)ON PC.Version =MV.MAXVERSION#(lf)#(tab)AND PC.DueDate = MV.DueDate#(lf)#(tab)AND PC.ProductCode = MV.ProductCode#(lf)WHERE 1=1#(lf)GROUP BY TM.ItemKey,PC.DueDate,PC.AvgPrice,PC.CFFlat,PC.FotFlat,PC.WeightedExpenses,MV.MAXVERSION#(lf))#(lf)#(lf)#(lf)SELECT#(lf)'1' as 'EntityID'#(lf)--,'1' + Inv.ItemKey as 'ItemKey'#(lf)--,CONCAT('1', Inv.ItemKey) as 'ItemKey'#(lf),cast(Inv.ItemKey as varchar) +'-'+ cast(Inv.ItemKey as varchar) as 'ItemKey'#(lf),Inv.Date AS 'Date'#(lf),NULL as 'Type'#(lf),NULL as 'Status'#(lf)--,'1' + Inv.[WarehsKey] as 'WarehsKey'#(lf)--,CONCAT('1' , Inv.[WarehsKey]) as 'WarehsKey'#(lf),cast( Inv.SupplierKey as varchar) as 'SupplierKey'#(lf),cast( Inv.[WarehsKey] as varchar) as 'WarehsKey'#(lf)--,'1' + Inv.[BranchKey] as 'BranchKey'#(lf)--,Concat('1', Inv.[BranchKey]) as 'BranchKey'#(lf),cast(Inv.[BranchKey] as varchar) as 'BranchKey'#(lf),Inv.[CostperUnit]#(lf),UnitPrice#(lf),FOTprice#(lf),CFPrice#(lf),SUM(Quantity) as 'Quantity'#(lf),SUM([StockValue]) as 'StockValue'#(lf),SUM([FOTStockValue]) as 'FOTStockValue'#(lf),SUM([CFStockValue]) as 'CFStockValue'#(lf),WeightedExpenses#(lf),Inv.[RowInsertDatetime]#(lf)FROM (SELECT * #(lf)#(tab)#(tab)FROM STG_1#(lf)#(tab)UNION ALL#(lf)#(tab)SELECT *#(lf)#(tab)#(tab)FROM STG_3#(lf)#(tab)#(tab))Inv#(lf)WHERE MaxVersion=1#(lf)GROUP BY #(lf)Inv.ItemKey#(lf),Inv.Date#(lf),Inv.TYPE#(lf),Inv.Status#(lf),Inv.WarehsKey#(lf),SupplierKey#(lf),Inv.BranchKey#(lf),Inv.CostperUnit#(lf),Inv.RowInsertDatetime#(lf),WeightedExpenses#(lf),UnitPrice#(lf),FOTprice#(lf),CFPrice#(lf)Order By SupplierKey,ItemKey,Date"]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Date", type date}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

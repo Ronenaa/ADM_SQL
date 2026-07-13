@@ -1,0 +1,812 @@
+table factCollection
+	lineageTag: d7eaf474-767e-44f4-bc95-57aa632f11b1
+
+	measure 'Total Debt' = CALCULATE(SUM(factCollection[Debt]),factCollection[DocTypeCode]=3)--,factCollection[DocType]="Open Docs")
+		formatString: "₪"\ #,0.00;"₪"-#,0.00;"₪"\ #,0.00
+		lineageTag: 32f794fd-926e-45f0-8199-961d7914679a
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"he-IL"}
+
+	measure '%  Debt from Total sales' = DIVIDE([Total Debt],[מכירות])
+		lineageTag: 40e57553-ced5-4ee2-b3af-a0c54e110977
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '% Late debt from total debt' = DIVIDE([Late Debt],[Total Debt])
+		lineageTag: 4a64f72f-987e-4db2-8fe8-f207fb34895e
+
+		changedProperty = IsHidden
+
+	measure 'Customer Days' =
+			
+			VAR _maxdate = CALCULATE(MAX(dimDates[Date]),dimDates[IsHistory]=1)
+			VAR _180Days = DATE(YEAR(_maxdate),MONTH(_maxdate),DAY(_maxdate)-180)
+			VAR _table = CALCULATETABLE(SUMMARIZE(factCollection,dimCustomers[AccountKey],factCollection[TransactionID],
+			                "PaidtoDate",SUM(factCollection[PayedToDate]),
+			                "Days", DATEDIFF(MAX(factCollection[InvoiceDate]),
+			                    IF(
+			                        ISBLANK(MAX(factCollection[תאריך קבלה])),
+			                        _maxdate,
+			                        IF(
+			                            MAX(factCollection[תאריך קבלה])>=_maxdate,
+			                            _maxdate,
+			                            MAX(factCollection[תאריך קבלה])
+			                            )
+			                    )
+			                    ,DAY)
+			                    ),
+			                    factCollection[PayedToDate]>0,All(dimDates),factCollection[InvoiceDate]<=_maxdate && factCollection[invoiceDate]>=_180Days,factCollection[DocTypeCode]<>1
+			                    )
+			RETURN
+			SUMX(_table,[PaidtoDate]*[Days])
+			/
+			SUMX(_table,[PaidtoDate])
+		lineageTag: a7ea06b6-96cf-4b0f-a57a-57a33997b913
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Debt To Date' = ```
+			
+			var MaxDate = CALCULATE(MAX(dimDates[Date]),FILTER(dimDates,dimDates[Date]<=TODAY())) 
+			RETURN
+			CALCULATE(SUM(factCollection[PayedToDate]), 
+			  CALCULATETABLE(FILTER(factCollection,factCollection[InvoiceDate]<=MaxDate && ((factCollection[תאריך קבלה]>MaxDate)|| ISBLANK([תאריך קבלה])) && (factCollection[DocTypeCode] = 3 || factCollection[DocTypeCode] = 4 || factCollection[DocTypeCode] = 5) ),ALL(dimDates)))
+			```
+		formatString: "₪"\ #,0.00;"₪"-#,0.00;"₪"\ #,0.00
+		lineageTag: 5dc8a6b9-b0e9-40b0-90dc-c12da4f0b068
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"he-IL"}
+
+	measure 'Expected Receipts' = CALCULATE(SUM(factCollection[Debt]),USERELATIONSHIP(factCollection[תאריך תשלום צפוי],dimDates[Date]),(factCollection[DocTypeCode]<>4))
+		formatString: "₪"\ #,0.00;"₪"-#,0.00;"₪"\ #,0.00
+		lineageTag: 5a135c34-2aaa-4b4a-ab52-1a17e74a1e86
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"he-IL"}
+
+	measure 'Late Debt' = CALCULATE([Total Debt],factCollection[LateFlag]=1)// 1 is late
+		formatString: "₪"\ #,0.00;"₪"-#,0.00;"₪"\ #,0.00
+		lineageTag: 34a872ce-39ba-43d4-a720-1d03e11e4847
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"he-IL"}
+
+	measure חוב = [Total Debt]
+		formatString: "₪"\ #,0.00;"₪"-#,0.00;"₪"\ #,0.00
+		displayFolder: חוב
+		lineageTag: 809c83ae-c770-44d6-a94f-ac48708f2109
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"he-IL"}
+
+	measure 'חוב באיחור' = [Late Debt]
+		formatString: "₪"\ #,0;"₪"-#,0;"₪"\ #,0
+		displayFolder: חוב
+		lineageTag: 106543d2-e17f-442a-a2a3-57dcf9c7d6de
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"he-IL"}
+
+	measure 'ימי לקוח' = [Customer Days]
+		displayFolder: ימי לקוח
+		lineageTag: 53454518-8fa0-4b0c-8487-00bc8fb1d2af
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'ניתוח תקופתי' =
+			SWITCH([AR_ChosenMeasure],
+			1,[Total Debt All Docs],
+			2,[Debt To Date 12 Month],
+			3,[Cash Flow],
+			[Total Debt All Docs])
+		formatString: "₪"\ #,0.###############;"₪"-#,0.###############;"₪"\ #,0.###############
+		lineageTag: 9550dd39-45c8-4e77-bb9e-5f304c15f17e
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"he-IL"}
+
+	measure 'סכום בחשבונית' = SUM(factCollection[InvoiceAmount])
+		formatString: "₪"\ #,0.00;"₪"-#,0.00;"₪"\ #,0.00
+		displayFolder: אחר
+		lineageTag: f34f56b4-406e-4495-ae8b-2cfe9fb45bb1
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"he-IL"}
+
+	measure שולם = SUM([PayedAmount])
+		formatString: "₪"\ #,0.00;"₪"-#,0.00;"₪"\ #,0.00
+		displayFolder: אחר
+		lineageTag: 3e1d0ef2-f77b-4bc9-bf95-d5fbc7c14d24
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"he-IL"}
+
+	measure 'תאריך תשלום אחרון' = IF(HASONEVALUE(dimCustomers[AccountKey]),FORMAT(MAX([תאריך קבלה]),"dd/mm/yy"),"")
+		displayFolder: אחר
+		lineageTag: 116d225b-9151-40ca-83ae-1cd3f4669cf7
+
+		changedProperty = IsHidden
+
+	measure 'תאריך תשלום הבא' = IF(HASONEVALUE(dimCustomers[AccountKey]),FORMAT(CALCULATE(MIN([תאריך תשלום צפוי]),FILTER(factCollection,factCollection[תאריך תשלום צפוי]>TODAY())),"dd/mm/yy"),"")
+		displayFolder: אחר
+		lineageTag: f26fa72e-11f0-4aa0-8134-668d6b00fc10
+
+		changedProperty = IsHidden
+
+	measure 'Customer Days Comparison LY' = ```
+			var MinDate = [Mindate - LY] var MaxDate = [Maxdate - LY] 
+			return  CALCULATE([Customer Days],FILTER(ALL(dimDates),dimDates[Date]>= minDate &&dimDates[Date]<=MaxDate))
+			```
+		formatString: 0.0
+		lineageTag: 2df6aabe-bd00-47d3-b49e-f5fb203d4f87
+
+		changedProperty = IsHidden
+
+	measure 'ימי לקוח אשתקד' = [Customer Days Comparison LY]
+		displayFolder: ימי לקוח
+		lineageTag: 0a9bf1d8-1774-465e-ac49-15d6ac4c1396
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Customer Days Current Year' =
+			
+			 IF(HASONEVALUE(dimDates[Year]),[Customer Days],
+				 CALCULATE(
+				TOTALYTD([Customer Days],
+					dimDates[Date],
+					dimDates[IsHistory]=1
+				),
+				dimDates[IsHistory]=1
+				))
+		lineageTag: 639bd2e3-e449-4960-a47e-dccb94663938
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '% Change Customer Days LY Comparison' = DIVIDE([Total Customer Days Current Year] - [Customer Days Comparison LY],[Customer Days Comparison LY])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 0a1082c2-7277-4fb9-b5b8-24852e0b9d4a
+
+		changedProperty = IsHidden
+
+	measure 'אחוז שינוי אשתקד - ימי לקוח' = [% Change Customer Days LY Comparison]
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: ימי לקוח
+		lineageTag: 52346685-f58d-48a0-a914-bbe6b1d97096
+
+		changedProperty = IsHidden
+
+	measure 'Total Debt All Docs' = Sum(factCollection[Debt]) //+ CALCULATE(Sum(factCollection[PayedAmount]),factCollection[DocTypeCode] = 4)
+		formatString: "₪"\ #,0;"₪"-#,0;"₪"\ #,0
+		lineageTag: e8448046-eb74-4b58-ae6f-e93e5c7e80c4
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"he-IL"}
+
+	measure 'Commited Debt for Obligo' = Sum(factCollection[Debt])
+		formatString: "₪"\ #,0.00;"₪"(#,0.00);"₪"\ #,0.00
+		lineageTag: dfa691c3-cfad-4b0e-bead-f6722247e551
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"he-IL"}
+
+	measure 'Allocated Debt' = CALCULATE(Sum(factCollection[Debt]),factCollection[DocTypeCode]=1)
+		formatString: "₪"\ #,0;"₪"(#,0);"₪"\ #,0
+		lineageTag: c1ec49d4-1e9d-474d-be38-133300b3d9dc
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isCustom":true}
+
+	measure 'Shippment Debt' = CALCULATE(Sum(factCollection[Debt]),factCollection[DocTypeCode]=2)
+		formatString: "₪"\ #,0.00;"₪"(#,0.00);"₪"\ #,0.00
+		lineageTag: 936d6394-7b85-42f7-a52a-5b4857e0af5f
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"he-IL"}
+
+	measure 'Cheque Debt' = CALCULATE(Sum(factCollection[Debt]),factCollection[DocTypeCode]=5)
+		formatString: "₪"\ #,0;"₪"(#,0);"₪"\ #,0
+		lineageTag: 5f974745-1d64-4242-9318-5bbd733bc228
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isCustom":true}
+
+	measure 'Total Invoices' = DISTINCTCOUNT(factCollection[חשבונית])
+		formatString: #,0
+		lineageTag: 32832cb8-16d2-4aa4-998c-fab153bccc14
+
+		changedProperty = IsHidden
+
+	measure 'Debt To Date 12 Month' = ```
+			
+			var MaxDate = CALCULATE(MAX(dimDates[Date]),FILTER(dimDates,dimDates[Date]<=TODAY()))
+			var MaxSubDate = CALCULATE(MAX(Sub_dimDates[Date]),FILTER(Sub_DimDates,Sub_dimDates[Date]<=MaxDate))
+			var MinDate = DATE(YEAR(MaxDate)-1,MONTH(MaxDate),1)
+			var _Debt =
+			CALCULATE(SUM(factCollection[PayedToDate]), 
+			    CALCULATETABLE(
+			            FILTER(
+			                    factCollection,
+			                    factCollection[InvoiceDate]<=MaxSubDate 
+			                    && ((factCollection[תאריך קבלה]>=MaxSubDate)|| ISBLANK([תאריך קבלה])) 
+			                    && (
+			                        factCollection[DocTypeCode] = 3 
+			                        || 
+			                        factCollection[DocTypeCode] = 4 
+			                        || 
+			                        factCollection[DocTypeCode] = 5
+			                        ) 
+			                )
+			                ,CALCULATETABLE(ALL(Sub_dimDates),USERELATIONSHIP(factCollection[InvoiceDate],Sub_DimDates[Date]))
+			                ,REMOVEFILTERS(dimDates)
+			            )
+			        )
+			
+			RETURN
+			IF(MaxSubDate<MinDate || MaxSubDate>MaxDate,BLANK(),_Debt)
+			```
+		formatString: "₪"\ #,0.##;"₪"(#,0.##);"₪"\ #,0.##
+		lineageTag: 5e95739a-9c48-4983-a31a-1c58aa3ce34b
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"he-IL"}
+
+	measure 'Cash Flow' = ```
+			
+			var _date = CALCULATE(MAX(dimDates[Date]),dimDates[IsHistory]=1)
+			var _Mindate = DATE(YEAR(_date),MONTH(_date)-6,1)
+			var _maxdate = DATE(YEAR(_date),MONTH(_date)+7,1)
+			var expctedRecipted =
+			CALCULATE(SUM(factCollection[Debt]),(factCollection[DocTypeCode]<>4)) 
+			
+			Return
+			
+			IF(
+			    MAX(Sub_DimDates[Date])< _Mindate || MAX(Sub_DimDates[Date])> _maxdate ,
+			    BLANK(),
+			    IF(ISBLANK(expctedRecipted),0,expctedRecipted)
+			)
+			```
+		formatString: "₪"\ #,0.##;"₪"(#,0.##);"₪"\ #,0.##
+		lineageTag: 78836b1d-567e-46b6-afe7-64b4bfde8278
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"he-IL"}
+
+	measure 'Customer Days VS Payment Term' =
+			
+			IF(MAX(dimCustomers[PaymentTermOrder])<10, //IF Payment Term is Immidate,+1,+5
+			        IF(  [Customer Days] > MAX(dimCustomers[PaymentTermOrder]) +10,1,0), //Then Check if Customer Days is greater then 10 only more then 10 days will be considered OVER
+			    IF(MAX(dimCustomers[PaymentTermOrder])<20,
+			        IF([Customer Days] > MAX(dimCustomers[PaymentTermOrder]) + 5,1,0),
+			     IF([Customer Days] > MAX(dimCustomers[PaymentTermOrder]) *1.25,1,0)
+			    ))
+		formatString: 0
+		lineageTag: 0f6b5643-face-4082-a797-cb784f32dc54
+
+		changedProperty = IsHidden
+
+	measure 'Customer Days Vs Payment Term Count Over' = ```
+			
+			Var _Count = COUNTROWS(
+			        FILTER(
+			            SUMMARIZE(dimCustomers,dimCustomers[AccountKey],dimCustomers[תנאי תשלום ללקוח],"CustomerDayFlag",[Customer Days VS Payment Term])
+			            ,[CustomerDayFlag]=1 
+			        )
+			)
+			
+			RETURN
+			IF(ISBLANK([Customer Days]),BLANK(),IF(ISBLANK(_Count),0,_Count))
+			```
+		formatString: 0
+		lineageTag: 6f9f4c74-5798-42dd-9429-d46846a5e520
+
+		changedProperty = IsHidden
+
+	measure 'Customer Days Vs Payment Term Count Under' =
+			
+			Var _Count = COUNTROWS(
+			        FILTER(
+			            SUMMARIZE(dimCustomers,dimCustomers[AccountKey],dimCustomers[תנאי תשלום ללקוח],dimCustomers[סטטוס לקוח],"CustomerDayFlag",[Customer Days VS Payment Term])
+			            ,[CustomerDayFlag]=0 && dimCustomers[סטטוס לקוח] = True()
+			        )
+			)
+			
+			RETURN
+			IF(ISBLANK([Customer Days]),BLANK(),IF(ISBLANK(_Count),0,_Count))
+		formatString: 0
+		lineageTag: 8ca50ef8-3037-4792-becc-f0ecaa3ef84e
+
+		changedProperty = IsHidden
+
+	measure 'Commited Debt' = CALCULATE(Sum(factCollection[Debt]),factCollection[DocTypeCode]<>4,factCollection[DocTypeCode]<>3)
+		formatString: "₪"\ #,0.00;"₪"(#,0.00);"₪"\ #,0.00
+		lineageTag: 42c49f49-5a2d-4789-b75b-6910ea8e76da
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"he-IL"}
+
+	measure 'Cheque Debt - Card' =
+			
+			var _result = CALCULATE(Sum(factCollection[Debt]),factCollection[DocTypeCode]=5)
+			Return
+			IF(ISBLANK(_result),0,_result)
+		formatString: "₪"\ #,0.##;"₪"(#,0.##);"₪"\ #,0.##
+		lineageTag: 85460fa5-d319-4bbd-873b-431117bef61d
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"he-IL"}
+
+	measure 'Allocated Debt - Card' =
+			
+			var _result = CALCULATE(Sum(factCollection[Debt]),factCollection[DocTypeCode]=1)
+			Return
+			IF(ISBLANK(_result),0,_result)
+		formatString: "₪"\ #,0.##;"₪"(#,0.##);"₪"\ #,0.##
+		lineageTag: 582016d2-a2d6-4cf3-b4a8-90f58a09617d
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"he-IL"}
+
+	measure 'Shippment Debt - Card' =
+			
+			var _result = CALCULATE(Sum(factCollection[Debt]),factCollection[DocTypeCode]=2)
+			Return
+			IF(ISBLANK(_result),0,_result)
+		formatString: "₪"\ #,0.##;"₪"(#,0.##);"₪"\ #,0.##
+		lineageTag: 2fc707fa-9429-4f96-a1c8-43c86318d103
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"he-IL"}
+
+	measure 'Late Debt - Card' =
+			
+			var _result = CALCULATE([Total Debt],factCollection[LateFlag]=1)// 1 is late
+			RETURN
+			IF(ISBLANK(_result),0,_result)
+		formatString: "₪"\ #,0.##;"₪"(#,0.##);"₪"\ #,0.##
+		lineageTag: 488b5180-7e56-4d3a-9a00-8a1b7b8da8ba
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"he-IL"}
+
+	measure 'Total Debt - Card' =
+			
+			var _result = CALCULATE(SUM(factCollection[Debt]),factCollection[DocType]="Open Docs")
+			RETURN
+			IF(ISBLANK(_result),0,_result)
+		formatString: "₪"\ #,0.##;"₪"(#,0.##);"₪"\ #,0.##
+		lineageTag: 9f41a5b2-6c78-4910-a30f-15f3ee184705
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"he-IL"}
+
+	measure 'Customer Days All Customers' = CALCULATE([Customer Days],ALL(dimCustomers))
+		lineageTag: 75e66e48-b7ac-4529-8bdf-d2aff03974fc
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Customer Days All Customers Margin' = Round([Customer Days] - [Customer Days All Customers],0)
+		formatString: 0
+		lineageTag: 3d823cbf-4b04-4eb9-85f1-ec49ebfafe8b
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'Customer Margin Debt' = ```
+			
+			Var _MarginValue = VALUES('Customer Days Range'[Customer Days Range])
+			                       
+			Var _Count =
+			                    Filter(
+			                    SUMMARIZE(
+			                            dimCustomers,
+			                            dimCustomers[AccountKey],
+			                            "CustomerDays",[Customer Days],
+			                            "Debt", [Debt To Date],
+			                            "CustomerDaysMargin",IF(
+			                                                    [Customer Days All Customers Margin]>30,
+			                                                    30,
+			                                                    IF(
+			                                                        [Customer Days All Customers Margin]<-30,
+			                                                        -30,
+			                                                        [Customer Days All Customers Margin])
+			                                                        )
+			                                )
+			                    ,[CustomerDaysMargin]=_MarginValue && [CustomerDays] >0 )
+			                    
+			
+			RETURN
+			IF(HASONEFILTER('Customer Days Range'[Customer Days Range]),
+			    (SUMX(_Count,[Debt])),
+			    1)
+			```
+		formatString: "₪"\ #,0.###############;"₪"-#,0.###############;"₪"\ #,0.###############
+		lineageTag: 9b6e88f8-10c8-4806-8544-de5ee2105615
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"he-IL"}
+
+	measure 'Delivety Notes' = CALCULATE(Sum(factCollection[Debt]),factCollection[DocTypeCode]=2)
+		formatString: "₪"#,0;-"₪"#,0;"₪"#,0
+		lineageTag: 41773c1f-c4a0-4c7f-b67e-0039f8a37014
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-IL"}
+
+	column AccountKey
+		dataType: string
+		lineageTag: 5be06e8e-1d3e-49c7-85dc-e09f6e6c2ae4
+		summarizeBy: none
+		sourceColumn: AccountKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column AgentKey
+		dataType: string
+		lineageTag: 328d3d88-249b-4b32-a702-f5f3aa36e97a
+		summarizeBy: none
+		sourceColumn: AgentKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column InvoiceAmount
+		dataType: decimal
+		lineageTag: e2640f8c-3a0a-44c9-acec-b28b72eeb2f9
+		summarizeBy: sum
+		sourceColumn: InvoiceAmount
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Obligo
+		dataType: decimal
+		lineageTag: ca119cfd-30af-4cd0-8767-8d4723d41488
+		summarizeBy: sum
+		sourceColumn: Obligo
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column DocType
+		dataType: string
+		lineageTag: 38f04e28-5597-457e-ab62-e8081bf292f6
+		summarizeBy: none
+		sourceColumn: DocType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DocTypeCode
+		dataType: int64
+		formatString: 0
+		lineageTag: 931c4739-2b45-488b-81a8-350ed1a15f80
+		summarizeBy: count
+		sourceColumn: DocTypeCode
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column TransactionID
+		dataType: int64
+		formatString: 0
+		lineageTag: c8a0b802-414b-4507-826b-ac8f77430b48
+		summarizeBy: count
+		sourceColumn: TransactionID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Line
+		dataType: int64
+		formatString: 0
+		lineageTag: 34ce608a-ffef-4101-8653-1ccc1d63cb1d
+		summarizeBy: sum
+		sourceColumn: Line
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column InvoiceDate
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 141162d7-0090-48ed-8bb4-6538c21b2a03
+		summarizeBy: none
+		sourceColumn: InvoiceDate
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column PayedAmount
+		dataType: decimal
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 8c338320-ad3a-4c7c-a7ad-00dc32a037ac
+		summarizeBy: sum
+		sourceColumn: PayedAmount
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Debt
+		dataType: decimal
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 9d005597-ce03-4c16-b593-39457326b913
+		summarizeBy: sum
+		sourceColumn: Debt
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column PayedDuration
+		dataType: int64
+		formatString: 0
+		lineageTag: 2b5a3847-43c4-40aa-b93e-d344a2a3a261
+		summarizeBy: sum
+		sourceColumn: PayedDuration
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column LateFlag
+		dataType: int64
+		formatString: 0
+		lineageTag: a1727592-f4b4-41ed-92f5-32fa71916995
+		summarizeBy: sum
+		sourceColumn: LateFlag
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Delay
+		dataType: int64
+		formatString: 0
+		lineageTag: 52cc82f4-4ed5-42cf-8656-92d548ddaa39
+		summarizeBy: sum
+		sourceColumn: Delay
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column חשבונית
+		dataType: int64
+		formatString: 0
+		lineageTag: 997c6b7f-15d6-442d-a0e4-00aecfbe9a66
+		summarizeBy: sum
+		sourceColumn: חשבונית
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'תאריך תשלום צפוי'
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 34c4dd42-07fe-480e-a361-270f21302001
+		summarizeBy: none
+		sourceColumn: תאריך תשלום צפוי
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column 'תאריך קבלה'
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 8516a8d2-73d8-4aa7-9522-42ccb20a21c1
+		summarizeBy: none
+		sourceColumn: תאריך קבלה
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column קבלה
+		dataType: int64
+		formatString: 0
+		lineageTag: 2d2d9e4c-0d59-4904-940a-d6eb50fe7ec3
+		summarizeBy: sum
+		sourceColumn: קבלה
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'פרטים נוספים'
+		dataType: string
+		lineageTag: 9b63842c-c014-4703-a204-671ea73f7494
+		summarizeBy: none
+		sourceColumn: פרטים נוספים
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column EntityID
+		dataType: int64
+		formatString: 0
+		lineageTag: 9c1ddec5-b9f2-4aa4-9e6d-e0c50a848d5f
+		summarizeBy: count
+		sourceColumn: EntityID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'ימי איחור'
+		dataType: string
+		lineageTag: 47456e80-3877-4cfa-a91a-63be308fd645
+		summarizeBy: none
+		sourceColumn: ימי איחור
+		sortByColumn: 'ימי איחור סדר'
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column PayedToDate
+		dataType: decimal
+		lineageTag: 9b19415e-3e27-4e75-832b-0c56e9636df5
+		summarizeBy: sum
+		sourceColumn: PayedToDate
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column RowInsertDatetime
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 928f2fbf-2bf9-4f91-956e-15b059efa4d1
+		summarizeBy: none
+		sourceColumn: RowInsertDatetime
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'ימי איחור סדר'
+		dataType: int64
+		formatString: 0
+		lineageTag: 5ffb9079-cb20-4a03-be86-0d0e9fd14329
+		summarizeBy: sum
+		sourceColumn: ימי איחור סדר
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Overdue
+		dataType: string
+		lineageTag: e88d3b24-9297-4dc7-9bf2-44d07e095049
+		summarizeBy: none
+		sourceColumn: Overdue
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column PayedDurationXPayedToDate
+		dataType: double
+		lineageTag: 8eb9ae9a-9c10-4f0b-b178-0071b6d2490f
+		summarizeBy: sum
+		sourceColumn: PayedDurationXPayedToDate
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column DeliveryDate
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: c14b8329-42f8-483e-a2e6-02fa59142b84
+		summarizeBy: none
+		sourceColumn: DeliveryDate
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	partition factCollection-14115409-419e-44bd-a50b-1c8df7c7d2eb = m
+		mode: import
+		queryGroup: 'fact Tables'
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="with Qblot_Chshbonit as ( #(lf)Select *,#(lf)CASE #(lf)#(tab)WHEN QQC.SCOM_MOTAM <= QS.Total#(lf)#(tab)#(tab)THEN QQC.SCOM_MOTAM#(lf)#(tab)ELSE QS.Total#(lf)END AS 'Amount'#(lf)from [dbo].[QISHOR_QBLOT_CHSHBONIOT] QQC#(lf)inner Join (Select MS_QBLH,T_Preon,Aopn_TSHLOM,SUM(Scom) as 'Total'#(lf)#(tab)#(tab)#(tab)from QBLOT_SHOROT#(lf)#(tab)#(tab)#(tab)where 1=1#(lf)#(tab)#(tab)#(tab)--AND AOPN_TSHLOM <> N'ש'#(lf)#(tab)#(tab)#(tab)AND Cast(SUBSTRING(T_PREON,1,4) as int) >=2018 and Cast(SUBSTRING(T_PREON,1,4) as int) <= Year(Getdate())#(lf)#(tab)#(tab)#(tab)AND CAST(SUBSTRING(T_PREON,1,4) + '-' + SUBSTRING(T_PREON,5,2) + '-' + SUBSTRING(T_PREON,7,2) as date) < Cast(GETDATE() as date)#(lf)#(tab)#(tab)#(tab)GROUP BY MS_QBLH,T_Preon,Aopn_TSHLOM#(lf)#(tab)#(tab)#(tab)) QS#(lf)#(tab)on QQC.QBLH=QS.MS_QBLH#(lf)) #(lf)#(lf),FirstDeliveryforInvoice as (#(lf)Select distinct MS_CHSHBONIT,MS_T_MSHLOCH#(lf)#(tab)#(tab)#(tab),SUBSTRING(TARIKH_MSHLOCH,1,4) + '-' + SUBSTRING(TARIKH_MSHLOCH,5,2) + '-' + SUBSTRING(TARIKH_MSHLOCH,7,2) as 'DeliveryDate'#(lf)#(tab)#(tab)#(tab)from CHSHBONIOT_SHOROT#(lf)#(tab)#(tab)#(tab)WHERE 1=1#(lf)#(tab)#(tab)#(tab)AND Cast(SUBSTRING(TARIKH_MSHLOCH,1,4) as int) >=2018 and Cast(SUBSTRING(TARIKH_MSHLOCH,1,4) as int) <= Year(Getdate())#(lf))#(lf)#(lf)#(lf),STG_Step1 as (#(lf)#(lf)-----הזמנות פתוחות עם הקצאה ----- #(lf)#(lf)Select MSPR_HZMNH as 'TransactionID'#(lf),1 as 'Line'#(lf),1 as 'DocTypeCode' -- PK#(lf),'Allocation' as 'DocType'-- Orders Before Shippment but after the item amount was allocated.#(lf),QOD_MQBL as 'AccountKey'#(lf),AISH_MCIROT as 'AgentKey'#(lf),null as 'Invoice'#(lf),SUBSTRING(T_HZMNH,1,4) + '-' + SUBSTRING(T_HZMNH,5,2) + '-' + SUBSTRING(T_HZMNH,7,2) as 'InvoiceDate'#(lf),SUBSTRING(T_ASPQH,1,4) + '-' + SUBSTRING(T_ASPQH,5,2) + '-' + SUBSTRING(T_ASPQH,7,2) as 'ExpectedPayDate'#(lf),NULL AS 'ActualPayedDate'#(lf),NULL AS 'DeliveryDate'#(lf),G.TNAI_TSHLOM_IMIM as 'TNAI_TSHLOM'#(lf),CASE#(lf)#(tab)WHEN MTBE = '$'#(lf)#(tab)#(tab)THEN (MCHIR_ICH*SM.NEW_SHER)*Hqr.Cmot#(lf)#(tab)ELSE MCHIR_ICH*HqR.Cmot#(lf)END AS 'InvoiceAmount'#(lf),0.00 as 'PayedAmount'#(lf),null as 'Receipt'#(lf),HEROT_1 as 'Details'#(lf),CASE#(lf)#(tab)WHEN MTBE = '$'#(lf)#(tab)#(tab)THEN (MCHIR_ICH*SM.NEW_SHER)*Hqr.Cmot *1.18#(lf)#(tab)ELSE MCHIR_ICH*HqR.Cmot *1.18#(lf)END AS 'Debt'#(lf),CASE#(lf)#(tab)WHEN MTBE = '$'#(lf)#(tab)#(tab)THEN (MCHIR_ICH*SM.NEW_SHER)*Hqr.Cmot#(lf)#(tab)ELSE MCHIR_ICH*HqR.Cmot#(lf)END AS 'Obligo'#(lf)#(lf)--,MCHIR_ICH#(lf)--,HqR.Cmot#(lf)--,MTBE#(lf)--,SM.NEW_SHER#(lf)from HZMNOT HZ#(lf)inner join (#(lf)#(tab)#(tab)#(tab)select HZMNT_MCIRH#(lf)#(tab)#(tab)#(tab),sum(CMOT_MOQTST) as Cmot#(lf)#(tab)#(tab)#(tab)from HQTSAOT_RCSH_HCHLPH#(lf)#(tab)#(tab)#(tab)where 1=1#(lf)#(tab)#(tab)#(tab)and SOG_TM_SH_RCSH_HZMNT_HCHLPH <> ''#(lf)#(tab)#(tab)#(tab)--and HZMNT_MCIRH = 138471--139627#(lf)#(tab)#(tab)#(tab)group by HZMNT_MCIRH#(lf)#(tab)#(tab)#(tab)Having sum(CMOT_MOQTST) <> 0#(lf)#(tab)#(tab)#(tab)) HqR#(lf)#(tab)on  HZ.mspr_Hzmnh = HqR.HZMNT_MCIRH#(lf)Left join (#(lf)#(tab)#(tab)#(tab)Select distinct MS_HZMNH#(lf)#(tab)#(tab)#(tab)from QISHOR_T_MSHLOCH_HZMNOT#(lf)#(tab)#(tab)#(tab)) HzN#(lf)#(tab)on hz.MSPR_HZMNH = HzN.MS_HZMNH#(lf)Left Join (select *, #(lf)Case#(lf)#(tab)when sher = 0#(lf)#(tab)#(tab)then first_value(sher) over (partition by value_partition order by Tarikh) #(lf)#(tab)else sher#(lf)end as new_sher#(lf)from (#(lf)  select *, sum(case when sher=0 then 0 else 1 end) over (order by tarikh ) as value_partition#(lf)  from SHERI_MTBE) m#(lf)#(lf)) SM #(lf)#(tab)on SM.TARIKH= CONVERT(VARCHAR(8), GETDATE(), 112)--HZ.T_HZMNH --- שער המרה לפי תאריך של היום#(lf)Left Join GORMIM G#(lf)#(tab)on HZ.QOD_MQBL = G.QOD_GORM#(lf)where OrderStatus in (1,2)#(lf)--AND HzN.MS_HZMNH is null#(lf)AND Cast(SUBSTRING(T_HZMNH,1,4) as int) >=2018 and Cast(SUBSTRING(T_HZMNH,1,4) as int) <= Year(Getdate())#(lf)AND (Hqr.Cmot <> 0 or MCHIR_ICH <> 0)#(lf)#(lf)--AND MSPR_HZMNH = 139627#(lf)--AND QOD_MQBL = 1041#(lf)#(lf)------ תעודות משלוח פתוחות ללא חשבונית -------------#(lf)#(lf)UNION ALL#(lf)#(lf)Select MS_TEODH as 'TransactionID'#(lf),1 as 'Line'#(lf),2 as 'DocTypeCode' -- PK#(lf),'Delivery Notes' as 'DocType'-- Orders Before Shippment but after the item amount was allocated.#(lf),TM.QOD_MQBL as 'AccountKey'#(lf),TM.AISH_MCIROT as 'AgentKey'#(lf),null as 'Invoice'#(lf),SUBSTRING(TARIKH_MSHLOCH,1,4) + '-' + SUBSTRING(TARIKH_MSHLOCH,5,2) + '-' + SUBSTRING(TARIKH_MSHLOCH,7,2) as 'InvoiceDate'#(lf),SUBSTRING(TARIKH_MSHLOCH,1,4) + '-' + SUBSTRING(TARIKH_MSHLOCH,5,2) + '-' + SUBSTRING(TARIKH_MSHLOCH,7,2) as 'ExpectedPayDate'#(lf),NULL AS 'ActualPayedDate'#(lf),SUBSTRING(TARIKH_MSHLOCH,1,4) + '-' + SUBSTRING(TARIKH_MSHLOCH,5,2) + '-' + SUBSTRING(TARIKH_MSHLOCH,7,2) AS 'DeliveryDate'#(lf),G.TNAI_TSHLOM_IMIM as 'TNAI_TSHLOM'#(lf),CASE#(lf)#(tab)WHEN MTBE_SH = '$'#(lf)#(tab)#(tab)THEN (TM.MCHIR_ICH*SM.new_sher)*TM.MSHQL_NTO#(lf)#(tab)ELSE TM.MCHIR_ICH*TM.MSHQL_NTO#(lf)END AS 'InvoiceAmount'#(lf),0.00 as 'PayedAmount'#(lf),null as 'Receipt'#(lf),HEROT_1 as 'Details'#(lf),CASE#(lf)#(tab)WHEN MTBE_SH = '$'#(lf)#(tab)#(tab)THEN (TM.MCHIR_ICH*SM.new_sher)*TM.MSHQL_NTO * 1.18 -----תוספת מעמ#(lf)#(tab)ELSE TM.MCHIR_ICH*TM.MSHQL_NTO * 1.18#(lf)END AS 'Debt'#(lf),CASE#(lf)#(tab)WHEN MTBE_SH = '$'#(lf)#(tab)#(tab)THEN (TM.MCHIR_ICH*SM.new_sher)*TM.MSHQL_NTO#(lf)#(tab)ELSE TM.MCHIR_ICH*TM.MSHQL_NTO#(lf)END AS 'Obligo'#(lf)#(lf)#(lf)FROM TEODOT_MSHLOCH TM#(lf)Left Join (SELECT distinct MS_T_MSHLOCH#(lf)#(tab)#(tab)#(tab)FROM CHSHBONIOT_SHOROT#(lf)#(tab)#(tab)) CH#(lf)#(tab)on TM.MS_TEODH = CH.MS_T_MSHLOCH#(lf)Left Join (SELECT MS_HZMNH,MS_T_MSHLOCH#(lf)#(tab)#(tab)#(tab)FROM QISHOR_T_MSHLOCH_HZMNOT#(lf)#(tab)#(tab)) HZT#(lf)#(tab)on TM.MS_TEODH = HZT.MS_T_MSHLOCH#(lf)Left Join HZMNOT HZ#(lf)#(tab)on HZ.MSPR_HZMNH = HZT.MS_HZMNH#(lf)Left Join (select *, #(lf)Case#(lf)#(tab)when sher = 0#(lf)#(tab)#(tab)then first_value(sher) over (partition by value_partition order by Tarikh) #(lf)#(tab)else sher#(lf)end as new_sher#(lf)from (#(lf)  select *, sum(case when sher=0 then 0 else 1 end) over (order by tarikh ) as value_partition#(lf)  from SHERI_MTBE) m#(lf)#(lf)) SM  #(lf)#(tab)on SM.TARIKH=CONVERT(VARCHAR(8), GETDATE(), 112)--HZ.T_HZMNH --- שער המרה לפי תאריך של היום#(lf)Left Join GORMIM G#(lf)#(tab)on TM.QOD_MQBL = G.QOD_GORM#(lf)WHERE CH.MS_T_MSHLOCH is null#(lf)AND Cast(SUBSTRING(TARIKH_MSHLOCH,1,4) as int) >=2018 and Cast(SUBSTRING(TARIKH_MSHLOCH,1,4) as int) <= Year(Getdate())#(lf)AND STTOS in (0,1)#(lf)AND TM.ActionType not in (2,6,7,9,10)#(lf)AND TM.MCHIR_ICH <> 0#(lf)AND TM.PurchaseOrderType = 0#(lf)#(lf)#(lf)--AND TM.QOD_MQBL = 1041#(lf)#(lf)#(lf)-------חשבוניות פתוחות ------#(lf)UNION ALL#(lf)#(lf)#(lf)Select CH.MS_CHSHBONIT as 'TransactionID'#(lf),1 as 'Line'#(lf),3 as 'DocTypeCode' -- PK#(lf),'Open Invoices' as 'DocType'-- Orders Before Shippment but after the item amount was allocated.#(lf),CH.QOD_LQOCH as 'AccountKey'#(lf),AM.QOD as 'AgentKey'#(lf),null as 'Invoice'#(lf),SUBSTRING(TARIKH_HPQH,1,4) + '-' + SUBSTRING(TARIKH_HPQH,5,2) + '-' + SUBSTRING(TARIKH_HPQH,7,2) as 'InvoiceDate'#(lf),SUBSTRING(PREON_TSHLOM,1,4) + '-' + SUBSTRING(PREON_TSHLOM,5,2) + '-' + SUBSTRING(PREON_TSHLOM,7,2) as 'ExpectedPayDate'#(lf),NULL AS 'ActualPayedDate'#(lf),FirstDeliveryDate AS 'DeliveryDate'#(lf),G.TNAI_TSHLOM_IMIM as 'TNAI_TSHLOM'#(lf),CH.SH_C_LLA_ME_M + ME_M AS 'InvoiceAmount'#(lf),CASE#(lf)#(tab)WHEN Round(QCH.SCOM,0) = 0#(lf)#(tab)#(tab)Then 0#(lf)#(tab)Else isnull(QCH.SCOM,0)#(lf)END AS 'PayedAmount'#(lf),null as 'Receipt'#(lf),null as 'Details'#(lf),CH.SH_C_LLA_ME_M + ME_M-isnull(QCH.SCOM,0) AS 'Debt'#(lf),CH.SH_C_LLA_ME_M + ME_M-isnull(QCH.SCOM,0) AS 'Obligo'#(lf)#(lf)FROM CHSHBONIOT_COTROT CH#(lf)left join (Select CHSHBONIT, SUM(SCOM_MOTAM) as SCOM#(lf)#(tab)#(tab)#(tab)from QISHOR_QBLOT_CHSHBONIOT#(lf)#(tab)#(tab)#(tab)GROUP BY CHSHBONIT#(lf)#(tab)#(tab)#(tab)) QCH#(lf)#(tab)on CH.MS_CHSHBONIT = QCH.CHSHBONIT#(lf)left join (Select MS_CHSHBONIT, MIN(DeliveryDate) as FirstDeliveryDate#(lf)#(tab)#(tab)#(tab)from FirstDeliveryforInvoice#(lf)#(tab)#(tab)#(tab)Group By MS_CHSHBONIT#(lf)#(tab)#(tab)#(tab)) CHS#(lf)#(tab)on CHS.MS_CHSHBONIT = QCH.CHSHBONIT#(lf)Left Join GORMIM G#(lf)#(tab)on CH.QOD_LQOCH = G.QOD_GORM#(lf)Left Join TBLT_ANSHI_MCIROT AM #(lf)#(tab)on AM.SHM_AISH_MCIROT = G.AISH_MCIROT_MTPL#(lf)WHERE 1=1  #(lf)--and QCH.CHSHBONIT is not null #(lf)and Round(CH.SH_C_LLA_ME_M + ME_M-isnull(QCH.SCOM,0),0) <> 0#(lf)AND Cast(SUBSTRING(TARIKH_HPQH,1,4) as int) >=2018 and Cast(SUBSTRING(TARIKH_HPQH,1,4) as int) <= Year(Getdate())#(lf)AND CH.IsTemp <> 1#(lf)#(lf)#(lf)-------חשבוניות סגורות ------#(lf)UNION ALL#(lf)#(lf)Select CH.MS_CHSHBONIT as 'TransactionID'#(lf),ROW_NUMBER () over (partition by CH.MS_CHSHBONIT order by T_PREON)  as 'Line'#(lf),4 as 'DocTypeCode' -- PK#(lf),'Reciept' as 'DocType'-- Orders Before Shippment but after the item amount was allocated.#(lf),CH.QOD_LQOCH as 'AccountKey'#(lf),AM.QOD as 'AgentKey'#(lf),CH.MS_CHSHBONIT as 'Invoice'#(lf),SUBSTRING(ch.TARIKH_HPQH,1,4) + '-' + SUBSTRING(ch.TARIKH_HPQH,5,2) + '-' + SUBSTRING(ch.TARIKH_HPQH,7,2) as 'InvoiceDate'#(lf),SUBSTRING(PREON_TSHLOM,1,4) + '-' + SUBSTRING(PREON_TSHLOM,5,2) + '-' + SUBSTRING(PREON_TSHLOM,7,2) as 'ExpectedPayDate'#(lf),ISNULL(SUBSTRING(QQC.T_PREON,1,4) + '-' + SUBSTRING(QQC.T_PREON,5,2) + '-' + SUBSTRING(QQC.T_PREON,7,2),#(lf)#(tab)#(tab)SUBSTRING(PREON_TSHLOM,1,4) + '-' + SUBSTRING(PREON_TSHLOM,5,2) + '-' + SUBSTRING(PREON_TSHLOM,7,2) )AS 'ActualPayedDate'#(lf),FirstDeliveryDate AS 'DeliveryDate'#(lf),G.TNAI_TSHLOM_IMIM as 'TNAI_TSHLOM'#(lf),QQC.SCOM AS 'InvoiceAmount'#(lf),QQC.SCOM AS 'PayedAmount'#(lf),QB.QBLH as 'Receipt'#(lf)#(lf),CH.HEROT as 'Details'#(lf),Round(CH.SH_C_LLA_ME_M + ME_M-isnull(QCH.SCOM,0),0) AS 'Debt'#(lf),Round(CH.SH_C_LLA_ME_M + ME_M-isnull(QCH.SCOM,0),0) AS 'Obligo'#(lf)#(lf)FROM CHSHBONIOT_COTROT CH#(lf)left join (Select CHSHBONIT, SUM(SCOM_MOTAM) as SCOM#(lf)#(tab)#(tab)#(tab)from QISHOR_QBLOT_CHSHBONIOT#(lf)#(tab)#(tab)#(tab)GROUP BY CHSHBONIT#(lf)) QCH#(lf)on CH.MS_CHSHBONIT = QCH.CHSHBONIT#(lf)left join QISHOR_QBLOT_CHSHBONIOT QB#(lf)on CH.MS_CHSHBONIT = QB.CHSHBONIT#(lf)left join QBLOT_COTROT Q#(lf)on QB.QBLH = Q.MS_QBLH#(lf)Left Join GORMIM G#(lf)#(tab)on CH.QOD_LQOCH = G.QOD_GORM#(lf)Left Join TBLT_ANSHI_MCIROT AM #(lf)#(tab)on AM.SHM_AISH_MCIROT = G.AISH_MCIROT_MTPL#(lf)Inner Join (Select *,#(lf)Case#(lf)#(tab)WHEN SCOM_MOTAM = Amount and Amount = Lag(Amount) over (partition by CHSHBONIT,QBLH order by T_Preon)#(lf)#(tab)#(tab)THEN 0#(lf)#(tab)WHEN Amount is null#(lf)#(tab)#(tab)THEN SCOM_MOTAM#(lf)#(tab)ELSE Amount#(lf)END as 'Scom'#(lf)From Qblot_Chshbonit) QQC#(lf)#(tab)on CH.MS_CHSHBONIT = QQC.CHSHBONIT and QQC.QBLH = Q.MS_QBLH#(lf)left join (Select MS_CHSHBONIT, MIN(DeliveryDate) as FirstDeliveryDate#(lf)#(tab)#(tab)#(tab)from FirstDeliveryforInvoice#(lf)#(tab)#(tab)#(tab)Group By MS_CHSHBONIT#(lf)#(tab)#(tab)#(tab)) CHS#(lf)#(tab)on CHS.MS_CHSHBONIT = QCH.CHSHBONIT#(lf)#(lf)WHERE 1=1  #(lf)--and QCH.CHSHBONIT is not null #(lf)and Round(CH.SH_C_LLA_ME_M + ME_M-isnull(QCH.SCOM,0),0) = 0#(lf)AND Cast(SUBSTRING(ch.TARIKH_HPQH,1,4) as int) >=2018 and Cast(SUBSTRING(ch.TARIKH_HPQH,1,4) as int) <= Year(Getdate())#(lf)--and MS_CHSHBONIT in (52409)#(lf)--order by QB.QBLH#(lf)AND CH.IsTemp <> 1#(lf)#(lf)#(lf)--------צ'קים עם פרעון עתידי-----------#(lf)UNION ALL#(lf)#(lf)Select QS.MS_QBLH as 'TransactionID'#(lf),ROW_NUMBER () over (partition by QC.MS_QBLH order by T_PREON)  as 'Line'#(lf),5 as 'DocTypeCode' -- PK#(lf),'Cheques' as 'DocType'-- Orders Before Shippment but after the item amount was allocated.#(lf),QS.QOD_LQOCH as 'AccountKey'#(lf),AM.QOD as 'AgentKey'#(lf),QS.MS_QBLH as 'Invoice'#(lf),SUBSTRING(QC.TARIKH_HPQH,1,4) + '-' + SUBSTRING(QC.TARIKH_HPQH,5,2) + '-' + SUBSTRING(QC.TARIKH_HPQH,7,2) as 'InvoiceDate'#(lf),SUBSTRING(QS.T_PREON,1,4) + '-' + SUBSTRING(QS.T_PREON,5,2) + '-' + SUBSTRING(QS.T_PREON,7,2) as 'ExpectedPayDate'#(lf),SUBSTRING(QS.T_PREON,1,4) + '-' + SUBSTRING(QS.T_PREON,5,2) + '-' + SUBSTRING(QS.T_PREON,7,2) AS 'ActualPayedDate'#(lf),NULL as 'DeliveryDate'#(lf),G.TNAI_TSHLOM_IMIM as 'TNAI_TSHLOM'#(lf),QS.SCOM AS 'InvoiceAmount'#(lf),0.00 AS 'PayedAmount'#(lf),QS.MS_QBLH as 'Receipt'#(lf),QC.HEROT as 'Details'#(lf),QS.SCOM AS 'Debt'#(lf),QS.SCOM AS 'Obligo'#(lf)#(lf)FROM QBLOT_SHOROT QS#(lf)Left Join QBLOT_COTROT QC#(lf)#(tab)ON QS.MS_QBLH =QC.MS_QBLH#(lf)Left Join GORMIM G#(lf)#(tab)on QS.QOD_LQOCH = G.QOD_GORM#(lf)Left Join TBLT_ANSHI_MCIROT AM #(lf)#(tab)on AM.SHM_AISH_MCIROT = G.AISH_MCIROT_MTPL#(lf)#(lf)WHERE 1=1 #(lf)AND AOPN_TSHLOM = N'ש'#(lf)AND Cast(SUBSTRING(T_PREON,1,4) as int) >=2018#(lf)AND CAST(SUBSTRING(T_PREON,1,4) + '-' + SUBSTRING(T_PREON,5,2) + '-' + SUBSTRING(T_PREON,7,2) as date) >= Cast(GETDATE() as date)#(lf)#(lf))#(lf)#(lf)#(lf),STG_Step2 as (#(lf)select #(lf)#(tab)#(tab)   #(lf)#(tab)#(tab)    [TransactionID]#(lf)           ,[Line]#(lf)           ,[DocTypeCode]#(lf)           ,[Invoice]#(lf)           ,CAST([InvoiceDate] as date) as 'InvoiceDate'#(lf)           ,CASE#(lf)#(tab)#(tab)#(tab)#(tab)WHEN DocTypeCode = 1 or DocTypeCode = 2#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)THEN DATEADD(DD,TNAI_TSHLOM,Cast(EOMONTH([ExpectedPayDate]) as date)) #(lf)#(tab)#(tab)#(tab)#(tab)ELSE CAST([ExpectedPayDate] as date)#(lf)#(tab)#(tab)#(tab)END as 'ExpectedPayDate'#(lf)           ,CAST([ActualPayedDate] as date) as 'ActualPayedDate'#(lf)#(tab)#(tab)   ,CASE#(lf)#(tab)#(tab)#(tab)#(tab)WHEN CAST([ActualPayedDate] as date) is null#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)THEN ISNULL(CAST(DeliveryDate as Date),CAST([InvoiceDate] as date))#(lf)#(tab)#(tab)#(tab)#(tab)WHEN CAST(DeliveryDate as Date)>=CAST([ActualPayedDate] as date)#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)THEN CAST([ActualPayedDate] as date)#(lf)#(tab)#(tab)#(tab)#(tab)ELSE ISNULL(CAST(DeliveryDate as Date),CAST([InvoiceDate] as date)) #(lf)#(tab)#(tab)#(tab)END as 'DeliveryDate'#(lf)#(tab)#(tab)   ,[AccountKey]#(lf)#(tab)#(tab)   ,[AgentKey]#(lf)           ,[InvoiceAmount]#(lf)           ,[Receipt]#(lf)           ,[PayedAmount]#(lf)           ,[Details]#(lf)           ,[Debt]#(lf)           ,[Obligo]#(lf)           ,[DocType]#(lf)#(lf)#(lf)from STG_Step1#(lf)#(lf))#(lf)#(lf),STG_Step3 as (#(lf)Select#(lf)#(lf)#(tab)#(tab)    [TransactionID]#(lf)           ,[Line]#(lf)           ,[DocTypeCode]#(lf)           ,[Invoice]#(lf)           ,[InvoiceDate]#(lf)           ,[ExpectedPayDate]#(lf)           ,[ActualPayedDate]#(lf)#(tab)#(tab)   ,[DeliveryDate]#(lf)#(tab)#(tab)   ,[AccountKey]#(lf)#(tab)#(tab)   ,[AgentKey]#(lf)           ,[InvoiceAmount]#(lf)           ,[Receipt]#(lf)           ,[PayedAmount]#(lf)           ,[Details]#(lf)           ,[Debt]#(lf)           ,[Obligo]#(lf)           ,[DocType]#(lf)           ,case #(lf)#(tab)#(tab)#(tab)#(tab)when [ActualPayedDate] is null #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)then DATEDIFF(DAY,[DeliveryDate],GETDATE()) #(lf)#(tab)#(tab)#(tab)#(tab)else  DATEDIFF(DAY,[DeliveryDate],[ActualPayedDate]) #(lf)#(tab)#(tab)#(tab)end as [PayedDuration]#(lf)           ,case #(lf)#(tab)#(tab)#(tab)#(tab)when (DATEADD(DAY,0,[ExpectedPayDate])< cast(GETDATE() as date) and [ActualPayedDate] is null) or ( DATEADD(DAY,0,[ExpectedPayDate])<[ActualPayedDate] ) #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)then 1 #(lf)#(tab)#(tab)#(tab)#(tab)else 0 #(lf)#(tab)#(tab)#(tab)end as [LateFlag]#(lf)           ,case #(lf)#(tab)#(tab)#(tab)#(tab)when (DATEADD(DAY,0,[ExpectedPayDate])< cast(GETDATE() as date) and [ActualPayedDate] is null) or ( DATEADD(DAY,0,[ExpectedPayDate])<[ActualPayedDate] ) #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)then case #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)when [ActualPayedDate] is null #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)then DATEDIFF(DAY,[ExpectedPayDate],cast(GETDATE() as date)) #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)else DATEDIFF(DAY,[ExpectedPayDate],[ActualPayedDate]) #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)end#(lf)#(tab)#(tab)#(tab)#(tab)else 0 #(lf)#(tab)#(tab)   end as [Delay]#(lf)#(tab)#(tab)   from STG_Step2#(lf)#(lf)#(lf))#(lf),STG_Step4 as (#(lf)Select#(lf)#(lf)             #(lf)#(tab)#(tab)   [TransactionID]#(lf)#(tab)#(tab)   ,CAST(CONVERT(INT, CONVERT(VARCHAR,[AccountKey]))as varchar) AS 'AccountKey'#(lf)#(tab)#(tab)   ,cast(CONVERT(INT, CONVERT(VARCHAR,[AgentKey])) as varchar) AS 'AgentKey'#(lf)#(tab)#(tab)   ,[InvoiceDate]#(lf)#(tab)#(tab)   ,cast([InvoiceAmount] as decimal (18,2)) as 'InvoiceAmount'#(lf)#(tab)#(tab)   ,[PayedAmount]#(lf)#(tab)#(tab)   ,[Debt]#(lf)#(tab)#(tab)   ,[Obligo]#(lf)#(tab)#(tab)   ,[DocType]#(lf)#(tab)#(tab)   ,[PayedDuration]#(lf)#(tab)#(tab)   ,[LateFlag]#(lf)#(tab)#(tab)   ,[Delay]#(lf)#(tab)#(tab)   ,[Invoice] AS 'חשבונית'#(lf)#(tab)#(tab)   ,[ExpectedPayDate] AS 'תאריך תשלום צפוי'#(lf)#(tab)#(tab)   ,[ActualPayedDate] AS 'תאריך קבלה'#(lf)#(tab)#(tab)   ,[DeliveryDate]#(lf)           ,[Receipt] AS 'קבלה'#(lf)#(tab)#(tab)   ,[Details] AS 'פרטים נוספים'#(lf)#(tab)#(tab)   ,[Line]#(lf)           ,[DocTypeCode]#(lf)           #(lf)           ,1 AS 'EntityID'#(lf)           #(lf)           #(lf)#(tab)#(tab)  #(lf)           #(lf)           #(lf)#(tab)#(tab)   ,case#(lf)#(tab)#(tab)    when [Delay] >0 and [Delay] <=7 then '1-7'#(lf)#(tab)#(tab)--#(tab)when [Delay] >7 and [Delay] <=14 then '7-14'#(lf)#(tab)#(tab)#(tab)when [Delay] >7 and [Delay] <=30 then '7-30'#(lf)#(tab)#(tab)#(tab)--when [Delay] >14 and [Delay] <=30 then '14-31'#(lf)#(tab)#(tab)#(tab)when [Delay] >30 and [Delay] <= 60 then '31-60'#(lf)#(tab)#(tab)#(tab)--when [Delay] >60 and [Delay] <=90 then '61-90'#(lf)#(tab)#(tab)#(tab)when [Delay] >60 and [Delay] <=120 then '61-120' #(lf)#(tab)#(tab)#(tab)--when [Delay] >90 and [Delay] <=120 then '91-120' #(lf)#(tab)#(tab)#(tab)when [Delay] <=0 then 'Current' #(lf)#(tab)#(tab)#(tab)else#(lf)#(tab)#(tab)#(tab)'120+'#(lf)#(tab)#(tab)#(tab)end as 'ימי איחור'#(lf)#(lf)#(tab)#(tab)#(tab),case#(lf)#(tab)#(tab)    when [Delay] >0 and [Delay] <=7 then 1#(lf)#(tab)#(tab)#(tab)when [Delay] >7 and [Delay] <=30 then 2#(lf)#(tab)#(tab)#(tab)--when [Delay] >14 and [Delay] <=30 then 3#(lf)#(tab)#(tab)#(tab)when [Delay] >30and [Delay] <=60then 3#(lf)#(tab)#(tab)#(tab)--when [Delay] >60 and [Delay] <=90 then 5 #(lf)#(tab)#(tab)#(tab)when [Delay] >60 and [Delay] <=120 then 4#(lf)#(tab)#(tab)#(tab)when [Delay] <=0 then 0#(lf)#(tab)#(tab)#(tab)else#(lf)#(tab)#(tab)#(tab)8#(lf)#(tab)#(tab)#(tab)end as 'ימי איחור סדר'#(lf)#(lf)           ,case when [LateFlag]=1 then 'באיחור' else 'Not Overdue' end as 'Overdue'#(lf)#(lf)           ,case #(lf)#(tab)#(tab)#(tab)#(tab)when  [PayedAmount]<>0 or [PayedAmount] is not null #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)then case#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)when [InvoiceAmount]<>[PayedAmount] #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)then  [InvoiceAmount]-[PayedAmount]#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)else [InvoiceAmount] #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)end#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)else [InvoiceAmount]#(lf)#(tab)#(tab)   end as  [PayedToDate]#(lf)#(lf)           ,case #(lf)#(tab)#(tab)#(tab)#(tab)when  [PayedAmount]<>0 or [PayedAmount] is not null #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)then case#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)when [InvoiceAmount]<>[PayedAmount] #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)then  ([InvoiceAmount]-[PayedAmount])*[PayedDuration]#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)else [InvoiceAmount]*[PayedDuration] #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)end#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)else [InvoiceAmount]*[PayedDuration]#(lf)#(tab)#(tab)   end as  [PayedDurationXPayedToDate]#(lf)#(lf)           ,GETDATE() as [RowInsertDatetime]#(lf)#(tab)#(tab)   from STG_Step3#(lf)#(tab)#(tab)   #(lf)#(lf))#(lf)#(lf)#(lf)select  *#(lf)from STG_Step4#(lf)where [TransactionID] <> 411032"]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"InvoiceDate", type date}, {"תאריך תשלום צפוי", type date}, {"תאריך קבלה", type date}, {"InvoiceAmount", Currency.Type}, {"PayedAmount", Currency.Type}, {"Debt", Currency.Type}, {"Obligo", Currency.Type}, {"PayedToDate", Currency.Type}, {"DeliveryDate", type date}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_Id = 963c0da2-7903-4d36-bab7-3885afed0425
+
+	annotation LinkedQueryName = factCollection
+
+	annotation PBI_QueryRelationships = {"columnCount":24,"keyColumnNames":[],"queryRelationships":[],"columnIdentities":["Section1/factCollection/Source.{TransactionID,0}","Section1/factCollection/Source.{AccountKey,1}","Section1/factCollection/Source.{AgentKey,2}","Section1/factCollection/Source.{InvoiceAmount,4}","Section1/factCollection/Source.{Payed Amount,5}","Section1/factCollection/Source.{Debt,6}","Section1/factCollection/Source.{Obligo,7}","Section1/factCollection/Source.{DocType,8}","Section1/factCollection/Source.{PayedDuration,9}","Section1/factCollection/Source.{LateFlag,10}","Section1/factCollection/Source.{Delay,11}","Section1/factCollection/Source.{חשבונית,12}","Section1/factCollection/Source.{קבלה,15}","Section1/factCollection/Source.{פרטים נוספים,16}","Section1/factCollection/Source.{Line,17}","Section1/factCollection/Source.{DocTypeCode,18}","Section1/factCollection/Source.{EntityID,19}","Section1/factCollection/Source.{ימי איחור,20}","Section1/factCollection/Source.{איחור,21}","Section1/factCollection/Source.{PayedToDate,22}","Section1/factCollection/Source.{RowInsertDatetime,23}","Section1/factCollection/--XX--Added Date - 1 Year.{New1,24}","Section1/factCollection/--XX--Added Date2 - 1 Year.{New2,25}","Section1/factCollection/--XX--Added Date3 - 1 Year.{New3,26}"],"ColumnCount":24,"KeyColumnNames":[],"ColumnIdentities":["Section1/factCollection/Source.{TransactionID,0}","Section1/factCollection/Source.{AccountKey,1}","Section1/factCollection/Source.{AgentKey,2}","Section1/factCollection/Source.{InvoiceAmount,4}","Section1/factCollection/Source.{Payed Amount,5}","Section1/factCollection/Source.{Debt,6}","Section1/factCollection/Source.{Obligo,7}","Section1/factCollection/Source.{DocType,8}","Section1/factCollection/Source.{PayedDuration,9}","Section1/factCollection/Source.{LateFlag,10}","Section1/factCollection/Source.{Delay,11}","Section1/factCollection/Source.{חשבונית,12}","Section1/factCollection/Source.{קבלה,15}","Section1/factCollection/Source.{פרטים נוספים,16}","Section1/factCollection/Source.{Line,17}","Section1/factCollection/Source.{DocTypeCode,18}","Section1/factCollection/Source.{EntityID,19}","Section1/factCollection/Source.{ימי איחור,20}","Section1/factCollection/Source.{איחור,21}","Section1/factCollection/Source.{PayedToDate,22}","Section1/factCollection/Source.{RowInsertDatetime,23}","Section1/factCollection/--XX--Added Date - 1 Year.{New1,24}","Section1/factCollection/--XX--Added Date2 - 1 Year.{New2,25}","Section1/factCollection/--XX--Added Date3 - 1 Year.{New3,26}"],"RelationshipInfo":[]}
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

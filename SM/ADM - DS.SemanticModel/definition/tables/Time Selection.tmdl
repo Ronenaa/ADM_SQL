@@ -1,0 +1,48 @@
+table 'Time Selection'
+	lineageTag: 3b1c0106-0181-4a96-b86e-5d555174b32d
+
+	column 'Time Selection'
+		lineageTag: 19031b11-e872-4205-807d-d9cccd18757b
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'Time Selection Order'
+
+		relatedColumnDetails
+			groupByColumn: 'Time Selection Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Time Selection Fields'
+		lineageTag: 7b0ae544-1fe5-46f8-889f-5690fde920d8
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'Time Selection Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Time Selection Order'
+		formatString: 0
+		lineageTag: 0e437e67-c763-40ef-be85-15ace28d8466
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Time Selection' = calculated
+		mode: import
+		source =
+				{
+				    ("Daily", NAMEOF('Sub_dimDates'[Date]), 0),
+				    ("Weekly", NAMEOF('Sub_dimDates'[WeekStart]), 1),
+				    ("Monthly", NAMEOF('Sub_dimDates'[MonthInCalendarName]), 2),
+				    ("Yearly", NAMEOF('Sub_dimDates'[Year]), 3)
+				}
+
+	annotation PBI_Id = 6152fc03d035452bb46324dace53fea7
+

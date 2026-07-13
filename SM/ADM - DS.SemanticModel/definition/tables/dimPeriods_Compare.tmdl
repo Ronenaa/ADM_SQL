@@ -1,0 +1,128 @@
+table dimPeriods_Compare
+	lineageTag: 50955d8e-bc55-4f30-983f-7b1846a0f306
+
+	column Period
+		dataType: string
+		lineageTag: 1e63a1d6-53e4-4df7-95d3-62ba9c7284e3
+		summarizeBy: none
+		sourceColumn: Period
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 36017f04-e3d2-4f10-aa56-a91c960f1dc0
+		summarizeBy: none
+		sourceColumn: Date
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Sort
+		dataType: double
+		lineageTag: ef267516-95b7-472c-9706-3e188c033891
+		summarizeBy: sum
+		sourceColumn: Sort
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column FullDays
+		dataType: double
+		lineageTag: 50b05af5-77b8-4c7d-bf1d-bdd04828d976
+		summarizeBy: sum
+		sourceColumn: FullDays
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition dimPeriods_Compare = m
+		mode: import
+		queryGroup: 'Dates Dim'
+		source = ```
+				let
+				Today= DateTime.Date(DateTime.LocalNow()),
+				Ranges = {
+				
+				{"Today",
+				Date.AddWeeks(Today,-1),
+				Date.AddWeeks(Today,-1),
+				Date.From(Date.EndOfWeek(Date.AddWeeks(Today,-1))),
+				0},
+				
+				{"Yesterday",
+				Date.AddWeeks(Date.AddDays(Today,-1),-1),
+				Date.AddWeeks(Date.AddDays(Today,-1),-1),
+				Date.From(Date.EndOfWeek(Date.AddWeeks(Today,-1))),
+				1},
+				
+				
+				{"Weekly",
+				Date.AddWeeks(Date.From(Date.StartOfWeek(Today)),-1), 
+				Date.AddWeeks(Today,-1),
+				Date.From(Date.EndOfWeek(Date.AddWeeks(Today,-1))),  
+				2},
+				
+				
+				{"PreviousWeek",
+				Date.From(Date.StartOfWeek(Date.AddWeeks(Today,-2))), 
+				Date.From(Date.EndOfWeek(Date.AddWeeks(Today,-2))),  
+				Date.From(Date.EndOfWeek(Date.AddWeeks(Today,-2))),  
+				3},
+				
+				
+				
+				
+				
+				{"Monthly", 
+				Date.StartOfMonth(Date.AddMonths(Today,-1)), 
+				Date.AddMonths(Today,-1),
+				Date.EndOfMonth(Date.AddMonths(Today,-1)), 
+				4},
+				
+				
+				
+				{"Previous Month", 
+				Date.StartOfMonth(Date.AddMonths(Today,-2)),
+				Date.EndOfMonth(Date.AddMonths(Today,-2)), 
+				Date.EndOfMonth(Date.AddMonths(Today,-2)), 
+				5},
+				
+				
+				{"Yearly",
+				Date.StartOfYear(Date.AddYears(Today,-1)),
+				Date.AddYears(Today,-1),
+				Date.EndOfYear(Date.AddYears(Today,-1)),
+				6
+				},
+				
+				{"All Date",
+				#date(2016, 01,01 ),
+				#date(2023, 01,01 ),
+				#date(2023, 01,01 ),
+				7
+				}
+				
+				},
+				
+				GetTables = List.Transform(Ranges, 
+				each CreatedimPeriodTable(_{0}, _{1}, _{2},_{3},_{4})),
+				Output = Table.Combine(GetTables)
+				in
+				    Output
+				```
+
+	annotation PBI_ResultType = Table
+

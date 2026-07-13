@@ -1,0 +1,49 @@
+{
+  "build": "13.0.1605.561",
+  "version": "1.2.4",
+  "author": {
+    "name": "MAQ Software",
+    "email": "sales@maqsoftware.com"
+  },
+  "licenseTerms": "http://go.microsoft.com/fwlink/?LinkID=627540",
+  "privacyTerms": "https://github.com/maqsoftware/PowerBI-visuals/blob/master/Privacy.md",
+  "resources": [
+    {
+      "resourceId": "rId1",
+      "sourceType": 0,
+      "file": "resources/CircularGauge.js"
+    },
+    {
+      "resourceId": "rId2",
+      "sourceType": 1,
+      "file": "resources/CircularGauge.css"
+    },
+    {
+      "resourceId": "rId3",
+      "sourceType": 3,
+      "file": "resources/icon.png"
+    }
+  ],
+  "visual": {
+    "guid": "CircularGauge1458053128559",
+    "name": "CircularGauge",
+    "displayName": "Circular Gauge",
+    "version": "1.2.4",
+    "description": "Illustrate headway toward goals in either a pie or a donut chart format. One color illustrates actual progress and the other displays the target. The percentage shown tracks progress. Text size and ring size are customizable.",
+    "supportUrl": "http://maqsoftware.com/#Contactus",
+    "gitHubUrl": "https://github.com/maqsoftware/PowerBI-visuals"
+  },
+  "images": {
+    "icon": {
+      "resourceId": "rId3"
+    }
+  },
+  "code": {
+    "javaScript": {
+      "resourceId": "rId1"
+    },
+    "css": {
+      "resourceId": "rId2"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+table VarietyParameter
+	lineageTag: b1432edf-9ef5-4ca7-b208-40d10edc17b1
+
+	measure MinVariety = MIN(VarietyParameter[Value])
+		formatString: 0
+		lineageTag: 582c6665-a640-4330-ba53-165dfd440ef7
+
+	measure MaxVariety = MAX(VarietyParameter[Value])
+		formatString: 0
+		lineageTag: b3513cb8-cc9e-44bb-bb39-0428bc136756
+
+	column Value
+		formatString: #,0
+		lineageTag: b7ceaad2-28bb-4d2e-9419-5f4a03ea8bce
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Value]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition VarietyParameter-992b60d3-0132-43cd-b1a5-f3a5511aafcd = calculated
+		mode: import
+		source = GENERATESERIES(1, 5000, 1)
+
+	annotation PBI_Id = 90c4620616074c6c8653dc17362dd847
+

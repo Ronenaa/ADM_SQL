@@ -1,0 +1,57 @@
+table dimTransactionType
+	lineageTag: 4a4c16c7-6f66-4a7e-affa-03ca2fc95862
+
+	column ID
+		dataType: int64
+		formatString: 0
+		lineageTag: 6ae38157-c1d5-4573-9f09-3ed5f46c8e0f
+		summarizeBy: none
+		sourceColumn: ID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Desc
+		dataType: string
+		lineageTag: f44aa517-3b01-44fb-85a8-02430da611da
+		summarizeBy: none
+		sourceColumn: Desc
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Family
+		dataType: string
+		lineageTag: a71da57f-f7af-48ed-9a25-f7ddba30a6eb
+		summarizeBy: none
+		sourceColumn: Family
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Group
+		dataType: string
+		lineageTag: 9d0284de-69dd-4086-ad4f-f4956a8898ea
+		summarizeBy: none
+		sourceColumn: Group
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dimTransactionType = m
+		mode: import
+		queryGroup: Dim
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="Select PO_TypeID AS 'ID'#(lf),PO_TypeDescription AS 'Desc'#(lf),CASE#(lf)#(tab)WHEN PO_Family = '2'#(lf)#(tab)#(tab)THEN 'Basis'#(lf)#(tab)WHEN PO_Family = '1'#(lf)#(tab)#(tab)THEN 'Flat'#(lf)#(tab)WHEN PO_Family = '0'#(lf)#(tab)#(tab)THEN 'Template'#(lf)#(tab)ELSE NULL#(lf)END AS 'Family'#(lf),CASE#(lf)#(tab)WHEN PO_TypeDescription LIKE '%PREMIUM%' AND PO_TypeDescription NOT LIKE '%PREMIUM Changed%'#(lf)#(tab)#(tab)THEN 'PREMIUM'#(lf)#(tab)WHEN PO_TypeDescription LIKE '%CIF%' or PO_TypeDescription LIKE '%C+F%'#(lf)#(tab)#(tab)THEN 'CIF'#(lf)#(tab)WHEN PO_TypeDescription LIKE '%FOB%' or PO_TypeDescription LIKE '%FOT%'#(lf)#(tab)#(tab)THEN 'FOT'#(lf)#(tab)ELSE NULL#(lf)END AS 'Group'#(lf)from PurchaseOrderTypes"])
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

@@ -1,0 +1,46 @@
+table LY_2Y_Parameter
+	lineageTag: bcd5ba58-c517-4a3f-b888-b7b9d6ba3bde
+
+	column LY_2Y_Parameter
+		lineageTag: 477f5f63-a270-42aa-a453-029c7d910eab
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'LY_2Y_Parameter Order'
+
+		relatedColumnDetails
+			groupByColumn: 'LY_2Y_Parameter Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'LY_2Y_Parameter Fields'
+		lineageTag: 518c5104-4b01-45fb-8757-13e396918140
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'LY_2Y_Parameter Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'LY_2Y_Parameter Order'
+		formatString: 0
+		lineageTag: 9645d913-21a9-4ac4-9335-902f5946e1df
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition LY_2Y_Parameter = calculated
+		mode: import
+		source =
+				{
+				    ("VS."&[Last Year], NAMEOF('factOrders'[Quantity Dynamic Table Switch LY FYvsYTD]), 0),
+				    ("VS."&[Last Year 2 Years], NAMEOF('factOrders'[Quantity Dynamic Table Switch 2LY FYvsYTD]), 1)
+				}
+
+	annotation PBI_Id = 677dd6ae0ebf4414a7236003412c7aa2
+

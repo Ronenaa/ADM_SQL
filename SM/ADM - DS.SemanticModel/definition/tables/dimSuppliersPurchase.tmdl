@@ -1,0 +1,511 @@
+table dimSuppliersPurchase
+	lineageTag: d63a8ace-675d-43cd-a966-fe5468761d68
+
+	column EntityID
+		dataType: string
+		lineageTag: 935f8640-e780-4c8a-acfd-260d3353107c
+		summarizeBy: none
+		sourceColumn: EntityID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SupplierKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 98795b23-eaa8-4857-b7ba-c233fcbe79ac
+		summarizeBy: none
+		sourceColumn: SupplierKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'מספר לקוח'
+		dataType: int64
+		formatString: 0
+		lineageTag: c186ed89-1bcd-4a0d-a4ff-9264f9a30f07
+		summarizeBy: none
+		sourceColumn: מספר לקוח
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Supplier Name'
+		dataType: string
+		lineageTag: 57e34e85-c8e8-4d51-a869-76149cea11c4
+		summarizeBy: none
+		sourceColumn: Supplier Name
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'מזהה לקוח'
+		dataType: string
+		lineageTag: 0027023f-d9e6-4e12-a6f4-292ddf2064ac
+		summarizeBy: none
+		sourceColumn: מזהה לקוח
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'מספר לקוח אב'
+		dataType: int64
+		formatString: 0
+		lineageTag: 73593250-d5e4-46cb-99c0-9faaff9b1318
+		summarizeBy: none
+		sourceColumn: מספר לקוח אב
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'שם לקוח אב'
+		dataType: string
+		lineageTag: 2bd6fa85-fc03-4c27-8f45-c9f839d4649e
+		summarizeBy: none
+		sourceColumn: שם לקוח אב
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'מזהה לקוח אב'
+		dataType: int64
+		formatString: 0
+		lineageTag: 487cb6c1-b298-47ed-af73-0f0ccd650987
+		summarizeBy: none
+		sourceColumn: מזהה לקוח אב
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ParentChildCustomerName
+		dataType: string
+		lineageTag: 7a42cc9c-b399-4377-92d9-73130966c56e
+		summarizeBy: none
+		sourceColumn: ParentChildCustomerName
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'קוד סוג לקוח'
+		dataType: string
+		lineageTag: 3e0c61a7-3333-4de4-94dc-a2fa02db2e81
+		summarizeBy: none
+		sourceColumn: קוד סוג לקוח
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'קטגוריית לקוח'
+		dataType: string
+		lineageTag: 73b1c4f6-41e8-4a70-8862-b59a7ae6ca00
+		summarizeBy: none
+		sourceColumn: קטגוריית לקוח
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'סוג לקוח'
+		dataType: string
+		lineageTag: ce82b2ec-eaf0-4de2-ab5a-2c77ee79b6c9
+		summarizeBy: none
+		sourceColumn: סוג לקוח
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'פרמטר 1'
+		dataType: int64
+		formatString: 0
+		lineageTag: 4265abb9-4e60-4143-8fc5-df967795598a
+		summarizeBy: none
+		sourceColumn: פרמטר 1
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'פרמטר 2'
+		dataType: int64
+		formatString: 0
+		lineageTag: 7e33fca9-f709-4b95-9a2b-f54d573c58e1
+		summarizeBy: none
+		sourceColumn: פרמטר 2
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'פרמטר 3'
+		dataType: int64
+		formatString: 0
+		lineageTag: bee75563-938d-4202-b745-6f22c5bf1d26
+		summarizeBy: none
+		sourceColumn: פרמטר 3
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'פרמטר 4'
+		dataType: int64
+		formatString: 0
+		lineageTag: 1c310274-add1-45c3-a0c5-a34a2897f144
+		summarizeBy: none
+		sourceColumn: פרמטר 4
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'פרמטר 5'
+		dataType: int64
+		formatString: 0
+		lineageTag: c3bfbb8e-5092-490b-b0ce-397369a0e6ff
+		summarizeBy: none
+		sourceColumn: פרמטר 5
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'פרמטר 6'
+		dataType: int64
+		formatString: 0
+		lineageTag: 66e2ab0c-de68-4c67-98b5-4861514fc1ff
+		summarizeBy: none
+		sourceColumn: פרמטר 6
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'פרמטר 7'
+		dataType: int64
+		formatString: 0
+		lineageTag: c3f5cd6f-f584-4865-9bc5-300a37aadf41
+		summarizeBy: none
+		sourceColumn: פרמטר 7
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'פרמטר 8'
+		dataType: int64
+		formatString: 0
+		lineageTag: 46e19333-3a9f-45de-bb39-c30b01c4fc7e
+		summarizeBy: none
+		sourceColumn: פרמטר 8
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column עיר
+		dataType: int64
+		formatString: 0
+		lineageTag: 26e4d398-ddd5-4bb1-8320-905b9b519bca
+		summarizeBy: none
+		sourceColumn: עיר
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column כתובת
+		dataType: string
+		lineageTag: d777a5aa-bf7c-4e51-ba27-942dbef8f367
+		summarizeBy: none
+		sourceColumn: כתובת
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'מספר טלפון'
+		dataType: string
+		lineageTag: d3f9c389-10b9-4a3b-988d-cf42b0045a28
+		summarizeBy: none
+		sourceColumn: מספר טלפון
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'סטטוס לקוח'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 0dbc62d6-ff64-42a8-8a59-2a193ef7adf6
+		summarizeBy: none
+		sourceColumn: סטטוס לקוח
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column AgentKey
+		dataType: int64
+		formatString: 0
+		lineageTag: d70d3024-3873-4b33-b711-54d0cc3dca84
+		summarizeBy: none
+		sourceColumn: AgentKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'תנאי תשלום ללקוח'
+		dataType: string
+		lineageTag: 3eec013b-f413-49c2-9df5-276f5915750c
+		summarizeBy: none
+		sourceColumn: תנאי תשלום ללקוח
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column MAXOBLIGO
+		dataType: int64
+		formatString: 0
+		lineageTag: 3c18ad10-17f9-4dbb-b914-a8356f9cc361
+		summarizeBy: none
+		sourceColumn: MAXOBLIGO
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column MAXCREDIT
+		dataType: int64
+		formatString: 0
+		lineageTag: 25a8a1a4-7159-46d1-a772-7bcd4f62b8e7
+		summarizeBy: none
+		sourceColumn: MAXCREDIT
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column CHEQUE_DEBIT
+		dataType: int64
+		formatString: 0
+		lineageTag: 5d917a70-bfab-46a3-a64b-55d8d3d6c441
+		summarizeBy: none
+		sourceColumn: CHEQUE_DEBIT
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column אובליגו
+		dataType: int64
+		formatString: 0
+		lineageTag: 42ec9111-a653-4898-94a8-f4892a1720e2
+		summarizeBy: none
+		sourceColumn: אובליגו
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'OBLIGO Balance'
+		dataType: int64
+		formatString: 0
+		lineageTag: c7a91f0b-9401-40b1-8d49-bab81ba510f2
+		summarizeBy: none
+		sourceColumn: OBLIGO Balance
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'חוב ללקוח'
+		dataType: int64
+		formatString: 0
+		lineageTag: 78650e6c-578d-4979-8112-a3319c55e9ca
+		summarizeBy: none
+		sourceColumn: חוב ללקוח
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column IsClubMember
+		dataType: int64
+		formatString: 0
+		lineageTag: a6e6e79b-444b-4b58-9df3-4d18c7e5de84
+		summarizeBy: none
+		sourceColumn: IsClubMember
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column מגדר
+		dataType: int64
+		formatString: 0
+		lineageTag: 41ab8343-7055-425a-96b1-0162919f2ea3
+		summarizeBy: none
+		sourceColumn: מגדר
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column גיל
+		dataType: int64
+		formatString: 0
+		lineageTag: 6b6e606a-be18-41ba-9ae3-813bdf6bacee
+		summarizeBy: none
+		sourceColumn: גיל
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'תאריך יום הולדת'
+		dataType: int64
+		formatString: 0
+		lineageTag: 2166e755-11b2-4599-a1d3-42bcdc5caeb7
+		summarizeBy: none
+		sourceColumn: תאריך יום הולדת
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'תאריך הצטרפות'
+		dataType: int64
+		formatString: 0
+		lineageTag: 7a6dec9b-f879-4129-bff7-d8c80a36d6ae
+		summarizeBy: none
+		sourceColumn: תאריך הצטרפות
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'תאריך תוקף מועדון'
+		dataType: int64
+		formatString: 0
+		lineageTag: 15e2be3c-0d4e-4fe8-b279-0367d2f2a603
+		summarizeBy: none
+		sourceColumn: תאריך תוקף מועדון
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'שיוך למועדון לקוחות'
+		dataType: int64
+		formatString: 0
+		lineageTag: 9285f9aa-8eda-4c3f-9b68-f3289ee6f8f1
+		summarizeBy: none
+		sourceColumn: שיוך למועדון לקוחות
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'אישור מייל'
+		dataType: int64
+		formatString: 0
+		lineageTag: 4e627411-e5b0-4c67-b2fc-c9d8e42e9e42
+		summarizeBy: none
+		sourceColumn: אישור מייל
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'אישור SMS'
+		dataType: int64
+		formatString: 0
+		lineageTag: a10de51a-1cf3-41f6-8f99-76f9cde641f5
+		summarizeBy: none
+		sourceColumn: אישור SMS
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column BirthdayMonth
+		dataType: int64
+		formatString: 0
+		lineageTag: 55882668-1b8f-415d-9ded-a2de629a4cc5
+		summarizeBy: none
+		sourceColumn: BirthdayMonth
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column JoinBranchID
+		dataType: int64
+		formatString: 0
+		lineageTag: ef607cf6-5def-4d82-ada3-3ad7a8dbb0db
+		summarizeBy: none
+		sourceColumn: JoinBranchID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column RowInsertDatetime
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: e2178b80-3656-4084-aaca-f67bfc99f699
+		summarizeBy: none
+		sourceColumn: RowInsertDatetime
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SupplierOrder
+		dataType: double
+		lineageTag: 4b4c057c-502c-42b1-8d6c-a8fbd0a6f05d
+		summarizeBy: none
+		sourceColumn: SupplierOrder
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column SupplierType
+		dataType: string
+		lineageTag: b25d7b8f-bfc8-4543-8292-0b43c21a24e0
+		summarizeBy: none
+		sourceColumn: SupplierType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dimSuppliersPurchase = m
+		mode: import
+		queryGroup: Dim
+		source =
+				let
+				    Source = dimSuppliers
+				in
+				    Source
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Exception
+

@@ -1,0 +1,69 @@
+table dimInvoiceDeliveryNumber
+	lineageTag: e32c21bf-f7a5-4377-bbd6-7f2e147e8994
+
+	column InvoiceID
+		dataType: string
+		lineageTag: 4b56c814-77a4-4b7f-b925-103ac7618e21
+		summarizeBy: none
+		sourceColumn: InvoiceID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column InvoiceLineNumber
+		dataType: int64
+		formatString: 0
+		lineageTag: ee6d607a-e66b-487b-bc5a-449c0e3a37e7
+		summarizeBy: sum
+		sourceColumn: InvoiceLineNumber
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DeliveryNote
+		dataType: int64
+		formatString: 0
+		lineageTag: 177a6e11-77fb-48af-9fe6-471b778e18db
+		summarizeBy: none
+		sourceColumn: DeliveryNote
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column OrderID
+		dataType: string
+		lineageTag: ba376f44-872b-4e81-814d-8bdf4c063ea7
+		summarizeBy: none
+		sourceColumn: OrderID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column RowInsertDatetime
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 2379cd87-233c-4964-b0e9-f4fb922498d4
+		summarizeBy: none
+		sourceColumn: RowInsertDatetime
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dimInvoiceDeliveryNumber = m
+		mode: import
+		queryGroup: Dim
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="SELECT #(lf)        CAST(CH.MS_CHSHBONIT as VARCHAR)  AS 'InvoiceID'#(lf)#(tab)#(tab),ROW_NUMBER () over (partition by CH.MS_CHSHBONIT order by CS.T_CHSHBONIT,TM.TARIKH_MSHLOCH) AS 'InvoiceLineNumber'#(lf)#(tab)#(tab), TM.MS_TEODH as 'DeliveryNote'#(lf)#(tab)#(tab),CAST(HZ.MSPR_HZMNH as VARCHAR) as 'OrderID'#(lf)#(tab)#(tab),GETDATE() AS RowInsertDatetime#(lf)#(tab)#(tab)#(lf)#(tab)#(tab)--,SIM.ItemID AS 'SubItemID'#(lf)FROM CHSHBONIOT_COTROT CH#(lf)Left Join GORMIM G#(lf)#(tab)on CH.QOD_LQOCH = G.QOD_GORM#(lf)Left Join TBLT_ANSHI_MCIROT AM #(lf)#(tab)on AM.SHM_AISH_MCIROT = G.AISH_MCIROT_MTPL#(lf)LEFT JOIN CHSHBONIOT_SHOROT CS ---------- #(lf)    ON CH.MS_CHSHBONIT = CS.MS_CHSHBONIT#(lf)LEFT JOIN TEODOT_MSHLOCH TM ------------#(lf)#(tab)ON CS.MS_T_MSHLOCH = TM.MS_TEODH#(lf)Left Join (SELECT MS_HZMNH,MS_T_MSHLOCH#(lf)#(tab)#(tab)#(tab)FROM QISHOR_T_MSHLOCH_HZMNOT#(lf)#(tab)#(tab)#(tab)) HZT#(lf)#(tab)on TM.MS_TEODH = HZT.MS_T_MSHLOCH#(lf)Left Join HZMNOT HZ#(lf)#(tab)on HZ.MSPR_HZMNH = HZT.MS_HZMNH#(lf)#(lf)WHERE 1=1  #(lf)AND Cast(SUBSTRING(cs.T_CHSHBONIT,1,4) as int) >=2018 and Cast(SUBSTRING(cs.T_CHSHBONIT,1,4) as int) <= Year(Getdate())#(lf)AND HZ.MSPR_HZMNH IS NOT NULL"])
+				in
+				    Source
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

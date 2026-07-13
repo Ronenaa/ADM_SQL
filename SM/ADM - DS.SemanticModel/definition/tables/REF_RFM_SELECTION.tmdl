@@ -1,0 +1,52 @@
+table REF_RFM_SELECTION
+	lineageTag: b9fdf9d7-0438-43a9-a316-60756296874d
+
+	column Index
+		dataType: int64
+		formatString: 0
+		lineageTag: e0fbe89b-9819-4071-b715-9aca5471d3eb
+		summarizeBy: sum
+		sourceColumn: Index
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Measure
+		dataType: string
+		lineageTag: 12af8e35-bf01-4950-935f-229a15ca20ef
+		summarizeBy: none
+		sourceColumn: Measure
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column MeasureHebrew
+		dataType: string
+		lineageTag: fbcc5f79-9211-472d-9575-b55a7b3d484c
+		summarizeBy: none
+		sourceColumn: MeasureHebrew
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition REF_RFM_SELECTION-cee8b36d-f359-4cf9-a257-afb54ee1242b = m
+		mode: import
+		queryGroup: 'RFM Model'
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WMlTSUXIuLS7Jz00tUghOTc9NzSsBCl1fcn3O9ekKQGL59anXpwPxKqVYnWglI6CcY3JJZllmSSVE2aLrM4GqYPLGUPn8vMSknFSFkMwCkKoJ1xden3F9BRBPAqqeohQbCwA=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type text) meta [Serialized.Text = true]) in type table [Index = _t, Measure = _t, MeasureHebrew = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Index", Int64.Type}, {"Measure", type text}})
+				in
+				    #"Changed Type"
+
+	changedProperty = IsHidden
+
+	annotation PBI_Id = 104ee348-f07d-48d2-ba05-fc4a36ae8694
+
+	annotation LinkedQueryName = REF_RFM_SELECTION
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,52 @@
+table dimEntities
+	lineageTag: 7e3b8bf5-8741-4491-9c04-d93ab5cbf9c5
+
+	column EnEntityName
+		dataType: string
+		lineageTag: 7435f222-906d-456b-8964-2cb828dbe33d
+		summarizeBy: none
+		sourceColumn: EnEntityName
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column EntityID
+		dataType: int64
+		formatString: 0
+		lineageTag: 4023df6b-2ec3-42cc-acae-b6b6a1ba447a
+		summarizeBy: none
+		sourceColumn: EntityID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column HebEntityName
+		dataType: string
+		lineageTag: 6f4342db-77c8-48f6-8a24-2908eec348bb
+		summarizeBy: none
+		sourceColumn: HebEntityName
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dimEntities-420748fa-2a80-4499-a415-21847aefcd5f = m
+		mode: import
+		queryGroup: Dim
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WcnTxVdJRMgTi6xOuz9S7PhlETLg+Tyk2FgA=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [EnEntityName = _t, EntityID = _t, HebEntityName = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"EnEntityName", type text}, {"EntityID", Int64.Type}, {"HebEntityName", type text}})
+				in
+				    #"Changed Type"
+
+	changedProperty = IsHidden
+
+	annotation PBI_Id = c3192ef6-9937-44f0-9291-5097172843cd
+
+	annotation LinkedQueryName = dimEntities
+
+	annotation PBI_ResultType = Table
+

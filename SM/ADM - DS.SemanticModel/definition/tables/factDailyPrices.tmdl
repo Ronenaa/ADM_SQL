@@ -1,0 +1,216 @@
+table factDailyPrices
+	lineageTag: 1b11c4c7-4e66-43ed-b247-a73280f9131c
+
+	measure 'Daily Price Date' =
+			
+			/*תקופה מוצגת = FORMAT(CALCULATE(MIN(dimDates[תאריך]),dimDates[IsHistory]=1),"dd/mm/yyyy") & " - " & FORMAT(CALCULATE(MAX(dimDates[תאריך]),dimDates[IsHistory]=1),"dd/mm/yyyy")*/
+			"As of date" & " - " & FORMAT(CALCULATE(MAX(Sub_DimDates[Date]),Sub_DimDates[IsHistory]=1),"dd/mm/yyyy")
+		lineageTag: d06fc450-e6a2-497a-9cb8-c249e46c959e
+
+		changedProperty = IsHidden
+
+	measure 'Avg Price Indicator (Target VS Actual)' =
+			
+			IF([Avg Unit Price By Supply Date _ DailyPrice]=BLANK(),Blank(),
+			    IF([Avg Unit Price By Supply Date _ DailyPrice]<=[Min Price Target],0,
+			        IF([Avg Unit Price By Supply Date _ DailyPrice]>=[Max Price Target],2,1
+			        )
+			    )
+			)
+		formatString: 0
+		lineageTag: 509562c3-ead3-4fc5-aee3-cbed0f8c105b
+
+		changedProperty = IsHidden
+
+	measure 'Min Price Target' =
+			
+			VAR MaxDate = CALCULATE(MAX(Sub_DimDates[Date]),Sub_DimDates[IsHistory]=1)--CALCULATE(LASTDATE(factDailyPrices[AsOfDate]))--,ALL(factDailyPrices))
+			RETURN
+			
+			CALCULATE(
+			    CALCULATE(MIN(factDailyPrices[MinPrice])
+			    ,FILTER(factDailyPrices,factDailyPrices[MinPrice]>0 && factDailyPrices[AsOfDate]=MaxDate))
+			    --,FILTER(dimDates,dimDates[תאריך]>=MaxDate)
+			     -- ,FILTER(Sub_DimDates,Sub_DimDates[תאריך]>=MaxDate)
+			     --,USERELATIONSHIP(Sub_DimDates[Date],factDailyPrices[Date])
+			    )
+		formatString: #,0
+		lineageTag: fb976e1d-9945-489f-8206-c49659aa59af
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'Max Price Target' = ```
+			
+			VAR MaxDate = CALCULATE(MAX(Sub_DimDates[Date]),Sub_DimDates[IsHistory]=1)--,ALL(factDailyPrices))
+			RETURN
+			CALCULATE(
+			    CALCULATE(MAX(factDailyPrices[MaxPrice]),FILTER(dimDates,dimDates[Date]>=MaxDate)
+			    ,FILTER(factDailyPrices,factDailyPrices[MaxPrice]>0 && factDailyPrices[AsOfDate]=MaxDate))
+			    --,USERELATIONSHIP(Sub_DimDates[Date],factDailyPrices[Date])
+			    )
+			    
+			```
+		formatString: 0
+		lineageTag: 8b0d4420-d527-4408-b3b3-3971db60ec47
+
+		changedProperty = IsHidden
+
+	measure 'Min - Max' = ```
+			
+			VAR DailyDate =CALCULATE(MAX(Sub_DimDates[Date]),Sub_DimDates[IsHistory]=1)--CALCULATE(LASTDATE(factDailyPrices[AsOfDate]),ALL(factDailyPrices))
+			Var _MaxDate = MAX(dimDates[Date]) 
+			
+			
+			RETURN
+			Switch(TRUE(),
+			    ISBLANK([Max Price Target]),
+			        BLANK(),
+			     _MaxDate<>BLANK(),
+			        [Min Price Target] & "-" & [Max Price Target],
+			BLANK()
+			)
+			
+			```
+		lineageTag: 91c2047f-ec21-4341-9b19-f8f4c3903eab
+
+		changedProperty = IsHidden
+
+	measure MonthsIndicator = ```
+			
+			Var _Parameter = PricingMonthParameter[PricingMonthParameter Value]
+			Var _Today = MAX(factDailyPrices[AsOfDate])
+			Var _MaxDate = CALCULATE(MAX(dimDates[Date]),dimDates[IsHistory]=0) 
+			Var _ParameterDate = EOMONTH(_Today, _Parameter)
+			
+			RETURN
+			Switch(TRUE(),
+			    _MaxDate <=_ParameterDate && _MaxDate<>BLANK(),1
+			    ,0
+			    )
+			```
+		formatString: 0
+		lineageTag: f2944dc7-57dd-4d87-8c70-c53f32ea66fa
+
+		changedProperty = IsHidden
+
+	measure 'Market Price' =
+			
+			VAR MaxDate = CALCULATE(MAX(factDailyPrices[AsOfDate]),factDailyPrices[MinPrice]>0)--CALCULATE(LASTDATE(factDailyPrices[AsOfDate]))--,ALL(factDailyPrices))
+			RETURN
+			ROUND(
+			CALCULATE(
+			    CALCULATE(AVERAGE(factDailyPrices[MarketPrice])
+			    ,FILTER(factDailyPrices,factDailyPrices[MinPrice]>0 /*&& factDailyPrices[AsOfDate]=MaxDate*/ && factDailyPrices[AsOfDate]>=MaxDate))
+			)
+			,0)
+		formatString: #,0
+		lineageTag: e0b21414-d9be-49b0-9b9b-eed6f6f11bc7
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'Market Price - Risk Plan No Total' = ```
+			
+			 SWITCH(TRUE(),
+			 ISBLANK([AVG Price - Risk Plan No Total]),
+			    BLANK(),
+			HASONEVALUE(dimDates[MonthInCalendarName]),
+			    [Market Price],
+			BLANK()
+			)
+			```
+		lineageTag: 36b955e7-ec70-4472-93fc-291ccf15a721
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column ItemKey
+		dataType: string
+		lineageTag: 461d8a0b-5072-4524-9cd5-60502aa39259
+		summarizeBy: none
+		sourceColumn: ItemKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column AsOfDate
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: f9a34ff2-67ab-41f8-a45c-7b4c02595afc
+		summarizeBy: none
+		sourceColumn: AsOfDate
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Date
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 25f524a2-fefa-4106-b9dd-22ed85a82d2a
+		summarizeBy: none
+		sourceColumn: Date
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column MAXPrice
+		dataType: double
+		lineageTag: b7bca43d-335c-4b81-b0de-2e6d897b215b
+		summarizeBy: sum
+		sourceColumn: MAXPrice
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MINPrice
+		dataType: double
+		lineageTag: e56db5a8-61ed-41fe-a35a-d4eba84e7d49
+		summarizeBy: sum
+		sourceColumn: MINPrice
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MarketPrice
+		dataType: double
+		lineageTag: 918aa133-1a40-4696-aa6a-2ed56bcd4e22
+		summarizeBy: sum
+		sourceColumn: MarketPrice
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition factDailyPrices = m
+		mode: import
+		queryGroup: 'fact Tables'
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="WITH DateList AS (#(lf)  --SELECT CAST(DATEADD(MONTH,DATEDIFF(month,0,DATEADD(MM,+1,MIN(AsOfDate))),0) AS date) AS 'Date'#(lf)Select Cast(dateadd(dd,[index]-1,'2023-09-01') as date) as date#(lf)FROM (select ROW_NUMBER () over (order by name) as 'index' from sys.all_columns) O#(lf)Where Cast(dateadd(dd,[index]-1,'2023-09-01') as date) <= (EOMONTH(DATEADD(MONTH,DATEDIFF(month,0,DATEADD(MM,+12,GETDATE())),0)) )#(lf)#(lf)#(lf)  #(lf))#(lf)#(lf),STG1 AS (#(lf)SELECT#(lf)    ProductID,#(lf)#(tab)AsOfDate,#(lf)    Months,#(lf)#(tab)MONTH(DATEADD(MM, case when RIGHT(MONTHS,2) IN ('10','11','12') THEN CAST(RIGHT(MONTHS,2) AS INT)-1 ELSE CAST(RIGHT(MONTHS,1) AS INT)-1 END, ASOFDATE)) AS MonthNum,#(lf)#(tab)YEAR(DATEADD(MM, case when RIGHT(MONTHS,2) IN ('10','11','12') THEN CAST(RIGHT(MONTHS,2) AS INT)-1 ELSE CAST(RIGHT(MONTHS,1) AS INT)-1 END, ASOFDATE)) AS YearNum,#(lf)#(tab)YEAR(DATEADD(MM, case when RIGHT(MONTHS,2) IN ('10','11','12') THEN CAST(RIGHT(MONTHS,2) AS INT)-1 ELSE CAST(RIGHT(MONTHS,1) AS INT)-1 END, ASOFDATE)) *100 + MONTH(DATEADD(MM, case when RIGHT(MONTHS,2) IN ('10','11','12') THEN CAST(RIGHT(MONTHS,2) AS INT)-1 ELSE CAST(RIGHT(MONTHS,1) AS INT)-1 END, ASOFDATE)) as YearMonthNum,#(lf)#(tab)LEFT(Months,3)AS 'MinMaxIndicator',#(lf)#(tab)Price,#(lf)#(tab)Case When Price = 0 Then 0 Else 1 End as Flag#(lf)FROM (#(lf)    SELECT#(lf)        ProductID,#(lf)#(tab)#(tab)AsOfDate,#(lf)        MinPriceMonth1,#(lf)        MaxPriceMonth1,#(lf)        MinPriceMonth2,#(lf)        MaxPriceMonth2,#(lf)#(tab)#(tab)MinPriceMonth3,#(lf)        MaxPriceMonth3,#(lf)#(tab)#(tab)MinPriceMonth4,#(lf)        MaxPriceMonth4,#(lf)#(tab)#(tab)MinPriceMonth5,#(lf)        MaxPriceMonth5,#(lf)#(tab)#(tab)MinPriceMonth6,#(lf)        MaxPriceMonth6,#(lf)#(tab)#(tab)MinPriceMonth7,#(lf)        MaxPriceMonth7,#(lf)#(tab)#(tab)MinPriceMonth8,#(lf)        MaxPriceMonth8,#(lf)#(tab)#(tab)MinPriceMonth9,#(lf)        MaxPriceMonth9,#(lf)#(tab)#(tab)MinPriceMonth10,#(lf)        MaxPriceMonth10,#(lf)#(tab)#(tab)MinPriceMonth11,#(lf)        MaxPriceMonth11,#(lf)#(tab)#(tab)MinPriceMonth12,#(lf)        MaxPriceMonth12#(lf)#(lf)    FROM [tblDailyPrices]#(lf)) AS SourceTable#(lf)UNPIVOT (#(lf)    Price FOR Months IN (#(lf)        MinPriceMonth1, MaxPriceMonth1,#(lf)        MinPriceMonth2, MaxPriceMonth2,#(lf)#(tab)#(tab)MinPriceMonth3, MaxPriceMonth3,#(lf)#(tab)#(tab)MinPriceMonth4, MaxPriceMonth4,#(lf)#(tab)#(tab)MinPriceMonth5, MaxPriceMonth5,#(lf)#(tab)#(tab)MinPriceMonth6, MaxPriceMonth6,#(lf)#(tab)#(tab)MinPriceMonth7, MaxPriceMonth7,#(lf)#(tab)#(tab)MinPriceMonth8, MaxPriceMonth8,#(lf)#(tab)#(tab)MinPriceMonth9, MaxPriceMonth9,#(lf)#(tab)#(tab)MinPriceMonth10, MaxPriceMonth10,#(lf)#(tab)#(tab)MinPriceMonth11, MaxPriceMonth11,#(lf)#(tab)#(tab)MinPriceMonth12, MaxPriceMonth12#(lf)    )#(lf)) AS UnpivotedTable#(lf))#(lf)#(lf),STG2 AS (#(lf)Select ProductID,#(lf)AsOfDate,#(lf)Months,#(lf)MonthNum,#(lf)YearNum,#(lf)YearMonthNum,#(lf)MinMaxIndicator,#(lf)Price,#(lf)Sum (Flag) over (partition by ProductID,MinMaxIndicator,YearMonthNum Order by AsOfDate) as Ranking#(lf)from STG1#(lf))#(lf)#(lf),STG3 AS (#(lf)Select ProductID,#(lf)AsOfDate,#(lf)Months,#(lf)MonthNum,#(lf)YearNum,#(lf)YearMonthNum,#(lf)MinMaxIndicator,#(lf)Max (Price) over (partition by ProductID,MinMaxIndicator,YearMonthNum,Ranking Order by AsOfDate) AS Price#(lf)from STG2#(lf))#(lf)#(lf),MAXPRICE as (#(lf)Select ProductID,#(lf)AsOfDate,#(lf)Months,#(lf)MonthNum,#(lf)YearNum,#(lf)YearMonthNum,#(lf)Price as 'MAXPrice'#(lf)From STG3#(lf)Where MinMaxIndicator = 'MAX'#(lf))#(lf)#(lf),MINPRICE as (#(lf)Select ProductID,#(lf)AsOfDate,#(lf)Months,#(lf)MonthNum,#(lf)YearNum,#(lf)YearMonthNum,#(lf)Price as 'MINPrice'#(lf)From STG3#(lf)Where MinMaxIndicator = 'MIN'#(lf))#(lf)#(lf),MARKETPRICE as (#(lf)Select ProductID,#(lf)AsOfDate,#(lf)MonthNum,#(lf)YearNum,#(lf)YearMonthNum,#(lf)AVG(Price) as 'MarketPrice'#(lf)From STG3#(lf)Group By ProductID,AsOfDate,MonthNum,YearNum,YearMonthNum#(lf))#(lf)#(lf),STG4 AS (#(lf)Select MX.ProductID,#(lf)MX.AsOfDate,#(lf)MX.Months,#(lf)MX.MonthNum,#(lf)MX.YearNum,#(lf)MX.YearMonthNum,#(lf)MAXPrice,#(lf)MINPrice,#(lf)MarketPrice#(lf)From MAXPRICE MX#(lf)Left Join MINPRICE MN#(lf)#(tab)ON MX.AsOfDate = MN.AsOfDate AND MX.YearMonthNum = MN.YearMonthNum AND MX.ProductID=MN.ProductID#(lf)Left Join MARKETPRICE MK#(lf)#(tab)ON MX.AsOfDate = MK.AsOfDate AND MX.YearMonthNum = MK.YearMonthNum AND MX.ProductID=MK.ProductID#(lf))#(lf)#(lf),STG5 AS(#(lf)SELECT *#(lf)FROM STG4#(lf)CROSS APPLY (#(lf)SELECT *#(lf)FROM DateList #(lf))dl#(lf)WHERE DL.Date>=STG4.AsOfDate #(lf)      AND Month(DL.Date)- Month(STG4.AsOfDate)<=12 #(lf)#(tab)  AND ( CASE --WHEN MonthNum = MONTH(STG_2.AsOfDate) THEN 1 #(lf)#(tab)             WHEN MONTH(DL.Date) = MonthNum AND  Year(DL.Date) = YearNum  THEN 1#(lf)#(tab)#(tab)#(tab)#(tab) ELSE 0 END=1)#(lf)#(tab)--AND MonthNum = 3#(lf))#(lf)#(lf)SELECT  CAST( CONVERT(BIGINT, CONVERT(VARCHAR, ProductID)) as varchar) +'-'+ CAST( CONVERT(BIGINT, CONVERT(VARCHAR, ProductID)) as varchar)AS 'ItemKey'#(lf)      ,AsOfDate#(lf)#(tab)  ,[Date]#(lf)#(tab)  ,MAXPrice#(lf)#(tab)  ,MINPrice#(lf)#(tab)  ,MarketPrice#(lf)FROM STG5#(lf)#(lf)#(lf)", CommandTimeout=#duration(0, 2, 30, 0)]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"AsOfDate", type date}, {"Date", type date}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

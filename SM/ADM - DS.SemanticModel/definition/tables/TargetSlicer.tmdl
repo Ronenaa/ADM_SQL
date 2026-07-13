@@ -1,0 +1,23 @@
+table TargetSlicer
+	lineageTag: d04764bc-af39-407b-90ae-cb36677be7b0
+
+	column TargetSlicer
+		dataType: double
+		formatString: 0
+		lineageTag: 3fabac3d-4282-432b-9db0-7c246778905e
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+		annotation SummarizationSetBy = User
+
+	partition TargetSlicer-1b49e656-9c2c-4129-867f-62ebed483261 = calculated
+		mode: import
+		source = GENERATESERIES(0, 35, 1)
+
+	annotation PBI_Id = d1d8301455b743f99fead5e435105c40
+

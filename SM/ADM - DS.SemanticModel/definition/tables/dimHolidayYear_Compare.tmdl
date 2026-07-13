@@ -1,0 +1,44 @@
+table dimHolidayYear_Compare
+	lineageTag: e85d2e79-1098-465d-928c-892fd1ad4ddd
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: 63e882e3-3842-4c1b-8d09-b85083e452a3
+		summarizeBy: sum
+		sourceColumn: Year
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Selected Year'
+		dataType: string
+		lineageTag: 60fc5841-5f7c-48c1-9da9-5d2862396be6
+		summarizeBy: none
+		sourceColumn: Selected Year
+		sortByColumn: Year
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dimHolidayYear_Compare-c1e120c8-af7c-47b0-9b20-251877bf1203 = m
+		mode: import
+		queryGroup: 'Dates Dim'
+		source =
+				let
+				    Source = dimHolidayYear
+				in
+				    Source
+
+	changedProperty = IsHidden
+
+	annotation PBI_Id = 71daf641-e6f1-4a2f-8dff-d7d848c32f77
+
+	annotation LinkedQueryName = dimHolidayYear_Compare
+
+	annotation PBI_QueryRelationships = {"columnCount":2,"keyColumnNames":[],"queryRelationships":[],"columnIdentities":["Section1/dimHolidayYear/Changed Type.{שנה,0}","Section1/dimHolidayYear/Added Custom.{Selected Year,45}"],"ColumnCount":2,"KeyColumnNames":[],"ColumnIdentities":["Section1/dimHolidayYear/Changed Type.{שנה,0}","Section1/dimHolidayYear/Added Custom.{Selected Year,45}"],"RelationshipInfo":[]}
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,137 @@
+/// how many days the customer consider late is ?
+expression 'Late Extension' = 0 meta [IsParameterQuery=true, Type="Number", IsParameterQueryRequired=false]
+	lineageTag: 9403d3ef-a930-4bd8-8ed1-d91d5614e9ce
+	queryGroup: Parameters
+
+	annotation PBI_ResultType = Number
+
+expression HolidayPivot =
+		let
+		    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("hdldcpw4GIXhrbh8napGP4C0lkz2FMf22Kk4U3HKF042xHZGIOnD0neO+s5NeNNCPA1q+vPnW7NcJnOxk/G3n263v9uf7fc/t9t9emH2Dc/pxePNdpe2323Pacu8rv72y6ccOhi6fcPb9ri9b9+3n03jL5OHzZyb1+2p2T9cphnuH/YNL+nFt31wv9Ob/be9f0zT+0wLPq5p37Ifz+MR/m2y+TIFnFnZsj3sb/p1u2vGamjpmpnsOjtdpoi7Y8tLmsSXmzQz+x9P/Xitp/Uxpe/p7f7cbA/pH35tD90EmUmV+y7mmNzv6a1+3mw/0h/HucztnNtA27hveU3Bj3OocwVjLIzsMbVPaYR79vAxcoZFU36jNDlpTl+3526EaV6OblYjZKxnAeBgiFiXxhXWqulZl/3XwlrtP2A9y/nGKWFdsvRhXXFGWcsJYCVhfc5jxN2QdbHiaE1ZlyOF5eMV1ktuV9oi1jmaKmsVQdZLy1pFjHUZ4Vyu1osaIWO9iBsHQ8S6NLawVk3PehFkM9x/wDqnaTLy1VofF2a9yP0k4IyyLmWkJWG9tNdb3Q1ZFyu2XDd1TVnLBIHy3yusV7nwkhaxXuuBZqEqgqzXlrWKGOtV7p1Ht6oRMtaruHEwRKxLMxXWqulZr4JshvsPWMt8kJSwztlUlxI6o6xXubOQkrAWIpm17oas13YJo2vKukwQLJ+usA7tAka3iHWQz5GW9sRYh5a1ihhr6fLVOqgRMtZBADgYItZBphI3Pesgi5YZ7j9gHeR845SwDnI/WXFGWQe5MZOSsD7nMeJuyLrUkdaUdZC7iy6fr7CO7QJGt4h1lBuLhRFkHVvWKmKsywgr66hGyFifoYMhYh1lKj1setbn9M1w/wHrKOd7wceFWcf2i5/OKOsoV11SEtbnPEbcDVmXOtKaspYJylfcWqbubYw6THU9j0tAuiS2ku4SBLokArpLCOc6tikvPuzUjY1g/pA5kAHKpUjn+qDcFx3k+v/bDLnfmzOuExdxiBHXqZvyFVZFjHA9pvK8RHUY8Idji6ga8a1tIC3DW6el77a3VH69wtc063bQIsCmAjEWRpCwaQjriCE2cnT7NdkaNULG2MiXNgtDBNnI7djBpqdsBJeH+w8wl0ksj0rAcWHORpCsOKOgjXzBIyUhfZ6AgLshalMfImScuqasTbNyb8u7K6xts24HLWJt64EaLe2OsbYtaxUx1lZO//FmVo2QsT5DB0PEujRzYaqanrWVpckM9x+wtnLZXPBxYda2+XoHMsrayhWXlIT1OY8Rd0PWVh5XkZqylgnKV9ym/HaFtWuWKaBFrF29YmShKoKsXctaRYy1k4/70Tk1QsbaCQAHQ8TaiTUPm561TF9mrfYfsHbNE0BwXJi1a77egYyydvXGnFnrkrA+jzHibsjayYWC1JS1az8QTXl/hbVv1u2gRax9BWO0tHvG2resVcRY++bptPVqhIz1+SuWgyFi7Zun07rpWfvWptp/wNo3T6fBcWHWXn7ECDijrH3zdBqUhLVv17i6G7L27SpX15S1TBAor/yWGM6fBUmLWM9VWhaqIsi6/S1RR4x16r78Dw==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type text) meta [Serialized.Text = true]) in type table [Date = _t, HebYearName = _t, HolidayID = _t, HolidayName = _t, HebYearID = _t]),
+		    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Date", type date}, {"HebYearName", type text}, {"HolidayID", Int64.Type}, {"HolidayName", type text}, {"HebYearID", Int64.Type}}),
+		    // ראש השנה, סוכות, חנוכה, פסח
+		    #"Filtered Basic Holidays**" = Table.SelectRows(#"Changed Type", each ([HolidayName] = "חנוכה" or [HolidayName] = "סוכות" or [HolidayName] = "פסח" or [HolidayName] = "ראש השנה")),
+		    #"Inserted Year" = Table.AddColumn(#"Filtered Basic Holidays**", "Year", each Date.Year([Date]), Int64.Type)
+		in
+		    #"Inserted Year"
+	lineageTag: 78165c7b-9009-4cf1-bf4f-2115d28f2e92
+	queryGroup: HolidaysData
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression HolidayNOTPivot =
+		let
+		    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("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", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type text) meta [Serialized.Text = true]) in type table [Date = _t, HebYearName = _t, SpecialDayName = _t]),
+		    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Date", type date}, {"HebYearName", type text}, {"SpecialDayName", type text}})
+		in
+		    #"Changed Type"
+	lineageTag: a04ff792-7e94-4a4c-a566-dec51201b6f9
+	queryGroup: HolidaysData
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression EntityID = "31871" meta [IsParameterQuery=true, List={"31871"}, DefaultValue="31871", Type="Text", IsParameterQueryRequired=false]
+	lineageTag: f690c8f1-aeb5-48a5-95cd-087dc600c63c
+	queryGroup: Parameters
+
+	annotation PBI_ResultType = Text
+
+expression CreatePeriodTable = ```
+		let
+		    Source = (
+		PeriodName as text,
+		StartDate as date, 
+		EndDate as date, 
+		SortOrder as number
+		) as table =>
+		let
+		DayCount = Duration.Days(EndDate-StartDate)+1,
+		DateList = List.Dates(StartDate,DayCount,#duration(1,0,0,0)),
+		AddPeriodName = List.Transform(DateList, 
+		each {PeriodName,_,SortOrder}),
+		CreateTable = #table(
+		type table[Period=text, Date=date, Sort=number], 
+		AddPeriodName)
+		in
+		CreateTable
+		in
+		    Source
+		```
+	lineageTag: 46b4b0c7-4acb-4989-9fa3-c043bf122b03
+	queryGroup: 'Dates Dim'
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Function
+
+expression CreatedimPeriodTable = ```
+		let
+		    Source = (
+		PeriodName as text,
+		StartDate as date, 
+		EndDate as date, 
+		FullDate as date,
+		SortOrder as number
+		) as table =>
+		let
+		//FullDayCount = Duration.Days(FullDate-StartDate)+1, //Old Calc
+		FullDayCount = CalcWorkingDays(StartDate ,FullDate),
+		DayCount = Duration.Days(EndDate-StartDate)+1,
+		DateList = List.Dates(StartDate,DayCount,#duration(1,0,0,0)),
+		AddPeriodName = List.Transform(DateList, 
+		each {PeriodName,_,SortOrder,FullDayCount}),
+		CreateTable = #table(
+		type table[Period=text, Date=date, Sort=number,FullDays=number], 
+		AddPeriodName)
+		in
+		CreateTable
+		in
+		    Source
+		```
+	lineageTag: a12bcc77-02c9-458d-8bea-dea0f51c6ed3
+	queryGroup: 'Dates Dim'
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Function
+
+expression CalcWorkingDays =
+		(StartDate,EndDate)=>
+		
+		let
+		    Source = dimDates,
+		    #"Filtered Rows" = Table.SelectRows(Source, each [Date] >= StartDate and [Date] <= EndDate),
+		    #"Calculated Sum" = List.Sum(#"Filtered Rows"[Is Working Day])
+		in
+		    #"Calculated Sum"
+	lineageTag: 852e5f89-bae7-4293-8dff-3adde1aafce0
+	queryGroup: 'Dates Dim'
+
+	annotation PBI_ResultType = Function
+
+	annotation PBI_NavigationStepName = Navigation
+
+expression SubItemsMapping =
+		let
+		    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WMtC1tLQ0UNJRur7i+szrE4F4FZADFphwffr1FSDGyutTry8A4lWonFgdqHZDkPgUoNjE63OuTyFZuxFE+xKgC1Zen6kAJBaBNZJgCljpbKDtc67PhOlEcMFuWwY0CqobJhMbCwA=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [ItemKey = _t, #"שם מוצר" = _t, MainItemKey = _t, MainItemName = _t, #"קבוצת פריט" = _t, #"שם מוצר על" = _t]),
+		    #"Changed Type" = Table.TransformColumnTypes(Source,{{"שם מוצר", type text}})
+		in
+		    #"Changed Type"
+	lineageTag: 1eb5beca-77bb-425c-91c5-0b273d00c935
+	queryGroup: Dim
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression 'SQL Address' = "127.0.0.1" meta [IsParameterQuery = true, IsParameterQueryRequired = true, Type = "Text", List = {"213.8.5.61", "127.0.0.1"}, DefaultValue = "213.8.5.61"]
+	lineageTag: 80a716ee-3318-4046-9090-516f1b5d3365
+
+	annotation PBI_ResultType = Text
+
+	annotation PBI_NavigationStepName = Navigation
+

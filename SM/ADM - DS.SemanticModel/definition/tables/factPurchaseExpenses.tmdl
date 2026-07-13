@@ -1,0 +1,702 @@
+table factPurchaseExpenses
+	lineageTag: e89423a5-0ca5-40f5-88a7-a6668858d8ac
+
+	measure 'Total Quantity (Expenses)' = SUM(factPurchaseExpenses[Quantity])
+		formatString: 0.00
+		lineageTag: da0d73d4-2042-4828-97e2-e199f944b3f7
+
+		changedProperty = IsHidden
+
+	measure 'Total Expenses NIS' = SUM(factPurchaseExpenses[LineTotalNetNIS])
+		formatString: "₪"\ #,0.00;"₪"-#,0.00;"₪"\ #,0.00
+		lineageTag: a87eb6f1-2fd2-4cf7-a17d-1dfbf12653d7
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"he-IL"}
+
+	measure 'Total Expenses USD' = SUM(factPurchaseExpenses[LineTotalNetUSD])
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 8a69ff38-48ce-496f-bccd-7231b1b9e523
+
+		changedProperty = IsHidden
+
+	measure 'Total Order Quantity (Hzmnot)' = SUM(factPurchaseExpenses[OrderQuantity])
+		formatString: #,0
+		lineageTag: 4044acc3-f43f-40d4-9c6d-3433235e9663
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'Avg Price USD (Expenses)' = DIVIDE([Total Expenses USD],[Total Order Quantity (Hzmnot)])
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 71f52325-9586-47d4-941b-2932f4fe42ec
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure PurchaseOrderDetailsMatrix = ```
+			
+			IF(HASONEVALUE(factPurchaseExpenses[ShipID]),
+			SWITCH(
+			    SELECTEDVALUE(hlp_ExpensesMatrixTableFileds[Filed]),
+			
+			    --"Boat", SELECTEDVALUE(dimBoats[ShipDesc]),
+			    --"Supplier", SELECTEDVALUE(dimSuppliersCompare[Supplier Name]),
+			    "Supplier",
+			            LOOKUPVALUE(
+			                dimSuppliersCompare[Supplier Name],
+			                dimSuppliersCompare[SupplierKey], 
+			                SELECTEDVALUE(factPurchaseExpenses[OrderSupplierKey])
+			            ),
+			   /* "Product", --SELECTEDVALUE(factPurchaseExpenses[ItemKey_backup]),--SELECTEDVALUE(dimItemsSimple[שם מוצר]),
+			            LOOKUPVALUE(
+			                        dimItemsSimple[Article_Description],
+			                        dimItemsSimple[ItemKey], 
+			                        SELECTEDVALUE(factPurchaseExpenses[ItemKey_backup])
+			                    ),*/
+			    --"OrderID", SELECTEDVALUE('factPurchaseExpenses'[OrderID]),
+			    "OrderDate", FORMAT(SELECTEDVALUE('factPurchaseExpenses'[OrderDate]), "dd/mm/yyyy"),
+			    "SupplyDate", FORMAT(SELECTEDVALUE('factPurchaseExpenses'[Value Date]), "dd/mm/yyyy"),
+			    "Quantity", FORMAT([Total Order Quantity (Hzmnot)], "#,##0.00"),
+			    "Order Type",
+			            LOOKUPVALUE(
+			                        dimTransactionType[Desc],
+			                        dimTransactionType[ID], 
+			                        SELECTEDVALUE(factPurchaseExpenses[TransactionType])
+			                    ),
+			    "CIF Price", FORMAT([CIF Price], "$#,##0.00"),
+			    BLANK()
+			),BLANK())
+			```
+		lineageTag: 91f990ab-c34f-45e1-8671-7c9907251a45
+
+		changedProperty = IsHidden
+
+	measure 'CIF Price' =
+			
+			CALCULATE([Avg Price USD (Expenses)]
+			            ,dimItems[PNL Description] = "Purchase Inventory"
+			)
+			
+			/*DIVIDE(
+			    CALCULATE(
+			        [Total Expenses USD],
+			        dimItems[PNL Description] = "Purchase Inventory"
+			    ),
+			    [Total Order Quantity (Hzmnot)]
+			)*/
+		formatString: \$#,0.0;(\$#,0.0);\$#,0.0
+		lineageTag: f07f0282-e466-4fc3-abfa-e19e2b43c81a
+
+		changedProperty = IsHidden
+
+	measure 'Total Order Quantity Order date' =
+			
+			CALCULATE([Total Order Quantity (Hzmnot)],
+			            USERELATIONSHIP(dimDates[Date],factPurchaseExpenses[OrderDate]
+			            ))
+		lineageTag: c57b76e5-92ba-4797-807d-703cb9ec3ecb
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Avg Unit Price (weighted)' = ```
+			
+			SUMX(
+			    ADDCOLUMNS(
+			        factPurchaseExpenses,
+			        "RealItemQtyForThisOrder",
+			            CALCULATE(
+			                SUM( factPurchaseExpenses[OrderQuantity] ),
+			                FILTER(
+			                    ALLEXCEPT(
+			                        factPurchaseExpenses,
+			                        factPurchaseExpenses[PurchaseOrderID]
+			                    ),
+			                    RIGHT( factPurchaseExpenses[ItemKey], 1 ) <> "S"
+			                    
+			                )
+			            )
+			    ),
+			    DIVIDE(
+			        factPurchaseExpenses[LineTotalNetUSD],
+			        [RealItemQtyForThisOrder]
+			    )
+			)
+			```
+		formatString: \$#,0.0;(\$#,0.0);\$#,0.0
+		lineageTag: 86353866-fade-47a6-a741-ac24d5a6160a
+
+		changedProperty = IsHidden
+
+	measure 'Boat & MonthYear Show' =
+			
+			VAR _Boat =
+			    SELECTEDVALUE( 'dimBoats'[ShipDesc] )
+			VAR _Date =
+			    SELECTEDVALUE( 'factPurchaseExpenses'[SupplyDate] )
+			RETURN
+			IF(
+			    NOT( ISBLANK( _Boat ) )
+			        && NOT( ISBLANK( _Date ) ),
+			    _Boat
+			        & " – "
+			        & FORMAT( _Date, "MMM yyyy" ),
+			   "Select Boat"
+			)
+		lineageTag: b25a2184-1442-49ae-a6ca-e4ab9dd84b70
+
+		changedProperty = IsHidden
+
+	measure 'Total Shortage Amount' =
+			
+			[Avg Price USD (Expenses)]*[Adjustment Quantity Shortage]
+		lineageTag: 94993112-e9a6-4f28-a076-4b14cc0639d6
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Purchase Cost - AVG Price' =
+			
+			VAR _amount = [Total Shortage Amount] + [Total Expenses USD]
+			VAR _quantity = [Adjustment Quantity Shortage] + [Total Order Quantity (Hzmnot)]
+			RETURN
+			DIVIDE(_amount,_quantity)
+		lineageTag: f669438d-9140-49dc-80cc-8027bdaf414e
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure Port_Name =
+			
+			CALCULATE(
+			    SELECTEDVALUE(dimSuppliersCompare[Supplier Name]),
+			    FILTER(
+			        ALL(factGain),
+			        factGain[PurchaseOrderID] in VALUES(factGain[PurchaseOrderID])
+			    )
+			)
+		lineageTag: 167606e7-f7ed-4dc1-b58f-4886e4ea3f0d
+
+		changedProperty = IsHidden
+
+	measure 'USD rate by order date' = ```
+			
+			IF(
+			    ISFILTERED(dimPurchaseOrderNumber[PurchaseOrderID]),
+			        CALCULATE(
+			            max(factPurchaseExpenses[NEW_SHER]),    
+			            FILTER(factPurchaseExpenses,factPurchaseExpenses[PNLKey] = 999)
+			            // ,REMOVEFILTERS(dimSuppliers)
+			            // ,REMOVEFILTERS(dimItems)
+			            // ,REMOVEFILTERS(factGain)
+			        ),
+			        BLANK()
+			)
+			```
+		formatString: 0.000
+		lineageTag: fdd3e630-cf8a-4813-b486-974912ff6b7d
+
+		changedProperty = IsHidden
+
+	measure 'Quantity Exchange or Purchase' = ```
+			
+			var exchange_doc = SELECTEDVALUE(factPurchaseExpenses[DocName])
+			RETURN
+			IF(
+			    exchange_doc = "Orders",
+			    factSales[Total Quantity Adjustment+Sales],
+			    factPurchaseExpenses[Total Order Quantity (Hzmnot)]
+			)
+			
+			```
+		lineageTag: 362d37b1-b865-4bae-97d2-176c4008cdbb
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Avg Price USD (Expenses) Non Invoice' =
+			
+			CALCULATE(
+			    DIVIDE([Total Expenses USD],[Total Order Quantity (Hzmnot)]),
+			    FILTER(factPurchaseExpenses,factPurchaseExpenses[DocType] <> "Invoice")
+			)
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: b5eb8d94-f2a6-4249-af92-ee59075da982
+
+	measure Total_Balance_NIS =
+			
+			CALCULATE(
+			    SUM(factPurchaseExpenses[LineTotalBalanceNIS]),
+			    REMOVEFILTERS(dimSuppliers),
+			    REMOVEFILTERS(dimItems),
+			    KEEPFILTERS(dimPurchaseOrderNumber)
+			)
+		formatString: "₪"#,0.00;-"₪"#,0.00;"₪"#,0.00
+		lineageTag: 932771eb-3b4f-422e-923c-6ddb400fb219
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-IL"}
+
+	measure Total_Balance_USD =
+			
+			CALCULATE(
+			    SUM(factPurchaseExpenses[LineTotalBalanceUSD]),
+			    REMOVEFILTERS(dimSuppliers),
+			    REMOVEFILTERS(dimItems),
+			    KEEPFILTERS(dimPurchaseOrderNumber)
+			)
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 703730b5-c8b2-4b1e-986e-87b00fbc4c05
+
+	measure Total_Net_USD =
+			
+			CALCULATE(
+			    SUM(factPurchaseExpenses[LineTotalNetUSD]),
+			    REMOVEFILTERS(dimSuppliers),
+			    REMOVEFILTERS(dimItems),
+			    KEEPFILTERS(dimPurchaseOrderNumber)
+			)
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: f92a90ef-9800-4acd-931f-285b4aa7b4ba
+
+	column EntityID
+		dataType: string
+		lineageTag: 7e021a22-204a-48e5-be52-a6b3cbfe0a36
+		summarizeBy: none
+		sourceColumn: EntityID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column OrderID
+		dataType: string
+		lineageTag: 6b141a6f-be55-43d6-b7a5-ec13c8dc8e08
+		summarizeBy: none
+		sourceColumn: OrderID
+
+		changedProperty = DataType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column OrderLineNumber
+		dataType: int64
+		formatString: 0
+		lineageTag: 3a5a7f37-9dc4-4ddc-ba68-7eb833f6a7a4
+		summarizeBy: sum
+		sourceColumn: OrderLineNumber
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DocName
+		dataType: string
+		lineageTag: 4def7567-0620-401a-b275-18cb529023f3
+		summarizeBy: none
+		sourceColumn: DocName
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SupplierKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 6e868e28-6d92-450a-81dd-375dcd6575b1
+		summarizeBy: none
+		sourceColumn: SupplierKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column UnitNetPriceUSD
+		dataType: double
+		lineageTag: dbcccad7-1986-42cd-bcf5-7e6b0d6e7bec
+		summarizeBy: sum
+		sourceColumn: UnitNetPriceUSD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Quantity
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: dbea6228-7723-46db-92de-1da0bc351c68
+		summarizeBy: sum
+		sourceColumn: Quantity
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Balance
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 420c63a8-a4f7-480f-82d9-4c1758b89d39
+		summarizeBy: sum
+		sourceColumn: Balance
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalCost
+		dataType: int64
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 1d6a354b-9b19-4d1d-8c95-1e29c4f411b2
+		summarizeBy: sum
+		sourceColumn: LineTotalCost
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column LineTotalNetUSD
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 917389b5-9219-4a26-8b63-e9d663f5689d
+		summarizeBy: sum
+		sourceColumn: LineTotalNetUSD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalBalanceUSD
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 51546770-461a-4e2a-a778-75c91b2bf09a
+		summarizeBy: sum
+		sourceColumn: LineTotalBalanceUSD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column UnitNetPriceNIS
+		dataType: double
+		lineageTag: 847676e1-045c-4a2e-9480-902cd571283c
+		summarizeBy: sum
+		sourceColumn: UnitNetPriceNIS
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalNetNIS
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: d9bd2737-2caf-4515-9416-e914fd139d2e
+		summarizeBy: sum
+		sourceColumn: LineTotalNetNIS
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalBalanceNIS
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 03c71a18-22da-411b-b957-363ce9d8b129
+		summarizeBy: sum
+		sourceColumn: LineTotalBalanceNIS
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column YearMonth
+		dataType: int64
+		formatString: 0
+		lineageTag: 79ee71e6-5035-4408-a227-dedb5671ff12
+		summarizeBy: sum
+		sourceColumn: YearMonth
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column סטטוס
+		dataType: int64
+		formatString: 0
+		lineageTag: 1244dcd6-c34f-415b-8d45-7d5dc842ec9a
+		summarizeBy: sum
+		sourceColumn: סטטוס
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column RowInsertDatetime
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 21fceab7-953c-482c-ae90-a9a36b497db3
+		summarizeBy: none
+		sourceColumn: RowInsertDatetime
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SourceKey
+		dataType: string
+		lineageTag: 603b3be2-e29e-414b-bd49-6227d1ab77b4
+		summarizeBy: none
+		sourceColumn: SourceKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Value Date'
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 8ebbead8-4849-474e-bf79-8fbe6e2f8974
+		summarizeBy: none
+		sourceColumn: Value Date
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column ExpenseOrderID
+		dataType: string
+		lineageTag: 0bb6c723-bba2-40cd-a1e9-7d7abff9a8e1
+		summarizeBy: none
+		sourceColumn: ExpenseOrderID
+
+		changedProperty = DataType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column PNLKey
+		dataType: int64
+		formatString: 0
+		lineageTag: ee6b88a8-4d1a-4e49-805e-06441d0ea3f6
+		summarizeBy: none
+		sourceColumn: PNLKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column OrderQuantity
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: e78d3fe5-0f13-40d1-9bf2-4482f239fe8d
+		summarizeBy: sum
+		sourceColumn: OrderQuantity
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column PurchaseOrderID
+		dataType: int64
+		formatString: 0
+		lineageTag: bd46f277-ab0d-435e-99e1-95f222ada536
+		summarizeBy: none
+		sourceColumn: PurchaseOrderID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Details
+		dataType: string
+		lineageTag: 843edbbd-e9db-4199-8b79-9f9b24da01e8
+		summarizeBy: none
+		sourceColumn: Details
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ServiceDetail
+		dataType: string
+		lineageTag: eab11f61-655f-4100-aeab-f5eaecfd8a28
+		summarizeBy: none
+		sourceColumn: ServiceDetail
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column EntryDate
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 4d2a42e9-78d8-4af7-830c-5db2940a19cc
+		summarizeBy: none
+		sourceColumn: EntryDate
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column OrderDate
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 5fbdfada-b936-4944-9cb4-51072f46eeed
+		summarizeBy: none
+		sourceColumn: OrderDate
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ItemKey_backup
+		dataType: string
+		lineageTag: 7785fa9c-7df0-4db0-9b39-4fca8084c39b
+		summarizeBy: none
+		sourceColumn: ItemKey_backup
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column MTBE
+		dataType: string
+		lineageTag: 5cdb73a4-d3ec-412c-9229-50b4307eb88a
+		summarizeBy: none
+		sourceColumn: MTBE
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ItemKey
+		dataType: string
+		lineageTag: 871fac77-df71-4893-b7dd-910ca718a2db
+		summarizeBy: none
+		sourceColumn: ItemKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ExpenseSource
+		dataType: string
+		lineageTag: 4c7e7445-e921-40df-be59-cbd8d72bf6ab
+		summarizeBy: none
+		sourceColumn: ExpenseSource
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SupplyDate
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: a5c0b3af-0c26-46ab-9ffc-3db84bbec340
+		summarizeBy: none
+		sourceColumn: SupplyDate
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ShipID
+		dataType: int64
+		formatString: 0
+		lineageTag: 0b431a32-557e-48e5-b852-180b62a3ed8e
+		summarizeBy: none
+		sourceColumn: ShipID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column OrderSupplierKey
+		dataType: int64
+		formatString: 0
+		lineageTag: ff118d1e-583f-4742-b22f-a3dd38c8247c
+		summarizeBy: none
+		sourceColumn: OrderSupplierKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column TransactionType
+		dataType: int64
+		formatString: 0
+		lineageTag: 07d28583-d96a-4a9c-814f-d9ff9724397b
+		summarizeBy: none
+		sourceColumn: TransactionType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DocType
+		dataType: string
+		lineageTag: a808dd3e-a8f3-408d-be86-e74fec48fe53
+		summarizeBy: none
+		sourceColumn: DocType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column NEW_SHER
+		dataType: double
+		lineageTag: 891a2432-d669-46b7-99a9-6c7000450101
+		summarizeBy: sum
+		sourceColumn: NEW_SHER
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition factPurchaseExpenses = m
+		mode: import
+		queryGroup: 'fact Tables'
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="with CurrencyConvertion as (#(lf)SELECT *, #(lf)         CASE#(lf)         #(tab)WHEN sher = 0#(lf)         #(tab)THEN FIRST_VALUE(sher) OVER (PARTITION BY value_partition ORDER BY Tarikh) #(lf)         #(tab)ELSE sher#(lf)         END AS new_sher#(lf)         ,CASE#(lf)         #(tab)WHEN SHER_EURO = 0#(lf)         #(tab)THEN FIRST_VALUE(SHER_EURO) OVER (PARTITION BY value_partitionEuro ORDER BY Tarikh) #(lf)         #(tab)ELSE  SHER_EURO#(lf)         END AS new_sherEuro#(lf) FROM (#(lf)          SELECT *#(lf) ,SUM(CASE WHEN sher=0 THEN 0 ELSE 1 END) OVER (ORDER BY tarikh ) AS value_partition#(lf) ,SUM(CASE WHEN SHER_EURO=0 THEN 0 ELSE 1 END) OVER (ORDER BY tarikh ) AS value_partitionEuro#(lf)          FROM SHERI_MTBE#(lf) ) m#(lf))#(lf),LastCreation as (#(lf)Select OrderId,MAX(CreateDate) AS LastCreation#(lf)From tblOrderPriceS#(lf)Group By OrderID#(lf))#(lf)#(lf),LastVersion as (#(lf)Select o.OrderId,Max(DayVersion) as LastVersion#(lf)From tblOrderPriceS o#(lf)Inner Join LastCreation LC#(lf)#(tab)ON o.OrderID=LC.OrderID AND o.CreateDate=LC.LastCreation#(lf)Group By o.OrderID#(lf))#(lf)#(lf),OrderPrices as (#(lf)Select O.*#(lf)from tblOrderPriceS o#(lf)Inner Join LastCreation LC#(lf)#(tab)ON o.OrderID=LC.OrderID And o.CreateDate=LC.LastCreation#(lf)Inner Join LastVersion LV#(lf)#(tab)ON o.OrderID=LV.OrderID AND o.DayVersion = LV.LastVersion#(lf)Where 1=1#(lf)),#(lf)--------------------------------------------------------------- the below part should be a view is the database ----------------------------------------------------#(lf)totals_raw AS (#(lf)    -- Step 1: per-row calculations#(lf)    SELECT#(lf)        CONCAT(#(lf)            CAST(CONVERT(BIGINT, POL.POL_OrderID) AS VARCHAR(20)),#(lf)            CAST(POL.POL_LineID AS VARCHAR(10))#(lf)        ) AS PurchaseOrderID,#(lf)        #(lf)        CONVERT(VARCHAR, HS.QOD_MOTSR) + '-' + CONVERT(VARCHAR, HS.QOD_MOTSR) AS ItemKey,#(lf)#(lf)        -- PNL classification#(lf)        CASE#(lf)            WHEN HST.QOD_SHROT IN (5, 19, 30, 4)#(lf)              OR HST.QOD_SHROT IS NULL#(lf)                THEN 999#(lf)            ELSE HST.QOD_SHROT#(lf)        END AS PNLKey,#(lf)#(lf)        -- Order quantity (only main item rows)#(lf)        CASE#(lf)            WHEN HS.QOD_SHROT = 0 THEN HS.CMOT#(lf)            ELSE 0#(lf)        END AS OrderQuantity,#(lf)#(lf)        -- Line total in USD (exactly כמו הקטע ששלחת)#(lf)        CASE#(lf)            WHEN HS.MTBE = '$' THEN HS.MCHIR_ICH * HS.CMOT#(lf)            WHEN HS.MTBE = 'Eur' THEN HS.MCHIR_ICH * HS.CMOT * (SM.NEW_SHEREURO / SM.NEW_SHER)#(lf)            ELSE HS.MCHIR_ICH * HS.CMOT * (#(lf)                    1 / CASE WHEN HC.SHER_MTBE = 0 THEN 1 ELSE HC.SHER_MTBE END#(lf)                 )#(lf)        END AS LineTotalNetUSD#(lf)    FROM HOTSAOT_COTROT HC#(lf)    LEFT JOIN HOTSAOT_SHOROT HS#(lf)        ON HC.NOMRTOR = HS.NOMRTOR#(lf)    LEFT JOIN PurchaseOrderLines POL#(lf)        ON CONCAT(#(lf)               CAST(CONVERT(BIGINT, POL.POL_OrderID) AS VARCHAR(20)),#(lf)               CAST(POL.POL_LineID AS VARCHAR(10))#(lf)           ) = CAST(HS.MS_MSMKH_QSHOR AS VARCHAR(30))#(lf)    LEFT JOIN HOTSAOT_SHROTIM_New HST#(lf)        ON HS.QOD_SHROT = HST.QOD_SHROT#(lf)    LEFT JOIN CurrencyConvertion SM#(lf)        ON SM.TARIKH = HC.T_ERKH#(lf)    WHERE 1 = 1#(lf)      AND CAST(SUBSTRING(HC.T_MSMKH, 1, 4) AS INT) >= 2018#(lf)      AND CAST(SUBSTRING(HC.T_MSMKH, 1, 4) AS INT) <= YEAR(GETDATE())#(lf)      AND HS.QOD_SHROT NOT IN (14)#(lf)),#(lf)#(lf)totals AS (#(lf)    -- Step 2: aggregate like the DAX measure#(lf)    SELECT#(lf)        PurchaseOrderID,#(lf)        ItemKey,#(lf)        999 as PNLKey,#(lf)        SUM(LineTotalNetUSD) AS LineTotalNetUSD,       -- same as [Total Expenses USD]#(lf)        SUM(OrderQuantity)   AS OrderQuantity,     -- same as [Total Order Quantity (Hzmnot)]#(lf)        SUM(LineTotalNetUSD) /#(lf)            NULLIF(SUM(OrderQuantity), 0) AS UnitNetPriceUSD  -- Avg Price USD (Expenses)#(lf)    FROM totals_raw#(lf)    GROUP BY#(lf)        PurchaseOrderID,#(lf)        ItemKey--,#(lf)        --PNLKey#(lf)),#(lf)--select * from totals#(lf)--where PurchaseOrderID = 20005431#(lf)main AS (#(lf)    -- Monthly quantity of items loaned between parties (exchanges), by PO and item#(lf)    SELECT#(lf)        TM.QOD_SHOLCH AS DeliveredFrom,#(lf)        W.SHM_GORM AS DeliveredFromName,#(lf)        ISNULL(b.MS_HZMNH, bb.MS_HZMNH) AS PurchaseOrderID,#(lf)        CASE #(lf)            WHEN ISNULL(b.MS_HZMNH, bb.MS_HZMNH) LIKE '2000%' THEN 'P' -- Purchase order#(lf)            ELSE 'E'                                                   -- Expense / other#(lf)        END AS Order_Type,#(lf)        CONVERT(VARCHAR, TM.QOD_MOTSR) + '-' + CONVERT(VARCHAR, TM.QOD_MOTSR) AS ItemKey,#(lf)        SUM(TM.MSHQL_NTO) AS qty_loaned,#(lf)        G.QOD_GORM AS DeliveredTo,#(lf)        G.SHM_GORM AS DeliveredToName,#(lf)        SUBSTRING(TARIKH_MSHLOCH, 1, 4) + '-' + SUBSTRING(TARIKH_MSHLOCH, 5, 2) AS [Date]#(lf)    FROM TEODOT_MSHLOCH TM#(lf)    LEFT JOIN GORMIM G#(lf)        ON TM.QOD_MQBL = G.QOD_GORM    -- Customer#(lf)    LEFT JOIN GORMIM W#(lf)        ON TM.QOD_SHOLCH = W.QOD_GORM  -- Supplier / source#(lf)    LEFT JOIN QISHOR_RCSH_LMCIRH a#(lf)        ON a.MS_TEODT_MCIRH = TM.MS_TEODH#(lf)    LEFT JOIN QISHOR_T_MSHLOCH_HZMNOT b#(lf)        ON a.MS_TEODT_RCSH = b.MS_T_MSHLOCH#(lf)    LEFT JOIN QISHOR_T_MSHLOCH_HZMNOT bb#(lf)        ON bb.MS_T_MSHLOCH = TM.MS_TEODH#(lf)    WHERE 1 = 1#(lf)      AND TM.MCHIR_ICH = 0                          -- Only free/loaned shipments#(lf)      AND G.AOPI_PEILOT NOT IN (N'פחת', N'אחסון')  -- Exclude waste/storage#(lf)    GROUP BY#(lf)        SUBSTRING(TARIKH_MSHLOCH, 1, 4) + '-' + SUBSTRING(TARIKH_MSHLOCH, 5, 2),#(lf)        TM.QOD_SHOLCH,#(lf)        W.SHM_GORM,#(lf)        b.MS_HZMNH,#(lf)        CONVERT(VARCHAR, TM.QOD_MOTSR) + '-' + CONVERT(VARCHAR, TM.QOD_MOTSR),#(lf)        G.QOD_GORM,#(lf)        G.SHM_GORM,#(lf)        bb.MS_HZMNH#(lf)),#(lf)#(lf)base AS (#(lf)    -- Link exchange movements to USD unit price from totals (only PNLKey=999 and non-zero order qty)#(lf)    SELECT DISTINCT#(lf)        a.*,#(lf)        b.UnitNetPriceUSD,#(lf)#(tab)#(tab)b.LineTotalNetUSD,#(lf)#(tab)#(tab)b.OrderQuantity #(lf)    FROM main a#(lf)    LEFT JOIN (#(lf)        SELECT *#(lf)        FROM totals#(lf)        WHERE PNLKey = 999#(lf)          AND OrderQuantity <> 0#(lf)    ) b#(lf)        ON a.PurchaseOrderID = b.PurchaseOrderID#(lf)    WHERE a.[Date] >= '2024-01'#(lf)),#(lf)#(lf)purchase_orders AS (#(lf)    -- Aggregate original purchase orders (P-type) by item and counterparty#(lf)    SELECT #(lf)        DeliveredFrom,#(lf)        DeliveredFromName,#(lf)        PurchaseOrderID,#(lf)        ItemKey,#(lf)        SUM(qty_loaned) AS quantity,#(lf)        DeliveredTo,#(lf)        DeliveredToName,#(lf)        [Date] AS Purchase_Date,#(lf)        MAX(UnitNetPriceUSD) AS max_unit_price,#(lf)#(tab)#(tab)MAX(LineTotalNetUSD) as max_LineTotalNetUSD,#(lf)#(tab)#(tab)MAX(OrderQuantity)#(tab) as max_OrderQuantity#(lf)    FROM base#(lf)    WHERE Order_Type = 'P'#(lf)    GROUP BY #(lf)        DeliveredFrom,#(lf)        DeliveredFromName,#(lf)        PurchaseOrderID,#(lf)        ItemKey,#(lf)        DeliveredTo,#(lf)        DeliveredToName,#(lf)        [Date]#(lf)),#(lf)#(lf)final AS (#(lf)    -- Match exchange (E/P) movements to the most recent purchase within 0–3 months#(lf)    SELECT #(lf)        b.DeliveredFrom,#(lf)        b.DeliveredFromName,#(lf)        b.PurchaseOrderID AS Exchange_order,#(lf)        b.[Date] AS Exchange_Order_Date,#(lf)        b.ItemKey,#(lf)        b.qty_loaned AS Qty_Sold,#(lf)        p.PurchaseOrderID AS Purchase,#(lf)        p.Purchase_Date,#(lf)        ROW_NUMBER() OVER (#(lf)            PARTITION BY b.ItemKey, b.PurchaseOrderID#(lf)            ORDER BY p.Purchase_Date DESC#(lf)        ) AS rn,#(lf)        p.quantity,#(lf)        p.max_unit_price AS UnitNetPriceUSD,#(lf)#(tab)#(tab)p.max_LineTotalNetUSD as LineTotalNetUSD,#(lf)#(tab)#(tab)p.max_OrderQuantity as OrderQuantity#(lf)    FROM base b #(lf)    LEFT JOIN purchase_orders p#(lf)        ON b.DeliveredFrom = p.DeliveredTo#(lf)       AND b.ItemKey = p.ItemKey#(lf)    WHERE 1 = 1#(lf)      -- Month-diff between exchange date and purchase date between 0 and 3#(lf)      AND CONVERT(INT, SUBSTRING(b.[Date], 1, 4) + SUBSTRING(b.[Date], 6, 2))#(lf)        - CONVERT(INT, SUBSTRING(p.Purchase_Date, 1, 4) + SUBSTRING(p.Purchase_Date, 6, 2))#(lf)        BETWEEN 0 AND 3#(lf)),#(lf)final2 as (#(lf)SELECT #(lf)    DeliveredFrom,#(lf)    DeliveredFromName,#(lf)    Exchange_order,#(lf)    Exchange_Order_Date,#(lf)    ItemKey,#(lf)    Qty_Sold,#(lf)    Purchase,#(lf)    Purchase_Date,#(lf)    UnitNetPriceUSD,#(lf)#(tab)LineTotalNetUSD,#(lf)#(tab)OrderQuantity#(lf)FROM final#(lf)WHERE 1 = 1 #(lf)  AND rn = 1#(lf)  AND Exchange_order IS NOT NULL #(lf)  AND UnitNetPriceUSD IS NOT NULL#(lf) -- and Purchase = 20005431#(lf)--order by Exchange_Order_Date desc, Exchange_order#(lf))#(lf)--select * from final2#(lf)--where Exchange_order = 133902#(lf)-----------------------------------------------------------------------------------------------------------------------------------------------#(lf)#(lf)SELECT#(lf)'1' as 'EntityID'#(lf)        ,CAST(HS.NOMRTOR AS VARCHAR) AS 'ExpenseOrderID'#(lf)#(tab)#(tab)--,CAST(HZ.MSPR_HZMNH AS VARCHAR) AS 'OrderID'#(lf)#(tab)#(tab),CAST(HS.MS_MSMKH_QSHOR  AS VARCHAR) AS 'OrderID'--'PurchaseOrderID'#(lf)#(tab)#(tab)--,CONCAT(CAST(POL.POL_OrderID AS VARCHAR(20)),CAST(POL.POL_LineID AS VARCHAR(10)))#(lf)#(tab)#(tab),CONCAT(#(lf)#(tab)#(tab)#(tab)CAST(CONVERT(BIGINT, POL.POL_OrderID) AS VARCHAR(20)),#(lf)#(tab)#(tab)#(tab)CAST(POL.POL_LineID AS VARCHAR(10))#(lf)#(tab)#(tab) )#(tab)as 'PurchaseOrderID'#(lf)#(tab)#(tab),HS.SHORH AS 'OrderLineNumber'#(lf)#(tab)#(tab),'Order Expenses' AS 'DocName'#(lf)#(tab)#(tab)--,CAST(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_GORM_MQBL))as varchar) AS 'AccountKey' -- customer from invoices in case you need just invoices #(lf)#(tab)#(tab),CAST(CONVERT(INT, CONVERT(VARCHAR,HC.QOD_SPQ))as varchar) AS 'SupplierKey'#(lf)#(tab)#(tab),CAST(#(lf)#(tab)#(tab)  MAX(#(lf)#(tab)#(tab)#(tab)CASE WHEN HS.QOD_SHROT = 0#(lf)#(tab)#(tab)#(tab)#(tab) THEN CONVERT(INT, CONVERT(VARCHAR, HC.QOD_SPQ))#(lf)#(tab)#(tab)#(tab)END#(lf)#(tab)#(tab)  ) OVER (PARTITION BY HS.MS_MSMKH_QSHOR)#(lf)#(tab)#(tab)#(tab)AS VARCHAR)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS 'OrderSupplierKey'#(lf)#(tab)#(tab),CAST(CONVERT(INT, CONVERT(VARCHAR,hz.QOD_MQBL))as varchar) AS 'SourceKey'#(lf)#(tab)#(tab)--,NULL AS 'Transport Type'--M.SHM_MOBIL AS 'Transport Type'#(lf)#(tab)#(tab)--,SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2) as 'Supply Date'#(lf)#(tab)#(tab)--,SUBSTRING(HZ.T_HZMNH,1,4) + '-' + SUBSTRING(HZ.T_HZMNH,5,2) + '-' + SUBSTRING(HZ.T_HZMNH,7,2) as 'Order Date'#(lf)        --,SUBSTRING(HS.T_ERKH,1,4) + '-' + SUBSTRING(HS.T_ERKH,5,2) + '-' + SUBSTRING(HS.T_ERKH,7,2) as 'Value Date'#(lf)#(tab)#(tab)--,SUBSTRING(HS.T_BITSOE,1,4) + '-' + SUBSTRING(HS.T_BITSOE,5,2) + '-' + SUBSTRING(HS.T_BITSOE,7,2) as 'Value Date'#(lf)#(tab)#(tab) -- grab the header-string once per order, convert to date, then expose on every row#(lf)#(tab)#(tab),CASE #(lf)#(tab)#(tab)#(tab)WHEN HS.MS_MSMKH_QSHOR = 0 #(lf)#(tab)#(tab)#(tab)  THEN CONVERT(date, HC.T_ERKH, 112)#(lf)#(tab)#(tab)#(tab)ELSE#(lf)#(tab)#(tab)#(tab)  -- pull the header-row date per order (using corrected key)#(lf)#(tab)#(tab)#(tab)  MAX(#(lf)#(tab)#(tab)#(tab)#(tab)CASE WHEN HS.QOD_SHROT = 0 #(lf)#(tab)#(tab)#(tab)#(tab)#(tab) THEN CONVERT(date, HC.T_ERKH, 112) #(lf)#(tab)#(tab)#(tab)#(tab)END#(lf)#(tab)#(tab)#(tab)  ) OVER (#(lf)#(tab)#(tab)#(tab)#(tab)PARTITION BY #(lf)#(tab)#(tab)#(tab)#(tab)  CASE #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)WHEN HS.MS_MSMKH_QSHOR = 0 #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)  THEN HZ.MSPR_HZMNH #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)ELSE HS.MS_MSMKH_QSHOR #(lf)#(tab)#(tab)#(tab)#(tab)  END#(lf)#(tab)#(tab)#(tab)  )#(lf)#(tab)#(tab)  END AS 'Value Date'#(lf)#(tab)#(tab),SUBSTRING(HS.T_HQLDH,1,4) + '-' + SUBSTRING(HS.T_HQLDH,5,2) + '-' + SUBSTRING(HS.T_HQLDH,7,2) as 'EntryDate'#(lf)#(tab)#(tab),cast(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_MOTSR)) as varchar)+ '-' + cast(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_MOTSR)) as varchar) AS 'ItemKey_backup'#(lf)#(tab)#(tab),CASE#(lf)#(tab)#(tab)#(tab)--WHEN  HST.QOD_SHROT IS NULL THEN cast(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_MOTSR)) as varchar)+ '-' + cast(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_MOTSR)) as varchar) - לפני שינוי של העמסת עלויות#(lf)#(tab)#(tab)#(tab)WHEN  HST.QOD_SHROT IS NULL OR HS.QOD_SHROT IN (5, 19, 30, 4) THEN cast(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_MOTSR)) as varchar)+ '-' + cast(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_MOTSR)) as varchar) -- העמסת עליות הובלה והפרש מחיר על המוצר#(lf)#(tab)#(tab)#(tab)ELSE cast(CONVERT(INT, CONVERT(VARCHAR,HS.QOD_MOTSR)) as varchar)+ '-' + cast(CONVERT(INT, CONVERT(VARCHAR,HST.QOD_SHROT)) as varchar)+'S' #(lf)#(tab)#(tab)#(tab)END#(tab)#(tab)AS 'ItemKey'#(lf)#(tab)#(tab)/*,CASE#(lf)#(tab)         WHEN HS.MTBE = '$' THEN HS.MCHIR_ICH#(lf)#(tab)#(tab)   --THEN CAST(HZ.MCHIR_ICH AS decimal (12,4))#(lf)#(tab)         ELSE CAST(HS.MCHIR_ICH *(1/CASE WHEN HC.SHER_MTBE=0 THEN 1 ELSE HC.SHER_MTBE END)  AS decimal (12,4))#(lf)         END AS 'UnitNetPriceUSD'*/ #(lf)#(tab)#(tab) ,CASE#(lf)#(tab)#(tab)#(tab)WHEN HST.QOD_SHROT IS NOT NULL THEN#(lf)#(tab)#(tab)#(tab)#(tab)CASE #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)WHEN HS.MTBE = '$' THEN #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)CAST(HS.MCHIR_ICH / NULLIF(POL.POL_FinalWeightReceived, 0) AS decimal(12,4))#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)WHEN HS.MTBE = 'Eur' THEN#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)CAST(#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)HS.MCHIR_ICH * (SM.NEW_SHEREURO/SM.NEW_SHER) / NULLIF(POL.POL_FinalWeightReceived, 0)#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS decimal(12,4)#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab))#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)ELSE #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)CAST(#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)HS.MCHIR_ICH * (1 / NULLIF(HC.SHER_MTBE, 0)) / NULLIF(POL.POL_FinalWeightReceived, 0)#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS decimal(12,4)#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab))#(lf)#(tab)#(tab)#(tab)#(tab)END#(lf)#(tab)#(tab)#(tab)ELSE #(lf)#(tab)#(tab)#(tab)#(tab)CASE #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)WHEN HS.MTBE = '$' THEN HS.MCHIR_ICH#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)WHEN HS.MTBE = 'Eur' THEN#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)CAST(#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)HS.MCHIR_ICH * (SM.NEW_SHEREURO/SM.NEW_SHER)#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS decimal(12,4)#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab))#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)ELSE #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)CAST(#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)HS.MCHIR_ICH * (1 / NULLIF(HC.SHER_MTBE, 0)) #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS decimal(12,4)#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab))#(lf)#(tab)#(tab)#(tab)#(tab)END#(lf)#(tab)#(tab)END AS 'UnitNetPriceUSD'#(lf)#(tab)#(tab),HS.MTBE#(lf)#(tab)#(tab),HS.CMOT AS 'Quantity'#(lf)#(tab)#(tab)--,POL.POL_FinalWeightReceived as tst#(lf)#(tab)#(tab)--,HZ.CMOT_MOZMNT AS 'OrderQuantity1' -- מוריד לבדיקה#(lf)#(tab)#(tab),CASE WHEN HS.QOD_SHROT = 0 then HS.CMOT#(lf)#(tab)#(tab)#(tab)#(tab)ELSE 0#(lf)#(tab)#(tab)#(tab)#(tab)END#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS 'OrderQuantity'#(lf)#(tab)#(tab)--,ISNULL(HST.QOD_SHROT,999) AS 'PNLKey'#(lf)#(tab)#(tab),CASE #(lf)#(tab)#(tab)#(tab)WHEN HST.QOD_SHROT IN (5, 19, 30, 4,18) OR HST.QOD_SHROT IS NULL #(lf)#(tab)#(tab)#(tab)THEN 999#(lf)#(tab)#(tab)#(tab)ELSE HST.QOD_SHROT#(lf)#(tab)#(tab)END#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS 'PNLKey'  ----------  העמסת עליות הובלה על המוצר והפרש מחיר#(lf)#(tab)#(tab)--,HS.QOD_SHROT AS 'PNLKey'#(lf)#(tab)#(tab),HS.CMOT AS 'Balance'#(lf)#(tab)#(tab),NULL AS 'LineTotalCost'#(lf)#(tab)#(tab)#(tab),CASE#(lf)#(tab)         WHEN HS.MTBE = '$' THEN HS.MCHIR_ICH*HS.CMOT #(lf)#(tab)#(tab)#(tab) WHEN HS.MTBE = 'Eur' THEN HS.MCHIR_ICH*HS.CMOT * (SM.NEW_SHEREURO/SM.NEW_SHER)#(lf)#(tab)         ELSE HS.MCHIR_ICH*HS.CMOT*(1/CASE WHEN HC.SHER_MTBE=0 THEN 1 ELSE HC.SHER_MTBE END)#(lf)         END AS 'LineTotalNetUSD'#(lf)#(tab)#(tab)#(tab)#(tab)/*CASE#(lf)#(tab)         WHEN HZ.MTBE = '$'#(lf)#(tab)#(tab)     THEN CAST((HS.MCHIR_ICH)*(HS.CMOT - CMOT_SHSOPQH) AS decimal (12,4))#(lf)#(tab)         ELSE CAST(HS.MCHIR_ICH*(HS.CMOT_MOZMNT - CMOT_SHSOPQH)*(1/SM.NEW_SHER) AS decimal (12,4))#(lf)         END */#(lf)#(tab)#(tab),CASE#(lf)#(tab)         WHEN HS.MTBE = '$' THEN HS.MCHIR_ICH*HS.CMOT #(lf)#(tab)#(tab)#(tab) WHEN HS.MTBE = 'Eur' THEN HS.MCHIR_ICH*HS.CMOT * ( SM.NEW_SHEREURO/SM.NEW_SHER)#(lf)#(tab)         ELSE HS.MCHIR_ICH*HS.CMOT*(1/CASE WHEN HC.SHER_MTBE=0 THEN 1 ELSE HC.SHER_MTBE END) END AS 'LineTotalBalanceUSD'#(tab)#(lf)#(tab)#(tab)--, (round(ii.IVCOST, 2)/ii.IEXCHANGE) *fnc.EXCHANGE2   *(CASE WHEN (i.DEBIT = 'C') THEN - 1 ELSE 1 END) AS 'LineTotalNet_USD'#(lf)#(tab)#(tab),CASE#(lf)#(tab)         WHEN HS.MTBE = '$' THEN HS.MCHIR_ICH*HC.SHER_MTBE #(lf)#(tab)#(tab)#(tab) WHEN HS.MTBE = 'Eur' THEN HS.MCHIR_ICH * SM.NEW_SHEREURO#(lf)#(tab)         ELSE HS.MCHIR_ICH #(lf)         END AS 'UnitNetPriceNIS'#(lf)#(tab)    ,CASE#(lf)#(tab)         WHEN HS.MTBE = '$' THEN HS.MCHIR_ICH*HC.SHER_MTBE*HS.CMOT#(lf)#(tab)#(tab)#(tab) WHEN HS.MTBE = 'Eur' THEN HS.MCHIR_ICH*HS.CMOT * SM.NEW_SHEREURO#(lf)#(tab)         ELSE HS.MCHIR_ICH*HS.CMOT #(lf)         END AS 'LineTotalNetNIS'#(lf)#(tab)#(tab) ,/*CASE#(lf)#(tab)         WHEN HS.MTBE = '$'#(lf)#(tab)#(tab)     THEN CAST((HS.MCHIR_ICH*SM.NEW_SHER)*(HZ.CMOT_MOZMNT - CMOT_SHSOPQH) AS decimal (12,4))#(lf)#(tab)         ELSE CAST(HS.MCHIR_ICH*(HZ.CMOT_MOZMNT - CMOT_SHSOPQH) AS decimal (12,4))#(lf)         END*/#(lf)#(tab)#(tab) CASE#(lf)#(tab)         WHEN HS.MTBE = '$' THEN HS.MCHIR_ICH*HC.SHER_MTBE*HS.CMOT #(lf)#(tab)#(tab)#(tab) WHEN HS.MTBE = 'Eur' THEN HS.MCHIR_ICH*HS.CMOT * SM.NEW_SHEREURO#(lf)#(tab)         ELSE HS.MCHIR_ICH*HS.CMOT #(lf)         END  AS 'LineTotalBalanceNIS'#(lf)#(tab)#(tab)--,null AS 'LineTotalNetVAT'#(lf)#(tab)#(tab)--,null AS 'LineTotalNetVAT_USD'#(lf)#(tab)#(tab)--,CONVERT(INT, LEFT(CONVERT(VARCHAR, CONVERT(DATETIME, (HZ.T_ASPQH + 46283040) / 1440.0), 112), 6)) AS YearMonth#(lf)#(tab)#(tab),CONVERT(INT, CONVERT(VARCHAR,SUBSTRING(HS.T_ERKH,1,4) + SUBSTRING(HS.T_ERKH,5,2))) AS YearMonth#(lf)#(tab)#(tab)--,case when (i.DEBIT='C')  then round(ii.IVCOST  ,2)*-1 else round(ii.IVCOST  ,2) end  as 'LineTotalNet'  -- Without Exchange#(lf)#(tab)#(tab)--,case when (i.DEBIT='C')  then round(ii.IVCOST  ,2)*-1*ii.IEXCHANGE else round(ii.IVCOST  ,2)*ii.IEXCHANGE end  as 'LineTotalNet' --allways exchange#(lf)#(tab)#(tab)--,case when (i.DEBIT='C')  then round(ii.QPRICE  ,2)*-1*ii.IEXCHANGE else round(ii.QPRICE  ,2)*ii.IEXCHANGE end  as 'LineTotalNet' -- the invoice items price without the total invoice discount#(lf)#(tab)#(tab)----#(lf)#(tab)#(tab),HC.STTOS AS 'סטטוס'#(lf)#(tab)#(tab),HC.HEROT AS 'Details'#(lf)#(tab)#(tab),HST.SHM_SHROT AS 'ServiceDetail' #(lf)#(tab)#(tab),sl.ShipID#(lf)#(tab)#(tab),CAST(PO.PO_OrderCreateDate as date)#(tab)#(tab)#(tab)as OrderDate#(lf)#(tab)#(tab),CAST(PO.PO_UpdatedDeliveryDateFrom as date)#(tab)as SupplyDate#(lf)#(tab)#(tab),GETDATE() AS RowInsertDatetime#(lf)#(tab)#(tab),CASE#(lf)#(tab)#(tab)#(tab)WHEN POL.POL_OrderID IS NULL THEN 'Other'#(lf)#(tab)#(tab)#(tab)ELSE 'Import'#(lf)#(tab)#(tab)#(tab)END#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)as ExpenseSource#(lf)#(tab)#(tab),OP.ActionType AS 'TransactionType'#(lf)#(tab)#(tab),CASE #(lf)#(tab)#(tab)    WHEN HS.QOD_SHROT IN (5, 19, 30, 20, 4) THEN N'סחורה'#(lf)#(tab)#(tab)    ELSE HC.SOG_MSMKH#(lf)#(tab)#(tab)END#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)as DocType#(lf)#(tab)#(tab),SM.NEW_SHER#(lf)#(tab)#(tab)--,HC.SHER_MTBE#(lf)#(tab)#(tab)--,HS.MCHIR_ICH#(lf)#(tab)#(tab)--,(SM.NEW_SHEREURO/SM.NEW_SHER) as tst#(lf)FROM HOTSAOT_COTROT HC#(lf)LEFT JOIN HOTSAOT_SHOROT HS ON HC.NOMRTOR = HS.NOMRTOR#(lf)LEFT JOIN PurchaseOrderLines POL ON CONCAT(#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)CAST(CONVERT(BIGINT, POL.POL_OrderID) AS VARCHAR(20)),#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)CAST(POL.POL_LineID AS VARCHAR(10))#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab))#(tab)#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)= CAST(HS.MS_MSMKH_QSHOR AS VARCHAR(30))#(lf)LEFT JOIN HZMNOT HZ ON (HS.MS_MSMKH_QSHOR = HZ.MSPR_HZMNH)#(lf)LEFT JOIN HOTSAOT_SHROTIM_New HST ON HS.QOD_SHROT = HST.QOD_SHROT#(lf)LEFT JOIN ShipsArrivals sa ON POL.POL_ShipArrivalID = sa.SA_ID#(lf)LEFT JOIN ShipList sl ON sa.SA_ShipID = sl.ShipID#(lf)LEFT JOIN PurchaseOrder PO ON POL.POL_OrderID = PO.PO_OrderID#(lf)LEFT JOIN CurrencyConvertion SM  ON SM.TARIKH=HC.T_ERKH#(lf)#(lf)LEFT JOIN OrderPrices OP#(lf)#(tab)ON op.OrderID = POL_OrderID AND op.OrderIDLine = POL.POL_LineID#(lf)#(lf)WHERE 1=1#(lf)and Cast(SUBSTRING(HC.T_MSMKH,1,4) as int) >=2018 and Cast(SUBSTRING(HC.T_MSMKH,1,4) as int) <= YEAR(GETDATE())#(lf)and HS.QOD_SHROT NOT IN (14)#(lf)--AND HZ.ActionType IN(2,10)#(lf)--and HC.NOMRTOR = 10921#(lf)--and HS.MS_MSMKH_QSHOR = 20004792--20004161 #(lf)--and HS.NOMRTOR = 10677#(lf)#(lf)UNION ALL#(lf)#(lf)#(lf)SELECT#(lf)     '1'                                                   AS EntityID,#(lf)#(tab) NULL                             AS ExpenseOrderID,#(lf)#(tab) CAST(CCS.HZMNT_RCSH AS VARCHAR)  AS OrderID,#(lf)#(tab) CAST(CCS.HZMNT_RCSH AS VARCHAR)  AS PurchaseOrderID,#(lf)#(tab) NULL                            AS OrderLineNumber,#(lf)     'Invoice'                                            AS DocName,#(lf)     NULL                          AS SupplierKey,#(lf)     NULL                          AS OrderSupplierKey,#(lf)     NULL                          AS SourceKey,#(lf)     CAST(SUBSTRING(CCS.T_CHSHBONIT,1,4) + '-' + SUBSTRING(CCS.T_CHSHBONIT,5,2) + '-' + SUBSTRING(CCS.T_CHSHBONIT,7,2) AS DATE) AS [Value Date],#(lf)     CAST(SUBSTRING(CCS.T_CHSHBONIT,1,4) + '-' + SUBSTRING(CCS.T_CHSHBONIT,5,2) + '-' + SUBSTRING(CCS.T_CHSHBONIT,7,2) AS DATE) AS EntryDate,#(lf)     CAST(CONVERT(VARCHAR, CCS.QOD_MOTSR) AS VARCHAR) + '-' + CAST(CONVERT(VARCHAR, CCS.QOD_MOTSR) AS VARCHAR) AS ItemKey_backup,#(lf)     CAST(CONVERT(VARCHAR, POL_ProductID) AS VARCHAR) + '-' + CAST(CONVERT(VARCHAR, M.ServiceCode) AS VARCHAR) + 'S' AS ItemKey,#(lf)     CAST(CCS.MCHIR_ICH_LLA_ME_M / (CASE WHEN SHER_LCHISHOB <> 0 THEN SHER_LCHISHOB ELSE CC2.new_sher END) AS DECIMAL(12,4)) * -1  AS UnitNetPriceUSD,#(lf)     NULL                            AS MTBE,#(lf)     CCS.MSHQL_NTO                   AS Quantity,#(lf)     CASE WHEN CCS.QOD_MOTSR = 0 THEN CCS.MSHQL_NTO ELSE 0 END AS OrderQuantity,#(lf)     HST.QOD_SHROT                           AS PNLKey,#(lf)     CCS.MSHQL_NTO                   AS Balance,#(lf)     NULL                            AS LineTotalCost,#(lf)     CAST(CCS.CMOT * (CCS.MCHIR_ICH_LLA_ME_M / (CASE WHEN SHER_LCHISHOB <> 0 THEN SHER_LCHISHOB ELSE CC2.new_sher END)) AS DECIMAL(12,4)) * -1 AS LineTotalNetUSD,#(lf)     CAST(CCS.CMOT * (CCS.MCHIR_ICH_LLA_ME_M / (CASE WHEN SHER_LCHISHOB <> 0 THEN SHER_LCHISHOB ELSE CC2.new_sher END)) AS DECIMAL(12,4)) * -1 AS LineTotalBalanceUSD,#(lf)     CAST(CCS.MCHIR_ICH_LLA_ME_M AS DECIMAL(12,4)) * -1  AS UnitNetPriceNIS,#(lf)     CAST(CCS.CMOT * CCS.MCHIR_ICH_LLA_ME_M AS DECIMAL(12,4)) * -1  AS LineTotalNetNIS,#(lf)     CAST(CCS.CMOT * CCS.MCHIR_ICH_LLA_ME_M AS DECIMAL(12,4)) * -1  AS LineTotalBalanceNIS,#(lf)     CONVERT(INT, CONVERT(VARCHAR, SUBSTRING(CCS.T_CHSHBONIT,1,4) + SUBSTRING(CCS.T_CHSHBONIT,5,2))) AS YearMonth,#(lf)     NULL                                    AS [סטטוס],#(lf)     NULL                                    AS Details,#(lf)     NULL                               AS ServiceDetail,#(lf)     NULL                                    AS ShipID,#(lf)     NULL                                   AS OrderDate,#(lf)     NULL                                  AS SupplyDate,#(lf)     GETDATE()                      AS RowInsertDatetime,#(lf)     'Invoice'                          AS ExpenseSource,#(lf)     NULL                             AS TransactionType,#(lf)    'Invoice'                                AS DocType,#(lf)#(tab)CASE WHEN SHER_LCHISHOB <> 0 THEN SHER_LCHISHOB ELSE CC2.new_sher END#(lf)#(lf)FROM [dbo].[CHIOBI_CHOTS_COTROT] CC#(lf)LEFT JOIN GORMIM G2#(lf)       ON CC.QOD_LQOCH = G2.QOD_GORM#(lf)LEFT JOIN TBLT_ANSHI_MCIROT AM2#(lf)       ON AM2.SHM_AISH_MCIROT = G2.AISH_MCIROT_MTPL#(lf)LEFT JOIN [dbo].[CHIOBI_CHOTS_SHOROT] CCS#(lf)       ON CC.MS_CHSHBONIT = CCS.MS_CHSHBONIT#(lf)LEFT JOIN CurrencyConvertion CC2#(lf)       ON CCS.[TARIKH_MSHLOCH] = CC2.Tarikh#(lf)LEFT JOIN ( ---- Connect to the base purchase in order to get the relative productID#(lf)#(tab)#(tab)#(tab)select DISTINCT#(lf)#(tab)#(tab)#(tab)POL_SQL_POID, POL_ProductID#(lf)#(tab)#(tab)#(tab)from PurchaseOrderLines POL#(lf)#(tab)#(tab)#(tab)) POL#(lf)#(tab)#(tab)ON CCS.HZMNT_RCSH = POL.POL_SQL_POID#(lf)LEFT JOIN MOTSRIM M#(lf)#(tab)ON CCS.QOD_MOTSR = M.QOD_MOTSR#(lf)LEFT JOIN HOTSAOT_SHROTIM_New HST #(lf)#(tab)ON M.ServiceCode = HST.QOD_SHROT#(lf)#(lf)UNION ALL#(lf)#(lf)SELECT#(lf)    '1'                                                                 AS EntityID,#(lf)    NULL                                                                AS ExpenseOrderID,#(lf)    CAST(HZ.MSPR_HZMNH AS VARCHAR)                                      AS OrderID,#(lf)    HZ.MSPR_HZMNH                                                       AS PurchaseOrderID,#(lf)    NULL                                                                AS OrderLineNumber,#(lf)    'Orders'                                                            AS DocName,#(lf)    HZ.QOD_SHOLCH                                                                AS SupplierKey,#(lf)    NULL                                                                AS OrderSupplierKey,#(lf)#(tab)NULL#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS SourceKey,#(lf)#(lf)    -- Supply date as value date#(lf)    CAST(SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2)#(lf)         AS DATE)                                                       AS [Value Date],#(lf)#(lf)    -- Order date as entry date#(lf)    CAST(SUBSTRING(HZ.T_HZMNH,1,4) + '-' + SUBSTRING(HZ.T_HZMNH,5,2) + '-' + SUBSTRING(HZ.T_HZMNH,7,2)#(lf)         AS DATE)                                                       AS EntryDate,#(lf)#(lf)    -- Item key (must match totals.ItemKey)#(lf)    CAST(CONVERT(INT, CONVERT(VARCHAR,HZ.MOTSR_MOZMN)) AS VARCHAR) + '-' +#(lf)    CAST(CONVERT(INT, CONVERT(VARCHAR,HZ.MOTSR_MOZMN)) AS VARCHAR)      AS ItemKey_backup,#(lf)    CAST(CONVERT(INT, CONVERT(VARCHAR,HZ.MOTSR_MOZMN)) AS VARCHAR) + '-' +#(lf)    CAST(CONVERT(INT, CONVERT(VARCHAR,HZ.MOTSR_MOZMN)) AS VARCHAR)      AS ItemKey,#(lf)#(lf)    -- >>> Take unit price from totals (Avg Price USD (Expenses))#(lf)    t.UnitNetPriceUSD                                                   AS UnitNetPriceUSD,#(lf)#(lf)    HZ.MTBE                                                             AS MTBE,#(lf)#(lf)    -- Physical ordered quantity (for reference)#(lf)    HZ.CMOT_MOZMNT                                                      AS Quantity,#(lf)#(lf)#(tab)--HZ.CMOT_MOZMNT#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS 'OrderQuantity',#(lf)#(lf)     -->>> Order quantity used by DAX = from totals#(lf)    t.OrderQuantity                                                     AS OrderQuantity,#(lf)#(lf)    999                                                                 AS PNLKey,#(lf)    (HZ.CMOT_MOZMNT - HZ.CMOT_SHSOPQH)                                  AS Balance,#(lf)    NULL                                                                AS LineTotalCost,#(lf)#(lf)    -- >>> Total expenses in USD from totals (feeds Total Expenses USD in DAX)#(lf)    t.LineTotalNetUSD                                                  AS LineTotalNetUSD,#(lf)#(lf)    -- Balance in USD can stay based on HZ (business choice)#(lf)    CASE#(lf)        WHEN HZ.MTBE = '$' THEN CAST(HZ.MCHIR_ICH * (HZ.CMOT_MOZMNT - HZ.CMOT_SHSOPQH) AS DECIMAL(12,4))#(lf)        ELSE CAST(HZ.MCHIR_ICH * (HZ.CMOT_MOZMNT - HZ.CMOT_SHSOPQH) * (1 / NULLIF(SM.NEW_SHER, 0))#(lf)                  AS DECIMAL(12,4))#(lf)    END                                                                 AS LineTotalBalanceUSD,#(lf)#(lf)    -- NIS fields (unchanged)#(lf)    CASE#(lf)        WHEN HZ.MTBE = '$' THEN CAST(HZ.MCHIR_ICH * SM.NEW_SHER AS DECIMAL(12,4))#(lf)        ELSE CAST(HZ.MCHIR_ICH AS DECIMAL(12,4))#(lf)    END                                                                 AS UnitNetPriceNIS,#(lf)    CASE#(lf)        WHEN HZ.MTBE = '$' THEN CAST(HZ.MCHIR_ICH * SM.NEW_SHER * HZ.CMOT_MOZMNT AS DECIMAL(12,4))#(lf)        ELSE CAST(HZ.MCHIR_ICH * HZ.CMOT_MOZMNT AS DECIMAL(12,4))#(lf)    END                                                                 AS LineTotalNetNIS,#(lf)    CASE#(lf)        WHEN HZ.MTBE = '$' THEN CAST(HZ.MCHIR_ICH * SM.NEW_SHER * (HZ.CMOT_MOZMNT - HZ.CMOT_SHSOPQH)#(lf)                                     AS DECIMAL(12,4))#(lf)        ELSE CAST(HZ.MCHIR_ICH * (HZ.CMOT_MOZMNT - HZ.CMOT_SHSOPQH) AS DECIMAL(12,4))#(lf)    END                                                                 AS LineTotalBalanceNIS,#(lf)#(lf)    CONVERT(INT, CONVERT(VARCHAR, SUBSTRING(HZ.T_ASPQH,1,4) + SUBSTRING(HZ.T_ASPQH,5,2))) AS YearMonth,#(lf)    HZ.OrderStatus                                                      AS [סטטוס],#(lf)    NULL                                                                AS Details,#(lf)    NULL                                                                AS ServiceDetail,#(lf)    NULL                                                                AS ShipID,#(lf)#(lf)    CAST(SUBSTRING(HZ.T_HZMNH,1,4) + '-' + SUBSTRING(HZ.T_HZMNH,5,2) + '-' + SUBSTRING(HZ.T_HZMNH,7,2)#(lf)         AS DATE)                                                       AS OrderDate,#(lf)    CAST(SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2)#(lf)         AS DATE)                                                       AS SupplyDate,#(lf)#(lf)    GETDATE()                                                           AS RowInsertDatetime,#(lf)    'Orders'                                                            AS ExpenseSource,#(lf)    OP.ActionType                                                       AS TransactionType,#(lf)    'Order'                                                             AS DocType,#(lf)    SM.NEW_SHER#(lf)FROM HZMNOT HZ#(lf)LEFT JOIN CurrencyConvertion SM#(lf)    ON SM.TARIKH = HZ.T_HZMNH#(lf)#(lf)-- >>> Join to totals (same source as first query)#(lf)LEFT JOIN final2 t#(lf)    ON t.Exchange_order = HZ.MSPR_HZMNH#(lf)   AND t.ItemKey =#(lf)        CAST(CONVERT(INT, CONVERT(VARCHAR,HZ.MOTSR_MOZMN)) AS VARCHAR) + '-' +#(lf)        CAST(CONVERT(INT, CONVERT(VARCHAR,HZ.MOTSR_MOZMN)) AS VARCHAR)#(lf)#(lf)LEFT JOIN OrderPrices OP#(lf)    ON OP.OrderID = HZ.MSPR_HZMNH#(lf)WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())#(lf)  AND HZ.OrderStatus <> 3#(lf)  AND HZ.ActionType IN (6,7)#(lf)--and hz.MSPR_HZMNH = 20005361#(lf)"]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Value Date", type date}, {"PNLKey", Int64.Type}, {"SupplierKey", Int64.Type}, {"OrderID", Int64.Type}, {"ExpenseOrderID", Int64.Type}, {"OrderSupplierKey", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	changedProperty = IsHidden
+
+	annotation PBI_ResultType = Exception
+
+	annotation PBI_NavigationStepName = Navigation
+

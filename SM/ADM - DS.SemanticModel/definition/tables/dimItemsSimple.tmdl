@@ -1,0 +1,288 @@
+table dimItemsSimple
+	lineageTag: 6fddc33b-eabd-4633-b7ce-e0e5e01b90e2
+
+	column EntityID
+		dataType: string
+		lineageTag: 5468ab1a-e3e8-47a0-8328-f1da0afc2a5d
+		summarizeBy: none
+		sourceColumn: EntityID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column MainItemKey
+		dataType: string
+		lineageTag: 5f1ab5a9-05ef-4cb9-b26d-11b01f1e281d
+		summarizeBy: none
+		sourceColumn: MainItemKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column MainItemName
+		dataType: string
+		lineageTag: c9a54493-dbf4-4efe-b4bc-888a4e76e133
+		summarizeBy: none
+		sourceColumn: MainItemName
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ItemKey
+		dataType: string
+		lineageTag: fd60eaec-4b22-4ea5-80db-6762e30ae1d6
+		summarizeBy: none
+		sourceColumn: ItemKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'שם מוצר'
+		dataType: string
+		lineageTag: 8872ed24-b659-4ed1-8cd6-3729d55a5c0b
+		summarizeBy: none
+		sourceColumn: שם מוצר
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column מקט
+		dataType: int64
+		formatString: 0
+		lineageTag: 5fd1e7d9-66d1-40bc-acaa-658dbc9d418e
+		summarizeBy: sum
+		sourceColumn: מקט
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'מזהה מוצר'
+		dataType: string
+		lineageTag: 7ea47109-469c-4dc3-91c4-bf5066986acf
+		summarizeBy: none
+		sourceColumn: מזהה מוצר
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'מוצר על'
+		dataType: int64
+		formatString: 0
+		lineageTag: 7096794a-d4cf-4b92-9318-a2e3d6e58b48
+		summarizeBy: sum
+		sourceColumn: מוצר על
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'שם מוצר על'
+		dataType: string
+		lineageTag: 545622f7-fca5-4167-981f-cb287e72c2e2
+		summarizeBy: none
+		sourceColumn: שם מוצר על
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'יחידת מידה'
+		dataType: string
+		lineageTag: 4da4ab92-21e1-4f3d-ad7e-6bf075b4a4a6
+		summarizeBy: none
+		sourceColumn: יחידת מידה
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'מחיר מכירה'
+		dataType: double
+		lineageTag: 0b668e13-1e0a-4f72-b693-969cddc9ae20
+		summarizeBy: sum
+		sourceColumn: מחיר מכירה
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'סיווג מוצר'
+		dataType: string
+		lineageTag: 4b5a6a8d-08d4-4de5-a4f3-2c4add2791fc
+		summarizeBy: none
+		sourceColumn: סיווג מוצר
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column קטגוריה
+		dataType: string
+		lineageTag: 6a30bfcf-4910-4abf-b77c-f83c49a58d64
+		summarizeBy: none
+		sourceColumn: קטגוריה
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column סטטוס
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: fcc445a0-ec54-4ebf-ae88-770fe0875a66
+		summarizeBy: none
+		sourceColumn: סטטוס
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'קבוצת פריט'
+		dataType: string
+		lineageTag: b91e466e-97c4-446a-8cb6-5c93f80eb2f9
+		summarizeBy: none
+		sourceColumn: קבוצת פריט
+		sortByColumn: ProductGroupOrder
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column RowInsertDatetime
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 65dd99d7-57fe-4703-b3b8-cab53c7fa76d
+		summarizeBy: none
+		sourceColumn: RowInsertDatetime
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Balance
+		dataType: double
+		lineageTag: 3c91f445-3b91-480c-b907-cc8ab9f4e5ac
+		summarizeBy: sum
+		sourceColumn: Balance
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column StockValue
+		dataType: double
+		lineageTag: 910ba45a-14fa-40b6-af6f-99c891dc5eaa
+		summarizeBy: sum
+		sourceColumn: StockValue
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Product
+		dataType: string
+		lineageTag: 571ac55b-baf6-4c0f-9d69-98daf00511e9
+		summarizeBy: none
+		sourceColumn: Product
+		sortByColumn: ProductOrder
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column PNL
+		dataType: string
+		lineageTag: b883fab9-b5e2-4b55-81af-6c3575d85a26
+		summarizeBy: none
+		sourceColumn: PNL
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Article
+		dataType: string
+		lineageTag: 00265b85-e0bc-44cc-a8f0-718ddf843093
+		summarizeBy: none
+		sourceColumn: Article
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Article_Description
+		dataType: string
+		lineageTag: 0be42075-c5f7-4b19-8ec4-c8882c4efac4
+		summarizeBy: none
+		sourceColumn: Article_Description
+		sortByColumn: ProductArticleOrder
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ProductArticleOrder
+		dataType: int64
+		formatString: 0
+		lineageTag: 555fe17d-1efa-48df-85f0-12e1fdcdfd0b
+		summarizeBy: sum
+		sourceColumn: ProductArticleOrder
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ProductGroupOrder
+		dataType: int64
+		formatString: 0
+		lineageTag: 433abd50-c7a3-421d-a146-e52a35b749e8
+		summarizeBy: sum
+		sourceColumn: ProductGroupOrder
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ProductOrder
+		dataType: int64
+		formatString: 0
+		lineageTag: 7f45d387-d27b-4926-a8ec-77ee38e4d7da
+		summarizeBy: sum
+		sourceColumn: ProductOrder
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dimItemsSimple = m
+		mode: import
+		queryGroup: Dim
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="#(lf)WITH Products_STG1 AS(#(lf)  SELECT  CAST( CONVERT(BIGINT, CONVERT(VARCHAR, M.QOD_MOTSR)) as varchar) AS 'ItemKey'#(lf)  #(tab)#(tab)  ,M.QOD_MOTSR AS 'מקט'#(lf)#(tab)#(tab)  ,CASE#(lf)#(tab)#(tab)#(tab)  WHEN CHARINDEX('=',M.TAOR_MOTSR,0) >0#(lf)#(tab)#(tab)#(tab)   THEN RIGHT(M.TAOR_MOTSR,Len(M.TAOR_MOTSR)-1) #(lf)#(tab)#(tab)#(tab)   ELSE M.TAOR_MOTSR #(lf)#(tab)#(tab)   END AS 'שם מוצר'#(lf)  #(tab)#(tab) -- ,CASE WHEN LEFT(M.TAOR_MOTSR,1) = '='  THEN SUBSTRING(M.TAOR_MOTSR,2,20) ELSE M.TAOR_MOTSR END AS 'שם מוצר'#(lf)  #(tab)#(tab)  ,CASE WHEN CHARINDEX('=',M.TAOR_MOTSR,0) >0 THEN RIGHT(M.TAOR_MOTSR,Len(M.TAOR_MOTSR)-1) ELSE M.TAOR_MOTSR  END + ' | ' + CAST( CONVERT(BIGINT, CONVERT(VARCHAR, M.QOD_MOTSR)) as varchar) AS 'מזהה מוצר'#(lf)#(tab)#(tab)  ,M.I_M AS 'יחידת מידה'#(lf)#(tab)#(tab)  ,M.MCHIR_MCIRH 'מחיר מכירה'#(lf)#(tab)#(tab)  ,M.MTBE_MCHIR_MCIRH 'מטבע'#(lf)  #(tab)#(tab)  ,M.IsActive AS 'סטטוס'#(lf)  #(tab)#(tab)  ,M.SIOOG AS 'סיווג מוצר'#(lf)#(tab)#(tab)  ,M.MasterProductInPurchase AS 'מוצר על'#(lf)#(tab)#(tab)  ,Case #(lf)#(tab)#(tab)#(tab)#(tab)WHEN p.TAOR_QBOTSH is NULL OR p.TAOR_QBOTSH = '' OR p.TAOR_QBOTSH = 'OTHERS' or T.TARO_ANGLIT_1 = 'Other'#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)THEN 'FEED STUFF'#(lf)#(tab)#(tab)#(tab)#(tab)ELSE p.TAOR_QBOTSH#(lf)#(tab)#(tab)#(tab)END AS 'קבוצת פריט'#(lf)#(tab)#(tab)  ,T.TARO_ANGLIT_1 AS 'Product'#(lf)#(tab)#(tab)  ,T.TARO_ANGLIT_3_PNL_HCNSH as 'PNL'#(lf)#(tab)#(tab)  ,T.TARO_ANGLIT_2_ART as 'Article'#(lf)#(tab)#(tab)  ,Case #(lf)#(tab)#(tab)#(tab)#(tab)WHEN A.ART_DESC is NULL OR A.ART_DESC = ''#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)THEN 'Other'#(lf)#(tab)#(tab)#(tab)#(tab)ELSE A.ART_DESC#(lf)#(tab)#(tab)#(tab)END AS 'Article_Description'#(lf)  FROM MOTSRIM M#(lf)  LEFT JOIN ADM_QBOTSOT_PRIT P on M.GroupCode = P.QOD_QBOTSH#(lf)  LEFT JOIN (SELECT *#(lf)#(tab)#(tab)#(tab)FROM [dbo].[TRGOM_ANGLIT]#(lf)#(tab)#(tab)#(tab)WHERE SOG_PRIT_SOCN_BNQ_TM_SH_CHBRH = N'פ') T#(lf)#(tab)#(tab)#(tab)ON M.QOD_MOTSR = T.QOD#(lf)  LEFT JOIN (SELECT distinct [TARO_ANGLIT_2_ART],[ART_DESC]#(lf)#(tab)#(tab)#(tab)FROM [dbo].[TRGOM_ANGLIT]#(lf)#(tab)#(tab)#(tab)WHERE SOG_PRIT_SOCN_BNQ_TM_SH_CHBRH = N'פ' and ART_DESC<>'' and TARO_ANGLIT_3_PNL_HCNSH = 8052) A#(lf)#(tab)#(tab)#(tab)ON A.TARO_ANGLIT_2_ART = T.TARO_ANGLIT_2_ART#(lf))#(lf),Products_STG_TopMaterial AS (#(lf)  SELECT DISTINCT stg1.[מוצר על], stg1c.[שם מוצר],T.TARO_ANGLIT_1 as 'MainItem'#(lf)  FROM Products_STG1 stg1#(lf)  LEFT JOIN Products_STG1 stg1c on stg1.[מוצר על] = stg1c.מקט#(lf)    LEFT JOIN (SELECT *#(lf)#(tab)#(tab)#(tab)FROM [dbo].[TRGOM_ANGLIT]#(lf)#(tab)#(tab)#(tab)WHERE SOG_PRIT_SOCN_BNQ_TM_SH_CHBRH = N'פ') T#(lf)#(tab)#(tab)#(tab)ON stg1c.ItemKey = T.QOD#(lf)  WHERE STG1.[מוצר על]<>0#(lf))#(lf)#(lf),STG2 AS(#(lf)#(tab)SELECT  #(lf)#(tab)'1' as 'EntityID'#(lf)#(tab)    ,STG1.ItemKey AS 'MainItemKey'#(lf)#(tab)    ,CASE #(lf)#(tab)#(tab)#(tab)WHEN TM.[שם מוצר] is NULL#(lf)#(tab)#(tab)#(tab)#(tab)THEN STG1.[Product]#(lf)#(tab)#(tab)#(tab)ELSE TM.[MainItem]#(lf)#(tab)#(tab)END AS  'MainItemName'#(lf)#(tab)#(tab),STG1.ItemKey + '-' + STG1.ItemKey AS ItemKey#(lf)#(tab)#(tab),STG1.[שם מוצר] AS 'שם מוצר'#(lf)#(tab)#(tab),STG1.[מקט]#(lf)#(tab)#(tab),STG1.[מזהה מוצר]#(lf)#(tab)#(tab),CASE #(lf)#(tab)#(tab)#(tab)WHEN TM.[מוצר על] is NULL#(lf)#(tab)#(tab)#(tab)#(tab)THEN STG1.ItemKey#(lf)#(tab)#(tab)#(tab)ELSE TM.[מוצר על]#(lf)#(tab)#(tab)END AS 'מוצר על'#(lf)#(tab)    ,CASE #(lf)#(tab)#(tab)#(tab)WHEN TM.[שם מוצר] is NULL#(lf)#(tab)#(tab)#(tab)#(tab)THEN STG1.[שם מוצר]#(lf)#(tab)#(tab)#(tab)ELSE TM.[שם מוצר]#(lf)#(tab)#(tab)END AS 'שם מוצר על'#(lf)#(tab)#(tab),STG1.[יחידת מידה]#(lf)#(tab)#(tab),STG1.[מחיר מכירה]#(lf)#(tab)#(tab),STG1.[סיווג מוצר]#(lf)#(tab)#(tab),STG1.[סיווג מוצר] AS 'קטגוריה' -- Product Category Name#(lf)#(tab)#(tab),STG1.[סטטוס] AS 'סטטוס'#(lf)#(tab)#(tab),[קבוצת פריט]#(lf)#(tab)#(tab),Product#(lf)#(tab)#(tab),PNL#(lf)#(tab)#(tab),Article#(lf)#(tab)#(tab),Article_Description#(lf)#(tab)#(tab),GETDATE() AS RowInsertDatetime#(lf)FROM Products_STG1 STG1#(lf)Left Join Products_STG_TopMaterial TM ON STG1.[מוצר על]= TM.[מוצר על]#(lf)#(lf)#(lf)#(tab))#(lf)#(tab)#(lf)#(tab),STG2_1 AS (#(lf)#(lf)#(lf)SELECT *,#(lf)#(tab)#(tab)Case#(lf)#(tab)#(tab)#(tab)When STG2.Article_Description = 'Other'#(lf)#(tab)#(tab)#(tab)#(tab)THEN 100000000#(lf)#(tab)#(tab)#(tab)When STG2.Article_Description ='Corn'#(lf)#(tab)#(tab)#(tab)#(tab)THEN 1#(lf)#(tab)#(tab)#(tab)When STG2.Article_Description ='FW'#(lf)#(tab)#(tab)#(tab)#(tab)THEN 2#(lf)#(tab)#(tab)#(tab)When STG2.Article_Description ='MW'#(lf)#(tab)#(tab)#(tab)#(tab)THEN 3#(lf)#(tab)#(tab)#(tab)When STG2.Article_Description ='FB'#(lf)#(tab)#(tab)#(tab)#(tab)THEN 4#(lf)#(tab)#(tab)#(tab)When STG2.Article_Description ='CGFP'#(lf)#(tab)#(tab)#(tab)#(tab)THEN 5#(lf)#(tab)#(tab)#(tab)When STG2.Article_Description ='DDGS'#(lf)#(tab)#(tab)#(tab)#(tab)THEN 6#(lf)#(tab)#(tab)#(tab)When STG2.Article_Description ='RSM'#(lf)#(tab)#(tab)#(tab)#(tab)THEN 7#(lf)#(tab)#(tab)#(tab)When STG2.Article_Description ='SFM'#(lf)#(tab)#(tab)#(tab)#(tab)THEN 8#(lf)#(tab)#(tab)#(tab)When STG2.Article_Description ='BPP'#(lf)#(tab)#(tab)#(tab)#(tab)THEN 9#(lf)#(tab)#(tab)#(tab)When STG2.Article_Description ='SBM'#(lf)#(tab)#(tab)#(tab)#(tab)THEN 10#(lf)#(tab)#(tab)#(tab)When STG2.Article_Description ='Soybeans'#(lf)#(tab)#(tab)#(tab)#(tab)THEN 11#(lf)#(tab)#(tab)#(tab)ELSE 100000000#(lf)#(tab)#(tab)END AS ProductArticleOrder#(lf)#(tab)#(tab),Case#(lf)#(tab)#(tab)#(tab)When STG2.[קבוצת פריט] = 'Other'#(lf)#(tab)#(tab)#(tab)#(tab)THEN 100000000#(lf)#(tab)#(tab)#(tab)When STG2.[קבוצת פריט] ='Grain'#(lf)#(tab)#(tab)#(tab)#(tab)THEN 1#(lf)#(tab)#(tab)#(tab)When STG2.[קבוצת פריט] ='FEED STUFF'#(lf)#(tab)#(tab)#(tab)#(tab)THEN 2#(lf)#(tab)#(tab)#(tab)When STG2.[קבוצת פריט] ='Soya'#(lf)#(tab)#(tab)#(tab)#(tab)THEN 3#(lf)#(tab)#(tab)#(tab)ELSE 100000000#(lf)#(tab)#(tab)END AS ProductGroupOrder#(lf)FROM STG2#(lf)#(lf)#(lf)#(lf)UNION ALL#(lf)#(lf)#(tab)SELECT  #(lf)#(tab)'1' as 'EntityID'#(lf)#(tab)    ,'0S' AS 'MainItemKey'#(lf)#(tab)#(tab),'כללי' AS 'MainItemName'#(lf)        ,'0-' +CAST(SIM.QOD_SHROT AS VARCHAR)+ 'S'  AS 'ItemKey'#(lf)#(tab)#(tab),SIM.SHM_SHROT  AS 'שם מוצר'#(lf)#(tab)#(tab),SIM.QOD_SHROT AS 'מקט'#(lf)#(tab)#(tab),CAST(SIM.QOD_SHROT AS VARCHAR) +' | ' + SIM.SHM_SHROT AS 'מזהה מוצר'#(lf)#(tab)#(tab),NULL AS 'מוצר על'#(lf)#(tab)    ,'כללי' AS 'שם מוצר על'#(lf)#(tab)#(tab),NULL AS 'יחידת מידה'#(lf)#(tab)#(tab),NULL AS 'מחיר מכירה'#(lf)#(tab)#(tab),'כללי' AS 'סיווג מוצר'#(lf)#(tab)#(tab),'כללי' AS 'קטגוריה'#(lf)#(tab)#(tab),NULL AS 'סטטוס'#(lf)#(tab)#(tab),'כללי' AS 'קבוצת פריט'#(lf)#(tab)#(tab),'' as Product#(lf)#(tab)#(tab),PNL as PNL#(lf)#(tab)#(tab),'' as 'Article'#(lf)#(tab)#(tab) ,'Other' AS 'Article_Description'#(lf)#(tab)#(tab),GETDATE() AS RowInsertDatetime#(lf)#(tab)#(tab),100000000 AS ProductArticleOrder#(lf)#(tab)#(tab),100000000 AS ProductGroupOrder#(lf)FROM HOTSAOT_SHROTIM_New SIM#(lf)  LEFT JOIN (SELECT *#(lf)#(tab)#(tab)#(tab)FROM [dbo].[TRGOM_ANGLIT]#(lf)#(tab)#(tab)#(tab)WHERE SOG_PRIT_SOCN_BNQ_TM_SH_CHBRH = N'פ') T#(lf)#(tab)#(tab)#(tab)ON SIM.QOD_SHROT = T.QOD#(lf)  LEFT JOIN (SELECT distinct [TARO_ANGLIT_2_ART],[ART_DESC]#(lf)#(tab)#(tab)#(tab)FROM [dbo].[TRGOM_ANGLIT]#(lf)#(tab)#(tab)#(tab)WHERE SOG_PRIT_SOCN_BNQ_TM_SH_CHBRH = N'פ' and ART_DESC<>'' and TARO_ANGLIT_3_PNL_HCNSH = 8052) A#(lf)#(tab)#(tab)#(tab)ON A.TARO_ANGLIT_2_ART = T.TARO_ANGLIT_2_ART#(lf))#(lf)#(tab)SELECT STG2_1.*#(lf)#(tab)#(tab)  ,CASE#(lf)#(tab)#(tab)#(tab)WHEN STG2_1.Product is NULL OR STG2_1.Product = ''#(lf)#(tab)#(tab)#(tab)#(tab)THEN 0  #(lf)#(tab)#(tab)#(tab)ELSE Dense_Rank () Over (Order by ProductArticleOrder,Product)  #(lf)#(tab)#(tab)END AS ProductOrder#(lf)#(tab)      ,INV.Balance AS 'Balance'#(lf)#(tab)#(tab)  ,Inv.StockValue#(lf)#(lf)#(tab)#(tab) #(lf)#(tab)FROM STG2_1#(lf)#(tab)#(lf)#(tab)#(lf)#(tab)----2.1#(lf)#(tab)----INVENTORY----#(lf)LEFT JOIN (#(lf)#(tab)#(tab)SELECT cast(Inv.ProductID as varchar) +'-'+ cast(Inv.ProductID as varchar) as 'ItemKey'#(lf)#(tab)#(tab)#(tab),SUM(TotalInventory) AS Balance#(lf)#(tab)#(tab)#(tab),SUM(ROUND(CAST(PCOST.FotFlat AS decimal),2) * INV.TotalInventory) as 'StockValue'#(lf)#(tab)#(tab)FROM  tblInventory Inv#(lf)        INNER join (#(lf)        SELECT MAX(DueDate) AS MD#(lf)        from tblInventory#(lf)        )DD#(lf)        ON INV.DueDate = DD.MD#(lf)        LEFT JOIN tblProductsCost PCost#(lf)        ON (INV.DueDate = PCost.DueDate#(lf)        AND INV.ProductID = PCost.ProductCode)#(lf)#(tab)#(tab)GROUP BY Inv.ProductID#(lf)#(tab)#(tab)#(tab)#(lf)#(tab)#(tab)) Inv#(lf)#(tab)#(tab)ON STG2_1.ItemKey = Inv.ItemKey"])
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

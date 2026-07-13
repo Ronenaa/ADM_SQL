@@ -1,0 +1,51 @@
+table LazyCustomerTable
+	lineageTag: 0f5ba804-b9f2-4643-b81e-d8fa0d710b84
+
+	measure LazyCustomerSwitch =
+			
+			SWITCH(MIN(LazyCustomerTable[ID]),
+			    1,1,
+			    2,[Lazy Customer - Supply Date]+[Lazy Customer - Execution],
+			    3,[Lazy Customer - Decline Last Year],
+			    1
+			)
+		formatString: 0
+		lineageTag: cbb6671c-f5ba-4daf-9317-f3553f038f74
+
+		changedProperty = IsHidden
+
+	column ID
+		dataType: int64
+		formatString: 0
+		lineageTag: c3954321-29ac-4532-af3b-a19971082fe9
+		summarizeBy: count
+		sourceColumn: ID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Description
+		dataType: string
+		lineageTag: 71002041-f6a4-4a51-b4af-32847b01d7b4
+		summarizeBy: none
+		sourceColumn: Description
+		sortByColumn: ID
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition LazyCustomerTable = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WMlTSUXLMyVFwLi0uyc9NLSpWitWJVjICivokVlWiCRsDhWEiCp55Ci6pyTmZealKsbEA", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [ID = _t, Description = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"ID", Int64.Type}, {"Description", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

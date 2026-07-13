@@ -1,0 +1,65 @@
+table HierarchySwitchReverse
+	lineageTag: 85a4135a-ee09-4383-aafa-b13fcd40fe22
+
+	column HierarchySwitchReverse
+		lineageTag: f53cdc34-6884-45b0-bde9-8a8d8a7745ce
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'HierarchySwitchReverse Order'
+
+		relatedColumnDetails
+			groupByColumn: 'HierarchySwitchReverse Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'HierarchySwitchReverse Fields'
+		lineageTag: 71eb6e31-0a94-45de-b033-d036700cb642
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'HierarchySwitchReverse Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'HierarchySwitchReverse Order'
+		formatString: 0
+		lineageTag: 5e6d2df0-32bc-4df9-91df-bb08b483e03e
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Value4
+		lineageTag: 77d85e1c-427c-4520-b6cf-fe27b0810759
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Value4]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Value5
+		formatString: 0
+		lineageTag: c647c303-200e-4239-ad30-ba1c082f139f
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Value5]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition HierarchySwitchReverse = calculated
+		mode: import
+		source =
+				{
+				    (" ", NAMEOF('dimCustomers'[סוג לקוח]), 0,"Product",1),
+				    ("  ", NAMEOF('dimCustomers'[שם לקוח אב]), 1,"Product",0),
+				    ("    ", NAMEOF('dimItemsSimple'[קבוצת פריט]), 2,"Customer",0),
+				    ("     ", NAMEOF('dimItemsSimple'[Article_Description]), 3,"Customer",1)
+				}
+
+	annotation PBI_Id = 23d3d9edb7054014a5c17050862becc2
+

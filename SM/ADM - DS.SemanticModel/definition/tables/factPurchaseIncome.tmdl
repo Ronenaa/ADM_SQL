@@ -1,0 +1,435 @@
+table factPurchaseIncome
+	lineageTag: c41f3b98-5f81-416b-8bf1-98b59f0ba0f2
+
+	column EntityID
+		dataType: string
+		lineageTag: dee46834-5a86-42ec-9961-59c05f4bb7f9
+		summarizeBy: none
+		sourceColumn: EntityID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DocID
+		dataType: int64
+		formatString: 0
+		lineageTag: 8deb888b-f3fe-4812-b2ab-05d52d4ab6b9
+		summarizeBy: count
+		sourceColumn: DocID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column InvoiceLineNumber
+		dataType: int64
+		formatString: 0
+		lineageTag: a16c895d-e697-4fab-a97f-074ff0d58ab7
+		summarizeBy: sum
+		sourceColumn: InvoiceLineNumber
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DocName
+		dataType: string
+		lineageTag: c42bafe7-92f6-4766-beb7-7fcdcfddeccb
+		summarizeBy: none
+		sourceColumn: DocName
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column LineType
+		dataType: string
+		lineageTag: 66a3c412-63cd-4892-95d2-9595adbd552d
+		summarizeBy: none
+		sourceColumn: LineType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column LineTypeCode
+		dataType: int64
+		formatString: 0
+		lineageTag: cfa066e4-011a-467e-8b0a-0bae90a38ef5
+		summarizeBy: count
+		sourceColumn: LineTypeCode
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column AccountKey
+		dataType: string
+		lineageTag: 1c449fe6-7591-4f4f-a96c-740707cd2a4a
+		summarizeBy: none
+		sourceColumn: AccountKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: d293bc38-e268-47a5-8c26-c209343f4a85
+		summarizeBy: none
+		sourceColumn: Date
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column AgentKey
+		dataType: string
+		lineageTag: d4f44cf8-601f-4d66-8916-4fb939dd80a9
+		summarizeBy: none
+		sourceColumn: AgentKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ItemKey
+		dataType: string
+		lineageTag: ff39cef2-d6b4-4e32-8840-e1cb6b3bff1c
+		summarizeBy: none
+		sourceColumn: ItemKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ItemKey_backup
+		dataType: string
+		lineageTag: 176c10f2-3cb9-4e3d-94f0-cad7c496bcf5
+		summarizeBy: none
+		sourceColumn: ItemKey_backup
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Item
+		dataType: string
+		lineageTag: 1acca7a6-e526-4cf5-9d65-2b572205786a
+		summarizeBy: none
+		sourceColumn: Item
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column AdditionalKey
+		dataType: string
+		lineageTag: 663c2d1a-0165-4221-b18b-8c98f5384346
+		summarizeBy: none
+		sourceColumn: AdditionalKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DiscountPercent
+		dataType: int64
+		formatString: 0
+		lineageTag: 604482c8-86fb-4401-8403-9f92c61c6fd3
+		summarizeBy: sum
+		sourceColumn: DiscountPercent
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column LineTotalDiscount
+		dataType: int64
+		formatString: 0
+		lineageTag: 1a9430e8-b7ed-4d37-90ee-d1779d5d80af
+		summarizeBy: sum
+		sourceColumn: LineTotalDiscount
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column UnitGrossPrice
+		dataType: int64
+		formatString: 0
+		lineageTag: d0280e9f-5597-40b1-90e3-233e29702c00
+		summarizeBy: sum
+		sourceColumn: UnitGrossPrice
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column UnitNetPriceUSD
+		dataType: double
+		lineageTag: a511f342-2567-4cb0-a58d-3f00ae2933e7
+		summarizeBy: sum
+		sourceColumn: UnitNetPriceUSD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column UnitNetPriceNIS
+		dataType: double
+		lineageTag: edead2bd-593d-40ac-bca2-610154374948
+		summarizeBy: sum
+		sourceColumn: UnitNetPriceNIS
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Quantity
+		dataType: double
+		lineageTag: d21d9e51-1e9b-496a-bc55-7f20cce2d44e
+		summarizeBy: sum
+		sourceColumn: Quantity
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column AdditionalQuantity
+		dataType: double
+		lineageTag: 1ea6afc5-b38d-4e2c-9553-3ac588b0cc03
+		summarizeBy: sum
+		sourceColumn: AdditionalQuantity
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalCost
+		dataType: int64
+		formatString: 0
+		lineageTag: a9565c7e-e750-4725-b8a0-8fc9959ac834
+		summarizeBy: sum
+		sourceColumn: LineTotalCost
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column LineTotalNetNIS
+		dataType: double
+		lineageTag: 46b65f12-c353-4706-8692-9b0d8dab8b37
+		summarizeBy: sum
+		sourceColumn: LineTotalNetNIS
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalNet_USD
+		dataType: double
+		lineageTag: ab9e78e0-27d1-43d8-a921-04543e032f94
+		summarizeBy: sum
+		sourceColumn: LineTotalNet_USD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalNetVAT
+		dataType: int64
+		formatString: 0
+		lineageTag: 82d43d19-f15c-4a60-95b8-aebf9c84f45b
+		summarizeBy: sum
+		sourceColumn: LineTotalNetVAT
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column LineTotalNetVAT_USD
+		dataType: int64
+		formatString: 0
+		lineageTag: e5e4f058-7a22-447b-a241-9a48739eb1ae
+		summarizeBy: sum
+		sourceColumn: LineTotalNetVAT_USD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column YearMonth
+		dataType: int64
+		formatString: 0
+		lineageTag: b56bbc08-cfab-483d-b8ea-b6896ae5087d
+		summarizeBy: sum
+		sourceColumn: YearMonth
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Status
+		dataType: int64
+		formatString: 0
+		lineageTag: ad3dcb66-f11c-47f0-850a-17ee170e1a43
+		summarizeBy: sum
+		sourceColumn: Status
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DeliveryNote
+		dataType: int64
+		formatString: 0
+		lineageTag: 946bb3f9-7066-4b78-939c-2d2d7cea72fb
+		summarizeBy: sum
+		sourceColumn: DeliveryNote
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DeliveryDate
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 23180951-08d5-42e3-af78-61fd3f57ffdf
+		summarizeBy: none
+		sourceColumn: DeliveryDate
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column OrderID
+		dataType: int64
+		formatString: 0
+		lineageTag: d05aabb0-b6d6-411d-830f-2a4a6b9f5027
+		summarizeBy: count
+		sourceColumn: OrderID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SupplierWarehouse
+		dataType: int64
+		formatString: 0
+		lineageTag: eb395441-08c8-4c12-9541-19c6de6fb650
+		summarizeBy: sum
+		sourceColumn: SupplierWarehouse
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column WarehouseFlag
+		dataType: int64
+		formatString: 0
+		lineageTag: 72c5c9f7-ee8e-4f9e-a08f-bb1b906cc34e
+		summarizeBy: sum
+		sourceColumn: WarehouseFlag
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column RowInsertDatetime
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 4ae21316-146a-40ea-a217-d6f90b66ecb7
+		summarizeBy: none
+		sourceColumn: RowInsertDatetime
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ActionType
+		dataType: int64
+		formatString: 0
+		lineageTag: 7520aad8-4c84-4926-b5ac-52a89b44f96a
+		summarizeBy: sum
+		sourceColumn: ActionType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ActionTypeDesc
+		dataType: int64
+		formatString: 0
+		lineageTag: 4b1bdfbf-d7d6-497d-a517-ecf1395cdf90
+		summarizeBy: sum
+		sourceColumn: ActionTypeDesc
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column AdjustmentFlag
+		dataType: string
+		lineageTag: 69865ce3-4c34-4b58-9afd-c5943efcb83e
+		summarizeBy: none
+		sourceColumn: AdjustmentFlag
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column TransactionType
+		dataType: int64
+		formatString: 0
+		lineageTag: a8aeb40b-a601-4b3e-96ac-7c40c88ed130
+		summarizeBy: sum
+		sourceColumn: TransactionType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column PurchaseOrderID
+		dataType: int64
+		formatString: 0
+		lineageTag: f4c1c00c-e07a-4409-b578-c43fc91f7315
+		summarizeBy: none
+		sourceColumn: PurchaseOrderID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition factPurchaseIncome = m
+		mode: import
+		queryGroup: 'fact Tables'
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="with CurrencyConvertion as ( --Curenncy COnvertion Table--#(lf)SELECT *, #(lf)         CASE#(lf)         #(tab)WHEN sher = 0#(lf)         #(tab)THEN FIRST_VALUE(sher) OVER (PARTITION BY value_partition ORDER BY Tarikh) #(lf)         #(tab)ELSE sher#(lf)         END AS new_sher#(lf)         ,CASE#(lf)         #(tab)WHEN SHER_EURO = 0#(lf)         #(tab)THEN FIRST_VALUE(SHER_EURO) OVER (PARTITION BY value_partitionEuro ORDER BY Tarikh) #(lf)         #(tab)ELSE  SHER_EURO#(lf)         END AS new_sherEuro#(lf) FROM ( SELECT *#(lf) ,SUM(CASE WHEN sher=0 THEN 0 ELSE 1 END) OVER (ORDER BY tarikh ) AS value_partition#(lf) ,SUM(CASE WHEN SHER_EURO=0 THEN 0 ELSE 1 END) OVER (ORDER BY tarikh ) AS value_partitionEuro#(lf)          FROM SHERI_MTBE) m#(lf)#(tab)#(tab)  )#(lf)#(lf)SELECT#(lf)    '1' as EntityID,#(lf)    CC.MS_CHSHBONIT  AS DocID,#(lf)    ROW_NUMBER() OVER (PARTITION BY CC.MS_CHSHBONIT ORDER BY CCS.T_CHSHBONIT) AS InvoiceLineNumber,#(lf)    'Invoice' AS DocName,#(lf)#(lf)    'Additional Expense' AS LineType,#(lf)    1 AS LineTypeCode,#(lf)#(lf)    CONVERT(VARCHAR, CCS.QOD_LQOCH) AS AccountKey,#(lf)    SUBSTRING(CCS.T_CHSHBONIT,1,4) + '-' + SUBSTRING(CCS.T_CHSHBONIT,5,2) + '-' + SUBSTRING(CCS.T_CHSHBONIT,7,2) AS [Date],#(lf)    CAST(CONVERT(INT, CONVERT(VARCHAR, AM2.QOD)) AS VARCHAR) AS AgentKey,#(lf)#(lf)    -- מפתחות פריט (ללא TM/SIM)#(lf)    CAST(CONVERT(VARCHAR, CCS.QOD_MOTSR) AS VARCHAR) + '-' + CAST(CONVERT(VARCHAR, CCS.QOD_MOTSR) AS VARCHAR) AS ItemKey,#(lf)    CAST(CONVERT(VARCHAR, CCS.QOD_MOTSR) AS VARCHAR) + '-' + CAST(CONVERT(VARCHAR, CCS.QOD_MOTSR) AS VARCHAR) AS ItemKey_backup,#(lf)    CAST(CONVERT(VARCHAR, CCS.QOD_MOTSR) AS VARCHAR) AS Item,#(lf)    CAST(CONVERT(VARCHAR, CCS.QOD_MOTSR) AS VARCHAR) AS AdditionalKey,#(lf)#(lf)    NULL AS DiscountPercent,#(lf)    NULL AS LineTotalDiscount,#(lf)    NULL AS UnitGrossPrice,#(lf)#(lf)    CAST(CCS.MCHIR_ICH_LLA_ME_M / (CASE WHEN SHER_LCHISHOB <> 0 THEN SHER_LCHISHOB ELSE 1 END) AS DECIMAL(12,2)) AS UnitNetPriceUSD,#(lf)    CAST(CCS.MCHIR_ICH_LLA_ME_M AS DECIMAL(12,2)) AS UnitNetPriceNIS,#(lf)#(lf)    CCS.MSHQL_NTO AS Quantity,#(lf)    CASE WHEN CCS.QOD_MOTSR <> 0 THEN 0 ELSE CCS.CMOT END AS AdditionalQuantity,#(lf)#(lf)    NULL AS LineTotalCost,#(lf)#(lf)#(tab)CCS.CMOT * CAST(CCS.MCHIR_ICH_LLA_ME_M AS DECIMAL(12,2)) AS LineTotalNetNIS,#(lf)#(lf)#(tab)CCS.CMOT * CAST(CCS.MCHIR_ICH_LLA_ME_M / (CASE WHEN SHER_LCHISHOB <> 0 THEN SHER_LCHISHOB ELSE CC2.new_sher END) AS DECIMAL(12,2)) AS LineTotalNet_USD,#(lf)#(lf)    NULL AS LineTotalNetVAT,#(lf)    NULL AS LineTotalNetVAT_USD,#(lf)#(lf)    CONVERT(INT, CONVERT(VARCHAR, SUBSTRING(CCS.T_CHSHBONIT,1,4) + SUBSTRING(CCS.T_CHSHBONIT,5,2))) AS YearMonth,#(lf)    NULL AS 'Status',#(lf)#(lf)    NULL AS DeliveryNote,#(lf)    CAST(SUBSTRING(CCS.T_CHSHBONIT,1,4) + '-' + SUBSTRING(CCS.T_CHSHBONIT,5,2) + '-' + SUBSTRING(CCS.T_CHSHBONIT,7,2) AS DATE) AS DeliveryDate,#(lf)#(lf)    NULL AS OrderID,#(lf)    NULL AS SupplierWarehouse,#(lf)    0    AS WarehouseFlag,#(lf)#(lf)    GETDATE() AS RowInsertDatetime,#(lf)    NULL AS ActionType,#(lf)    NULL AS ActionTypeDesc,#(lf)    '1' AS AdjustmentFlag,#(lf)    NULL AS TransactionType,#(lf)#(tab)HZMNT_RCSH as PurchaseOrderID#(lf)#(lf)FROM [dbo].[CHIOBI_CHOTS_COTROT] CC#(lf)LEFT JOIN GORMIM G2#(lf)    ON CC.QOD_LQOCH = G2.QOD_GORM#(lf)LEFT JOIN TBLT_ANSHI_MCIROT AM2#(lf)    ON AM2.SHM_AISH_MCIROT = G2.AISH_MCIROT_MTPL#(lf)LEFT JOIN [dbo].[CHIOBI_CHOTS_SHOROT] CCS#(lf)    ON CC.MS_CHSHBONIT = CCS.MS_CHSHBONIT#(lf)LEFT JOIN CurrencyConvertion CC2#(lf)    ON CCS.[TARIKH_MSHLOCH] = CC2.Tarikh#(lf)"]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Date", type date}, {"DeliveryDate", type date}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

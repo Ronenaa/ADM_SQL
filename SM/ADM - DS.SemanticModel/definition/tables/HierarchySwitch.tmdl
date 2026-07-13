@@ -1,0 +1,67 @@
+table HierarchySwitch
+	lineageTag: 316c1c89-89d0-4dbe-a2d2-30f8e134f0ed
+
+	column HierarchySwitch
+		lineageTag: 85b45265-ed0b-4245-9e39-39f2306898be
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'HierarchySwitch Order'
+
+		relatedColumnDetails
+			groupByColumn: 'HierarchySwitch Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'HierarchySwitch Fields'
+		lineageTag: b7f78c26-ffea-4aaf-a4d5-df2c72a0c940
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'HierarchySwitch Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'HierarchySwitch Order'
+		formatString: 0
+		lineageTag: 042ef851-b4ad-42b0-bd58-d2193bddce97
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Value4
+		lineageTag: 5bd5d00c-1c13-4c18-b933-3008cfd7580f
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Value4]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Value5
+		formatString: 0
+		lineageTag: 11737d73-2d87-48ae-a52d-964c711a9627
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Value5]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition HierarchySwitch = calculated
+		mode: import
+		source =
+				{
+				    (" ", NAMEOF('dimCustomers'[סוג לקוח]), 0,"Customer",1),
+				    ("  ", NAMEOF('dimCustomers'[שם לקוח אב]), 1,"Customer",0),
+				    ("   ", NAMEOF('dimItemsSimple'[Article_Description]), 2,"Customer",2),
+				    ("    ", NAMEOF('dimItemsSimple'[קבוצת פריט]), 3,"Product",0),
+				    ("     ", NAMEOF('dimItemsSimple'[Article_Description]), 4,"Product",1),
+				    ("      ", NAMEOF('dimCustomers'[שם לקוח אב]), 5,"Product",2)
+				}
+
+	annotation PBI_Id = 95cae78cf3714a6a84fb5c34bc59a765
+

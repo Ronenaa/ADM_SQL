@@ -1,0 +1,71 @@
+table RiskPlanMeasures
+	lineageTag: 6403fa79-1d08-4c14-a332-27c6e52e2ad7
+
+	measure SwitchMeasures = ```
+			
+			Switch(MIN(RiskPlanMeasures[RiskPlanMeasures Order]),
+			    0,[Balance - Risk Plan], 
+			    1,[AVG Price - Risk Plan No Total], 
+			    2,[Market Price - Risk Plan No Total],
+			    3,[Price Diff - Risk Plan No Total], 
+			    4,[Total Risk Plan])
+			```
+		formatString: #,0
+		lineageTag: 71a16e47-e920-4307-9e26-6adcefdedc0f
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	column RiskPlanMeasures
+		lineageTag: a79bb10e-c383-4f51-98aa-f8e17c68b6de
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'RiskPlanMeasures Order'
+
+		relatedColumnDetails
+			groupByColumn: 'RiskPlanMeasures Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'RiskPlanMeasures Fields'
+		lineageTag: 547d2b85-4cde-40a7-8c8e-a616148917aa
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'RiskPlanMeasures Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'RiskPlanMeasures Order'
+		formatString: 0
+		lineageTag: fc848cee-67c5-420f-abf7-0ba0f84b394b
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Value4
+		lineageTag: dc6a4445-c0a7-4072-9c94-31defeb3e1af
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Value4]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition RiskPlanMeasures = calculated
+		mode: import
+		source =
+				{
+				    ("Balance", NAMEOF('factOrders'[Balance - Risk Plan]), 0,"Balance"),
+				    ("Cost Price", NAMEOF('factOrders'[AVG Price - Risk Plan No Total]), 1,"Cost Price"),
+				    ("Market Price", NAMEOF('factDailyPrices'[Market Price - Risk Plan No Total]), 2,"Market Price"),
+				    ("Profit/Loss", NAMEOF('factOrders'[Price Diff - Risk Plan No Total]), 3,"Profit/Loss"),
+				    ("Risk Plan", NAMEOF('factOrders'[Total Risk Plan]), 4,"Risk Plan")
+				}
+
+	annotation PBI_Id = 580a514ede69493bbd930b0a0cfc24b0
+

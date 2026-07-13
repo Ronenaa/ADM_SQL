@@ -1,0 +1,55 @@
+table dimHolidayYear
+	lineageTag: 5b3c65c7-8936-47ad-b2d0-39d345b50a1a
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: 89d6f79a-a04f-4c78-b518-825be013deed
+		summarizeBy: sum
+		sourceColumn: Year
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Selected Year'
+		dataType: string
+		lineageTag: cdf57b28-8b52-4b4b-80df-88ba85f123e0
+		summarizeBy: none
+		sourceColumn: Selected Year
+		sortByColumn: Year
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dimHolidayYear-b1425125-e263-41a3-b618-e58e625838c3 = m
+		mode: import
+		queryGroup: 'Dates Dim'
+		source = ```
+				let
+				Culture ="en-US",
+				    Source = dimDates,
+				    #"Added Custom" = Table.AddColumn(Source, "Selected Year", each if  Date.IsInCurrentYear([Date]) then
+				(if Culture ="he-IL" then "שנה נוכחית" else  "This Year")
+				else if Date.IsInCurrentYear(Date.AddYears([Date],1)) then 
+				(if Culture ="he-IL" then "שנה קודמת" else  "Previous Year")
+				else
+				[Year], type text),
+				    #"Removed Other Columns" = Table.SelectColumns(#"Added Custom",{"Year", "Selected Year"}),
+				    #"Removed Duplicates" = Table.Distinct(#"Removed Other Columns"),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Removed Duplicates",{{"Year", Int64.Type}})
+				in
+				    #"Changed Type"
+				```
+
+	changedProperty = IsHidden
+
+	annotation PBI_Id = 343b8039-4dd1-487d-a0cf-6b4d19d7862a
+
+	annotation LinkedQueryName = dimHolidayYear
+
+	annotation PBI_QueryRelationships = {"columnCount":2,"keyColumnNames":[],"queryRelationships":[],"columnIdentities":["Section1/dimHolidayYear/Changed Type.{שנה,0}","Section1/dimHolidayYear/Added Custom.{Selected Year,45}"],"ColumnCount":2,"KeyColumnNames":[],"ColumnIdentities":["Section1/dimHolidayYear/Changed Type.{שנה,0}","Section1/dimHolidayYear/Added Custom.{Selected Year,45}"],"RelationshipInfo":[]}
+
+	annotation PBI_ResultType = Exception
+

@@ -1,0 +1,32 @@
+table PurchaseMonthsParameter
+	lineageTag: 064317b7-c798-4f4a-879e-af2bab3604c0
+
+	measure 'PurchaseMonthsParameter Value' = SELECTEDVALUE('PurchaseMonthsParameter'[PurchaseMonthsParameter], 6)
+		lineageTag: da2c4e36-005c-4675-887d-cbda6916b03d
+
+	measure 'כמות נדרשת לעמידה בחודשי מלאי' = ```
+			[מכר חודשי ממוצע  - ניתוח מלאי] * 
+			[PurchaseMonthsParameter Value]
+			```
+		formatString: #,0
+		lineageTag: a2d8d8a1-45f4-4269-b3c6-ba03324bd863
+
+	column PurchaseMonthsParameter
+		formatString: 0
+		lineageTag: e34fdddd-c88f-43d4-b301-f27eb00b214e
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+		annotation SummarizationSetBy = User
+
+	partition PurchaseMonthsParameter-38c50bb1-ee92-44ef-951e-fd764282e1e6 = calculated
+		mode: import
+		source = GENERATESERIES(1, 24, 1)
+
+	annotation PBI_Id = 106ef1a5dfe64f1a852b469fe57b8c07
+

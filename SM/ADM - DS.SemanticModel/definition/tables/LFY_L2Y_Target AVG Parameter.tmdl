@@ -1,0 +1,57 @@
+table 'LFY_L2Y_Target AVG Parameter'
+	lineageTag: 332b4c45-fac7-4203-9002-fabaa1af0028
+
+	column 'LFY_L2Y_Target AVG Parameter'
+		lineageTag: de46a51e-0763-41e8-96ec-52a9acc7ee93
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'LFY_L2Y_Target AVG Parameter Order'
+
+		relatedColumnDetails
+			groupByColumn: 'LFY_L2Y_Target AVG Parameter Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'LFY_L2Y_Target AVG Parameter Fields'
+		lineageTag: c6efef5a-9755-458c-afd1-fe6d63b80bef
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'LFY_L2Y_Target AVG Parameter Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'LFY_L2Y_Target AVG Parameter Order'
+		formatString: 0
+		lineageTag: b94b8d39-4d44-4564-a2ec-caa2218d0161
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Value4
+		lineageTag: 343a7760-b980-4b9e-b685-f3b01f307bdd
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Value4]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'LFY_L2Y_Target AVG Parameter' = calculated
+		mode: import
+		source =
+				{
+				    ("LY FY", NAMEOF('factOrders'[Monthly Avg LY Full]), 14, "LY FY"),
+				    ("Target",NAMEOF([Full Monthly Target]), 13, "Target"),
+				    ("2YA YTD", NAMEOF('factOrders'[Monthly Avg 2Y YTD]), 12, "2YA YTD"),
+				    ("2YA FY", NAMEOF('factOrders'[Monthly Avg 2Y FY]), 11, "2YA FY"),
+				    ("Potential", NAMEOF([Full Monthly Potential]), 10, "Potential")
+				}
+
+	annotation PBI_Id = 770dbbfa7248414e9307e128d30145fc
+

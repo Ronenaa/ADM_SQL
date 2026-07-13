@@ -1,0 +1,47 @@
+table AgentRLS
+	lineageTag: 7935e743-e2bf-488b-bf66-3f4bb83089c9
+
+	column AgentKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 743b1f87-9b6e-4cd7-a6cc-37cc92d4689a
+		summarizeBy: none
+		sourceColumn: AgentKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column AgentName
+		dataType: string
+		lineageTag: 5937a1b1-45f6-402d-8408-0345d3a8a01e
+		summarizeBy: none
+		sourceColumn: AgentName
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column AgentEmail
+		dataType: string
+		lineageTag: 81b04e6c-5895-48d5-a149-8cc91c34b4be
+		summarizeBy: none
+		sourceColumn: AgentEmail
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition AgentRLS = m
+		mode: import
+		queryGroup: Dim
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="select DISTINCT#(lf)#(tab)#(tab)SalesPersonID as AgentKey#(lf)#(tab)#(tab),ENGName      as AgentName#(lf)#(tab)#(tab),eMail        as AgentEmail#(lf)from viewADMSalesPerson"])
+				in
+				    Source
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

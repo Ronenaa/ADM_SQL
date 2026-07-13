@@ -1,0 +1,26 @@
+table 'Top Months'
+	lineageTag: e007f1a1-cba4-49ed-933b-ecde0276b868
+
+	measure 'Top Months Value' = SELECTEDVALUE('Top Months'[Top Months], 5)
+		formatString: 0
+		lineageTag: 11893086-f1f4-4bc1-ae1f-3ba11eb83b5d
+
+	column 'Top Months'
+		formatString: 0
+		lineageTag: cc20b2fb-7110-43f9-a191-6b5403de201b
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+		annotation SummarizationSetBy = User
+
+	partition 'Top Months' = calculated
+		mode: import
+		source = GENERATESERIES(1, 12, 1)
+
+	annotation PBI_Id = b817c19c42364a4a8ebf67a77fc4d68b
+

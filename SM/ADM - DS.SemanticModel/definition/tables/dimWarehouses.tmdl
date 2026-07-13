@@ -1,0 +1,89 @@
+table dimWarehouses
+	lineageTag: 7f1307ca-77f6-4414-97f7-8fe03b1f2c85
+
+	column EntityID
+		dataType: string
+		lineageTag: 797f790f-0489-4280-9c0f-c86b6efae9b4
+		summarizeBy: none
+		sourceColumn: EntityID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column WarehsKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 1a886f18-3ccc-4241-ab0e-32b4a7d574b2
+		summarizeBy: none
+		sourceColumn: WarehsKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column WarehouseName
+		dataType: string
+		lineageTag: 0491cf5f-9518-4e98-b123-9f7007f89d11
+		summarizeBy: none
+		sourceColumn: WarehouseName
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column WarehouseType
+		dataType: string
+		lineageTag: 151b9ca3-55cf-4dec-add2-16555b584f2d
+		summarizeBy: none
+		sourceColumn: WarehouseType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column RowInsertDatetime
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 10eb667c-6e53-4c2f-ab95-2c2e78935179
+		summarizeBy: none
+		sourceColumn: RowInsertDatetime
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column WarehouseActivity
+		dataType: string
+		lineageTag: 0a305885-9971-477b-8516-4740b71cc12b
+		summarizeBy: none
+		sourceColumn: WarehouseActivity
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column WarehouseOrder
+		dataType: int64
+		formatString: 0
+		lineageTag: e3c1b5da-e372-4637-bc62-2126b814d52f
+		summarizeBy: sum
+		sourceColumn: WarehouseOrder
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dimWarehouses = m
+		mode: import
+		queryGroup: Dim
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="Select#(lf)'1' as 'EntityID'#(lf)--,'1' + w.WARHS as 'WarehsKey'#(lf)--,CONCAT('1' , w.WARHS) as 'WarehsKey'#(lf),G.QOD_GORM as 'WarehsKey'#(lf)---,w.TYPE as 'WarehouseType'#(lf),G.SHM_GORM as 'WarehouseName'#(lf),G.EntityType as 'WarehouseType'#(lf),G.AOPI_PEILOT as 'WarehouseActivity'#(lf),CASE#(lf)#(tab)WHEN QOD_GORM = 1144 ----לוגוס#(lf)#(tab)#(tab)THEN 1#(lf)#(tab)WHEN QOD_GORM = 1411 ----גורן הכפר#(lf)#(tab)#(tab)THEN 2#(lf)#(tab)WHEN QOD_GORM = 1220 ----מספנות ישראל#(lf)#(tab)#(tab)THEN 3#(lf)#(tab)ELSE ROW_NUMBER () OVER (Order By G.Qod_Gorm) + 3#(lf)END AS 'WarehouseOrder'#(lf),GETDATE() AS RowInsertDatetime#(lf)#(lf)From  GORMIM G#(lf)WHERE EntityType = N'מקום אספקה'"])
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

@@ -1,0 +1,49 @@
+table LYTargetPotentialParameter
+	lineageTag: ec6a3c37-d651-4c01-8b8c-6c862b3983f7
+
+	column LYTargetPotentialParameter
+		lineageTag: af44831a-69d8-467e-9930-118976a4e4b3
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'LYTargetPotentialParameter Order'
+
+		relatedColumnDetails
+			groupByColumn: 'LYTargetPotentialParameter Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'LYTargetPotentialParameter Fields'
+		lineageTag: a69af0e7-7476-48d4-9c48-02080c6e3c34
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'LYTargetPotentialParameter Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'LYTargetPotentialParameter Order'
+		formatString: 0
+		lineageTag: 6fd3ca83-3908-4c7b-b67b-5b80aaf9d8fa
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition LYTargetPotentialParameter = calculated
+		mode: import
+		source =
+				{
+				    --("LY", NAMEOF('factOrders'[Quantity Dynamic Table Switch LY YTD Visual]), 0),
+				    ("LY", NAMEOF('factOrders'[Quantity Dynamic Table Switch LY FYvsYTD]), 0),
+				    --("LY", NAMEOF(DynamicTableFYvsYTD[DynamicTableFYvsYTD]), 0),
+				    ("Target", NAMEOF('factTargets'[TargetToDate]), 1),
+				    ("Potential", NAMEOF('factTargets'[Potential]), 2)
+				}
+
+	annotation PBI_Id = bfab4e1c8a614eff9489b5bb9135c321
+

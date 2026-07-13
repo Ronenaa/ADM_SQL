@@ -1,0 +1,25 @@
+table SortOptions
+	lineageTag: 7a7c4214-1fd3-415b-8515-0851817ee69e
+
+	column 'Sort By'
+		lineageTag: a6f04d7c-e506-4da4-a70b-820f383186bd
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Sort By]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition SortOptions = calculated
+		mode: import
+		source =
+				DATATABLE(
+				    "Sort By", STRING,
+				    {
+				        {"Open Orders"},
+				        {"Size"},
+				        {"Order Date"}
+				    }
+				)
+
+	annotation PBI_Id = cac25f03f8854c7d9078431b732227a5
+

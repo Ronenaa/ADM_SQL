@@ -1,0 +1,29 @@
+{
+  "version": "2.18.0",
+  "author": {
+    "name": "Klaus Birringer",
+    "email": "info@dataviz.boutique"
+  },
+  "resources": [
+    {
+      "resourceId": "rId0",
+      "sourceType": 5,
+      "file": "resources/treeImageFreeE1148639291D450198F892FA45A672BC.pbiviz.json"
+    }
+  ],
+  "visual": {
+    "guid": "treeImageFreeE1148639291D450198F892FA45A672BC",
+    "name": "Ultimate-Decomposition-Tree-Free-2.18.0",
+    "displayName": "Ultimate decomposition Tree Free 2.18.0",
+    "version": "2.18.0",
+    "description": "The Ultimate decomposition Tree can display Hierarchical Information in combination of images and two measures and % calculation as well.",
+    "supportUrl": "https://dataviz.boutique",
+    "gitHubUrl": "",
+    "visualClassName": "Visual"
+  },
+  "metadata": {
+    "pbivizjson": {
+      "resourceId": "rId0"
+    }
+  }
+}

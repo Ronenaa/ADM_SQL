@@ -1,0 +1,24 @@
+table CustomerScore
+	lineageTag: 5f6b3eba-e29f-4e43-bf8e-18c89f87cc9a
+
+	column 'Filter By'
+		lineageTag: ee3f761e-6ec2-43df-b1b1-654101777299
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Filter By]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition CustomerScore = calculated
+		mode: import
+		source =
+				DATATABLE(
+				    "Filter By", STRING,
+				    {
+				        {"Red"},
+				        {"Orange"}
+				    }
+				)
+
+	annotation PBI_Id = c5a8a842438445188007b97692f886c4
+

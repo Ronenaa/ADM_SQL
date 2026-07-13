@@ -1,0 +1,22 @@
+table MinStockDaysParameter
+	lineageTag: 0811fadd-4430-4080-a39a-62dee284310f
+
+	column MinStockDaysParameter
+		formatString: 0
+		lineageTag: db6cb61e-94a0-4bdf-b92d-6ab0267936d0
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+		annotation SummarizationSetBy = User
+
+	partition MinStockDaysParameter-63a44e9b-4b7d-4be7-88cd-a8584c517763 = calculated
+		mode: import
+		source = GENERATESERIES(0, 60, 1)
+
+	annotation PBI_Id = 7a914d786ca342979c22d3b971f7f824
+

@@ -1,0 +1,260 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
+  "name": "f8ede57a030660502b50",
+  "position": {
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "height": 192.17158176943698,
+    "width": 986.02323503127786,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dimItemsSimple"
+                    }
+                  },
+                  "Property": "קבוצת פריט"
+                }
+              },
+              "queryRef": "dimItemsSimple.קבוצת פריט",
+              "nativeQueryRef": "קבוצת פריט"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dimItemsSimple"
+                    }
+                  },
+                  "Property": "Article_Description"
+                }
+              },
+              "queryRef": "dimItemsSimple.Article_Description",
+              "nativeQueryRef": "Article_Description"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factSales"
+                    }
+                  },
+                  "Property": "Total Gain"
+                }
+              },
+              "queryRef": "factSales.Total Gain",
+              "nativeQueryRef": "Total Gain"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factSales"
+                    }
+                  },
+                  "Property": "FOT Profit"
+                }
+              },
+              "queryRef": "factSales.FOT Profit",
+              "nativeQueryRef": "FOT Profit"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factSales"
+                    }
+                  },
+                  "Property": "Quantity FOT"
+                }
+              },
+              "queryRef": "factSales.Quantity FOT",
+              "nativeQueryRef": "Quantity FOT"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factSales"
+                    }
+                  },
+                  "Property": "CIF Profit"
+                }
+              },
+              "queryRef": "factSales.CIF Profit",
+              "nativeQueryRef": "CIF Profit"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factSales"
+                    }
+                  },
+                  "Property": "Quantity CIF"
+                }
+              },
+              "queryRef": "factSales.Quantity CIF",
+              "nativeQueryRef": "Quantity CIF"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factSales"
+                    }
+                  },
+                  "Property": "FOT Premium Profit"
+                }
+              },
+              "queryRef": "factSales.FOT Premium Profit",
+              "nativeQueryRef": "FOT Premium Profit"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factSales"
+                    }
+                  },
+                  "Property": "Quantity FOT Premium"
+                }
+              },
+              "queryRef": "factSales.Quantity FOT Premium",
+              "nativeQueryRef": "Quantity FOT Premium"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "86ee0cc442cc15e109da",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dimItems"
+              }
+            },
+            "Property": "ItemKey"
+          }
+        },
+        "type": "Advanced",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "d",
+              "Entity": "dimItems",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "Not": {
+                  "Expression": {
+                    "Comparison": {
+                      "ComparisonKind": 0,
+                      "Left": {
+                        "Column": {
+                          "Expression": {
+                            "SourceRef": {
+                              "Source": "d"
+                            }
+                          },
+                          "Property": "ItemKey"
+                        }
+                      },
+                      "Right": {
+                        "Literal": {
+                          "Value": "'96-96'"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "howCreated": "User"
+      },
+      {
+        "name": "347afb78b4e416edc701",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dimItemsSimple"
+              }
+            },
+            "Property": "קבוצת פריט"
+          }
+        },
+        "type": "Categorical",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "d",
+              "Entity": "dimItemsSimple",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "d"
+                          }
+                        },
+                        "Property": "קבוצת פריט"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'GRAIN'"
+                        }
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

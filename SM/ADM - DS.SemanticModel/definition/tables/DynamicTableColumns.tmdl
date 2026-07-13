@@ -1,0 +1,127 @@
+table DynamicTableColumns
+	lineageTag: 8cd17312-12e0-4055-955a-c9b56fc250e5
+
+	measure 'TooltipSwitch YTD' = ```
+			
+			    SWITCH(MIN(DynamicTableColumns[DynamicTableColumns]),
+			        3,[Quantity Dynamic Table Switch 2Y YTD],
+			        2,[Quantity Dynamic Table Switch LY YTD Visual],
+			        4,[TargetToDate],
+			        1,[Quantity Dynamic Table Switch]
+			        )
+			
+			    
+			```
+		lineageTag: dd3758b9-4df8-4533-8065-d8587937ba7d
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'TooltipSwitch Full' = ```
+			
+			    SWITCH(MIN(DynamicTableColumns[Value5]),
+			        3,[Quantity Dynamic Table Switch 2Y],
+			        2,[Quantity Dynamic Table Switch LY No -],
+			        4,[Total Target Current Year],
+			        1,"-"
+			        )
+			
+			```
+		lineageTag: 3e0f3468-6d17-47c2-9ab3-9624400e1f0e
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'TooltipSwitch %' =
+			
+			SWITCH(MIN(DynamicTableColumns[DynamicTableColumns]),
+			        1,Blank(),
+			        3,
+			        DIVIDE([Quantity Dynamic Table Switch]-[Quantity Dynamic Table Switch 2Y YTD],[Quantity Dynamic Table Switch 2Y YTD],BLANK()),
+			        2,
+			        DIVIDE([Quantity Dynamic Table Switch]-[Quantity Dynamic Table Switch LY YTD Visual],[Quantity Dynamic Table Switch LY YTD Visual],BLANK()),
+			        4,
+			        DIVIDE([Quantity Dynamic Table Switch]-[TargetToDate],[TargetToDate],BLANK())
+			        )
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 5dca4a3c-b37c-413d-8248-26d095d00078
+
+	column DynamicTableColumns
+		formatString: 0
+		lineageTag: fade254c-8d88-49b5-8619-b42ae42979c7
+		summarizeBy: sum
+		sourceColumn: [Value1]
+		sortByColumn: 'DynamicTableColumns Order'
+
+		relatedColumnDetails
+			groupByColumn: 'DynamicTableColumns Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'DynamicTableColumns Fields'
+		lineageTag: 0b5be67f-48a1-455c-b26e-5042aec8bb5c
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'DynamicTableColumns Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'DynamicTableColumns Order'
+		formatString: 0
+		lineageTag: 0b11880b-365c-417e-b504-68cd149020e8
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Value4
+		lineageTag: fe500e2a-853e-4840-85ab-d890196ae051
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Value4]
+		sortByColumn: Value5
+
+		annotation SummarizationSetBy = Automatic
+
+	column Value5
+		formatString: 0
+		lineageTag: 8e42bf95-827f-4963-aa5f-14e276691c93
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Value5]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DynamicTableColumns = calculated
+		mode: import
+		source = ```
+				{
+				    (3,
+				     NAMEOF([Quantity Sales USD NIS 2Y Switch YTD]),
+				     0,
+				     YEAR(CALCULATE(MAX(dimDates[Date]),dimDates[IsHistory]=1))-2,
+				     3),
+				    (2, 
+				    NAMEOF([Quantity Sales USD NIS LY Switch YTD]),
+				     1,
+				     YEAR(CALCULATE(MAX(dimDates[Date]),dimDates[IsHistory]=1))-1,
+				     2),
+				    (1, 
+				    NAMEOF([Quantity Sales USD NIS Switch]),
+				     2,
+				     YEAR(CALCULATE(MAX(dimDates[Date]),dimDates[IsHistory]=1)),
+				     1), 
+				    (4,
+				     NAMEOF([TargetToDate]),
+				      3,
+				      "Target",
+				      4)
+				}
+				```
+
+	annotation PBI_Id = 3b4feae82bb84d438052279c1c74e2d9
+

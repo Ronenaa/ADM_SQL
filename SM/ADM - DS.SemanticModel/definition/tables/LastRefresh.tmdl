@@ -1,0 +1,78 @@
+table LastRefresh
+	lineageTag: c38987d0-fbd4-4eee-a517-cc7f45404d5a
+
+	measure 'רענון אחרון' = "Last Refresh : "  & FORMAT(VALUES(LastRefresh[LastRefresh]),"dd/mm/yyyy hh:mm")
+		lineageTag: dfbd95aa-a2e6-42b9-9d2a-40fdec429df0
+
+		changedProperty = IsHidden
+
+	column LastRefresh
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: b38e4e94-63ea-4cd3-818d-f72d54ecaf9a
+		summarizeBy: none
+		sourceColumn: LastRefresh
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition LastRefresh-305f40f8-9636-4c63-88b3-8fabbd591586 = m
+		mode: import
+		queryGroup: 'Dates Dim'
+		source = ```
+				let
+				    currentDate = DateTimeZone.FixedUtcNow(),
+				    currentYear = Date.Year(currentDate),
+				 
+				    // Last Sunday of October
+				    lastDayOfOctober = #date(currentYear, 10, 31),
+				    dayOfWeekOct = Date.DayOfWeek(lastDayOfOctober, Day.Sunday),
+				    lastSundayOct = Date.AddDays(lastDayOfOctober, -dayOfWeekOct),
+				 
+				    // Last Sunday of March
+				    lastDayOfMarch = #date(currentYear, 3, 31),
+				    dayOfWeekMar = Date.DayOfWeek(lastDayOfMarch, Day.Sunday),
+				    lastSundayMar = Date.AddDays(lastDayOfMarch, -dayOfWeekMar),
+				    fridayBeforeLastSundayMar = Date.AddDays(lastSundayMar, -2),
+				 
+				    // Fix: Convert currentDate to Date for comparison
+				    isStandardTime = Date.From(currentDate) >= lastSundayOct or Date.From(currentDate) < fridayBeforeLastSundayMar,
+				 
+				    // Apply UTC+2 or UTC+3
+				    israelTime = let
+				    currentDate = DateTimeZone.FixedUtcNow(),
+				    currentYear = Date.Year(currentDate),
+				
+				    // Last Sunday of October
+				    lastDayOfOctober = #date(currentYear, 10, 31),
+				    dayOfWeekOct = Date.DayOfWeek(lastDayOfOctober, Day.Sunday),
+				    lastSundayOct = Date.AddDays(lastDayOfOctober, -dayOfWeekOct),
+				
+				    // Last Sunday of March
+				    lastDayOfMarch = #date(currentYear, 3, 31),
+				    dayOfWeekMar = Date.DayOfWeek(lastDayOfMarch, Day.Sunday),
+				    lastSundayMar = Date.AddDays(lastDayOfMarch, -dayOfWeekMar),
+				    fridayBeforeLastSundayMar = Date.AddDays(lastSundayMar, -2),
+				
+				    // Fix: Convert currentDate to Date for comparison
+				    isStandardTime = Date.From(currentDate) >= lastSundayOct or Date.From(currentDate) < fridayBeforeLastSundayMar,
+				
+				    // Apply UTC+2 or UTC+3
+				    israelTime = if isStandardTime then DateTimeZone.SwitchZone(currentDate, 2) else DateTimeZone.SwitchZone(currentDate, 3)
+				in
+				    israelTime
+				in
+				    israelTime
+				```
+
+	changedProperty = IsHidden
+
+	annotation PBI_Id = 81e9773d-b51e-4363-bba3-6411a9b1e69b
+
+	annotation LinkedQueryName = LastRefresh
+
+	annotation PBI_ResultType = DateTimeZone
+
+	annotation PBI_NavigationStepName = Navigation
+

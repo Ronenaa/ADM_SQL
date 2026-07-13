@@ -1,0 +1,1173 @@
+table dimDates
+	lineageTag: cb77239d-de71-4866-8cf3-cfac06b8fa73
+
+	measure 'Maxdate - LY' =
+			
+			var LastYearToToday=CALCULATE(MAX(dimDates[Date]),dimDates[IsHistory]=1)
+			return
+			CALCULATE(MAX(dimDates[LastYear]),FILTER(dimDates,dimDates[Date]=LastYearToToday),FILTER(Sub_DimDates,Sub_DimDates[Date]=LastYearToToday))
+		formatString: Short Date
+		lineageTag: 2a43d4fa-a514-4b13-982f-12de7b8503e5
+
+		changedProperty = IsHidden
+
+	measure 'Mindate - LY' =
+			
+			var OnlyThisYear=Year(CALCULATE(MAX(dimDates[Date]), dimDates[IsHistory]=1))
+			RETURN
+			CALCULATE(MIN(dimDates[LastYear]),FILTER(dimDates,Year(dimDates[Date])=OnlyThisYear),FILTER(Sub_DimDates,Sub_DimDates[Year]=OnlyThisYear))
+		formatString: General Date
+		lineageTag: e15d5d37-497f-499d-8d21-285875482582
+
+		changedProperty = IsHidden
+
+	measure 'תקופה מוצגת' = FORMAT(CALCULATE(MIN(dimDates[Date]),dimDates[IsHistory]=1),"dd/mm/yyyy") & " - " & FORMAT(CALCULATE(MAX(dimDates[Date]),dimDates[IsHistory]=1),"dd/mm/yyyy")
+		displayFolder: מדדים
+		lineageTag: 6e65ded5-c137-4e81-bf8a-2727de9a470c
+
+		changedProperty = IsHidden
+
+	measure 'Last Sale Date' = CALCULATE(MAX(factSales[Date]),factSales[LineTotalNetNIS]>0,ALL(dimDates))
+		formatString: Short Date
+		lineageTag: 50515ce9-f261-4ef0-ab15-418f4df403f9
+
+		changedProperty = IsHidden
+
+	measure 'Mindate - LM' =
+			
+			var OnlyLastMonth=CALCULATE(MAX(dimDates[YearMonthSum]), dimDates[IsHistory]=1)
+			return
+			CALCULATE(MIN(dimDates[LastMonth]),FILTER(dimDates,dimDates[YearMonthSum]=OnlyLastMonth),FILTER(Sub_DimDates,Sub_DimDates[Date]=OnlyLastMonth))
+		formatString: General Date
+		lineageTag: 30b32ed4-7de6-4f1f-b6ea-2939211ece42
+
+		changedProperty = IsHidden
+
+	measure 'Maxdate - LM' =
+			
+			var OnlyThisMonth=CALCULATE(MAX(dimDates[Date]), dimDates[IsHistory]=1)
+			return
+			CALCULATE(MAX(dimDates[LastMonth]),FILTER(dimDates,dimDates[Date]=OnlyThisMonth))
+		formatString: General Date
+		lineageTag: e7db9ece-486f-418d-97a6-a5a862aa981d
+
+		changedProperty = IsHidden
+
+	measure 'Maxdate - LY_Full' =
+			
+			var OnlyThisYear=CALCULATE(MAX(dimDates[Year]), dimDates[IsHistory]=1)
+			var OnlyThisYear2=YEAR(CALCULATE(MAX(dimDates[date]), dimDates[IsHistory]=1))
+			RETURN
+			CALCULATE(MAX(dimDates[LastYear_Full]),FILTER(dimDates,dimDates[Year]=OnlyThisYear),FILTER(Sub_DimDates,Sub_DimDates[Date]=OnlyThisYear2))
+		formatString: General Date
+		lineageTag: f1b6d366-9d14-4637-a487-2c912ebd4aea
+
+		changedProperty = IsHidden
+
+	measure 'Maxdate - LM_Full' =
+			
+			var OnlyThisMonth=CALCULATE(MAX(dimDates[Date]), dimDates[IsHistory]=1)
+			return
+			CALCULATE(MAX(dimDates[LastMonth_Full]),FILTER(dimDates,dimDates[Date]=OnlyThisMonth),FILTER(Sub_DimDates,Sub_DimDates[Date]=OnlyThisMonth))
+		formatString: General Date
+		lineageTag: 8e95dc8b-0272-48bb-a8f9-440e6019a1b3
+
+		changedProperty = IsHidden
+
+	measure 'Working Days in Selected Period' =
+			
+			
+			CALCULATE(
+			SUM(dimDates[Is Working Day]),dimDates[UntilNextMonth]=1)
+		formatString: 0.0
+		lineageTag: 6028f275-fd65-4801-aeb6-3af4c5fca885
+
+		changedProperty = IsHidden
+
+	measure 'Working Days Passed in Selected Period' =
+			
+			
+			CALCULATE(SUM(dimDates[Is Working Day]),dimDates[IsHistory]=1)
+		formatString: 0.0
+		lineageTag: 11e55ae5-c14a-412b-869e-4ecdf6063e49
+
+		changedProperty = IsHidden
+
+	measure 'Remaining Working Days in Selected Period' =
+			
+			CALCULATE(SUM(dimDates[Is Working Day]),FILTER(dimDates,  dimDates[IsHistory]=0 && dimDates[UntilNextMonth]=1))
+		formatString: 0.0
+		lineageTag: 412dfcf4-935f-4ac5-970f-58711ad90ee8
+
+		changedProperty = IsHidden
+
+	measure Today = CALCULATE(max(dimDates[Date]),dimDates[IsHistory]=1)
+		formatString: General Date
+		lineageTag: 82bef2d5-e142-4a54-a832-93e0bd295cb4
+
+		changedProperty = IsHidden
+
+	measure 'Maxdate MTD - LY_Full' =
+			
+			var OnlyThisYear=CALCULATE(MAX(dimDates[YearMonthSum]), dimDates[IsHistory]=1)
+			RETURN
+			CALCULATE(MAX(dimDates[LastYear_Full]),FILTER(dimDates,dimDates[YearMonthSum]=OnlyThisYear),FILTER(Sub_DimDates,Sub_DimDates[Date]=OnlyThisYear))
+		formatString: General Date
+		lineageTag: d1049128-aaea-4704-a342-5c02d44056f7
+
+		changedProperty = IsHidden
+
+	measure 'Remaining Working Days in Selected Period All Year' =
+			
+			CALCULATE(SUM(dimDates[Is Working Day]),FILTER(dimDates, dimDates[IsHistory]=0 && dimDates[Show This Year]=TRUE()))
+		lineageTag: fde0d9a8-dddb-4b18-8dcb-6dcfcc67b5b6
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'תקופה נבחרת' = "Selected Period: "  & [תקופה מוצגת]
+		displayFolder: מדדים
+		lineageTag: 071daacf-fed4-4946-a931-bed84bd7a9bf
+
+		changedProperty = IsHidden
+
+	measure 'Mindate - Current Year' =
+			
+			var OnlyThisYear=CALCULATE(MAX(dimDates[Year]), dimDates[IsHistory]=1)
+			RETURN
+			CALCULATE(MIN(dimDates[Date]),FILTER(dimDates,dimDates[Year]=OnlyThisYear),FILTER(Sub_DimDates,Sub_DimDates[Date]=OnlyThisYear))
+		formatString: 0
+		lineageTag: 65b6e411-c899-4194-9f87-7bac44a8358b
+
+		changedProperty = IsHidden
+
+	measure 'Maxdate - Current Year' =
+			
+			var OnlyThisYear=CALCULATE(MAX(dimDates[Year]), dimDates[IsHistory]=1)
+			return
+			CALCULATE(MAX(dimDates[Date]),FILTER(dimDates,dimDates[Year]=OnlyThisYear),FILTER(Sub_DimDates,Sub_DimDates[Year]=OnlyThisYear))
+		formatString: 0
+		lineageTag: 753ad2c4-7021-466b-aa05-d9fafc158806
+
+		changedProperty = IsHidden
+
+	measure MonthInCalenderShortName_Current =
+			
+			VAR _date = CALCULATE(MAX(dimDates[Date]),FILTER(ALL(dimDates),dimDates[IsHistory]=1))
+			Return
+			CALCULATE(MAX(dimDates[MonthInCalendarShortName]),FILTER(ALL(dimDates),dimDates[Date]=_date))
+		lineageTag: 18b6f7a2-ee85-4af7-b0d6-2bca4c02a4b9
+
+		changedProperty = IsHidden
+
+	measure MonthInCalenderShortName_LM =
+			
+			VAR _date = CALCULATE(MAX(dimDates[Date]),FILTER(ALL(dimDates),dimDates[IsHistory]=1))
+			VAR _LM = EOMONTH(_date,-1)
+			Return
+			CALCULATE(MAX(dimDates[MonthInCalendarShortName]),FILTER(ALL(dimDates),dimDates[Date]=_LM))
+		lineageTag: 2939f3b7-36db-42fc-a05b-4b2420b66cc3
+
+		changedProperty = IsHidden
+
+	measure MonthInCalenderShortName_NM =
+			
+			VAR _date = CALCULATE(MAX(dimDates[Date]),FILTER(ALL(dimDates),dimDates[IsHistory]=1))
+			VAR _NM = EOMONTH(_date,1)
+			Return
+			CALCULATE(MAX(dimDates[MonthInCalendarShortName]),FILTER(ALL(dimDates),dimDates[Date]=_NM))
+		lineageTag: dd61204f-fcd7-4da0-9a0c-8907b836c5c2
+
+		changedProperty = IsHidden
+
+	measure MonthInCalenderShortName_NM2 =
+			
+			VAR _date = CALCULATE(MAX(dimDates[Date]),FILTER(ALL(dimDates),dimDates[IsHistory]=1))
+			VAR _NM = EOMONTH(_date,2)
+			Return
+			CALCULATE(MAX(dimDates[MonthInCalendarShortName]),FILTER(ALL(dimDates),dimDates[Date]=_NM))
+		lineageTag: 35b2a2c8-2327-43aa-8c64-cbee38439015
+
+		changedProperty = IsHidden
+
+	measure MonthInCalenderShortName_NM3 =
+			
+			VAR _date = CALCULATE(MAX(dimDates[Date]),FILTER(ALL(dimDates),dimDates[IsHistory]=1))
+			VAR _NM = EOMONTH(_date,3)
+			Return
+			CALCULATE(MAX(dimDates[MonthInCalendarShortName]),FILTER(ALL(dimDates),dimDates[Date]=_NM))
+		lineageTag: 0d42fb8c-706e-49af-8f82-d879a8df40a3
+
+		changedProperty = IsHidden
+
+	measure MonthInCalenderShortName_LM2 =
+			
+			VAR _date = CALCULATE(MAX(dimDates[Date]),FILTER(ALL(dimDates),dimDates[IsHistory]=1))
+			VAR _LM = EOMONTH(_date,-2)
+			Return
+			CALCULATE(MAX(dimDates[MonthInCalendarShortName]),FILTER(ALL(dimDates),dimDates[Date]=_LM))
+		lineageTag: be88b64d-51e5-4b91-9f3e-3107209a1681
+
+		changedProperty = IsHidden
+
+	measure 'Last Year' = CALCULATE(YEAR(MAX(dimDates[date])),dimDates[IsHistory]=1)-1
+		formatString: 0
+		lineageTag: 0652e5aa-8574-4c30-b28e-b017b44db3ea
+
+		changedProperty = IsHidden
+
+	measure 'Last Year 2 Years' = CALCULATE(YEAR(MAX(dimDates[date])),dimDates[IsHistory]=1)-2
+		formatString: 0
+		lineageTag: 0a6081e9-d71a-4b2a-b310-d79fc60df7cc
+
+		changedProperty = IsHidden
+
+	measure WeekStartToEnd = FORMAT(SELECTEDVALUE(dimDates[WeekStart]),"dd/mm/yyyy") & " - " & FORMAT(SELECTEDVALUE(dimDates[WeekEnding]),"dd/mm/yyyy")
+		lineageTag: 31fe8b3d-5cb2-4e1c-b99e-6b6fd1f7a0c7
+
+	column Date
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: e79df50e-1880-4453-bceb-6ee2bcd41a00
+		summarizeBy: none
+		sourceColumn: Date
+
+		changedProperty = IsHidden
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column Year
+		dataType: string
+		lineageTag: 1332db14-3064-4b2f-ac93-e111aa8ed6fc
+		summarizeBy: none
+		sourceColumn: Year
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column QuarterNumOfYear
+		dataType: double
+		lineageTag: 6cfc7d5d-fcdf-473a-ae46-128179debd8a
+		summarizeBy: sum
+		sourceColumn: QuarterNumOfYear
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column QuarterName
+		dataType: string
+		lineageTag: c96b3497-dc91-4cdf-9ce4-c0a0e63801f6
+		summarizeBy: none
+		sourceColumn: QuarterName
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column HalfOfYearNum
+		dataType: double
+		lineageTag: bccd6597-8392-4ae7-8b84-9188da373233
+		summarizeBy: sum
+		sourceColumn: HalfOfYearNum
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column HalfOfYearName
+		dataType: string
+		lineageTag: 261b204b-060f-4a97-b874-d25f91dce306
+		summarizeBy: none
+		sourceColumn: HalfOfYearName
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column HalfOfCalendarYear
+		dataType: string
+		lineageTag: 2b22595e-739a-451e-8e56-f3d014f4a5d7
+		summarizeBy: none
+		sourceColumn: HalfOfCalendarYear
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column HalfOfCalendarYearSum
+		dataType: double
+		lineageTag: 8d3a8434-ba62-4594-99e3-f0b94e614622
+		summarizeBy: sum
+		sourceColumn: HalfOfCalendarYearSum
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MonthNumberOfYear
+		dataType: double
+		lineageTag: ed2a2a46-3cca-477f-ba7d-5697209ef1c6
+		summarizeBy: sum
+		sourceColumn: MonthNumberOfYear
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column DayOfMonth
+		dataType: double
+		lineageTag: b4097daf-5465-4cdb-8880-16272db1834e
+		summarizeBy: sum
+		sourceColumn: DayOfMonth
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column DateInt
+		dataType: double
+		lineageTag: 8e171501-1db4-4010-8678-67a58a7b045a
+		summarizeBy: sum
+		sourceColumn: DateInt
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MonthName
+		dataType: string
+		lineageTag: ccd8a4a6-e785-40d7-81cb-5573a1356731
+		summarizeBy: none
+		sourceColumn: MonthName
+		sortByColumn: MonthNumberOfYear
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column MonthInCalendarName
+		dataType: string
+		lineageTag: 8ccdffca-c899-4d54-b00d-689e039ed9af
+		summarizeBy: none
+		sourceColumn: MonthInCalendarName
+		sortByColumn: YearMonthNumber
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column QuarterInCalendar
+		dataType: string
+		lineageTag: 5a3a8e0a-5211-4644-ab7a-3d187d5ef744
+		summarizeBy: none
+		sourceColumn: QuarterInCalendar
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DayOFWeekNum
+		dataType: double
+		lineageTag: 2ffc139c-f2b8-4314-b5c3-1c77223a7d45
+		summarizeBy: sum
+		sourceColumn: DayOFWeekNum
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column DayOfWeekName
+		dataType: string
+		lineageTag: 33f7fd41-6fd5-4982-ba71-55e4a405706a
+		summarizeBy: none
+		sourceColumn: DayOfWeekName
+		sortByColumn: DayOFWeekNum
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column WeekEnding
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 3e485ca5-d570-4f64-aa48-30eaf8159966
+		summarizeBy: none
+		sourceColumn: WeekEnding
+
+		changedProperty = IsHidden
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column YearMonthSum
+		dataType: double
+		lineageTag: d4a85998-2882-4eb2-8d5e-64b315e22a90
+		summarizeBy: none
+		sourceColumn: YearMonthSum
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column YearQuarterSum
+		dataType: double
+		lineageTag: 931f234d-7755-42e4-b260-4fc9df206d86
+		summarizeBy: sum
+		sourceColumn: YearQuarterSum
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Show Dates'
+		dataType: string
+		lineageTag: 583eefa7-f57b-4634-b02c-af830d093be1
+		summarizeBy: none
+		sourceColumn: Show Dates
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Show Months'
+		dataType: string
+		lineageTag: e10c0946-9625-4e57-a648-b15526446781
+		summarizeBy: none
+		sourceColumn: Show Months
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DaysInMonth
+		dataType: double
+		lineageTag: 38bd021b-f882-4a9d-9e3f-2f571279c6c4
+		summarizeBy: sum
+		sourceColumn: DaysInMonth
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column WeekInYear
+		dataType: double
+		lineageTag: 330bddff-fd53-4951-ac91-4aabb00e692a
+		summarizeBy: sum
+		sourceColumn: WeekInYear
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column YearMonthNumber
+		dataType: double
+		lineageTag: 49bfe8e3-a9eb-41af-9a44-e3c9e0f4ce91
+		summarizeBy: sum
+		sourceColumn: YearMonthNumber
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Show This Year'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 6c8b1d2e-bfd2-4907-861b-fd486470bcf1
+		summarizeBy: none
+		sourceColumn: Show This Year
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Show Last 7 Days'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: ad002b93-9b74-41a9-a2be-2683402a670d
+		summarizeBy: none
+		sourceColumn: Show Last 7 Days
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Show Last 30 Days'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: a2047fba-1aca-4c70-b1f1-9a4711b2221b
+		summarizeBy: none
+		sourceColumn: Show Last 30 Days
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Show Last 12 Months'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: b103a87f-7a4e-429d-a9b9-6aae0e2affff
+		summarizeBy: none
+		sourceColumn: Show Last 12 Months
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Show Last 6 Months'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 510aca4f-e37b-421d-9fa9-18b3d2d25a85
+		summarizeBy: none
+		sourceColumn: Show Last 6 Months
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Show Last 3 Months'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: b648abfa-fb44-484a-83d3-1a61f367682b
+		summarizeBy: none
+		sourceColumn: Show Last 3 Months
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Refresh Time'
+		dataType: dateTime
+		formatString: Long Time
+		lineageTag: 37c03fba-4caf-427b-bbd9-065867d2c4d6
+		summarizeBy: none
+		sourceColumn: Refresh Time
+
+		changedProperty = IsHidden
+
+		annotation UnderlyingDateTimeDataType = Time
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Refresh Date'
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 8851ba94-4409-4f7a-990d-9f80f7455d31
+		summarizeBy: none
+		sourceColumn: Refresh Date
+
+		changedProperty = IsHidden
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column FirstDayOfMonth
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 72f3174c-b217-441d-ad0b-4405f1b8a0b6
+		summarizeBy: none
+		sourceColumn: FirstDayOfMonth
+
+		changedProperty = IsHidden
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column LastYear
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 698b6371-5b8b-4d9b-84eb-b2bfa6084597
+		summarizeBy: none
+		sourceColumn: LastYear
+
+		changedProperty = IsHidden
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column LastMonth
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: aac12a7a-a07b-4cfc-85e6-bbf095331f06
+		summarizeBy: none
+		sourceColumn: LastMonth
+
+		changedProperty = IsHidden
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Working Day'
+		dataType: double
+		lineageTag: 1c18b8f2-b137-468b-aa90-58e518484eba
+		summarizeBy: sum
+		sourceColumn: Is Working Day
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LastMonth_Full
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: fea2424c-366c-4067-93c8-ad693e22aee7
+		summarizeBy: none
+		sourceColumn: LastMonth_Full
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column LastYear_Full
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: b2fa026f-ada6-4b1a-8ae9-63490314bd60
+		summarizeBy: none
+		sourceColumn: LastYear_Full
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'This Year Selection'
+		dataType: string
+		lineageTag: 2e16ce0b-5392-42fc-91e5-88d8214ab228
+		summarizeBy: none
+		sourceColumn: This Year Selection
+		sortByColumn: Year
+
+		changedProperty = IsHidden
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'This Month Selection'
+		dataType: string
+		lineageTag: 9144660f-56b9-46d5-9f41-4daa8c10c231
+		summarizeBy: none
+		sourceColumn: This Month Selection
+		sortByColumn: YearMonthSum
+
+		changedProperty = IsHidden
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column IsHistory
+		dataType: int64
+		formatString: 0
+		lineageTag: 1c7e9a5f-3237-4d5a-a142-80d6fb0b6e39
+		summarizeBy: sum
+		sourceColumn: IsHistory
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column UntilThisMonth
+		dataType: int64
+		formatString: 0
+		lineageTag: ca6500bd-b35c-44e7-89df-4b2a597a2c2d
+		summarizeBy: sum
+		sourceColumn: UntilThisMonth
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column UntilNextMonth
+		dataType: int64
+		formatString: 0
+		lineageTag: 7d4c230a-75a8-4aa0-9e52-419cad49fef9
+		summarizeBy: sum
+		sourceColumn: UntilNextMonth
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is History To Today'
+		dataType: int64
+		formatString: 0
+		lineageTag: eb141a7c-f24e-4223-bd99-5fb6f06da959
+		summarizeBy: sum
+		sourceColumn: Is History To Today
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Show Next 12 Months'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: f0db8e80-330e-4d3c-8332-e6362105f680
+		summarizeBy: none
+		sourceColumn: Show Next 12 Months
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Show Around 6 Months'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: da0bded0-dffb-46c8-a890-2d3707990688
+		summarizeBy: none
+		sourceColumn: Show Around 6 Months
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Show Around 12 Months'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 09af1465-afef-45d3-9ca0-d033ec98e095
+		summarizeBy: none
+		sourceColumn: Show Around 12 Months
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column WeekInYearName
+		dataType: string
+		lineageTag: f0e34568-efc9-4a89-b8c8-4fd5b42847b3
+		summarizeBy: none
+		sourceColumn: WeekInYearName
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column WeekName
+		dataType: string
+		lineageTag: 5d0e61e7-be0b-4b21-9744-999b9ac19351
+		summarizeBy: none
+		sourceColumn: WeekName
+		sortByColumn: 'Week of Year'
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Week of Year'
+		dataType: int64
+		formatString: 0
+		lineageTag: e231b1ea-ba5d-487b-80f8-820a2f573407
+		summarizeBy: none
+		sourceColumn: Week of Year
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = User
+
+	column 'Show Next 6 Months'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 1ed82505-507c-4c1f-ba1e-bc9d71a7cc2a
+		summarizeBy: none
+		sourceColumn: Show Next 6 Months
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column WeekStart
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: b28ea448-07c0-4ade-a8b9-27c3c977b58f
+		summarizeBy: none
+		sourceColumn: WeekStart
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column ShowLast2Years
+		dataType: int64
+		formatString: 0
+		lineageTag: 798f4d54-9511-4815-a855-2e9e8632d08d
+		summarizeBy: sum
+		sourceColumn: ShowLast2Years
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ShortMonthName
+		dataType: string
+		lineageTag: c82dd169-3106-4e33-8839-4c75a75212df
+		summarizeBy: none
+		sourceColumn: ShortMonthName
+		sortByColumn: MonthNumberOfYear
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column MonthInCalendarShortName
+		dataType: string
+		lineageTag: 425d0a4b-6f9e-4546-92e7-7852bfdafcb4
+		summarizeBy: none
+		sourceColumn: MonthInCalendarShortName
+		sortByColumn: YearMonthNumber
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column MonthToShow
+		dataType: int64
+		formatString: 0
+		lineageTag: d5cb7cec-e528-48b7-83f6-1e926260ba7d
+		summarizeBy: sum
+		sourceColumn: MonthToShow
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Show3Years
+		dataType: int64
+		formatString: 0
+		lineageTag: fb2f67e0-20ec-4256-a4db-c4e9cc277342
+		summarizeBy: sum
+		sourceColumn: Show3Years
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Show Next 8 Months'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 4aeaf7d2-f1ed-4353-9f95-a9c061835d52
+		summarizeBy: none
+		sourceColumn: Show Next 8 Months
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Show Next 7 Months'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: baedfefd-6d1b-44d2-9895-8e761b8975b9
+		summarizeBy: none
+		sourceColumn: Show Next 7 Months
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column MTD_Indicator
+		dataType: string
+		lineageTag: d497cf93-5f26-4190-a5f3-2b07d620bfec
+		summarizeBy: none
+		sourceColumn: MTD_Indicator
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column YTD_Indicator
+		dataType: string
+		lineageTag: ae2e8632-80e3-4be9-9ba3-de03f406890e
+		summarizeBy: none
+		sourceColumn: YTD_Indicator
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Week Passed'
+		dataType: int64
+		formatString: 0
+		lineageTag: 42cd7783-6205-48da-820e-bbdb38271638
+		summarizeBy: none
+		sourceColumn: Week Passed
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = User
+
+	column 'Week Passed Formatted'
+		dataType: string
+		lineageTag: c9f8f206-0d5b-4fb3-867c-cebed62d0a13
+		summarizeBy: none
+		sourceColumn: Week Passed Formatted
+		sortByColumn: 'Week Passed'
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dimDates-687ce122-c7f7-4816-8c31-c8171ad70a27 = m
+		mode: import
+		queryGroup: 'Dates Dim'
+		source = ```
+				let
+				 
+				/* 
+				
+				LAST UPDATE: 14/01/2018
+				 
+				DimDate is Hebrew by default. For ENGLISH insert "en-US" (witout quotes). For more: http://msdn.microsoft.com/en-us/goglobal/bb896001.aspx
+				
+				TodayDate=DateTime.Date(DateTime.LocalNow())+1, \\choose if today sales arent count
+				End of Today = EndDate = DateTime.Date(DateTime.LocalNow()),
+				End of This Month = EndDate = Date.EndOfMonth(DateTime.Date(DateTime.LocalNow())),
+				End of This Year = EndDate = Date.AddYears(Date.EndOfYear(DateTime.Date(DateTime.LocalNow())),1)
+				Sales Module =  #date(2017,03,12)
+				*/
+				TodayDate=Date.From(DateTime.FixedLocalNow()),//DateTime.Date(DateTime.LocalNow()),Use For Prod //#date(219,11,11), Use For Demo 
+				EndDate = Date.AddYears(Date.EndOfYear(DateTime.Date(DateTime.LocalNow())),2),
+				StartDate=#date(2018, 1, 1),
+				DayCount = Duration.Days(Duration.From(EndDate - StartDate))+1,
+				Culture ="en-US",
+				
+				 Source = List.Dates(StartDate,DayCount,#duration(1,0,0,0)),
+				 TableFromList = Table.FromList(Source, Splitter.SplitByNothing()),    
+				 ChangedType = Table.TransformColumnTypes(TableFromList,{{"Column1", type date}}),
+				 RenamedColumns = Table.RenameColumns(ChangedType,{{"Column1", "Date"}}),
+				 InsertYear = Table.AddColumn(RenamedColumns, "Year", each Date.Year([Date]), type number),
+				    #"Added This Year" = Table.AddColumn(InsertYear, "This Year Selection",
+				each if Date.IsInCurrentYear([Date]) then "This Year"
+				else
+				[Year]),
+				 InsertQuarter = Table.AddColumn( #"Added This Year", "QuarterNumOfYear", each Date.QuarterOfYear([Date]), type number),
+				 InsertQuarterName = Table.AddColumn(InsertQuarter , "QuarterName" , each "Q-" & Number.ToText([QuarterNumOfYear])),
+				 InsertHalfOfYearNum = Table.AddColumn(InsertQuarterName , "HalfOfYearNum", each  Number.RoundDown(([QuarterNumOfYear]+1)/2), type number),
+				 InsertHalfOfYearName = Table.AddColumn(InsertHalfOfYearNum ,"HalfOfYearName",each "H-" & Number.ToText([HalfOfYearNum])),
+				 InsertHalfOfCalendarYear = Table.AddColumn(InsertHalfOfYearName ,"HalfOfCalendarYear", each  "H" & Number.ToText([HalfOfYearNum]) & " " & Number.ToText([Year])),
+				 InsertHalfOfCalendarYearSum = Table.AddColumn( InsertHalfOfCalendarYear ,"HalfOfCalendarYearSum",each [Year]*10 +[HalfOfYearNum], type number),
+				 InsertMonth = Table.AddColumn(InsertHalfOfCalendarYearSum , "MonthNumberOfYear", each Date.Month([Date]), type number),
+				 InsertDay = Table.AddColumn(InsertMonth, "DayOfMonth", each Date.Day([Date]), type number),
+				 InsertDayInt = Table.AddColumn(InsertDay, "DateInt", each [Year] * 10000 + [MonthNumberOfYear] * 100 + [DayOfMonth], type number),
+				 InsertMonthName = Table.AddColumn(InsertDayInt, "MonthName", each Date.ToText([Date], "MMMM", Culture), type text),
+				 InsertCalendarMonth = Table.AddColumn(InsertMonthName, "MonthInCalendarName", each (try(Text.Range([MonthName],0,3)) otherwise [MonthName]) & " " & Number.ToText([Year])),
+				    #"Added This Month Selection" = Table.AddColumn(InsertCalendarMonth, "This Month Selection", each if Date.IsInCurrentMonth([Date]) then
+				(
+				if Culture ="he-IL" then "חודש נוכחי" else
+				"This Month"
+				)
+				else [MonthInCalendarName]),
+				 InsertCalendarQtr = Table.AddColumn(#"Added This Month Selection", "QuarterInCalendar", each "Q" & Number.ToText([QuarterNumOfYear]) & " " & Number.ToText([Year])),
+				 InsertDayWeek = Table.AddColumn(InsertCalendarQtr, "DayOFWeekNum", each 1+Date.DayOfWeek([Date]), type number),
+				 InsertDayName = Table.AddColumn(InsertDayWeek, "DayOfWeekName", each Text.Trim(Text.Replace(Date.ToText([Date], "dddd", Culture),"יום","")," "), type text),
+				 InsertWeekEnding = Table.AddColumn(InsertDayName, "WeekEnding", each Date.EndOfWeek([Date]), type date),
+				 InsertYearMonthSum = Table.AddColumn(InsertWeekEnding,"YearMonthSum", each [Year]*100 +[MonthNumberOfYear], type number),
+				 InsertYearQuarterSum = Table.AddColumn(InsertYearMonthSum ,"YearQuarterSum", each [Year]*10 +[QuarterNumOfYear], type number),
+				 
+				
+				 InsertDaySelection = 
+				 if Culture="he-IL" 
+				 then 
+				 (Table.AddColumn(InsertYearQuarterSum , "Show Dates", each (if Date.IsInCurrentDay(Date.AddDays([Date],1)) then "אתמול" else (if  Date.IsInCurrentDay([Date]) then "היום" else "שאר התאריכים"))))
+				 else 
+				 (Table.AddColumn(InsertYearQuarterSum , "Show Dates", each (if Date.IsInCurrentDay(Date.AddDays([Date],1)) then "Yesterday" else (if  Date.IsInCurrentDay([Date]) then "Today" else "Other"))))
+				 ,
+				
+				 
+				
+				 InsertMonthSelection = 
+				 if Culture="he-IL" 
+				 then 
+				 (Table.AddColumn(InsertDaySelection , "Show Months", each (if Date.IsInPreviousMonth([Date]) then "חודש שעבר" else (if  Date.IsInCurrentMonth([Date]) then "החודש" else "שאר התאריכים"))))
+				 else
+				 (Table.AddColumn(InsertDaySelection , "Show Months", each (if Date.IsInPreviousMonth([Date]) then "Last Month" else (if  Date.IsInCurrentMonth([Date]) then "This Month" else "Other"))))
+				 ,
+				
+				 InsertDaysInMonth =Table.AddColumn(InsertMonthSelection ,"DaysInMonth" , each Date.DaysInMonth([Date]) ,type number),
+				 InsertWeekInYear =  Table.AddColumn(InsertDaysInMonth ,"WeekInYear", each [Year]*100+Date.WeekOfYear([Date]),type number),
+				 InsertYearMonthNumber = Table.AddColumn(InsertWeekInYear, "YearMonthNumber",each ([Year]-Date.Year(StartDate))*12+[MonthNumberOfYear], type number),
+				
+				 IsInThisYear =Table.AddColumn(InsertYearMonthNumber ,"Show This Year" , each  Date.IsInCurrentYear([Date]) , type logical),
+				 
+				 ShowLast7Days = Table.AddColumn( IsInThisYear, "Show Last 7 Days", each (Duration.Days(Duration.From(DateTime.Date(DateTime.LocalNow()) - [Date]))) <=7 and (Duration.Days(Duration.From(DateTime.Date(DateTime.LocalNow()) - [Date]))) >=0 , type logical),
+				 ShowLast30Days = Table.AddColumn( ShowLast7Days, "Show Last 30 Days", each (Duration.Days(Duration.From(DateTime.Date(DateTime.LocalNow()) - [Date]))) <=30 and (Duration.Days(Duration.From(DateTime.Date(DateTime.LocalNow()) - [Date]))) >=0 , type logical),
+				    ShowLast_12_Months = Table.AddColumn(ShowLast30Days , "Show Last 12 Months", each [Date]>=Date.AddMonths(Date.StartOfMonth(TodayDate),-11),type logical),
+				    #"Show Next 12 Months" = Table.AddColumn(ShowLast_12_Months, "Show Next 12 Months", each [Date]<=Date.AddMonths(Date.StartOfMonth(TodayDate),12) and [Date]>=Date.StartOfMonth(TodayDate) ,type logical),
+				    ShowLast_6_Months = Table.AddColumn(#"Show Next 12 Months", "Show Last 6 Months", each [Date]>=Date.AddMonths(Date.StartOfMonth(TodayDate),-5) and [Date]<=TodayDate,type logical),
+				 ShowLast_3_Months = Table.AddColumn(ShowLast_6_Months, "Show Last 3 Months", each [Date]>=Date.AddMonths(Date.StartOfMonth(TodayDate),-2) and [Date]<=TodayDate,type logical),
+				    #"Show Next 6 Months" = Table.AddColumn(ShowLast_3_Months,"Show Next 6 Months", each if  [Date]<=Date.AddMonths(Date.StartOfMonth(TodayDate),6) and [Date]>=Date.StartOfMonth(TodayDate) then true else false ,type logical),
+				    #"Show Next 7 Months" = Table.AddColumn(#"Show Next 6 Months","Show Next 7 Months", each if  [Date]<=Date.AddMonths(Date.StartOfMonth(TodayDate),7) and [Date]>=Date.StartOfMonth(TodayDate) then true else false ,type logical),
+				    #"Show Next 8 Months" = Table.AddColumn(#"Show Next 7 Months","Show Next 8 Months", each if  [Date]<=Date.AddMonths(Date.StartOfMonth(TodayDate),8) and [Date]>=Date.StartOfMonth(TodayDate) then true else false ,type logical),
+				    ShowLast2Years = Table.AddColumn(#"Show Next 8 Months", "ShowLast2Years", each if Date.Year([Date]) = Date.Year(Date.From(DateTime.FixedLocalNow()))  then 1 
+				else if Date.Year([Date]) = Date.Year(Date.From(DateTime.FixedLocalNow()))-1 
+				then 1 
+				else 0, Int64.Type),
+				 
+				 LastRefreshTime = Table.AddColumn(ShowLast2Years ,"Refresh Time", each  Time.From(DateTime.LocalNow()),type time),
+				 LastRefreshDate = Table.AddColumn(LastRefreshTime ,"Refresh Date", each  DateTime.Date(DateTime.LocalNow()),type date),
+				 FisrtDayOfMonth = Table.AddColumn( LastRefreshDate ,"FirstDayOfMonth", each Date.StartOfMonth([Date])  ,type date),
+				
+				
+				
+				    #"Added Last Month" = Table.AddColumn(#"FisrtDayOfMonth", "LastMonth", each if [Date]=Date.EndOfMonth([Date]) then 
+				(if Date.Day([Date])=Date.Day(Date.EndOfMonth(Date.AddMonths([Date],-1))) then 
+				Date.AddMonths([Date],-1)
+				else
+				Date.EndOfMonth(Date.AddMonths([Date],-1)))
+				else 
+				Date.AddMonths([Date],-1),type date),
+				
+				
+				    #"Added Last Year" = Table.AddColumn(#"Added Last Month", "LastYear", each if [Date]=Date.EndOfMonth([Date]) then 
+				(if Date.Day([Date])=Date.Day(Date.EndOfMonth(Date.AddYears([Date],-1))) then 
+				Date.AddYears([Date],-1)
+				else
+				Date.EndOfMonth(Date.AddYears([Date],-1)))
+				else 
+				Date.AddYears([Date],-1),type date),
+				    #"Added Last Month - Full" = Table.AddColumn(#"Added Last Year", "LastMonth_Full", each Date.EndOfMonth([LastMonth])),
+				    #"Added Last Year - Full" = Table.AddColumn(#"Added Last Month - Full", "LastYear_Full", each Date.EndOfMonth([LastYear])),
+				
+				
+				    #"Changed Type Dates Compare" = Table.TransformColumnTypes(#"Added Last Year - Full",{{"LastYear", type date}, {"LastMonth", type date}, {"LastMonth_Full", type date}, {"LastYear_Full", type date}}),
+				    #"Add Working Day" = Table.AddColumn(#"Changed Type Dates Compare", "Is Working Day", each if [DayOFWeekNum] = 6 then 0.5 else if [DayOFWeekNum] = 7
+				then
+				0
+				else
+				1,type number),
+				 #"Added IsHistory" = Table.AddColumn(#"Add Working Day", "IsHistory", each if [Date] > TodayDate then 0 else 1 , Int64.Type),
+				    #"Added Day History category" = Table.AddColumn( #"Added IsHistory", "Is History To Today", each if
+				Date.Month([Date])*100+Date.Day([Date]) > 
+				Date.Month(TodayDate)*100 +
+				Date.Day(TodayDate)
+				then
+				 0 else 1 ,  Int64.Type),
+				    UntilNextMonth = Table.AddColumn(#"Added Day History category", "UntilNextMonth", each if [Date]>Date.EndOfMonth(TodayDate) then 0 else 1,  Int64.Type),
+				    UntilThisMonth = Table.AddColumn( UntilNextMonth, "UntilThisMonth", each if [Date]<Date.StartOfMonth(TodayDate) then 1 else 0, Int64.Type),
+				    #"Changed Type" = Table.TransformColumnTypes(UntilThisMonth ,{{"Year", type text}}),
+				    #"Around 6 Month" = Table.AddColumn(#"Changed Type", "Show Around 6 Months", each if Date.AddMonths(Date.StartOfMonth([Date]),-3)<= Date.From(DateTime.FixedLocalNow()) and Date.AddMonths(Date.StartOfMonth([Date]),4)>= Date.From(DateTime.FixedLocalNow()) then true else false, type logical),
+				    #"Around 12 Months" = Table.AddColumn(#"Around 6 Month", "Show Around 12 Months", each if Date.AddMonths(Date.StartOfMonth([Date]),-6)<= Date.From(DateTime.FixedLocalNow()) and Date.AddMonths(Date.StartOfMonth([Date]),7)>= Date.From(DateTime.FixedLocalNow()) then true else false, type logical),
+				    #"Insert WeekInYearName" = Table.AddColumn(#"Around 12 Months", "WeekInYearName", each Text.Combine({"Week", Text.From(Date.WeekOfYear([Date])),Text.From([Year])}," ")),
+				    #"Week Name" = Table.AddColumn(#"Insert WeekInYearName", "WeekName", each Text.Combine({"Week", Text.From(Date.WeekOfYear([Date]))}," ")),
+				    #"Inserted Week of Year" = Table.AddColumn(#"Week Name", "Week of Year", each Date.WeekOfYear([Date]), Int64.Type),
+				    #"Add WeekStart" = Table.AddColumn(#"Inserted Week of Year", "WeekStart", each Date.AddDays(Date.EndOfWeek([Date]),-6),type date),
+				    #"Inserted First Characters" = Table.AddColumn(#"Add WeekStart", "ShortMonthName", each Text.Start([MonthName], 3), type text),
+				    MonthInCalenderShortName = Table.AddColumn(#"Inserted First Characters", "MonthInCalendarShortName", each (try(Text.Range([MonthName],0,3)) otherwise [MonthName]) & " " & Text.Range([Year],2,2), type text),
+				    MonthtoShow = Table.AddColumn(MonthInCalenderShortName, "MonthToShow", each if Date.Month(DateTime.FixedLocalNow())<=4 then if Date.Year([Date])=Date.Year(DateTime.FixedLocalNow())-1 or Date.Year([Date])=Date.Year(DateTime.FixedLocalNow()) then 1 else 0
+				else if Date.Month(DateTime.FixedLocalNow())>10 then if Date.Year([Date])=Date.Year(DateTime.FixedLocalNow())+1 or Date.Year([Date])=Date.Year(DateTime.FixedLocalNow()) then 1 else 0
+				else if Date.Year([Date])=Date.Year(DateTime.FixedLocalNow()) then 1 else 0, Int64.Type),
+				    show3Years = Table.AddColumn(MonthtoShow, "Show3Years", each if Date.Month(DateTime.FixedLocalNow())<=4 then if Date.Year([Date])=Date.Year(DateTime.FixedLocalNow())-1 or Date.Year([Date])=Date.Year(DateTime.FixedLocalNow()) or Date.Year([Date])=Date.Year(DateTime.FixedLocalNow()) -2 then 1 else 0
+				else if Date.Month(DateTime.FixedLocalNow())>10 then if Date.Year([Date])=Date.Year(DateTime.FixedLocalNow())+1 or Date.Year([Date])=Date.Year(DateTime.FixedLocalNow()) or Date.Year([Date])=Date.Year(DateTime.FixedLocalNow())-1 then 1 else 0
+				else if Date.Year([Date])=Date.Year(DateTime.FixedLocalNow()) then 1 else 0, Int64.Type),
+				AddMTDColumn = Table.AddColumn(
+				    show3Years,
+				    "MTD_Indicator",
+				    each if Date.IsInCurrentMonth([Date]) then "MTD" else "Other",
+				    type text
+				),
+				AddYTDColumn = Table.AddColumn(
+				    AddMTDColumn,
+				    "YTD_Indicator",
+				    each if Date.IsInCurrentYear([Date]) then "YTD" else "Other",
+				    type text
+				),
+				// --- Weeks offset vs current week (Sunday-based) ---
+				AddWeekPassed =
+				    Table.AddColumn(
+				        AddYTDColumn,
+				        "Week Passed",
+				        each
+				            let
+				                startOfThisWeek = Date.StartOfWeek(Date.From(DateTime.FixedLocalNow()), Day.Sunday),
+				                rowWeekStart    = [WeekStart],
+				                weekDiff        = Duration.Days(startOfThisWeek - rowWeekStart) / 7,
+				                offset          = Int64.From(weekDiff)   // Past = negative, future = positive
+				            in
+				                offset,
+				        Int64.Type
+				    ),
+				
+				// --- Friendly English text ---
+				AddWeekPassedFormatted =
+				    Table.AddColumn(
+				        AddWeekPassed,
+				        "Week Passed Formatted",
+				        each
+				            let w = [Week Passed]
+				            in
+				                if w = 0 then "This Week"
+				                else if w = 1 then "Last Week"
+				                else if w = -1 then "Next Week"
+				                else if w > 0 then Text.From(Number.Abs(w)) & " Weeks Ago"
+				                else "In " & Text.From(Number.Abs(w)) & " Weeks Ahead",
+				        type text
+				    )
+				in
+				    AddWeekPassedFormatted
+				```
+
+	annotation PBI_Id = 0338cb02-0624-4859-9012-4d0cc589f987
+
+	annotation LinkedQueryName = dimDates
+
+	annotation PBI_QueryRelationships = {"columnCount":45,"keyColumnNames":[],"queryRelationships":[],"columnIdentities":["Section1/dimDates/ChangedType.{Column1,0}","Section1/dimDates/Changed Type.{Year,1}","Section1/dimDates/Added This Year.{This Year Selection,2}","Section1/dimDates/InsertQuarter.{QuarterNumOfYear,3}","Section1/dimDates/InsertQuarterName.{QuarterName,4}","Section1/dimDates/InsertHalfOfYearNum.{HalfOfYearNum,5}","Section1/dimDates/InsertHalfOfYearName.{HalfOfYearName,6}","Section1/dimDates/InsertHalfOfCalendarYear.{HalfOfCalendarYear,7}","Section1/dimDates/InsertHalfOfCalendarYearSum.{HalfOfCalendarYearSum,8}","Section1/dimDates/InsertMonth.{MonthNumberOfYear,9}","Section1/dimDates/InsertDay.{DayOfMonth,10}","Section1/dimDates/InsertDayInt.{DateInt,11}","Section1/dimDates/InsertMonthName.{MonthName,12}","Section1/dimDates/InsertCalendarMonth.{MonthInCalendarName,13}","Section1/dimDates/Added This Month Selection.{This Month Selection,14}","Section1/dimDates/InsertCalendarQtr.{QuarterInCalendar,15}","Section1/dimDates/InsertDayWeek.{DayOFWeekNum,16}","Section1/dimDates/InsertDayName.{DayOfWeekName,17}","Section1/dimDates/InsertWeekEnding.{WeekEnding,18}","Section1/dimDates/InsertYearMonthSum.{YearMonthSum,19}","Section1/dimDates/InsertYearQuarterSum.{YearQuarterSum,20}","Section1/dimDates/InsertDaySelection.{Show Dates,21}","Section1/dimDates/InsertMonthSelection.{Show Months,22}","Section1/dimDates/InsertDaysInMonth.{DaysInMonth,23}","Section1/dimDates/InsertWeekInYear.{WeekInYear,24}","Section1/dimDates/InsertYearMonthNumber.{YearMonthNumber,25}","Section1/dimDates/IsInThisYear.{Show This Year,26}","Section1/dimDates/ShowLast7Days.{Show Last 7 Days,27}","Section1/dimDates/ShowLast30Days.{Show Last 30 Days,28}","Section1/dimDates/ShowLast_12_Months.{Show Last 12 Months,29}","Section1/dimDates/Show Next 12 Months.{Show Next 12 Months,30}","Section1/dimDates/ShowLast_6_Months.{Show Last 6 Months,31}","Section1/dimDates/ShowLast_3_Months.{Show Last 3 Months,32}","Section1/dimDates/LastRefreshTime.{Refresh Time,33}","Section1/dimDates/LastRefreshDate.{Refresh Date,34}","Section1/dimDates/FisrtDayOfMonth.{FirstDayOfMonth,35}","Section1/dimDates/Changed Type Dates Compare.{LastMonth,36}","Section1/dimDates/Changed Type Dates Compare.{LastYear,37}","Section1/dimDates/Changed Type Dates Compare.{LastMonth_Full,38}","Section1/dimDates/Changed Type Dates Compare.{LastYear_Full,39}","Section1/dimDates/Add Working Day.{Is Working Day,40}","Section1/dimDates/Added IsHistory.{IsHistory,41}","Section1/dimDates/Added Day History category.{Is History To Today,42}","Section1/dimDates/UntilNextMonth.{UntilNextMonth,43}","Section1/dimDates/UntilThisMonth.{UntilThisMonth,44}"],"ColumnCount":45,"KeyColumnNames":[],"ColumnIdentities":["Section1/dimDates/ChangedType.{Column1,0}","Section1/dimDates/Changed Type.{Year,1}","Section1/dimDates/Added This Year.{This Year Selection,2}","Section1/dimDates/InsertQuarter.{QuarterNumOfYear,3}","Section1/dimDates/InsertQuarterName.{QuarterName,4}","Section1/dimDates/InsertHalfOfYearNum.{HalfOfYearNum,5}","Section1/dimDates/InsertHalfOfYearName.{HalfOfYearName,6}","Section1/dimDates/InsertHalfOfCalendarYear.{HalfOfCalendarYear,7}","Section1/dimDates/InsertHalfOfCalendarYearSum.{HalfOfCalendarYearSum,8}","Section1/dimDates/InsertMonth.{MonthNumberOfYear,9}","Section1/dimDates/InsertDay.{DayOfMonth,10}","Section1/dimDates/InsertDayInt.{DateInt,11}","Section1/dimDates/InsertMonthName.{MonthName,12}","Section1/dimDates/InsertCalendarMonth.{MonthInCalendarName,13}","Section1/dimDates/Added This Month Selection.{This Month Selection,14}","Section1/dimDates/InsertCalendarQtr.{QuarterInCalendar,15}","Section1/dimDates/InsertDayWeek.{DayOFWeekNum,16}","Section1/dimDates/InsertDayName.{DayOfWeekName,17}","Section1/dimDates/InsertWeekEnding.{WeekEnding,18}","Section1/dimDates/InsertYearMonthSum.{YearMonthSum,19}","Section1/dimDates/InsertYearQuarterSum.{YearQuarterSum,20}","Section1/dimDates/InsertDaySelection.{Show Dates,21}","Section1/dimDates/InsertMonthSelection.{Show Months,22}","Section1/dimDates/InsertDaysInMonth.{DaysInMonth,23}","Section1/dimDates/InsertWeekInYear.{WeekInYear,24}","Section1/dimDates/InsertYearMonthNumber.{YearMonthNumber,25}","Section1/dimDates/IsInThisYear.{Show This Year,26}","Section1/dimDates/ShowLast7Days.{Show Last 7 Days,27}","Section1/dimDates/ShowLast30Days.{Show Last 30 Days,28}","Section1/dimDates/ShowLast_12_Months.{Show Last 12 Months,29}","Section1/dimDates/Show Next 12 Months.{Show Next 12 Months,30}","Section1/dimDates/ShowLast_6_Months.{Show Last 6 Months,31}","Section1/dimDates/ShowLast_3_Months.{Show Last 3 Months,32}","Section1/dimDates/LastRefreshTime.{Refresh Time,33}","Section1/dimDates/LastRefreshDate.{Refresh Date,34}","Section1/dimDates/FisrtDayOfMonth.{FirstDayOfMonth,35}","Section1/dimDates/Changed Type Dates Compare.{LastMonth,36}","Section1/dimDates/Changed Type Dates Compare.{LastYear,37}","Section1/dimDates/Changed Type Dates Compare.{LastMonth_Full,38}","Section1/dimDates/Changed Type Dates Compare.{LastYear_Full,39}","Section1/dimDates/Add Working Day.{Is Working Day,40}","Section1/dimDates/Added IsHistory.{IsHistory,41}","Section1/dimDates/Added Day History category.{Is History To Today,42}","Section1/dimDates/UntilNextMonth.{UntilNextMonth,43}","Section1/dimDates/UntilThisMonth.{UntilThisMonth,44}"],"RelationshipInfo":[]}
+
+	annotation PBI_ResultType = Exception
+
+	annotation PBI_NavigationStepName = Navigation
+

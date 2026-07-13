@@ -1,0 +1,63 @@
+table AR_MeasuerSelectionTable
+	lineageTag: fedf73e3-2060-441a-aad2-5e87d38b7c7e
+
+	measure AR_ChosenMeasure = MAX(AR_MeasuerSelectionTable[ID])
+		formatString: 0
+		lineageTag: 355d8af5-8aa0-49fc-8737-3146f83bd00a
+
+		changedProperty = IsHidden
+
+	column ID
+		dataType: int64
+		formatString: 0
+		lineageTag: 2b94899c-803d-43c3-9fbf-979028e2e66a
+		summarizeBy: count
+		sourceColumn: ID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Des
+		dataType: string
+		lineageTag: 5ac4ce06-e872-428e-b59b-001b8328410e
+		summarizeBy: none
+		sourceColumn: Des
+		sortByColumn: ID
+
+		changedProperty = IsHidden
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'בחירת ניתוח תקופתי'
+		dataType: string
+		lineageTag: 00ba78fb-7033-4518-bcc2-2b3edaa0ddff
+		summarizeBy: none
+		sourceColumn: בחירת ניתוח תקופתי
+		sortByColumn: ID
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition AR_MeasuerSelectionTable-20f33fcf-1ecc-4d58-b2a8-0a8ba97e19f0 = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WMlTSUfLNzyvJyCmpBDKVYnWilYyADOfS3NKcxJLMslQgxyU1qUQhJF/BJbEkFazCGCjoWlGQmlySmgJSnFicoeCWk1+uFBsLAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [ID = _t, Des = _t, #"בחירת ניתוח תקופתי" = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"ID", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	changedProperty = IsHidden
+
+	annotation PBI_Id = 13e2eaef-618f-4fe9-996f-e07fe8ba3a2a
+
+	annotation LinkedQueryName = AR_MeasuerSelectionTable
+
+	annotation PBI_ResultType = Table
+

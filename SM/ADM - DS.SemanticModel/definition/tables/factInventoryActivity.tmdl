@@ -1,0 +1,316 @@
+table factInventoryActivity
+	lineageTag: 857aa497-cc14-4087-8462-eba3232b5432
+
+	measure 'Total Quantity IN' = CALCULATE(SUM(factInventoryActivity[Quantity]),factInventoryActivity[DocType] = 1 || factInventoryActivity[DocType] = 3)
+		formatString: #,0
+		lineageTag: eaddbfc5-a5ac-4ff0-aeeb-ca449054758c
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'Total Purchases Cost (Execute)' = ```
+			
+			IF(HASONEVALUE(VAT_MeasureSelctionTable[ID ANALYSIS]),
+			    SWITCH(MAX(VAT_MeasureSelctionTable[ID ANALYSIS]),
+			        1,SUM(factInventoryActivity[LineTotalNet_USD]),
+			        2,SUM(factInventoryActivity[LineTotalNetNIS])
+			    ),
+			   SUM(factInventoryActivity[LineTotalNet_USD]))
+			   
+			```
+		formatString: #,0
+		lineageTag: e2659c89-487c-4ee8-b21d-31ede4742337
+
+		changedProperty = IsHidden
+
+	measure 'Total Quantity OUT' = CALCULATE(SUM(factInventoryActivity[Quantity]),factInventoryActivity[DocType] = 2 || factInventoryActivity[DocType] = 4)
+		formatString: #,0
+		lineageTag: d7966f51-ba4b-455d-b580-54e1443d52de
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	column EntityID
+		dataType: string
+		lineageTag: 7389eec5-4531-44ee-9c10-7b9a4aad3c40
+		summarizeBy: none
+		sourceColumn: EntityID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DocName
+		dataType: string
+		lineageTag: 53ccf887-a10f-41e0-88f2-458637a6274a
+		summarizeBy: none
+		sourceColumn: DocName
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column AccountKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 47d807a4-5b65-4ee9-a866-204ac54e0f26
+		summarizeBy: none
+		sourceColumn: AccountKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column AgentKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 316580ae-6d4f-4316-a852-2fefb019ed88
+		summarizeBy: count
+		sourceColumn: AgentKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ItemKey
+		dataType: string
+		lineageTag: 5746ebfc-d9c4-478b-af6c-50859a66ff5d
+		summarizeBy: none
+		sourceColumn: ItemKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DiscountPercent
+		dataType: int64
+		formatString: 0
+		lineageTag: 0c1d6fea-f9fb-448d-bde8-fdf25b2114a2
+		summarizeBy: sum
+		sourceColumn: DiscountPercent
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column LineTotalDiscount
+		dataType: int64
+		formatString: 0
+		lineageTag: 77540d1f-cf76-4600-9345-03e1a89b025e
+		summarizeBy: sum
+		sourceColumn: LineTotalDiscount
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column UnitGrossPrice
+		dataType: int64
+		lineageTag: 8d0936c1-34d9-4b94-b6dc-e554866d188f
+		summarizeBy: sum
+		sourceColumn: UnitGrossPrice
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column UnitNetPriceUSD
+		dataType: double
+		lineageTag: e12cc90e-9875-4c26-be05-03f43dc06b1d
+		summarizeBy: sum
+		sourceColumn: UnitNetPriceUSD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Quantity
+		dataType: double
+		lineageTag: 16f82fa9-161b-4124-8462-e7fcfc9c46ad
+		summarizeBy: sum
+		sourceColumn: Quantity
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalCost
+		dataType: int64
+		formatString: 0
+		lineageTag: c4bc58f2-eff1-4035-90e6-8b2b31babe37
+		summarizeBy: sum
+		sourceColumn: LineTotalCost
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column UnitNetPriceNIS
+		dataType: double
+		lineageTag: dcb55433-2d70-408b-994b-3a446983aeea
+		summarizeBy: sum
+		sourceColumn: UnitNetPriceNIS
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalNetNIS
+		dataType: double
+		lineageTag: 2e10d06c-c526-4555-883a-9524ec0ad5f6
+		summarizeBy: sum
+		sourceColumn: LineTotalNetNIS
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column YearMonth
+		dataType: int64
+		formatString: 0
+		lineageTag: f25e8f79-306d-4f84-a667-b4ef26ee11fd
+		summarizeBy: sum
+		sourceColumn: YearMonth
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column RowInsertDatetime
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: c2c01af9-ffed-49c7-a24d-8551b5631519
+		summarizeBy: none
+		sourceColumn: RowInsertDatetime
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DocID
+		dataType: string
+		lineageTag: 5aa5b6a7-f7ab-4d99-8f7d-42f9e1728723
+		summarizeBy: none
+		sourceColumn: DocID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column InvoiceLineNumber
+		dataType: int64
+		formatString: 0
+		lineageTag: fa5a8c14-0a0f-4c31-b4e1-d7b1a0638f53
+		summarizeBy: sum
+		sourceColumn: InvoiceLineNumber
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Date
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: c8730d6e-3841-411a-9479-c1454ebef77f
+		summarizeBy: none
+		sourceColumn: Date
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column LineTotalNet_USD
+		dataType: double
+		lineageTag: 156ce665-d928-41cd-afb2-4d58243902b9
+		summarizeBy: sum
+		sourceColumn: LineTotalNet_USD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalNetVAT
+		dataType: int64
+		formatString: 0
+		lineageTag: 90c7be67-baf9-4a97-849d-54a8b164c703
+		summarizeBy: sum
+		sourceColumn: LineTotalNetVAT
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column LineTotalNetVAT_USD
+		dataType: int64
+		formatString: 0
+		lineageTag: e04b8a0c-02d6-4dab-bea3-c143954dd230
+		summarizeBy: sum
+		sourceColumn: LineTotalNetVAT_USD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Status
+		dataType: int64
+		formatString: 0
+		lineageTag: 56dc8793-42a6-43ab-b0f6-9adcd3d0a072
+		summarizeBy: sum
+		sourceColumn: Status
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DocType
+		dataType: int64
+		formatString: 0
+		lineageTag: 264e7fcd-6de1-41eb-aa61-2e6bdee2146d
+		summarizeBy: sum
+		sourceColumn: DocType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column InventoryWarehouse
+		dataType: int64
+		formatString: 0
+		lineageTag: 6120b2b4-2ab1-4db1-8cf5-9c78d542b255
+		summarizeBy: none
+		sourceColumn: InventoryWarehouse
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition factInventoryActivity = m
+		mode: import
+		queryGroup: 'fact Tables'
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query=" ----------------תעודות משלוח מלאי יוצא-----------------------------#(lf) #(lf) SELECT #(lf) '1' as 'EntityID'#(lf),'A'+ CAST(MS_TEODH as nvarchar(100)) as 'DocID'#(lf),ROW_NUMBER () Over (Partition By MS_TEODH Order By TARIKH_MSHLOCH)  as 'InvoiceLineNumber'#(lf),'Out' as  'DocName'#(lf),2 AS DocType#(lf),CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MQBL)) AS 'AccountKey'#(lf),SUBSTRING(TARIKH_MSHLOCH,1,4) + '-' + SUBSTRING(TARIKH_MSHLOCH,5,2) + '-' + SUBSTRING(TARIKH_MSHLOCH,7,2) as 'Date'#(lf)--,null AS 'Time'#(lf),CONVERT(INT, CONVERT(VARCHAR, TM.AISH_MCIROT)) AS 'AgentKey'#(lf),CONVERT(VARCHAR, TM.QOD_MOTSR)+'-'+CONVERT(VARCHAR, TM.QOD_MOTSR) AS 'ItemKey'#(lf)--,concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR)))+'-'+concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR))) AS 'SubItemKey'#(lf)--,concat('1',CONVERT(INT, CONVERT(VARCHAR, o.BRANCH))) AS 'BranchKey'#(lf)--,null as 'EmployeeKey'#(lf)--,null as 'חבר מועדון'#(lf)--,(1-(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100))*100  as 'DiscountPercent'#(lf),null AS 'DiscountPercent'#(lf)--,(round((oi.TQUANT/1000)* oi.PRICE,2)*oi.IEXCHANGE)-((oi.TQUANT/1000)*round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE) as 'LineTotalDiscount' #(lf),NULL AS 'LineTotalDiscount' #(lf)--,round(oi.PRICE ,2)*oi.IEXCHANGE as 'Unit Gross Price' #(lf),NULL AS 'UnitGrossPrice'#(lf)--,round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE as 'Unit Net Price'#(lf),CASE#(lf)#(tab)         WHEN TM.MTBE_SH = '$' THEN CAST(TM.MCHIR_ICH as decimal(12,2))#(lf)#(tab)#(tab)   --THEN CAST(HZ.MCHIR_ICH AS decimal (12,4))#(lf)#(tab)         ELSE CAST(TM.MCHIR_ICH *(1/SM.NEW_SHER)  AS decimal (12,2))#(lf)         END AS 'UnitNetPriceUSD'#(lf),CASE#(lf)#(tab)  WHEN TM.MTBE_SH = '$'#(lf)#(tab)  THEN CAST(TM.MCHIR_ICH*SM.NEW_SHER AS decimal (12,2))#(lf)#(tab)  ELSE CAST(TM.MCHIR_ICH AS decimal (12,2))#(lf)      END AS 'UnitNetPriceNIS'#(lf),TM.MSHQL_NTO as 'Quantity'#(lf)/*,tor.COST * (#(lf)#(tab)#(tab)#(tab)CASE #(lf)#(tab)#(tab)#(tab)#(tab)WHEN doct.DEBIT = 'C'#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)THEN - 1#(lf)#(tab)#(tab)#(tab)#(tab)ELSE 1#(lf)#(tab)#(tab)#(tab)#(tab)END#(lf)#(tab)#(tab)#(tab)) AS 'LineTotalCost' */#(lf),NULL AS 'LineTotalCost' #(lf)--,(oi.TQUANT/1000)*round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE  as 'LineTotalNet'#(lf),CASE#(lf)#(tab)         WHEN TM.MTBE_SH = '$'#(lf)#(tab)#(tab)     THEN CAST((TM.MCHIR_ICH * SM.NEW_SHER) * TM.MSHQL_NTO AS decimal (18,2))#(lf)#(tab)         ELSE CAST( TM.MCHIR_ICH * TM.MSHQL_NTO AS decimal (18,2))#(lf)         END AS 'LineTotalNetNIS'#(lf),CASE#(lf)#(tab)         WHEN TM.MTBE_SH = '$'#(lf)#(tab)#(tab)     THEN CAST((TM.MCHIR_ICH)*TM.MSHQL_NTO/*TM.CMOT_SHSOPQH*/ AS decimal (18,2))#(lf)#(tab)         ELSE CAST(TM.MCHIR_ICH * TM.MSHQL_NTO/* TM.CMOT_SHSOPQH*/ * (1/SM.NEW_SHER) AS decimal (18,2))#(lf)         END AS 'LineTotalNet_USD'#(lf),null AS 'LineTotalNetVAT'#(lf),null AS 'LineTotalNetVAT_USD'#(lf),CONVERT(INT, CONVERT(VARCHAR,SUBSTRING(TARIKH_MSHLOCH,1,4) + SUBSTRING(TARIKH_MSHLOCH,5,2))) AS YearMonth#(lf),STTOS as 'Status'#(lf)--,null as 'ChargeFlag'  #(lf)--,null as 'סטטוס ליקוט כותרת'#(lf)--,null as 'סטטוס ליקוט שורה'#(lf)--,null  as 'דגל סטורנו'#(lf),TM.QOD_SHOLCH as 'InventoryWarehouse'#(lf),GETDATE() AS RowInsertDatetime#(lf)--,NULL AS SubItemID#(lf)FROM TEODOT_MSHLOCH TM#(lf)Left Join (SELECT distinct MS_T_MSHLOCH#(lf)#(tab)#(tab)#(tab)FROM CHSHBONIOT_SHOROT#(lf)#(tab)#(tab)) CH#(lf)#(tab)on TM.MS_TEODH = CH.MS_T_MSHLOCH#(lf)Left Join (SELECT MS_HZMNH,MS_T_MSHLOCH#(lf)#(tab)#(tab)#(tab)FROM QISHOR_T_MSHLOCH_HZMNOT#(lf)#(tab)#(tab)) HZT#(lf)#(tab)on TM.MS_TEODH = HZT.MS_T_MSHLOCH#(lf)Left Join HZMNOT HZ#(lf)#(tab)on HZ.MSPR_HZMNH = HZT.MS_HZMNH#(lf)Left Join (select *, #(lf)Case#(lf)#(tab)when sher = 0#(lf)#(tab)#(tab)then first_value(sher) over (partition by value_partition order by Tarikh) #(lf)#(tab)else sher#(lf)end as new_sher#(lf)from (#(lf)  select *, sum(case when sher=0 then 0 else 1 end) over (order by tarikh ) as value_partition#(lf)  from SHERI_MTBE) m#(lf)#(lf)) SM  #(lf)#(tab)on SM.TARIKH=HZ.T_HZMNH#(lf)#(lf)WHERE 1=1#(lf)AND Cast(SUBSTRING(TARIKH_MSHLOCH,1,4) as int) >=2018 and Cast(SUBSTRING(TARIKH_MSHLOCH,1,4) as int) <= Year(Getdate())#(lf)AND STTOS in (0,1)#(lf)AND TM.ActionType in (1,11,12)#(lf)#(lf) ----------------תעודות משלוח מלאי נכנס-----------------------------#(lf) Union ALL#(lf)#(lf)#(lf) SELECT #(lf) '1' as 'EntityID'#(lf),'A'+ CAST(MS_TEODH as nvarchar(100)) as 'DocID'#(lf),ROW_NUMBER () Over (Partition By MS_TEODH Order By TARIKH_MSHLOCH)  as 'InvoiceLineNumber'#(lf),'In' as  'DocName'#(lf),1 AS DocType#(lf),CONVERT(INT, CONVERT(VARCHAR, TM.QOD_SHOLCH)) AS 'AccountKey'#(lf),SUBSTRING(TARIKH_MSHLOCH,1,4) + '-' + SUBSTRING(TARIKH_MSHLOCH,5,2) + '-' + SUBSTRING(TARIKH_MSHLOCH,7,2) as 'Date'#(lf)--,null AS 'Time'#(lf),CONVERT(INT, CONVERT(VARCHAR, TM.AISH_MCIROT)) AS 'AgentKey'#(lf),CONVERT(VARCHAR, TM.QOD_MOTSR)+'-'+CONVERT(VARCHAR, TM.QOD_MOTSR) AS 'ItemKey'#(lf)--,concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR)))+'-'+concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR))) AS 'SubItemKey'#(lf)--,concat('1',CONVERT(INT, CONVERT(VARCHAR, o.BRANCH))) AS 'BranchKey'#(lf)--,null as 'EmployeeKey'#(lf)--,null as 'חבר מועדון'#(lf)--,(1-(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100))*100  as 'DiscountPercent'#(lf),null AS 'DiscountPercent'#(lf)--,(round((oi.TQUANT/1000)* oi.PRICE,2)*oi.IEXCHANGE)-((oi.TQUANT/1000)*round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE) as 'LineTotalDiscount' #(lf),NULL AS 'LineTotalDiscount' #(lf)--,round(oi.PRICE ,2)*oi.IEXCHANGE as 'Unit Gross Price' #(lf),NULL AS 'UnitGrossPrice'#(lf)--,round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE as 'Unit Net Price'#(lf),CASE#(lf)#(tab)         WHEN TM.MTBE_SH = '$' THEN CAST(TM.MCHIR_ICH as decimal(12,2))#(lf)#(tab)#(tab)   --THEN CAST(HZ.MCHIR_ICH AS decimal (12,4))#(lf)#(tab)         ELSE CAST(TM.MCHIR_ICH *(1/SM.NEW_SHER)  AS decimal (12,2))#(lf)         END AS 'UnitNetPriceUSD'#(lf),CASE#(lf)#(tab)  WHEN TM.MTBE_SH = '$'#(lf)#(tab)  THEN CAST(TM.MCHIR_ICH*SM.NEW_SHER AS decimal (12,2))#(lf)#(tab)  ELSE CAST(TM.MCHIR_ICH AS decimal (12,2))#(lf)      END AS 'UnitNetPriceNIS'#(lf),TM.MSHQL_NTO as 'Quantity'#(lf)/*,tor.COST * (#(lf)#(tab)#(tab)#(tab)CASE #(lf)#(tab)#(tab)#(tab)#(tab)WHEN doct.DEBIT = 'C'#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)THEN - 1#(lf)#(tab)#(tab)#(tab)#(tab)ELSE 1#(lf)#(tab)#(tab)#(tab)#(tab)END#(lf)#(tab)#(tab)#(tab)) AS 'LineTotalCost' */#(lf),NULL AS 'LineTotalCost' #(lf)--,(oi.TQUANT/1000)*round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE  as 'LineTotalNet'#(lf),CASE#(lf)#(tab)         WHEN TM.MTBE_SH = '$'#(lf)#(tab)#(tab)     THEN CAST((TM.MCHIR_ICH * SM.NEW_SHER) * TM.MSHQL_NTO AS decimal (18,2))#(lf)#(tab)         ELSE CAST( TM.MCHIR_ICH * TM.MSHQL_NTO AS decimal (18,2))#(lf)         END AS 'LineTotalNetNIS'#(lf),CASE#(lf)#(tab)         WHEN TM.MTBE_SH = '$'#(lf)#(tab)#(tab)     THEN CAST((TM.MCHIR_ICH)*TM.MSHQL_NTO/*TM.CMOT_SHSOPQH*/ AS decimal (18,2))#(lf)#(tab)         ELSE CAST(TM.MCHIR_ICH * TM.MSHQL_NTO/* TM.CMOT_SHSOPQH*/ * (1/SM.NEW_SHER) AS decimal (18,2))#(lf)         END AS 'LineTotalNet_USD'#(lf),null AS 'LineTotalNetVAT'#(lf),null AS 'LineTotalNetVAT_USD'#(lf),CONVERT(INT, CONVERT(VARCHAR,SUBSTRING(TARIKH_MSHLOCH,1,4) + SUBSTRING(TARIKH_MSHLOCH,5,2))) AS YearMonth#(lf),STTOS as 'Status'#(lf)--,null as 'ChargeFlag'  #(lf)--,null as 'סטטוס ליקוט כותרת'#(lf)--,null as 'סטטוס ליקוט שורה'#(lf)--,null  as 'דגל סטורנו'#(lf),TM.QOD_MQBL as 'InventoryWarehouse'#(lf),GETDATE() AS RowInsertDatetime#(lf)--,NULL AS SubItemID#(lf)FROM TEODOT_MSHLOCH TM#(lf)Left Join (SELECT MS_HZMNH,MS_T_MSHLOCH#(lf)#(tab)#(tab)#(tab)FROM QISHOR_T_MSHLOCH_HZMNOT#(lf)#(tab)#(tab)) HZT#(lf)#(tab)on TM.MS_TEODH = HZT.MS_T_MSHLOCH#(lf)Left Join HZMNOT HZ#(lf)#(tab)on HZ.MSPR_HZMNH = HZT.MS_HZMNH#(lf)Left Join (select *, #(lf)Case#(lf)#(tab)when sher = 0#(lf)#(tab)#(tab)then first_value(sher) over (partition by value_partition order by Tarikh) #(lf)#(tab)else sher#(lf)end as new_sher#(lf)from (#(lf)  select *, sum(case when sher=0 then 0 else 1 end) over (order by tarikh ) as value_partition#(lf)  from SHERI_MTBE) m#(lf)#(lf)) SM  #(lf)#(tab)on SM.TARIKH=HZ.T_HZMNH#(lf)WHERE 1=1#(lf)AND Cast(SUBSTRING(TARIKH_MSHLOCH,1,4) as int) >=2018 and Cast(SUBSTRING(TARIKH_MSHLOCH,1,4) as int) <= Year(Getdate())#(lf)AND STTOS in (0,1)#(lf)AND TM.ActionType = 2#(lf)#(lf) ----------------תעודות משלוח החלפה מלאי נכנס-----------------------------#(lf) #(lf) Union ALL#(lf)#(lf)#(lf) SELECT#(lf) '1' as 'EntityID'#(lf),'A'+ CAST(MS_TEODH as nvarchar(100)) as 'DocID'#(lf),ROW_NUMBER () Over (Partition By MS_TEODH Order By TARIKH_MSHLOCH)  as 'InvoiceLineNumber'#(lf),'Exchange - In' as  'DocName'#(lf),3 AS DocType#(lf),CONVERT(INT, CONVERT(VARCHAR, TM.QOD_SHOLCH)) AS 'AccountKey'#(lf),SUBSTRING(TARIKH_MSHLOCH,1,4) + '-' + SUBSTRING(TARIKH_MSHLOCH,5,2) + '-' + SUBSTRING(TARIKH_MSHLOCH,7,2) as 'Date'#(lf)--,null AS 'Time'#(lf),CONVERT(INT, CONVERT(VARCHAR, TM.AISH_MCIROT)) AS 'AgentKey'#(lf),CONVERT(VARCHAR, TM.QOD_MOTSR)+'-'+CONVERT(VARCHAR, TM.QOD_MOTSR) AS 'ItemKey'#(lf)--,concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR)))+'-'+concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR))) AS 'SubItemKey'#(lf)--,concat('1',CONVERT(INT, CONVERT(VARCHAR, o.BRANCH))) AS 'BranchKey'#(lf)--,null as 'EmployeeKey'#(lf)--,null as 'חבר מועדון'#(lf)--,(1-(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100))*100  as 'DiscountPercent'#(lf),null AS 'DiscountPercent'#(lf)--,(round((oi.TQUANT/1000)* oi.PRICE,2)*oi.IEXCHANGE)-((oi.TQUANT/1000)*round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE) as 'LineTotalDiscount' #(lf),NULL AS 'LineTotalDiscount' #(lf)--,round(oi.PRICE ,2)*oi.IEXCHANGE as 'Unit Gross Price' #(lf),NULL AS 'UnitGrossPrice'#(lf)--,round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE as 'Unit Net Price'#(lf),CASE#(lf)#(tab)         WHEN TM.MTBE_SH = '$' THEN CAST(TM.MCHIR_ICH as decimal(12,2))#(lf)#(tab)#(tab)   --THEN CAST(HZ.MCHIR_ICH AS decimal (12,4))#(lf)#(tab)         ELSE CAST(TM.MCHIR_ICH *(1/SM.NEW_SHER)  AS decimal (12,2))#(lf)         END AS 'UnitNetPriceUSD'#(lf),CASE#(lf)#(tab)  WHEN TM.MTBE_SH = '$'#(lf)#(tab)  THEN CAST(TM.MCHIR_ICH*SM.NEW_SHER AS decimal (12,2))#(lf)#(tab)  ELSE CAST(TM.MCHIR_ICH AS decimal (12,2))#(lf)      END AS 'UnitNetPriceNIS'#(lf),TM.MSHQL_NTO as 'Quantity'#(lf)/*,tor.COST * (#(lf)#(tab)#(tab)#(tab)CASE #(lf)#(tab)#(tab)#(tab)#(tab)WHEN doct.DEBIT = 'C'#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)THEN - 1#(lf)#(tab)#(tab)#(tab)#(tab)ELSE 1#(lf)#(tab)#(tab)#(tab)#(tab)END#(lf)#(tab)#(tab)#(tab)) AS 'LineTotalCost' */#(lf),NULL AS 'LineTotalCost' #(lf)--,(oi.TQUANT/1000)*round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE  as 'LineTotalNet'#(lf),CASE#(lf)#(tab)         WHEN TM.MTBE_SH = '$'#(lf)#(tab)#(tab)     THEN CAST((TM.MCHIR_ICH * SM.NEW_SHER) * TM.MSHQL_NTO AS decimal (18,2))#(lf)#(tab)         ELSE CAST( TM.MCHIR_ICH * TM.MSHQL_NTO AS decimal (18,2))#(lf)         END AS 'LineTotalNetNIS'#(lf),CASE#(lf)#(tab)         WHEN TM.MTBE_SH = '$'#(lf)#(tab)#(tab)     THEN CAST((TM.MCHIR_ICH)*TM.MSHQL_NTO/*TM.CMOT_SHSOPQH*/ AS decimal (18,2))#(lf)#(tab)         ELSE CAST(TM.MCHIR_ICH * TM.MSHQL_NTO/* TM.CMOT_SHSOPQH*/ * (1/SM.NEW_SHER) AS decimal (18,2))#(lf)         END AS 'LineTotalNet_USD'#(lf),null AS 'LineTotalNetVAT'#(lf),null AS 'LineTotalNetVAT_USD'#(lf),CONVERT(INT, CONVERT(VARCHAR,SUBSTRING(TARIKH_MSHLOCH,1,4) + SUBSTRING(TARIKH_MSHLOCH,5,2))) AS YearMonth#(lf),STTOS as 'Status'#(lf)--,null as 'ChargeFlag'  #(lf)--,null as 'סטטוס ליקוט כותרת'#(lf)--,null as 'סטטוס ליקוט שורה'#(lf)--,null  as 'דגל סטורנו'#(lf),TM.QOD_MQBL as 'InventoryWarehouse'#(lf),GETDATE() AS RowInsertDatetime#(lf)--,NULL AS SubItemID#(lf)FROM TEODOT_MSHLOCH TM#(lf)Left Join (SELECT MS_HZMNH,MS_T_MSHLOCH#(lf)#(tab)#(tab)#(tab)FROM QISHOR_T_MSHLOCH_HZMNOT#(lf)#(tab)#(tab)) HZT#(lf)#(tab)on TM.MS_TEODH = HZT.MS_T_MSHLOCH#(lf)Left Join HZMNOT HZ#(lf)#(tab)on HZ.MSPR_HZMNH = HZT.MS_HZMNH#(lf)Left Join (select *, #(lf)Case#(lf)#(tab)when sher = 0#(lf)#(tab)#(tab)then first_value(sher) over (partition by value_partition order by Tarikh) #(lf)#(tab)else sher#(lf)end as new_sher#(lf)from (#(lf)  select *, sum(case when sher=0 then 0 else 1 end) over (order by tarikh ) as value_partition#(lf)  from SHERI_MTBE) m#(lf)#(lf)) SM  #(lf)#(tab)on SM.TARIKH=HZ.T_HZMNH#(lf)WHERE 1=1#(lf)AND Cast(SUBSTRING(TARIKH_MSHLOCH,1,4) as int) >=2018 and Cast(SUBSTRING(TARIKH_MSHLOCH,1,4) as int) <= Year(Getdate())#(lf)AND STTOS in (0,1)#(lf)AND TM.ActionType in (6,7)#(lf)#(lf) ----------------תעודות משלוח החלפה מלאי יוצא-----------------------------#(lf) #(lf) Union ALL#(lf)#(lf)#(lf) SELECT#(lf) '1' as 'EntityID'#(lf),'A'+ CAST(MS_TEODH as nvarchar(100)) as 'DocID'#(lf),ROW_NUMBER () Over (Partition By MS_TEODH Order By TARIKH_MSHLOCH)  as 'InvoiceLineNumber'#(lf),'Exchange - Out' as  'DocName'#(lf),4 AS DocType#(lf),CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MQBL)) AS 'AccountKey'#(lf),SUBSTRING(TARIKH_MSHLOCH,1,4) + '-' + SUBSTRING(TARIKH_MSHLOCH,5,2) + '-' + SUBSTRING(TARIKH_MSHLOCH,7,2) as 'Date'#(lf)--,null AS 'Time'#(lf),CONVERT(INT, CONVERT(VARCHAR, TM.AISH_MCIROT)) AS 'AgentKey'#(lf),CONVERT(VARCHAR, TM.QOD_MOTSR)+'-'+CONVERT(VARCHAR, TM.QOD_MOTSR) AS 'ItemKey'#(lf)--,concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR)))+'-'+concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR))) AS 'SubItemKey'#(lf)--,concat('1',CONVERT(INT, CONVERT(VARCHAR, o.BRANCH))) AS 'BranchKey'#(lf)--,null as 'EmployeeKey'#(lf)--,null as 'חבר מועדון'#(lf)--,(1-(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100))*100  as 'DiscountPercent'#(lf),null AS 'DiscountPercent'#(lf)--,(round((oi.TQUANT/1000)* oi.PRICE,2)*oi.IEXCHANGE)-((oi.TQUANT/1000)*round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE) as 'LineTotalDiscount' #(lf),NULL AS 'LineTotalDiscount' #(lf)--,round(oi.PRICE ,2)*oi.IEXCHANGE as 'Unit Gross Price' #(lf),NULL AS 'UnitGrossPrice'#(lf)--,round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE as 'Unit Net Price'#(lf),CASE#(lf)#(tab)         WHEN TM.MTBE_SH = '$' THEN CAST(TM.MCHIR_ICH as decimal(12,2))#(lf)#(tab)#(tab)   --THEN CAST(HZ.MCHIR_ICH AS decimal (12,4))#(lf)#(tab)         ELSE CAST(TM.MCHIR_ICH *(1/SM.NEW_SHER)  AS decimal (12,2))#(lf)         END AS 'UnitNetPriceUSD'#(lf),CASE#(lf)#(tab)  WHEN TM.MTBE_SH = '$'#(lf)#(tab)  THEN CAST(TM.MCHIR_ICH*SM.NEW_SHER AS decimal (12,2))#(lf)#(tab)  ELSE CAST(TM.MCHIR_ICH AS decimal (12,2))#(lf)      END AS 'UnitNetPriceNIS'#(lf),TM.MSHQL_NTO as 'Quantity'#(lf)/*,tor.COST * (#(lf)#(tab)#(tab)#(tab)CASE #(lf)#(tab)#(tab)#(tab)#(tab)WHEN doct.DEBIT = 'C'#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)THEN - 1#(lf)#(tab)#(tab)#(tab)#(tab)ELSE 1#(lf)#(tab)#(tab)#(tab)#(tab)END#(lf)#(tab)#(tab)#(tab)) AS 'LineTotalCost' */#(lf),NULL AS 'LineTotalCost' #(lf)--,(oi.TQUANT/1000)*round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE  as 'LineTotalNet'#(lf),CASE#(lf)#(tab)         WHEN TM.MTBE_SH = '$'#(lf)#(tab)#(tab)     THEN CAST((TM.MCHIR_ICH * SM.NEW_SHER) * TM.MSHQL_NTO AS decimal (18,2))#(lf)#(tab)         ELSE CAST( TM.MCHIR_ICH * TM.MSHQL_NTO AS decimal (18,2))#(lf)         END AS 'LineTotalNetNIS'#(lf),CASE#(lf)#(tab)         WHEN TM.MTBE_SH = '$'#(lf)#(tab)#(tab)     THEN CAST((TM.MCHIR_ICH)*TM.MSHQL_NTO/*TM.CMOT_SHSOPQH*/ AS decimal (18,2))#(lf)#(tab)         ELSE CAST(TM.MCHIR_ICH * TM.MSHQL_NTO/* TM.CMOT_SHSOPQH*/ * (1/SM.NEW_SHER) AS decimal (18,2))#(lf)         END AS 'LineTotalNet_USD'#(lf),null AS 'LineTotalNetVAT'#(lf),null AS 'LineTotalNetVAT_USD'#(lf),CONVERT(INT, CONVERT(VARCHAR,SUBSTRING(TARIKH_MSHLOCH,1,4) + SUBSTRING(TARIKH_MSHLOCH,5,2))) AS YearMonth#(lf),STTOS as 'Status'#(lf)--,null as 'ChargeFlag'  #(lf)--,null as 'סטטוס ליקוט כותרת'#(lf)--,null as 'סטטוס ליקוט שורה'#(lf)--,null  as 'דגל סטורנו'#(lf),TM.QOD_SHOLCH as 'InventoryWarehouse'#(lf),GETDATE() AS RowInsertDatetime#(lf)--,NULL AS SubItemID#(lf)FROM TEODOT_MSHLOCH TM#(lf)Left Join (SELECT MS_HZMNH,MS_T_MSHLOCH#(lf)#(tab)#(tab)#(tab)FROM QISHOR_T_MSHLOCH_HZMNOT#(lf)#(tab)#(tab)) HZT#(lf)#(tab)on TM.MS_TEODH = HZT.MS_T_MSHLOCH#(lf)Left Join HZMNOT HZ#(lf)#(tab)on HZ.MSPR_HZMNH = HZT.MS_HZMNH#(lf)Left Join (select *, #(lf)Case#(lf)#(tab)when sher = 0#(lf)#(tab)#(tab)then first_value(sher) over (partition by value_partition order by Tarikh) #(lf)#(tab)else sher#(lf)end as new_sher#(lf)from (#(lf)  select *, sum(case when sher=0 then 0 else 1 end) over (order by tarikh ) as value_partition#(lf)  from SHERI_MTBE) m#(lf)#(lf)) SM  #(lf)#(tab)on SM.TARIKH=HZ.T_HZMNH#(lf)WHERE 1=1#(lf)AND Cast(SUBSTRING(TARIKH_MSHLOCH,1,4) as int) >=2018 and Cast(SUBSTRING(TARIKH_MSHLOCH,1,4) as int) <= Year(Getdate())#(lf)AND STTOS in (0,1)#(lf)AND TM.ActionType in (6,7)#(lf)#(lf)------------------------------תנועות לוגוס עבור אחרים-------------------------------#(lf)UNION ALL #(lf) SELECT#(lf) '1' as 'EntityID'#(lf),'L' + CAST(NOMRTOR_TNOEH as nvarchar(100)) as 'DocID'#(lf),ROW_NUMBER () Over (Partition By NOMRTOR_TNOEH Order By T_TNOEH)  as 'InvoiceLineNumber'#(lf),CASE#(lf)#(tab)WHEN SOG_TNOEH_CN_ITS_SP_HE LIKE N'%י%'#(lf)#(tab)#(tab)THEN 'Logos - Out' #(lf)#(tab)ELSE 'Logos - In' #(lf)END as  'DocName'#(lf),CASE#(lf)#(tab)WHEN SOG_TNOEH_CN_ITS_SP_HE LIKE N'%י%'#(lf)#(tab)#(tab)THEN 6 #(lf)#(tab)ELSE 5 #(lf)END AS DocType#(lf),CONVERT(INT, CONVERT(VARCHAR, TM.QOD_GORM)) AS 'AccountKey'#(lf),SUBSTRING(T_TNOEH,1,4) + '-' + SUBSTRING(T_TNOEH,5,2) + '-' + SUBSTRING(T_TNOEH,7,2) as 'Date'#(lf)--,null AS 'Time'#(lf),NULL AS 'AgentKey'#(lf),CONVERT(VARCHAR, TM.QOD_PRIT)+'-'+CONVERT(VARCHAR, TM.QOD_PRIT) AS 'ItemKey'#(lf)--,concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR)))+'-'+concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR))) AS 'SubItemKey'#(lf)--,concat('1',CONVERT(INT, CONVERT(VARCHAR, o.BRANCH))) AS 'BranchKey'#(lf)--,null as 'EmployeeKey'#(lf)--,null as 'חבר מועדון'#(lf)--,(1-(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100))*100  as 'DiscountPercent'#(lf),null AS 'DiscountPercent'#(lf)--,(round((oi.TQUANT/1000)* oi.PRICE,2)*oi.IEXCHANGE)-((oi.TQUANT/1000)*round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE) as 'LineTotalDiscount' #(lf),NULL AS 'LineTotalDiscount' #(lf)--,round(oi.PRICE ,2)*oi.IEXCHANGE as 'Unit Gross Price' #(lf),NULL AS 'UnitGrossPrice'#(lf)--,round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE as 'Unit Net Price'#(lf),NULL AS 'UnitNetPriceUSD'#(lf),NULL AS 'UnitNetPriceNIS'#(lf),TM.CMOT_LOGOS as 'Quantity'#(lf)/*,tor.COST * (#(lf)#(tab)#(tab)#(tab)CASE #(lf)#(tab)#(tab)#(tab)#(tab)WHEN doct.DEBIT = 'C'#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)THEN - 1#(lf)#(tab)#(tab)#(tab)#(tab)ELSE 1#(lf)#(tab)#(tab)#(tab)#(tab)END#(lf)#(tab)#(tab)#(tab)) AS 'LineTotalCost' */#(lf),NULL AS 'LineTotalCost' #(lf)--,(oi.TQUANT/1000)*round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE  as 'LineTotalNet'#(lf),NULL AS 'LineTotalNetNIS'#(lf),NULL AS 'LineTotalNet_USD'#(lf),null AS 'LineTotalNetVAT'#(lf),null AS 'LineTotalNetVAT_USD'#(lf),CONVERT(INT, CONVERT(VARCHAR,SUBSTRING(T_TNOEH,1,4) + SUBSTRING(T_TNOEH,5,2))) AS YearMonth#(lf),1 as 'Status'#(lf)--,null as 'ChargeFlag'  #(lf)--,null as 'סטטוס ליקוט כותרת'#(lf)--,null as 'סטטוס ליקוט שורה'#(lf)--,null  as 'דגל סטורנו'#(lf),1144 as 'InventoryWarehouse'#(lf),GETDATE() AS RowInsertDatetime#(lf)--,NULL AS SubItemID#(lf)FROM [BT].[dbo].[TNOEOT_MLAI_CLLI] TM#(lf)#(lf)Left Join (select *, #(lf)Case#(lf)#(tab)when sher = 0#(lf)#(tab)#(tab)then first_value(sher) over (partition by value_partition order by Tarikh) #(lf)#(tab)else sher#(lf)end as new_sher#(lf)from (#(lf)  select *, sum(case when sher=0 then 0 else 1 end) over (order by tarikh ) as value_partition#(lf)  from SHERI_MTBE) m#(lf)#(lf)) SM  #(lf)#(tab)on SM.TARIKH=TM.T_TNOEH#(lf)WHERE 1=1#(lf)AND QOD_GORM <> 1#(lf)AND Cast(SUBSTRING(T_TNOEH,1,4) as int) >=2018 and Cast(SUBSTRING(T_TNOEH,1,4) as int) <= Year(Getdate())#(lf)AND SOG_TNOEH_CN_ITS_SP_HE NOT LIKE N'%ה%'"]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Date", type date}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

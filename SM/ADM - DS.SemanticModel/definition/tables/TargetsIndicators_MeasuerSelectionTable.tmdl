@@ -1,0 +1,57 @@
+table TargetsIndicators_MeasuerSelectionTable
+	lineageTag: 9788905d-2500-453d-b33c-93f38a7c6211
+
+	column ID
+		dataType: int64
+		formatString: 0
+		lineageTag: 4dd27610-a101-4185-bfce-ca7e94850559
+		summarizeBy: count
+		sourceColumn: ID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Indicator
+		dataType: string
+		lineageTag: c9063ab9-fb00-43ab-a401-32311305d03d
+		summarizeBy: none
+		sourceColumn: Indicator
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Above
+		dataType: string
+		lineageTag: cb25edfa-8867-43ce-ad0d-658acd8aa263
+		summarizeBy: none
+		sourceColumn: Above
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Below
+		dataType: string
+		lineageTag: e7da10f3-04aa-4bd3-9a85-f8fd831f0422
+		summarizeBy: none
+		sourceColumn: Below
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition TargetsIndicators_MeasuerSelectionTable-567ce6bf-fb61-4d52-9529-51e25e84bd58 = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WMlTSUbo+7/qi63MUrk+5PhPImAwUAYlaAoFSrE60khFIyfLrK65PvT5R4focuCIDPXOwUpAaY4gxq65Pv74KRQ1UXWwsAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type text) meta [Serialized.Text = true]) in type table [ID = _t, Indicator = _t, Above = _t, Below = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"ID", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	changedProperty = IsHidden
+
+	annotation PBI_ResultType = Table
+

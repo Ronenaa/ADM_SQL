@@ -1,0 +1,24 @@
+table FilterExecution
+	lineageTag: 128333f5-49e3-444f-9d0d-1996e68f5f07
+
+	column 'Filter By'
+		lineageTag: a46f1873-61f6-43d0-9f88-752ab3c6f614
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Filter By]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition FilterExecution = calculated
+		mode: import
+		source =
+				DATATABLE(
+				    "Filter By", STRING,
+				    {
+				        {"All"},
+				        {"No Execution YTD"}
+				    }
+				)
+
+	annotation PBI_Id = f69ffae8fe9a4fb1848e78177a6fa4d9
+

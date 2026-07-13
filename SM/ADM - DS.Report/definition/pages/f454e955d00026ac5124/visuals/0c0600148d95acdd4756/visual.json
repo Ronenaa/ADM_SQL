@@ -1,0 +1,224 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
+  "name": "0c0600148d95acdd4756",
+  "position": {
+    "x": 0,
+    "y": 117.81948168007149,
+    "z": 1000,
+    "height": 118.9633601429848,
+    "width": 1011.1885612153708,
+    "tabOrder": 1000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dimPurchaseOrderNumber"
+                    }
+                  },
+                  "Property": "PurchaseOrderID"
+                }
+              },
+              "queryRef": "dimSubPurchaseOrderNumber.PurchaseOrderID",
+              "nativeQueryRef": "PurchaseOrderID1"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dimItemsSimple"
+                    }
+                  },
+                  "Property": "Article_Description"
+                }
+              },
+              "queryRef": "dimItemsSimple.Article_Description",
+              "nativeQueryRef": "Article_Description1"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factSales"
+                    }
+                  },
+                  "Property": "Total Gain"
+                }
+              },
+              "queryRef": "factSales.Total Gain",
+              "nativeQueryRef": "Total Gain"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factSales"
+                    }
+                  },
+                  "Property": "FOT Profit"
+                }
+              },
+              "queryRef": "factSales.FOT Profit",
+              "nativeQueryRef": "FOT Profit"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factSales"
+                    }
+                  },
+                  "Property": "Quantity FOT"
+                }
+              },
+              "queryRef": "factSales.Quantity FOT",
+              "nativeQueryRef": "Quantity FOT"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factSales"
+                    }
+                  },
+                  "Property": "CIF Profit"
+                }
+              },
+              "queryRef": "factSales.CIF Profit",
+              "nativeQueryRef": "CIF Profit"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factSales"
+                    }
+                  },
+                  "Property": "Quantity CIF"
+                }
+              },
+              "queryRef": "factSales.Quantity CIF",
+              "nativeQueryRef": "Quantity CIF"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factSales"
+                    }
+                  },
+                  "Property": "FOT Premium Profit"
+                }
+              },
+              "queryRef": "factSales.FOT Premium Profit",
+              "nativeQueryRef": "FOT Premium Profit"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factSales"
+                    }
+                  },
+                  "Property": "Quantity FOT Premium"
+                }
+              },
+              "queryRef": "factSales.Quantity FOT Premium",
+              "nativeQueryRef": "Quantity FOT Premium"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "dimPurchaseOrderNumber"
+                  }
+                },
+                "Property": "PurchaseOrderID"
+              }
+            },
+            "direction": "Descending"
+          }
+        ]
+      }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "86ee0cc442cc15e109da",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dimItems"
+              }
+            },
+            "Property": "ItemKey"
+          }
+        },
+        "type": "Advanced",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "d",
+              "Entity": "dimItems",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "Not": {
+                  "Expression": {
+                    "Comparison": {
+                      "ComparisonKind": 0,
+                      "Left": {
+                        "Column": {
+                          "Expression": {
+                            "SourceRef": {
+                              "Source": "d"
+                            }
+                          },
+                          "Property": "ItemKey"
+                        }
+                      },
+                      "Right": {
+                        "Literal": {
+                          "Value": "'96-96'"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "howCreated": "User"
+      }
+    ]
+  }
+}

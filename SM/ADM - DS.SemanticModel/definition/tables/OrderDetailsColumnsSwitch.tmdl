@@ -1,0 +1,91 @@
+table OrderDetailsColumnsSwitch
+	lineageTag: ebb23ff6-155c-45af-a249-357bb1f07125
+
+	column OrderDetailsColumnsSwitch
+		lineageTag: e85d7905-4fa5-4763-875a-ec4c64518ad1
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'OrderDetailsColumnsSwitch Order'
+
+		relatedColumnDetails
+			groupByColumn: 'OrderDetailsColumnsSwitch Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'OrderDetailsColumnsSwitch Fields'
+		lineageTag: 76938589-d1be-4aae-a4aa-5bcff07e5a98
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'OrderDetailsColumnsSwitch Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'OrderDetailsColumnsSwitch Order'
+		formatString: 0
+		lineageTag: dbd87aae-3df9-4b76-8275-a134e02d9165
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Type
+		formatString: 0
+		lineageTag: 7989161e-3e93-4db2-b480-b808b116ef96
+		summarizeBy: none
+		sourceColumn: [Value4]
+
+		annotation SummarizationSetBy = Automatic
+
+	column OrderIDFilter
+		formatString: 0
+		lineageTag: 10deb412-5089-454d-8982-ba0d2bb985c8
+		summarizeBy: sum
+		sourceColumn: [Value5]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition OrderDetailsColumnsSwitch = calculated
+		mode: import
+		source =
+				{
+					("Order", NAMEOF('factOrders'[OrderID]), 0,1,1),
+					("Order Date", NAMEOF('factOrders'[Date]), 1,1,0),
+					("Customer", NAMEOF('dimCustomers'[שם לקוח אב]), 2,1,0),
+					("Product", NAMEOF('dimItemsSimple'[Article_Description]), 3,1,0),
+					("Quantity", NAMEOF('factOrders'[Quantity Dynamic Table Switch]), 4,1,0),
+					("Remain", NAMEOF('factOrders'[Open Quantity Switch]), 5,1,0),
+					("Price", NAMEOF('factOrders'[Price Dynamic Table Details Switch]), 6,1,0),
+					("Supply Date", NAMEOF('factOrders'[תאריך אספקה]), 7,1,0),
+					("Status", NAMEOF('dimOrderStatus'[Desc]), 8,1,0),
+				    ("Transaction Type",NAMEOF('dimTransactionType'[Desc]),9,1,0),
+				    ("Delivered From", NAMEOF('dimSuppliers'[Supplier Name]), 10,1,0),
+					("Order", NAMEOF('factOrders'[OrderID]), 11,2,1),
+					("Order Date", NAMEOF('factOrders'[Date]), 12,2,0),
+					("Customer", NAMEOF('dimCustomers'[שם לקוח אב]), 13,2,0),
+					("Product", NAMEOF('dimItemsSimple'[Article_Description]), 14,2,0),
+					("Quantity", NAMEOF('factOrders'[Quantity Dynamic Table Switch]), 15,2,0),
+					("Remain", NAMEOF('factOrders'[Open Quantity Switch]), 16,2,0),
+					("Price", NAMEOF('factOrders'[Price Dynamic Table Details Switch]), 17,2,0),
+					("Supply Date", NAMEOF('factOrders'[תאריך אספקה]), 18,2,0),
+					("Status", NAMEOF('dimOrderStatus'[Desc]), 19,2,0),
+				    ("Transaction Type",NAMEOF('dimTransactionType'[Desc]),20,2,0),
+				    ("Delivered From", NAMEOF('dimSuppliers'[Supplier Name]), 21,2,0),
+					("Delivery Note", NAMEOF('factSales'[DeliveryNote]), 22,3,1),
+					("Delivery Date", NAMEOF('factSales'[DeliveryDate]), 23,3,0),
+					("Customer", NAMEOF('dimCustomers'[שם לקוח]), 24,3,0),
+					("Product", NAMEOF('dimItemsSimple'[Article_Description]), 25,3,0),
+					("Quantity", NAMEOF('factOrders'[Quantity Dynamic Table Switch]), 26,3,0),
+					("Price", NAMEOF('factOrders'[Price Dynamic Table Details Switch]), 27,3,0),
+				    ("Transaction Type",NAMEOF('dimTransactionType'[Desc]),28,1,0),
+				    ("Delivered From", NAMEOF('dimSuppliers'[Supplier Name]), 29,3,0),
+				    ("Order", NAMEOF('factSales'[OrderID]), 30,3,0)
+				}
+
+	annotation PBI_Id = 5ec27c195a8d450eb28a413189becc96
+

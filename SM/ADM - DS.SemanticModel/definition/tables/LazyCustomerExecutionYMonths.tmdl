@@ -1,0 +1,22 @@
+table LazyCustomerExecutionYMonths
+	lineageTag: c8ab060e-1647-4ae7-8e6c-cbec1388ee8a
+
+	column LazyCustomerExecutionYMonths
+		formatString: 0
+		lineageTag: bad51a0d-4307-4198-a1b2-b6e0b0d6478c
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+		annotation SummarizationSetBy = User
+
+	partition LazyCustomerExecutionYMonths = calculated
+		mode: import
+		source = GENERATESERIES(1, 12, 1)
+
+	annotation PBI_Id = fdc66247eaec45429d881ec586a7743b
+

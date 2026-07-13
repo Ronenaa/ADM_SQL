@@ -1,0 +1,26 @@
+Power Query:
+
+=
+let
+    currentDate = DateTimeZone.FixedUtcNow(),
+    currentYear = Date.Year(currentDate),
+
+    // Last Sunday of October
+    lastDayOfOctober = #date(currentYear, 10, 31),
+    dayOfWeekOct = Date.DayOfWeek(lastDayOfOctober, Day.Sunday),
+    lastSundayOct = Date.AddDays(lastDayOfOctober, -dayOfWeekOct),
+
+    // Last Sunday of March
+    lastDayOfMarch = #date(currentYear, 3, 31),
+    dayOfWeekMar = Date.DayOfWeek(lastDayOfMarch, Day.Sunday),
+    lastSundayMar = Date.AddDays(lastDayOfMarch, -dayOfWeekMar),
+    fridayBeforeLastSundayMar = Date.AddDays(lastSundayMar, -2),
+
+    // Fix: Convert currentDate to Date for comparison
+    isStandardTime = Date.From(currentDate) >= lastSundayOct or Date.From(currentDate) < fridayBeforeLastSundayMar,
+
+    // Apply UTC+2 or UTC+3
+    israelTime = if isStandardTime then DateTimeZone.SwitchZone(currentDate, 2) else DateTimeZone.SwitchZone(currentDate, 3)
+in
+    israelTime
+```

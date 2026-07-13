@@ -1,0 +1,30 @@
+table SalesParameter
+	lineageTag: 95b910fd-24ce-40ee-824f-2edeb1153a09
+
+	measure MinSales = MIN(SalesParameter[Value])
+		formatString: 0
+		lineageTag: 84cb05bc-e588-4e43-8132-d62a00390ee6
+
+	measure MaxSales = MAX(SalesParameter[Value])
+		formatString: 0
+		lineageTag: 009d7a57-da49-451f-9f38-772af5a048f4
+
+	column Value
+		formatString: #,0
+		lineageTag: 7d89f32e-a757-4d9d-825b-75f346f2b0d1
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+		annotation SummarizationSetBy = User
+
+	partition SalesParameter-b5a30ac6-e172-4c18-97c8-f9c7763cf88a = calculated
+		mode: import
+		source = GENERATESERIES(0, 500000, 100)
+
+	annotation PBI_Id = c5d320d87d6847698971385045eeef78
+

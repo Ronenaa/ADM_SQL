@@ -1,0 +1,369 @@
+table dimHolidays
+	lineageTag: 4743208b-b1f6-4008-8460-d331d695c515
+
+	measure 'מכירות חגים' =
+			
+			SUMX(dimHolidays,
+				[Total Sales]
+			)
+		formatString: #,0
+		lineageTag: 1e58f8e3-c219-46bd-b8fa-a0a5e4f1e5c7
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'מכירות חגים שנה נוכחית' =
+			
+			var maxYear = [This Holiday Year]
+			return
+			CALCULATE(
+				[מכירות חגים],
+				dimHolidays[Year]=maxYear
+			)
+		formatString: #,0
+		lineageTag: 6f73ef98-7d15-46c9-ac88-c01f5e319f7f
+
+		changedProperty = IsHidden
+
+	measure 'מכירות חגים אשתקד' =
+			
+			var maxYear = [Previous Holiday Year]
+			var maxDay = [Max Available Day - This Holiday Year]
+			return
+			CALCULATE(
+			    [מכירות חגים],
+				dimHolidays[Year]=maxYear,
+			    FILTER(VALUES(dimHolidays[DaysFromHoliday]),dimHolidays[DaysFromHoliday]<=maxDay && NOT(ISBLANK(maxDay)))
+			)
+		formatString: #,0
+		lineageTag: 71c8896f-b678-4e34-ba45-930908ed461c
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'שינוי מכירות חגים אשתקד' =
+			
+			[מכירות חגים שנה נוכחית]-[מכירות חגים אשתקד]
+		formatString: #,0
+		lineageTag: 53d810e2-a727-46dd-b42f-bea849f52e2a
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'אחוז רווח חגים' = ```
+			
+			DIVIDE([מכירות חגים]-[הוצאות חגים], 
+			    [מכירות חגים],
+			    BLANK())
+			```
+		lineageTag: 0806fea8-cf8b-4ca2-b192-fd177166e12f
+
+		changedProperty = IsHidden
+
+	measure 'הוצאות חגים' =
+			
+			SUMX(dimHolidays,
+				[Total Cost]
+			)
+		formatString: #,0
+		lineageTag: 38eb7581-7cde-47ce-b6f8-19c9fe458f04
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'אחוז רווח חגים שנה נוכחית' =
+			
+			var maxYear = [This Holiday Year]--CALCULATE(MAX(dimHolidays[HebYearID]), dimDates[IsHistory]=1)
+			return
+			CALCULATE(
+				[אחוז רווח חגים],
+				--dimHolidays[HebYearID]=maxYear
+			    dimHolidays[year]=maxYear
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: b41e79bb-decc-4305-a8e3-6877e9f7fe8b
+
+		changedProperty = IsHidden
+
+	measure 'אחוז רווח חגים אשתקד' =
+			
+			var maxYear = [Previous Holiday Year]--CALCULATE(MAX(dimHolidays[HebYearID])-1, dimDates[IsHistory]=1)
+			var maxDay = [Max Available Day - This Holiday Year]
+			return
+			CALCULATE(
+				[אחוז רווח חגים],
+				--ALLSELECTED(dimHolidays[HebYearID]),
+				--dimHolidays[HebYearID]=maxYear
+			    dimHolidays[Year]=maxYear,
+			    FILTER(VALUES(dimHolidays[DaysFromHoliday]),dimHolidays[DaysFromHoliday]<=maxDay && NOT(ISBLANK(maxDay)))
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: bb480499-2708-417f-a2b0-76856899c431
+
+		changedProperty = IsHidden
+
+	measure 'ממוצע מכירות לעסקה חגים שנה נוכחית' =
+			
+			DIVIDE([מכירות חגים שנה נוכחית],[כמות עסקאות חגים שנה נוכחית])
+		lineageTag: efe00d75-04f5-483c-a917-e4f2e9b26e2a
+
+		changedProperty = IsHidden
+
+	measure 'כמות עסקאות חגים' =
+			
+			SUMX(dimHolidays,
+				[Transactions Quantity]
+			)
+		formatString: #,0
+		lineageTag: a52c99a8-24ba-4d5c-9a43-3d9f718bcb85
+
+		changedProperty = IsHidden
+
+	measure 'כמות עסקאות חגים שנה נוכחית' =
+			
+			var maxYear = [This Holiday Year]
+			return
+			CALCULATE(
+				[כמות עסקאות חגים],
+				dimHolidays[Year]=maxYear
+			)
+		formatString: #,0
+		lineageTag: c6964014-b65c-4c92-843b-988153208f1f
+
+		changedProperty = IsHidden
+
+	measure 'ממוצע מכירות לעסקה חגים אשתקד' =
+			
+			DIVIDE([מכירות חגים אשתקד],[כמות עסקאות חגים אשתקד])
+		lineageTag: 449f01d1-6187-4815-8f4b-aec0382525c3
+
+		changedProperty = IsHidden
+
+	measure 'כמות עסקאות חגים אשתקד' =
+			
+			var maxYear = [Previous Holiday Year]
+			var maxDay = [Max Available Day - This Holiday Year]
+			return
+			CALCULATE(
+				[כמות עסקאות חגים],
+				dimHolidays[Year]=maxYear,
+			    FILTER(VALUES(dimHolidays[DaysFromHoliday]),dimHolidays[DaysFromHoliday]<=maxDay && NOT(ISBLANK(maxDay)))
+			)
+		formatString: #,0
+		lineageTag: b76f923f-904b-43c8-a6ed-5e87696cfdc0
+
+		changedProperty = IsHidden
+
+	measure 'ממוצע מכירות ליום בחג' =
+			
+			DIVIDE([מכירות חגים],
+				[כמות ימים עם מכירה])
+		formatString: #,0
+		lineageTag: 7b61ec2f-aba2-4aeb-93b4-58ff5aee647b
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'This Holiday Year' =
+			
+			IF(HASONEVALUE(dimHolidayYear[Year]), MAX(dimHolidayYear[Year]),
+			CALCULATE(MAX(dimHolidays[Year]), dimDates[IsHistory]=1,  all(dimHolidays[DaysSort],dimHolidays[קבוצת חג],dimHolidays[קטגורית ימים לחג],dimHolidays[DaysFromHoliday],dimHolidays[HolidayCategorySort])))
+		formatString: 0
+		lineageTag: 238a26e0-2009-4af6-945a-74553a6e1093
+
+		changedProperty = IsHidden
+
+	measure 'Previous Holiday Year' =
+			
+			IF(HASONEVALUE(dimHolidayYear_Compare[Year]), MAX(dimHolidayYear_Compare[Year]),
+			[This Holiday Year]-1)
+		formatString: 0
+		lineageTag: 464591ae-cc80-4aa3-a086-b1c204e19667
+
+		changedProperty = IsHidden
+
+	measure 'Max Available Day - This Holiday Year' =
+			
+			var maxYear = [This Holiday Year]
+			return
+			CALCULATE(
+			CALCULATE(
+			    MAX(dimHolidays[DaysFromHoliday]),
+			    dimHolidays[Year] = maxYear,
+			    FILTER(VALUES(dimHolidays[DaysFromHoliday]),
+			        NOT(ISBLANK(CALCULATE([Total Sales],dimHolidays[Year] = maxYear))))
+			)
+			,all(dimHolidays[DaysSort],dimHolidays[קבוצת חג],dimHolidays[קטגורית ימים לחג],dimHolidays[DaysFromHoliday],dimHolidays[HolidayCategorySort]))
+		formatString: 0
+		lineageTag: 54e50f78-3524-47a4-ab27-ea4e00bcbaf6
+
+		changedProperty = IsHidden
+
+	column HebYearID
+		dataType: int64
+		formatString: 0
+		lineageTag: 1e2223ea-b25d-451a-a102-cf2d3fbc68cb
+		summarizeBy: count
+		sourceColumn: HebYearID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column HebYearName
+		dataType: string
+		lineageTag: fd62f975-fbdf-4934-ac50-3b09f34921b5
+		summarizeBy: none
+		sourceColumn: HebYearName
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column HolidayID
+		dataType: int64
+		formatString: 0
+		lineageTag: c554a122-adcc-4e24-9077-c82dabad208e
+		summarizeBy: count
+		sourceColumn: HolidayID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column HolidayName
+		dataType: string
+		lineageTag: 84b31618-0268-431a-bd39-dd149888d89c
+		summarizeBy: none
+		sourceColumn: HolidayName
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DaysFromHoliday
+		dataType: int64
+		formatString: 0
+		lineageTag: b2a3a101-dfc8-492e-856f-2dea2c97b0f9
+		summarizeBy: sum
+		sourceColumn: DaysFromHoliday
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Custom Date'
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 82b25dbb-69f9-4586-839f-a8547b1f628d
+		summarizeBy: none
+		sourceColumn: Custom Date
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'קטגורית ימים לחג'
+		dataType: string
+		lineageTag: 6c8849ed-a30d-47b3-b267-04c24ecb867a
+		summarizeBy: none
+		sourceColumn: קטגורית ימים לחג
+		sortByColumn: DaysSort
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DaysSort
+		dataType: int64
+		formatString: 0
+		lineageTag: 27baac29-28d9-4ed8-ae2c-ffd1445bf06d
+		summarizeBy: sum
+		sourceColumn: DaysSort
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'קבוצת חג'
+		dataType: string
+		lineageTag: 447459f9-714b-430f-9d4d-1a13af65add3
+		summarizeBy: none
+		sourceColumn: קבוצת חג
+		sortByColumn: HolidayCategorySort
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: 8817c4e3-2009-410b-8a97-c07459e543e3
+		summarizeBy: sum
+		sourceColumn: Year
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column HolidayCategorySort
+		dataType: int64
+		formatString: 0
+		lineageTag: ff3c00f7-91da-4721-a592-782234360157
+		summarizeBy: sum
+		sourceColumn: HolidayCategorySort
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dimHolidays-1f7668fe-51f4-449e-9090-82cc19bf0a9c = m
+		mode: import
+		queryGroup: 'Dates Dim'
+		source = ```
+				let
+				    Source = dimDates,
+				    #"1 - Removed Other Columns" = Table.SelectColumns(Source,{"Date"}),
+				    #"1 - Merged HolidayPivot TBL" = Table.NestedJoin(#"1 - Removed Other Columns",{"Date"},HolidayPivot,{"Date"},"HolidayPivot",JoinKind.Inner),
+				    #"1 - Expanded HolidayPivot" = Table.ExpandTableColumn(#"1 - Merged HolidayPivot TBL", "HolidayPivot", {"HebYearID", "HebYearName", "HolidayID", "HolidayName", "Year"}, {"HebYearID", "HebYearName", "HolidayID", "HolidayName", "Year"}),
+				    #"2 - Added list 30" = Table.AddColumn(#"1 - Expanded HolidayPivot", "DaysFromHoliday", each {-30..30}),
+				    #"2 - Expanded DaysFromHoliday" = Table.ExpandListColumn(#"2 - Added list 30", "DaysFromHoliday"),
+				    #"2 - Changed Type" = Table.TransformColumnTypes(#"2 - Expanded DaysFromHoliday",{{"DaysFromHoliday", Int64.Type}}),
+				    #"2 - Added Date before+after" = Table.AddColumn(#"2 - Changed Type", "Custom Date", each Date.AddDays([Date], [DaysFromHoliday]),type date),
+				    #"3 - Merged HolidayNotPivot" = Table.NestedJoin(#"2 - Added Date before+after",{"Custom Date"},HolidayNOTPivot,{"Date"},"HolidayNOTPivot",JoinKind.LeftOuter),
+				    #"3 - Expanded HolidayNOTPivot" = Table.ExpandTableColumn(#"3 - Merged HolidayNotPivot", "HolidayNOTPivot", {"SpecialDayName"}, {"SpecialDayName"}),
+				    #"4 - Added Days Category" = Table.AddColumn(#"3 - Expanded HolidayNOTPivot", "קטגורית ימים לחג", each if [SpecialDayName]<>null then [SpecialDayName] & " " & Number.ToText([DaysFromHoliday]) & " "
+				else if [DaysFromHoliday]>0 then " ימים מ"&[HolidayName] & " " & Number.ToText([DaysFromHoliday]) & " "
+				else " ימים ל"&[HolidayName] & " " & Number.ToText([DaysFromHoliday]) & " ", type text),
+				    #"4 - Added DaysSort" = Table.AddColumn(#"4 - Added Days Category", "DaysSort", each [HolidayID]*1000 + [DaysFromHoliday], Int64.Type),
+				    #"4 - Added Holiday Category" = Table.AddColumn(#"4 - Added DaysSort", "קבוצת חג", each if Text.Contains(
+				if [SpecialDayName]<>null then [SpecialDayName] else Number.ToText([DaysFromHoliday]) 
+				,[HolidayName]) then "חג"
+				else if [DaysFromHoliday]<0 then "לפני חג"
+				else "אחרי חג", type text),
+				    #"4 - Added Holiday CategorySort" = Table.AddColumn(#"4 - Added Holiday Category", "HolidayCategorySort", each if [קבוצת חג]="חג" then 1
+				else if [קבוצת חג]= "לפני חג" then 0
+				else 2, Int64.Type),
+				    #"5 - Removed Other Columns" = Table.SelectColumns(#"4 - Added Holiday CategorySort",{"HebYearID", "HebYearName", "HolidayID", "HolidayName", "Year", "DaysFromHoliday", "Custom Date", "קטגורית ימים לחג", "DaysSort", "קבוצת חג", "HolidayCategorySort"})
+				in
+				    #"5 - Removed Other Columns"
+				```
+
+	changedProperty = IsHidden
+
+	annotation PBI_Id = 55cb7783-cde5-455c-854a-c56045d5ac0c
+
+	annotation LinkedQueryName = dimHolidays
+
+	annotation PBI_QueryRelationships = {"columnCount":11,"keyColumnNames":[],"queryRelationships":[{"keyColumnCount":1,"keyColumn":6,"otherKeyColumnIdentity":"Section1/HolidayNOTPivot/Changed Type.{Date,0}","KeyColumnCount":1}],"columnIdentities":["Section1/HolidayPivot/Changed Type.{HebYearID,4}","Section1/HolidayPivot/Changed Type.{HebYearName,1}","Section1/HolidayPivot/Changed Type.{HolidayID,2}","Section1/HolidayPivot/Changed Type.{HolidayName,3}","Section1/HolidayPivot/Inserted Year.{Year,5}","Section1/dimHolidays/2 - Changed Type.{DaysFromHoliday,6}","Section1/dimHolidays/2 - Added Date before+after.{Custom Date,7}","Section1/dimHolidays/4 - Added Days Category.{קטגורית ימים לחג,9}","Section1/dimHolidays/4 - Added DaysSort.{DaysSort,10}","Section1/dimHolidays/4 - Added Holiday Category.{קבוצת חג,11}","Section1/dimHolidays/4 - Added Holiday CategorySort.{HolidayCategorySort,12}"],"ColumnCount":11,"KeyColumnNames":[],"ColumnIdentities":["Section1/HolidayPivot/Changed Type.{HebYearID,4}","Section1/HolidayPivot/Changed Type.{HebYearName,1}","Section1/HolidayPivot/Changed Type.{HolidayID,2}","Section1/HolidayPivot/Changed Type.{HolidayName,3}","Section1/HolidayPivot/Inserted Year.{Year,5}","Section1/dimHolidays/2 - Changed Type.{DaysFromHoliday,6}","Section1/dimHolidays/2 - Added Date before+after.{Custom Date,7}","Section1/dimHolidays/4 - Added Days Category.{קטגורית ימים לחג,9}","Section1/dimHolidays/4 - Added DaysSort.{DaysSort,10}","Section1/dimHolidays/4 - Added Holiday Category.{קבוצת חג,11}","Section1/dimHolidays/4 - Added Holiday CategorySort.{HolidayCategorySort,12}"],"RelationshipInfo":[{"keyColumnCount":1,"keyColumn":6,"otherKeyColumnIdentity":"Section1/HolidayNOTPivot/Changed Type.{Date,0}","KeyColumnCount":1}]}
+
+	annotation PBI_ResultType = Table
+

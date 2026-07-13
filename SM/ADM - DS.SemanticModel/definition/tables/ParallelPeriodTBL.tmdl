@@ -1,0 +1,60 @@
+/// Additional Analysis for not Calendar Periods & Special Dates.
+/// Mostly for B2C Use/
+table ParallelPeriodTBL
+	lineageTag: bffd2742-dd16-46e4-9dff-588159d5d616
+
+	column 'This Year'
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 9a56e508-25f7-40b5-b09e-76a471e95bb2
+		summarizeBy: none
+		sourceColumn: This Year
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Parallel Period'
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: a4c3ebbc-3d25-4806-9593-c31bfe76f453
+		summarizeBy: none
+		sourceColumn: Parallel Period
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Description
+		dataType: string
+		lineageTag: 2c9569c1-8bee-47cb-8b5b-bf57a25f1ec1
+		summarizeBy: none
+		sourceColumn: Description
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition ParallelPeriodTBL-53cbab26-1efc-4fd3-b420-e558bda477a9 = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("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", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type text) meta [Serialized.Text = true]) in type table [#"This Year" = _t, #"Parallel Period" = _t, Description = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"This Year", type date}, {"Parallel Period", type date}, {"Description", type text}})
+				in
+				    #"Changed Type"
+
+	changedProperty = IsHidden
+
+	annotation PBI_Id = 53b46d3f-5a3e-4b54-9d1a-586203dd2ef1
+
+	annotation LinkedQueryName = ParallelPeriodTBL
+
+	annotation PBI_QueryRelationships = {"columnCount":3,"keyColumnNames":[],"queryRelationships":[],"columnIdentities":["Section1/ParallelPeriodTBL/Changed Type.{This Year,0}","Section1/ParallelPeriodTBL/Changed Type.{Parallel Period,1}","Section1/ParallelPeriodTBL/Changed Type.{Description,2}"],"ColumnCount":3,"KeyColumnNames":[],"ColumnIdentities":["Section1/ParallelPeriodTBL/Changed Type.{This Year,0}","Section1/ParallelPeriodTBL/Changed Type.{Parallel Period,1}","Section1/ParallelPeriodTBL/Changed Type.{Description,2}"],"RelationshipInfo":[]}
+
+	annotation PBI_ResultType = Table
+

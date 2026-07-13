@@ -1,0 +1,26 @@
+table ProfitScoreWeight
+	lineageTag: 8a435ac3-027b-4da8-9175-04fc8d684ba7
+
+	measure 'ProfitScoreWeight Value' = SELECTEDVALUE(ProfitScoreWeight[ProfitScoreWeight])
+		formatString: 0%;-0%;0%
+		lineageTag: fc1b2e5a-659a-4806-9277-ed520acbb848
+
+	column ProfitScoreWeight
+		formatString: 0%;-0%;0%
+		lineageTag: c2c0bda2-0102-4675-89f4-254df1b30e69
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+		annotation SummarizationSetBy = User
+
+	partition ProfitScoreWeight-75429d8d-c2cf-4328-b705-771862c29f81 = calculated
+		mode: import
+		source = GENERATESERIES(0, 1, 0.01)
+
+	annotation PBI_Id = 8ae0bc7a855e48fc90df5b9bc283d26e
+

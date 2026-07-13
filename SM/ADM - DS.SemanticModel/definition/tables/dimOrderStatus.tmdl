@@ -1,0 +1,48 @@
+table dimOrderStatus
+	lineageTag: 4eafc1e3-33e3-469c-8ec8-5f9cef9fc7c0
+
+	column Key
+		dataType: int64
+		formatString: 0
+		lineageTag: f302fa9f-e76b-43c7-b424-d229bb9dbe9c
+		summarizeBy: none
+		sourceColumn: Key
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Desc
+		dataType: string
+		lineageTag: 2de1351b-1710-4be1-8e67-029b5c862cbe
+		summarizeBy: none
+		sourceColumn: Desc
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Status_Group
+		dataType: string
+		lineageTag: 04be587f-2ba2-4171-ac88-10a2b95780cb
+		summarizeBy: none
+		sourceColumn: Status_Group
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dimOrderStatus = m
+		mode: import
+		queryGroup: Dim
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="WITH UNIONTABLE as (#(lf)Select OrderStatusCode AS 'Key',#(lf)OrderStatusDesc AS 'Desc'#(lf)from [dbo].[OrderStatus]#(lf)#(lf)Union ALL#(lf)Select POL_StatusID AS 'Key',#(lf)POL_StatusDesc AS 'Des'#(lf)From PurchaseOrderLineStatus#(lf))#(lf)#(lf)SELECT *,#(lf)CASE#(lf)#(tab)WHEN [Key] IN (1,2,10,40)#(lf)#(tab)#(tab)THEN 'Open'#(lf)#(tab)ELSE 'Close'#(lf)END AS Status_Group#(lf)FROM UNIONTABLE"]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Key", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+
