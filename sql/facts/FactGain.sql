@@ -741,12 +741,14 @@ AND TM.QOD_SHOLCH <> TM.QOD_MQBL   -- exclude internal docs (same source and des
         SUM(CASE WHEN s.LineType <> 'Item' THEN s.LineTotalNet_USD ELSE 0 END)      AS AdditionalLineCost,
         SUM(s.AdditionalQuantity)                                                       AS AdditionalQuantity,
         -- 1 = delivery note had multiple lines (e.g. item + warehouse storage fee), 0 = single line
-        CASE WHEN COUNT(*) > 1 THEN '1' ELSE '0' END                                   AS MultiLineFlag
+        CASE 
+			WHEN COUNT(*) > 1 or s.ItemKey = '42-42' THEN '1' 	
+		ELSE '0' END                                   AS MultiLineFlag
     FROM sales s
     LEFT OUTER JOIN base_link bl ON bl.DeliveryNote = s.DeliveryNote
 	WHERE s.SupplierWarehouse in (1144,1411,1367,1366,1289,1101,943)
     GROUP BY
-        s.DeliveryNote, s.DeliveryDate,
+        s.DeliveryNote, s.DeliveryDate, s.ItemKey,
         s.AccountKey, s.AgentKey,
         s.ActionType, s.ActionTypeDesc,
         s.SupplierWarehouse, 
@@ -756,20 +758,20 @@ AND TM.QOD_SHOLCH <> TM.QOD_MQBL   -- exclude internal docs (same source and des
 ,WH_prices AS (
     SELECT
         *,
-        CASE WHEN Quantity > 0
-             THEN CAST(ROUND((LineTotalNet_USD - AdditionalLineCost) / NULLIF(Quantity, 0), 2) AS FLOAT)
+        CASE
+			WHEN ItemKey = '42-42' THEN CAST(ROUND((LineTotalNet_USD - AdditionalLineCost) / NULLIF(Quantity, 0), 2) AS FLOAT) - 12
+			WHEN Quantity > 0 THEN CAST(ROUND((LineTotalNet_USD - AdditionalLineCost) / NULLIF(Quantity, 0), 2) AS FLOAT)
              ELSE NULL END                                                                       AS Item_Price,
-        CASE WHEN AdditionalQuantity > 0
-             THEN CAST(ROUND(AdditionalLineCost / NULLIF(AdditionalQuantity, 0), 2) AS FLOAT)
+        CASE 
+			WHEN ItemKey = '42-42' THEN CAST(12 AS FLOAT)
+			WHEN AdditionalQuantity > 0 THEN CAST(ROUND(AdditionalLineCost / NULLIF(AdditionalQuantity, 0), 2) AS FLOAT)
              ELSE NULL END                                                                       AS Storage_Price,
-        CASE WHEN AdjustmentFlag <> '1'
-             THEN CAST(ROUND(
-                 (LineTotalNet_USD - AdditionalLineCost) / NULLIF(Quantity, 0) +
-                 ISNULL(AdditionalLineCost / NULLIF(AdditionalQuantity, 0), 0),
-                 2) AS FLOAT)
+        CASE 
+			WHEN AdjustmentFlag <> '1' THEN CAST(ROUND((LineTotalNet_USD - AdditionalLineCost) / NULLIF(Quantity, 0) +ISNULL(AdditionalLineCost / NULLIF(AdditionalQuantity, 0), 0),2) AS FLOAT)
              ELSE NULL END                                                                       AS Total_Price
     FROM WH_sales
 )
+
 
 -- ============================================================
 -- Branch 1: Import / Exchange orders — cost from P_costs
