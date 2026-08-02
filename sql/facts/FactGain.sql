@@ -739,16 +739,17 @@ AND TM.QOD_SHOLCH <> TM.QOD_MQBL   -- exclude internal docs (same source and des
         -- Additional-line cost: the value of non-item lines (e.g. warehouse storage fee).
         -- Non-zero only when MultiLineFlag = 1; use this to compare WH additional costs vs other order types.
         SUM(CASE WHEN s.LineType <> 'Item' THEN s.LineTotalNet_USD ELSE 0 END)      AS AdditionalLineCost,
-        SUM(s.AdditionalQuantity)                                                       AS AdditionalQuantity,
+        SUM(s.AdditionalQuantity)                                                   AS AdditionalQuantity,
         -- 1 = delivery note had multiple lines (e.g. item + warehouse storage fee), 0 = single line
-        CASE 
-			WHEN COUNT(*) > 1 or s.ItemKey = '42-42' THEN '1' 	
-		ELSE '0' END                                   AS MultiLineFlag
+		CASE 
+			WHEN COUNT(*) > 1 or MAX(CASE WHEN s.LineType = 'Item' THEN s.ItemKey ELSE NULL END) = '42-42' THEN '1' 	
+			ELSE '0' 
+		END																			 AS MultiLineFlag
     FROM sales s
     LEFT OUTER JOIN base_link bl ON bl.DeliveryNote = s.DeliveryNote
 	WHERE s.SupplierWarehouse in (1144,1411,1367,1366,1289,1101,943)
     GROUP BY
-        s.DeliveryNote, s.DeliveryDate, s.ItemKey,
+        s.DeliveryNote, s.DeliveryDate, --s.ItemKey,
         s.AccountKey, s.AgentKey,
         s.ActionType, s.ActionTypeDesc,
         s.SupplierWarehouse, 
@@ -772,6 +773,7 @@ AND TM.QOD_SHOLCH <> TM.QOD_MQBL   -- exclude internal docs (same source and des
     FROM WH_sales
 )
 
+,test as (
 
 -- ============================================================
 -- Branch 1: Import / Exchange orders — cost from P_costs
@@ -803,7 +805,7 @@ SELECT
 	case 
 		when s.rn = 1 and PC.DocName = 'Swap' then sum(s.Quantity) over (partition by s.PurchaseOrderID)
 		when s.rn = 1 and PC.DocName = 'Import' then PC.orderquantity
-	else 0 end																						AS PurchaseQuantity,
+	else 0 end																												AS PurchaseQuantity,
 	s.LineTotalNet_USD																										AS LineTotalNet_USD,
 	NULL																													AS Item_Price,
 	NULL																													AS Storage_Price,
@@ -817,72 +819,39 @@ SELECT
 	then PC.[demurrage / Despatch] else 0 end																				AS [demurrage / Despatch],
 	CASE WHEN s.rn = 1 THEN PC.[Other_Expenses]     ELSE 0 END																AS [Other_Expenses],
 	CASE WHEN s.rn = 1 THEN PC.Shortage            ELSE 0 END																AS Shortage,
-	CASE WHEN s.rn = 1 THEN
-    CAST(ROUND(
-        PC.DischargeCosts /
-        NULLIF(
-            PC.orderquantity - ISNULL(cq.CIF_Qty, 0),
-            0
-        )
-    , 2) AS FLOAT)
-	ELSE 0 END AS DischargeCost,
-	CASE WHEN s.rn = 1 THEN
-	CAST(ROUND(PC.Cif_price + PC.[demurrage / Despatch] + PC.DischargeCosts /
-	NULLIF(
-    PC.orderquantity - ISNULL(cq.CIF_Qty,0),
-    0), 2) AS FLOAT)
-	ELSE 0 END																												AS FOT_Purchase,
-
-	CAST(ROUND(CASE
-	WHEN s.SalesType = 'CIF' AND s.LineType = 'Item'
-		THEN (s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - PC.Cif_price
-	WHEN s.SalesType IN ('FOT', 'FOT Premium') AND s.LineType = 'Item'
-		THEN (s.LineTotalNet_USD / NULLIF(s.Quantity, 0))
-				- (
-					PC.Cif_price
-					+ PC.[demurrage / Despatch]
-					+ (
-						PC.DischargeCosts
-						/ NULLIF(
-							PC.orderquantity - ISNULL(cq.CIF_Qty, 0),
-							0
-						)
-					)
-				)
-		ELSE 0
-	END, 2) AS FLOAT) AS Gain,
-
+	CASE 
+		WHEN s.rn = 1 THEN 
+		CAST(ROUND( ISNULL(PC.DischargeCosts /NULLIF(PC.orderquantity - ISNULL(cq.CIF_Qty, 0),0), 0), 2) AS FLOAT) END 		AS DischargeCost,
+	CASE 
+		WHEN s.rn = 1 THEN 
+		CAST(ROUND(PC.Cif_price + PC.[demurrage / Despatch] + 
+		ISNULL(PC.DischargeCosts / NULLIF(PC.orderquantity - ISNULL(cq.CIF_Qty,0),0), 0),2) AS FLOAT)
+		ELSE 0 END																											AS FOT_Purchase,
 	CAST(ROUND(CASE
 		WHEN s.SalesType = 'CIF' AND s.LineType = 'Item'
-			THEN ((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - PC.Cif_price) * s.Quantity
+		THEN (s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - PC.Cif_price
 		WHEN s.SalesType IN ('FOT', 'FOT Premium') AND s.LineType = 'Item'
-			THEN (
-					(s.LineTotalNet_USD / NULLIF(s.Quantity, 0))
-					- (
-						PC.Cif_price
-						+ PC.[demurrage / Despatch]
-						+ (
-							PC.DischargeCosts
-							/ NULLIF(
-								PC.orderquantity - ISNULL(cq.CIF_Qty, 0),
-								0
-							)
-						  )
-					  )
-				 ) * s.Quantity
-		ELSE 0
-	END, 2) AS FLOAT) AS TotalGain,
-		NULL																													AS AdditionalLineCost
+		THEN (s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - (PC.Cif_price+ PC.[demurrage / Despatch] + (PC.DischargeCosts/ NULLIF(
+			PC.orderquantity - ISNULL(cq.CIF_Qty, 0),0)))
+		ELSE 0 END, 2) AS FLOAT)																							AS Gain,
+	CAST(ROUND(CASE
+		WHEN s.SalesType = 'CIF' AND s.LineType = 'Item'
+		THEN ((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - PC.Cif_price) * s.Quantity
+		WHEN s.SalesType IN ('FOT', 'FOT Premium') AND s.LineType = 'Item'
+		THEN ((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) -
+		(PC.Cif_price + PC.[demurrage / Despatch]+ (PC.DischargeCosts/ NULLIF(PC.orderquantity - ISNULL(cq.CIF_Qty, 0),0)))) * s.Quantity
+		ELSE 0 END, 2) AS FLOAT)																							AS TotalGain,
+		NULL																												AS AdditionalLineCost
 FROM (
     SELECT s.*,
            bl.PurchaseOrderID,
            ROW_NUMBER() OVER (PARTITION BY bl.PurchaseOrderID ORDER BY s.DeliveryNote ASC) AS rn
     FROM sales s
     INNER JOIN base_link bl ON bl.DeliveryNote = s.DeliveryNote
-) s
-LEFT JOIN  P_costs PC   ON PC.PurchaseOrderID = CAST(s.PurchaseOrderID AS VARCHAR(30))
-LEFT JOIN CIF_Qty cq    ON cq.PurchaseOrderID = s.PurchaseOrderID
-WHERE PC.ValueDate IS NOT NULL
+	) s
+	LEFT JOIN  P_costs PC   ON PC.PurchaseOrderID = CAST(s.PurchaseOrderID AS VARCHAR(30))
+	LEFT JOIN CIF_Qty cq    ON cq.PurchaseOrderID = s.PurchaseOrderID
+	WHERE PC.ValueDate IS NOT NULL
 
 UNION ALL
 
@@ -898,7 +867,9 @@ SELECT
     'Warehouse'																												AS Purchase_DocName,
 	s.AdjustmentFlag																										AS [AdjustmentFlag],
 	'0'																														AS Qty_flag,
-	s.MultiLineFlag																											AS [MultiLineFlag],
+	case 
+		when s.Storage_Price is null then '0' --to ignore the discount
+		else s.MultiLineFlag		end																						AS [MultiLineFlag],
 	case when row_number() over
 	(partition by s.SupplierWarehouse, FORMAT(s.DeliveryDate, 'yyyy-MM'), s.ItemKey
 	order by s.DeliveryNote asc) = 1
@@ -943,3 +914,8 @@ LEFT JOIN inv
            ELSE s.ItemKey
        END)
     AND FORMAT(inv.[Date], 'yyyyMM') = FORMAT(s.DeliveryDate, 'yyyyMM')
+
+	)
+
+	select *
+	from test

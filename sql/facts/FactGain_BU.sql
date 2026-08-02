@@ -772,7 +772,6 @@ AND TM.QOD_SHOLCH <> TM.QOD_MQBL   -- exclude internal docs (same source and des
     FROM WH_sales
 )
 
-
 -- ============================================================
 -- Branch 1: Import / Exchange orders — cost from P_costs
 -- ============================================================
@@ -817,72 +816,39 @@ SELECT
 	then PC.[demurrage / Despatch] else 0 end																				AS [demurrage / Despatch],
 	CASE WHEN s.rn = 1 THEN PC.[Other_Expenses]     ELSE 0 END																AS [Other_Expenses],
 	CASE WHEN s.rn = 1 THEN PC.Shortage            ELSE 0 END																AS Shortage,
-	CASE WHEN s.rn = 1 THEN
-    CAST(ROUND(
-        PC.DischargeCosts /
-        NULLIF(
-            PC.orderquantity - ISNULL(cq.CIF_Qty, 0),
-            0
-        )
-    , 2) AS FLOAT)
-	ELSE 0 END AS DischargeCost,
-	CASE WHEN s.rn = 1 THEN
-	CAST(ROUND(PC.Cif_price + PC.[demurrage / Despatch] + PC.DischargeCosts /
-	NULLIF(
-    PC.orderquantity - ISNULL(cq.CIF_Qty,0),
-    0), 2) AS FLOAT)
-	ELSE 0 END																												AS FOT_Purchase,
-
-	CAST(ROUND(CASE
-	WHEN s.SalesType = 'CIF' AND s.LineType = 'Item'
-		THEN (s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - PC.Cif_price
-	WHEN s.SalesType IN ('FOT', 'FOT Premium') AND s.LineType = 'Item'
-		THEN (s.LineTotalNet_USD / NULLIF(s.Quantity, 0))
-				- (
-					PC.Cif_price
-					+ PC.[demurrage / Despatch]
-					+ (
-						PC.DischargeCosts
-						/ NULLIF(
-							PC.orderquantity - ISNULL(cq.CIF_Qty, 0),
-							0
-						)
-					)
-				)
-		ELSE 0
-	END, 2) AS FLOAT) AS Gain,
-
+	CASE 
+		WHEN s.rn = 1 THEN 
+		CAST(ROUND( ISNULL(PC.DischargeCosts /NULLIF(PC.orderquantity - ISNULL(cq.CIF_Qty, 0),0), 0), 2) AS FLOAT) END 		AS DischargeCost,
+	CASE 
+		WHEN s.rn = 1 THEN 
+		CAST(ROUND(PC.Cif_price + PC.[demurrage / Despatch] + 
+		ISNULL(PC.DischargeCosts / NULLIF(PC.orderquantity - ISNULL(cq.CIF_Qty,0),0), 0),2) AS FLOAT)
+		ELSE 0 END																											AS FOT_Purchase,
 	CAST(ROUND(CASE
 		WHEN s.SalesType = 'CIF' AND s.LineType = 'Item'
-			THEN ((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - PC.Cif_price) * s.Quantity
+		THEN (s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - PC.Cif_price
 		WHEN s.SalesType IN ('FOT', 'FOT Premium') AND s.LineType = 'Item'
-			THEN (
-					(s.LineTotalNet_USD / NULLIF(s.Quantity, 0))
-					- (
-						PC.Cif_price
-						+ PC.[demurrage / Despatch]
-						+ (
-							PC.DischargeCosts
-							/ NULLIF(
-								PC.orderquantity - ISNULL(cq.CIF_Qty, 0),
-								0
-							)
-						  )
-					  )
-				 ) * s.Quantity
-		ELSE 0
-	END, 2) AS FLOAT) AS TotalGain,
-		NULL																													AS AdditionalLineCost
+		THEN (s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - (PC.Cif_price+ PC.[demurrage / Despatch] + (PC.DischargeCosts/ NULLIF(
+			PC.orderquantity - ISNULL(cq.CIF_Qty, 0),0)))
+		ELSE 0 END, 2) AS FLOAT)																							AS Gain,
+	CAST(ROUND(CASE
+		WHEN s.SalesType = 'CIF' AND s.LineType = 'Item'
+		THEN ((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - PC.Cif_price) * s.Quantity
+		WHEN s.SalesType IN ('FOT', 'FOT Premium') AND s.LineType = 'Item'
+		THEN ((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) -
+		(PC.Cif_price + PC.[demurrage / Despatch]+ (PC.DischargeCosts/ NULLIF(PC.orderquantity - ISNULL(cq.CIF_Qty, 0),0)))) * s.Quantity
+		ELSE 0 END, 2) AS FLOAT)																							AS TotalGain,
+		NULL																												AS AdditionalLineCost
 FROM (
     SELECT s.*,
            bl.PurchaseOrderID,
            ROW_NUMBER() OVER (PARTITION BY bl.PurchaseOrderID ORDER BY s.DeliveryNote ASC) AS rn
     FROM sales s
     INNER JOIN base_link bl ON bl.DeliveryNote = s.DeliveryNote
-) s
-LEFT JOIN  P_costs PC   ON PC.PurchaseOrderID = CAST(s.PurchaseOrderID AS VARCHAR(30))
-LEFT JOIN CIF_Qty cq    ON cq.PurchaseOrderID = s.PurchaseOrderID
-WHERE PC.ValueDate IS NOT NULL
+	) s
+	LEFT JOIN  P_costs PC   ON PC.PurchaseOrderID = CAST(s.PurchaseOrderID AS VARCHAR(30))
+	LEFT JOIN CIF_Qty cq    ON cq.PurchaseOrderID = s.PurchaseOrderID
+	WHERE PC.ValueDate IS NOT NULL
 
 UNION ALL
 
