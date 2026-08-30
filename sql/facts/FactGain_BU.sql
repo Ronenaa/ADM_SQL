@@ -171,8 +171,11 @@ exchange_priced AS (
             p.max_OrderQuantity   AS OrderQuantity,
             ship_sub.ShipID,   -- ship from the related purchase order
             ROW_NUMBER() OVER (
-                PARTITION BY b.ItemKey,b.PurchaseOrderID
-                ORDER BY p.Purchase_Date DESC
+                PARTITION BY b.DeliveredFrom, b.PurchaseOrderID, b.ItemKey, b.[Date]
+                ORDER BY
+                    CASE WHEN DATEDIFF(MONTH, CAST(b.[Date] + '-01' AS DATE), CAST(p.Purchase_Date + '-01' AS DATE)) <= 0 THEN 0 ELSE 1 END,
+                    ABS(DATEDIFF(MONTH, CAST(b.[Date] + '-01' AS DATE), CAST(p.Purchase_Date + '-01' AS DATE))) ASC,
+                    p.PurchaseOrderID DESC
             ) AS rn
         FROM exchange_movements b
         LEFT JOIN exchange_p_orders p
@@ -193,10 +196,6 @@ exchange_priced AS (
             JOIN ShipList      sl ON sa.SA_ShipID          = sl.ShipID
             GROUP BY POL.POL_OrderID, POL.POL_LineID
         ) ship_sub ON ship_sub.PurchaseOrderID = CAST(p.PurchaseOrderID AS VARCHAR(20))
-        WHERE DATEDIFF(MONTH,
-				CAST(b.[Date] + '-01' AS DATE),
-				CAST(p.Purchase_Date + '-01' AS DATE)
-				)    BETWEEN -3 AND 0
 )
 
 -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -739,16 +738,17 @@ AND TM.QOD_SHOLCH <> TM.QOD_MQBL   -- exclude internal docs (same source and des
         -- Additional-line cost: the value of non-item lines (e.g. warehouse storage fee).
         -- Non-zero only when MultiLineFlag = 1; use this to compare WH additional costs vs other order types.
         SUM(CASE WHEN s.LineType <> 'Item' THEN s.LineTotalNet_USD ELSE 0 END)      AS AdditionalLineCost,
-        SUM(s.AdditionalQuantity)                                                       AS AdditionalQuantity,
+        SUM(s.AdditionalQuantity)                                                   AS AdditionalQuantity,
         -- 1 = delivery note had multiple lines (e.g. item + warehouse storage fee), 0 = single line
-        CASE 
-			WHEN COUNT(*) > 1 or s.ItemKey = '42-42' THEN '1' 	
-		ELSE '0' END                                   AS MultiLineFlag
+		CASE 
+			WHEN COUNT(*) > 1 or MAX(CASE WHEN s.LineType = 'Item' THEN s.ItemKey ELSE NULL END) = '42-42' THEN '1' 	
+			ELSE '0' 
+		END																			 AS MultiLineFlag
     FROM sales s
     LEFT OUTER JOIN base_link bl ON bl.DeliveryNote = s.DeliveryNote
 	WHERE s.SupplierWarehouse in (1144,1411,1367,1366,1289,1101,943)
     GROUP BY
-        s.DeliveryNote, s.DeliveryDate, s.ItemKey,
+        s.DeliveryNote, s.DeliveryDate, --s.ItemKey,
         s.AccountKey, s.AgentKey,
         s.ActionType, s.ActionTypeDesc,
         s.SupplierWarehouse, 
@@ -802,7 +802,7 @@ SELECT
 	case 
 		when s.rn = 1 and PC.DocName = 'Swap' then sum(s.Quantity) over (partition by s.PurchaseOrderID)
 		when s.rn = 1 and PC.DocName = 'Import' then PC.orderquantity
-	else 0 end																						AS PurchaseQuantity,
+	else 0 end																												AS PurchaseQuantity,
 	s.LineTotalNet_USD																										AS LineTotalNet_USD,
 	NULL																													AS Item_Price,
 	NULL																													AS Storage_Price,
@@ -864,7 +864,9 @@ SELECT
     'Warehouse'																												AS Purchase_DocName,
 	s.AdjustmentFlag																										AS [AdjustmentFlag],
 	'0'																														AS Qty_flag,
-	s.MultiLineFlag																											AS [MultiLineFlag],
+	case 
+		when s.Storage_Price is null then '0' --to ignore the discount
+		else s.MultiLineFlag		end																						AS [MultiLineFlag],
 	case when row_number() over
 	(partition by s.SupplierWarehouse, FORMAT(s.DeliveryDate, 'yyyy-MM'), s.ItemKey
 	order by s.DeliveryNote asc) = 1
