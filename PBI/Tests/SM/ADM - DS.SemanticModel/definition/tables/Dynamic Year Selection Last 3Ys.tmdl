@@ -1,0 +1,49 @@
+table 'Dynamic Year Selection Last 3Ys'
+	lineageTag: c592bc04-49f0-4323-9338-2a50e283bdea
+
+	column 'Dynamic Year Selection Last 3Ys'
+		lineageTag: b880579e-8366-4a6d-8b7f-db4aeb52775b
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'Dynamic Year Selection Last 3Ys Order'
+
+		relatedColumnDetails
+			groupByColumn: 'Dynamic Year Selection Last 3Ys Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Dynamic Year Selection Last 3Ys Fields'
+		isHidden
+		lineageTag: 32a154d5-9490-424c-a1d9-4236bd3abc9b
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'Dynamic Year Selection Last 3Ys Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Dynamic Year Selection Last 3Ys Order'
+		isHidden
+		formatString: 0
+		lineageTag: 9d5364e9-fe37-4f0c-b54c-60635bfd5cae
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Dynamic Year Selection Last 3Ys' = calculated
+		mode: import
+		source =
+				{
+				    ("Quantity Sales USD NIS Switch", NAMEOF('factOrders'[Quantity Sales USD NIS LY Switch]), 0),
+				    ("Quantity Sales USD NIS LY Switch", NAMEOF('factOrders'[QQuantity Sales USD NIS 2Y Switch]), 1),
+				    ("QQuantity Sales USD NIS 3Y Switch", NAMEOF('factOrders'[QQuantity Sales USD NIS 3Y Switch]), 2)
+				}
+
+	annotation PBI_Id = 5a794c9087964f5ab2e8427d04350898
+

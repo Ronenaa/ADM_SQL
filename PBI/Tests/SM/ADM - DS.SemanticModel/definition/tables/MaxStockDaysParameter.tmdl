@@ -1,0 +1,22 @@
+table MaxStockDaysParameter
+	lineageTag: 1b8c3439-d218-455e-950c-54fae8445054
+
+	column MaxStockDaysParameter
+		formatString: 0
+		lineageTag: 6a59e2ef-a455-4b43-85e6-0bd72e24e699
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+		annotation SummarizationSetBy = User
+
+	partition MaxStockDaysParameter-17003100-58fd-463c-9ae0-f6d4aac2ea5b = calculated
+		mode: import
+		source = GENERATESERIES(60, 150, 1)
+
+	annotation PBI_Id = f6d56ad230944d8f9a44e40bdb723153
+

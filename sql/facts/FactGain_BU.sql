@@ -1,3 +1,5 @@
+DECLARE @CutoffDate DATE = '2024-01-01';
+
 with CurrencyConvertion as (
 SELECT *, 
          CASE
@@ -26,7 +28,7 @@ SELECT *,
             CAST(CONVERT(BIGINT, POL.POL_OrderID) AS VARCHAR(20)),
             CAST(POL.POL_LineID AS VARCHAR(10))
         ) AS PurchaseOrderID,
-        
+
         CONVERT(VARCHAR, HS.QOD_MOTSR) + '-' + CONVERT(VARCHAR, HS.QOD_MOTSR) AS ItemKey,
 
         -- PNL classification
@@ -70,7 +72,12 @@ SELECT *,
 ),
 
 totals AS (
-    -- Step 2: aggregate like the DAX measure
+    -- Step 2: aggregate like the DAX measure. NOTE: UnitNetPriceUSD here is a blended average
+    -- (commodity + freight/demurrage/discharge all summed together) — it is NOT the true CIF
+    -- price. It's used only to identify/rank candidate import matches in exchange_priced; the
+    -- actual CIF/demurrage/discharge values for a matched import are read from P_costs later,
+    -- in the final SELECT, once the matched import's PurchaseOrderID is known (see purchase_orders'
+    -- Swap branch / MatchedImportPO).
     SELECT
         PurchaseOrderID,
         ItemKey,
@@ -84,11 +91,6 @@ totals AS (
         ItemKey
 ),
 
-Items_Family as (select
-	QOD_MOTSR,
-	CAST( CONVERT(VARCHAR,MasterProductInPurchase) as varchar) +'-' + CAST( CONVERT(VARCHAR,MasterProductInPurchase) as varchar) AS 'מוצר על'
-	from MOTSRIM
-	),
 -- exchange_movements: merges former 'main' + 'base' — raw free shipments enriched with purchase cost
 exchange_movements AS (
     SELECT
@@ -104,7 +106,11 @@ exchange_movements AS (
         G.QOD_GORM     AS DeliveredTo,
         G.SHM_GORM     AS DeliveredToName,
         SUBSTRING(TARIKH_MSHLOCH, 1, 4) + '-' + SUBSTRING(TARIKH_MSHLOCH, 5, 2) AS [Date],
-        -- price columns from totals (previously joined in the separate 'base' CTE)
+        -- price columns from totals (previously joined in the separate 'base' CTE) — a blended
+        -- average, used only to identify/rank the best candidate import match below. The Swap
+        -- branch does NOT use this as its final price — it reads the matched import's true
+        -- Cif_price/demurrage/discharge from P_costs directly, downstream in the final SELECT,
+        -- keyed on Purchase (the matched import's own PurchaseOrderID, carried through below).
         t.UnitNetPriceUSD,
         t.LineTotalNetUSD,
         t.OrderQuantity
@@ -120,9 +126,14 @@ exchange_movements AS (
         WHERE PNLKey = 999
           AND OrderQuantity <> 0
     ) t ON ISNULL(b.MS_HZMNH, bb.MS_HZMNH) = t.PurchaseOrderID
-    WHERE TM.MCHIR_ICH = 0                         -- Only free/loaned shipments
-      AND G.AOPI_PEILOT NOT IN (N'פחת', N'אחסון') -- Exclude waste/storage
-      AND SUBSTRING(TARIKH_MSHLOCH, 1, 4) + '-' + SUBSTRING(TARIKH_MSHLOCH, 5, 2) >= '2024-01'
+    WHERE --TM.MCHIR_ICH = 0                         -- Only free/loaned shipments
+      G.AOPI_PEILOT NOT IN (N'אחסון')                -- Exclude storage
+      -- Date cutoff only applies to swap/loan movements (Order_Type = 'E'); candidate imports
+      -- (Order_Type = 'P', resolved PO LIKE '2000%') must never be cut off by this, or a swap
+      -- can lose its true matching import just because the import's movement row predates the
+      -- cutoff. No upper bound here — a future import is still a valid match candidate.
+      AND (ISNULL(b.MS_HZMNH, bb.MS_HZMNH) LIKE '2000%'
+           OR TRY_CONVERT(DATE, SUBSTRING(TARIKH_MSHLOCH, 1, 4) + '-' + SUBSTRING(TARIKH_MSHLOCH, 5, 2) + '-' + SUBSTRING(TARIKH_MSHLOCH, 7, 2)) >= @CutoffDate)
     GROUP BY
         SUBSTRING(TARIKH_MSHLOCH, 1, 4) + '-' + SUBSTRING(TARIKH_MSHLOCH, 5, 2),
         TM.QOD_SHOLCH, W.SHM_GORM,
@@ -155,7 +166,9 @@ exchange_p_orders AS (
         [Date]
 ),
 
--- exchange_priced: merges former 'final' + 'final2' — ranks and keeps only the best purchase match
+-- exchange_priced: merges former 'final' + 'final2' — ranks and keeps only the best purchase match.
+-- `Purchase` is the matched import's own PurchaseOrderID — this is what the Swap branch carries
+-- forward to join P_costs directly for the true Cif_price/demurrage/discharge, downstream.
 exchange_priced AS (
     SELECT
             b.DeliveredFrom,
@@ -170,10 +183,16 @@ exchange_priced AS (
             p.max_LineTotalNetUSD AS LineTotalNetUSD,
             p.max_OrderQuantity   AS OrderQuantity,
             ship_sub.ShipID,   -- ship from the related purchase order
+            -- Matching rule: prefer the nearest import within the past 3 months (inclusive).
+            -- Only when none exists in that window do we look ahead to the nearest future
+            -- import (no limit on how far forward). An import older than 3 months in the past
+            -- is never used, even if it's the only candidate — the swap gets no price instead
+            -- (enforced by the eligibility filter in the join below, not just by ranking, so a
+            -- lone too-old candidate can't win rn=1 by default).
             ROW_NUMBER() OVER (
                 PARTITION BY b.DeliveredFrom, b.PurchaseOrderID, b.ItemKey, b.[Date]
                 ORDER BY
-                    CASE WHEN DATEDIFF(MONTH, CAST(b.[Date] + '-01' AS DATE), CAST(p.Purchase_Date + '-01' AS DATE)) <= 0 THEN 0 ELSE 1 END,
+                    CASE WHEN CAST(p.Purchase_Date + '-01' AS DATE) <= CAST(b.[Date] + '-01' AS DATE) THEN 0 ELSE 1 END,
                     ABS(DATEDIFF(MONTH, CAST(b.[Date] + '-01' AS DATE), CAST(p.Purchase_Date + '-01' AS DATE))) ASC,
                     p.PurchaseOrderID DESC
             ) AS rn
@@ -181,6 +200,14 @@ exchange_priced AS (
         LEFT JOIN exchange_p_orders p
             ON  b.DeliveredFrom = p.DeliveredTo
             AND b.ItemKey       = p.ItemKey
+            -- Eligibility: past import must be within 3 months (inclusive); future imports are
+            -- eligible at any distance. This is a hard filter, not just a tie-break — an import
+            -- older than 3 months is excluded from the join entirely, so it can never surface as
+            -- rn=1 even when it's the only candidate for this DeliveredFrom/ItemKey pair.
+            AND (
+                    DATEDIFF(MONTH, CAST(p.Purchase_Date + '-01' AS DATE), CAST(b.[Date] + '-01' AS DATE)) BETWEEN 0 AND 3
+                 OR CAST(p.Purchase_Date + '-01' AS DATE) > CAST(b.[Date] + '-01' AS DATE)
+                )
         -- Look up the ship that delivered the related purchase order.
         -- p.PurchaseOrderID = CONCAT(POL_OrderID, POL_LineID) — same format as totals_raw.
         -- Must include POL_LineID in the key, otherwise it never matches.
@@ -195,7 +222,7 @@ exchange_priced AS (
             JOIN ShipsArrivals sa ON POL.POL_ShipArrivalID = sa.SA_ID
             JOIN ShipList      sl ON sa.SA_ShipID          = sl.ShipID
             GROUP BY POL.POL_OrderID, POL.POL_LineID
-        ) ship_sub ON ship_sub.PurchaseOrderID = CAST(p.PurchaseOrderID AS VARCHAR(20))
+        ) ship_sub ON ship_sub.PurchaseOrderID = CAST(p.PurchaseOrderID AS VARCHAR(30))
 )
 
 -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -217,7 +244,8 @@ SELECT
      CONVERT(INT, CONVERT(VARCHAR, SUBSTRING(CCS.T_CHSHBONIT,1,4) + SUBSTRING(CCS.T_CHSHBONIT,5,2))) AS YearMonth,
 	 null as ShipID,
     'Invoice'                                AS DocType,
-	CASE WHEN SHER_LCHISHOB <> 0 THEN SHER_LCHISHOB ELSE CC2.new_sher END as [NEW_SHER]
+	CASE WHEN SHER_LCHISHOB <> 0 THEN SHER_LCHISHOB ELSE CC2.new_sher END as [NEW_SHER],
+	NULL									AS MatchedImportPO  -- only Swap rows have this
 FROM [dbo].[CHIOBI_CHOTS_COTROT] CC
 LEFT JOIN [dbo].[CHIOBI_CHOTS_SHOROT] CCS
        ON CC.MS_CHSHBONIT = CCS.MS_CHSHBONIT
@@ -231,7 +259,7 @@ LEFT JOIN MOTSRIM M
 	ON CCS.QOD_MOTSR = M.QOD_MOTSR
 LEFT JOIN HOTSAOT_SHROTIM_New HST 
 	ON M.ServiceCode = HST.QOD_SHROT
-	where CAST(SUBSTRING(CCS.T_CHSHBONIT,1,4) + '-' + SUBSTRING(CCS.T_CHSHBONIT,5,2) + '-' + SUBSTRING(CCS.T_CHSHBONIT,7,2) AS DATE) >= '2024-01-01'
+	where CAST(SUBSTRING(CCS.T_CHSHBONIT,1,4) + '-' + SUBSTRING(CCS.T_CHSHBONIT,5,2) + '-' + SUBSTRING(CCS.T_CHSHBONIT,7,2) AS DATE) >= @CutoffDate
 
 UNION ALL
 	------Import--------
@@ -321,6 +349,7 @@ SELECT
 		    ELSE HC.SOG_MSMKH
 		END												as DocType
 		,SM.NEW_SHER
+		,NULL											AS MatchedImportPO  -- only Swap rows have this
 FROM HOTSAOT_COTROT HC
 LEFT JOIN HOTSAOT_SHOROT HS ON HC.NOMRTOR = HS.NOMRTOR
 LEFT JOIN PurchaseOrderLines POL ON CONCAT(
@@ -339,11 +368,17 @@ WHERE 1=1
 and Cast(SUBSTRING(HC.T_MSMKH,1,4) as int) >=2018 and Cast(SUBSTRING(HC.T_MSMKH,1,4) as int) <= YEAR(GETDATE())
 and HS.QOD_SHROT NOT IN (14)
 and CONCAT(CAST(CONVERT(BIGINT, POL.POL_OrderID) AS VARCHAR(20)),CAST(POL.POL_LineID AS VARCHAR(10))) <> ' '
-and  cast( HC.T_ERKH as date) >= '2024-01-01'
+and  cast( HC.T_ERKH as date) >= @CutoffDate
 
 UNION ALL
 
 -----Exchange----
+-- Single row per swap PO, same shape as before. UnitNetPriceUSD/LineTotalNetUSD here are only
+-- the blended totals-based price (used historically for this branch) — they are NOT the swap's
+-- final cost basis anymore. The final SELECT instead joins P_costs a second time, keyed on
+-- MatchedImportPO (t.Purchase — the matched import's own PurchaseOrderID), to read that import's
+-- true, already-computed Cif_price/demurrage/discharge directly — no recalculation, so it can
+-- never drift from what P_costs reports for that import elsewhere in the model.
 SELECT
     CAST(HZ.MSPR_HZMNH AS VARCHAR)                                      AS PurchaseOrderID,
     'Swap'                                                          AS DocName,  -- was: 'Orders'
@@ -361,7 +396,8 @@ SELECT
     CONVERT(INT, CONVERT(VARCHAR, SUBSTRING(HZ.T_ASPQH,1,4) + SUBSTRING(HZ.T_ASPQH,5,2))) AS YearMonth,
     t.ShipID                                                            AS ShipID,  -- ship from the related purchase order
     'Order'                                                             AS DocType,
-    SM.NEW_SHER
+    SM.NEW_SHER,
+    t.Purchase                                                          AS MatchedImportPO
 FROM HZMNOT HZ
 LEFT JOIN CurrencyConvertion SM
     ON SM.TARIKH = HZ.T_HZMNH
@@ -374,7 +410,7 @@ LEFT JOIN exchange_priced t
 WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
   AND HZ.OrderStatus <> 3
   AND HZ.ActionType IN (6,7)
-  AND YEAR(CAST(SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2) AS DATE))  >= 2024
+  AND CAST(SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2) AS DATE) >= @CutoffDate
   )
 
 ,inv AS (
@@ -408,7 +444,7 @@ WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
                 AND inv.ProductID = pcost.ProductCode
                 AND inv.Version   = pcost.Version
             WHERE inv.SupplierID IN (1411, 1367, 1366, 1289, 1101, 943)
-              AND inv.DueDate >= '2024-01-01'
+              AND inv.DueDate >= @CutoffDate
 
             UNION ALL
 
@@ -426,7 +462,7 @@ WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
                        CAST(SUBSTRING(T_TNOEH,1,4)+'-'+SUBSTRING(T_TNOEH,5,2)+'-'+SUBSTRING(T_TNOEH,7,2) AS DATE) AS [Date]
                 FROM BT.dbo.TNOEOT_MLAI_CLLI
                 WHERE QOD_GORM <> 1
-                  AND CAST(SUBSTRING(T_TNOEH,1,4) AS INT) BETWEEN 2024 AND YEAR(GETDATE())
+                  AND CAST(SUBSTRING(T_TNOEH,1,4)+'-'+SUBSTRING(T_TNOEH,5,2)+'-'+SUBSTRING(T_TNOEH,7,2) AS DATE) >= @CutoffDate
                   AND (SOG_TNOEH_CN_ITS_SP_HE LIKE N'%כ%' OR SOG_TNOEH_CN_ITS_SP_HE LIKE N'%י%')
             ) tm
             LEFT JOIN (SELECT DueDate, ProductCode, MAX(Version) AS MAXVERSION
@@ -484,7 +520,8 @@ WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
 		SUM(CASE WHEN PNLKey = 999 THEN LineTotalNetUSD ELSE 0 END)
 		/ NULLIF(SUM(CASE WHEN PNLKey = 999 THEN OrderQuantity ELSE 0 END), 0)
 	, 2) AS FLOAT) AS Cif_price,
-	MAX(pe.NEW_SHER) AS NEW_SHER
+	MAX(pe.NEW_SHER) AS NEW_SHER,
+	MAX(pe.MatchedImportPO) AS MatchedImportPO
   from purchase_orders pe
   LEFT JOIN po_doctype dt ON dt.PurchaseOrderID = pe.PurchaseOrderID
   group by pe.PurchaseOrderID, dt.DocName
@@ -501,7 +538,7 @@ WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
 		,SUBSTRING(CS.T_CHSHBONIT,1,4) + '-' + SUBSTRING(CS.T_CHSHBONIT,5,2) + '-' + SUBSTRING(CS.T_CHSHBONIT,7,2) AS 'Date' -- Invoice date  
 		,CAST(CONVERT(INT, CONVERT(VARCHAR,AM.QOD))as varchar) 'AgentKey' -- Agent from Customer method
 		,CAST( CONVERT(VARCHAR,CS.QOD_MOTSR) as varchar) +'-' + CAST( CONVERT(VARCHAR,CS.QOD_MOTSR) as varchar) AS 'ItemKey'
-		,M.[מוצר על]
+		,CAST(CONVERT(VARCHAR,M.MasterProductInPurchase) as varchar) +'-' + CAST(CONVERT(VARCHAR,M.MasterProductInPurchase) as varchar) AS [מוצר על]
 		,CAST(ROUND(CS.MCHIR_ICH_LLA_ME_M / NULLIF(CASE WHEN SHER_LCHISHOB <> 0 THEN SHER_LCHISHOB ELSE 1 END, 0), 2) AS FLOAT) AS 'UnitNetPriceUSD'
 		,cast(ROUND(CS.MSHQL_NTO,2)AS FLOAT)  AS 'Quantity'
 		,case
@@ -564,7 +601,7 @@ Left Join TBLT_ANSHI_MCIROT AM
 LEFT JOIN CHSHBONIOT_SHOROT CS 
     ON CH.MS_CHSHBONIT = CS.MS_CHSHBONIT
 --New line to add product family
-LEFT JOIN Items_Family M
+LEFT JOIN MOTSRIM M
 	ON CS.QOD_MOTSR = M.QOD_MOTSR
 	--end here
 LEFT JOIN TEODOT_MSHLOCH TM 
@@ -588,9 +625,9 @@ left join TBLT_PEOLOT_HZMNH_T_MSHLOCH act
 	on TM.ActionType = act.MS_AOPTSIH
 left join CurrencyConvertion CC 
 	ON cs.[TARIKH_MSHLOCH] = cc.Tarikh
-WHERE 1=1  
-AND Cast(SUBSTRING(cs.T_CHSHBONIT,1,4) as int) >= 2025
-AND TM.QOD_SHOLCH <> TM.QOD_MQBL 
+WHERE 1=1
+AND CAST(SUBSTRING(cs.T_CHSHBONIT,1,4) + '-' + SUBSTRING(cs.T_CHSHBONIT,5,2) + '-' + SUBSTRING(cs.T_CHSHBONIT,7,2) AS DATE) >= @CutoffDate
+AND TM.QOD_SHOLCH <> TM.QOD_MQBL
 AND CS.QOD_MOTSR <> 96
 
 -------OPEN Orders----------------------------------------------------------------------------------
@@ -603,7 +640,7 @@ UNION ALL
 	,SUBSTRING(TARIKH_MSHLOCH,1,4) + '-' + SUBSTRING(TARIKH_MSHLOCH,5,2) + '-' + SUBSTRING(TARIKH_MSHLOCH,7,2) as 'Date'
 	,CONVERT(INT, CONVERT(VARCHAR, TM.AISH_MCIROT)) AS 'AgentKey'
 	,CONVERT(VARCHAR, TM.QOD_MOTSR)+'-'+CONVERT(VARCHAR, TM.QOD_MOTSR) AS 'ItemKey'
-	,M.[מוצר על]
+	,CAST(CONVERT(VARCHAR,M.MasterProductInPurchase) as varchar) +'-' + CAST(CONVERT(VARCHAR,M.MasterProductInPurchase) as varchar) AS [מוצר על]
 	,CAST(ROUND(CASE
 	         WHEN TM.MTBE_SH = '$' THEN TM.MCHIR_ICH
 	         ELSE TM.MCHIR_ICH * (1 / NULLIF(SM.NEW_SHER, 0))
@@ -660,7 +697,7 @@ Left Join (SELECT distinct MS_T_MSHLOCH
 			FROM CHSHBONIOT_SHOROT
 		) CH
 	on TM.MS_TEODH = CH.MS_T_MSHLOCH
-LEFT JOIN Items_Family M
+LEFT JOIN MOTSRIM M
 	ON TM.QOD_MOTSR = M.QOD_MOTSR
 Left Join (SELECT MS_HZMNH,MS_T_MSHLOCH
 			FROM QISHOR_T_MSHLOCH_HZMNOT
@@ -681,7 +718,7 @@ left join TBLT_PEOLOT_HZMNH_T_MSHLOCH act
 	on TM.ActionType = act.MS_AOPTSIH
 WHERE
 CH.MS_T_MSHLOCH is null
-AND Cast(SUBSTRING(TARIKH_MSHLOCH,1,4) as int) >= 2025
+AND CAST(SUBSTRING(TARIKH_MSHLOCH,1,4) + '-' + SUBSTRING(TARIKH_MSHLOCH,5,2) + '-' + SUBSTRING(TARIKH_MSHLOCH,7,2) AS DATE) >= @CutoffDate
 AND STTOS in (0,1)
 AND TM.PurchaseOrderType = 0
 AND TM.QOD_MOTSR <> 96 
@@ -799,7 +836,7 @@ SELECT
 	case when s.SalesType is null then s.QuantityCategory
 		 else s.SalesType end																								AS [Price Term],
 	s.Quantity																												AS Quantity,
-	case 
+	case
 		when s.rn = 1 and PC.DocName = 'Swap' then sum(s.Quantity) over (partition by s.PurchaseOrderID)
 		when s.rn = 1 and PC.DocName = 'Import' then PC.orderquantity
 	else 0 end																												AS PurchaseQuantity,
@@ -810,33 +847,43 @@ SELECT
 		 THEN CAST(ROUND(s.LineTotalNet_USD / NULLIF(s.Quantity, 0), 2) AS FLOAT)
 		 ELSE NULL END																										AS Total_Price,
 	s.UnitNetPriceUSD																										AS UnitNetPriceUSD,
+	-- For Swap rows, pull the matched import's own already-computed CIF/demurrage/discharge
+	-- straight from ImportPC (P_costs joined again, keyed on PC.MatchedImportPO) instead of
+	-- PC (the swap PO's own P_costs row) — this is the exact, single-source-of-truth number
+	-- P_costs reports for that import elsewhere in the model, not a recalculation.
 	case when s.rn = 1
-	then PC.Cif_price else 0 end																							AS CIF_Purchase,
+	then ISNULL(ImportPC.Cif_price, PC.Cif_price) else 0 end																AS CIF_Purchase,
 	case when s.rn = 1
-	then PC.[demurrage / Despatch] else 0 end																				AS [demurrage / Despatch],
+	then ISNULL(ImportPC.[demurrage / Despatch], PC.[demurrage / Despatch]) else 0 end									AS [demurrage / Despatch],
 	CASE WHEN s.rn = 1 THEN PC.[Other_Expenses]     ELSE 0 END																AS [Other_Expenses],
 	CASE WHEN s.rn = 1 THEN PC.Shortage            ELSE 0 END																AS Shortage,
-	CASE 
-		WHEN s.rn = 1 THEN 
-		CAST(ROUND( ISNULL(PC.DischargeCosts /NULLIF(PC.orderquantity - ISNULL(cq.CIF_Qty, 0),0), 0), 2) AS FLOAT) END 		AS DischargeCost,
-	CASE 
-		WHEN s.rn = 1 THEN 
-		CAST(ROUND(PC.Cif_price + PC.[demurrage / Despatch] + 
-		ISNULL(PC.DischargeCosts / NULLIF(PC.orderquantity - ISNULL(cq.CIF_Qty,0),0), 0),2) AS FLOAT)
+	CASE
+		WHEN s.rn = 1 THEN
+		CAST(ROUND( ISNULL(
+			ISNULL(ImportPC.DischargeCosts, PC.DischargeCosts)
+			/ NULLIF(ISNULL(ImportPC.orderquantity, PC.orderquantity) - ISNULL(cq.CIF_Qty, 0), 0)
+		, 0), 2) AS FLOAT) END 		AS DischargeCost,
+	CASE
+		WHEN s.rn = 1 THEN
+		CAST(ROUND(ISNULL(ImportPC.Cif_price, PC.Cif_price) + ISNULL(ImportPC.[demurrage / Despatch], PC.[demurrage / Despatch]) +
+		ISNULL(
+			ISNULL(ImportPC.DischargeCosts, PC.DischargeCosts)
+			/ NULLIF(ISNULL(ImportPC.orderquantity, PC.orderquantity) - ISNULL(cq.CIF_Qty, 0), 0)
+		, 0),2) AS FLOAT)
 		ELSE 0 END																											AS FOT_Purchase,
 	CAST(ROUND(CASE
 		WHEN s.SalesType = 'CIF' AND s.LineType = 'Item'
-		THEN (s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - PC.Cif_price
+		THEN (s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - ISNULL(ImportPC.Cif_price, PC.Cif_price)
 		WHEN s.SalesType IN ('FOT', 'FOT Premium') AND s.LineType = 'Item'
-		THEN (s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - (PC.Cif_price+ PC.[demurrage / Despatch] + (PC.DischargeCosts/ NULLIF(
-			PC.orderquantity - ISNULL(cq.CIF_Qty, 0),0)))
+		THEN (s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - (ISNULL(ImportPC.Cif_price, PC.Cif_price)+ ISNULL(ImportPC.[demurrage / Despatch], PC.[demurrage / Despatch]) + (ISNULL(ImportPC.DischargeCosts, PC.DischargeCosts)/ NULLIF(
+			ISNULL(ImportPC.orderquantity, PC.orderquantity) - ISNULL(cq.CIF_Qty, 0),0)))
 		ELSE 0 END, 2) AS FLOAT)																							AS Gain,
 	CAST(ROUND(CASE
 		WHEN s.SalesType = 'CIF' AND s.LineType = 'Item'
-		THEN ((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - PC.Cif_price) * s.Quantity
+		THEN ((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - ISNULL(ImportPC.Cif_price, PC.Cif_price)) * s.Quantity
 		WHEN s.SalesType IN ('FOT', 'FOT Premium') AND s.LineType = 'Item'
 		THEN ((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) -
-		(PC.Cif_price + PC.[demurrage / Despatch]+ (PC.DischargeCosts/ NULLIF(PC.orderquantity - ISNULL(cq.CIF_Qty, 0),0)))) * s.Quantity
+		(ISNULL(ImportPC.Cif_price, PC.Cif_price) + ISNULL(ImportPC.[demurrage / Despatch], PC.[demurrage / Despatch])+ (ISNULL(ImportPC.DischargeCosts, PC.DischargeCosts)/ NULLIF(ISNULL(ImportPC.orderquantity, PC.orderquantity) - ISNULL(cq.CIF_Qty, 0),0)))) * s.Quantity
 		ELSE 0 END, 2) AS FLOAT)																							AS TotalGain,
 		NULL																												AS AdditionalLineCost
 FROM (
@@ -847,7 +894,10 @@ FROM (
     INNER JOIN base_link bl ON bl.DeliveryNote = s.DeliveryNote
 	) s
 	LEFT JOIN  P_costs PC   ON PC.PurchaseOrderID = CAST(s.PurchaseOrderID AS VARCHAR(30))
-	LEFT JOIN CIF_Qty cq    ON cq.PurchaseOrderID = s.PurchaseOrderID
+	-- Second P_costs join: only matters for Swap rows (PC.MatchedImportPO is NULL for
+	-- Invoice/Import), pulls the matched import's own CIF/demurrage/discharge directly.
+	LEFT JOIN P_costs ImportPC ON ImportPC.PurchaseOrderID = PC.MatchedImportPO
+	LEFT JOIN CIF_Qty cq    ON cq.PurchaseOrderID = ISNULL(PC.MatchedImportPO, s.PurchaseOrderID)
 	WHERE PC.ValueDate IS NOT NULL
 
 UNION ALL

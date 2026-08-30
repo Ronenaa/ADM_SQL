@@ -1,0 +1,60 @@
+table ALLorOPEN
+	lineageTag: 944ff9f9-2a29-40de-8ddb-d3b0db4b9a44
+
+	column ALLorOPEN
+		lineageTag: 353147d6-eccd-43ef-9442-4321bdd3a310
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'ALLorOPEN Order'
+
+		relatedColumnDetails
+			groupByColumn: 'ALLorOPEN Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'ALLorOPEN Fields'
+		lineageTag: df7d9a21-c55f-4422-b6c9-970192fd76f6
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'ALLorOPEN Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'ALLorOPEN Order'
+		formatString: 0
+		lineageTag: f38cad13-93df-473a-a3f4-a177eb0c2478
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Value4
+		lineageTag: 8dfb41be-576d-417d-9ba2-028ae59c7164
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Value4]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition ALLorOPEN = calculated
+		mode: import
+		source =
+				{
+				    ("Sales", NAMEOF('factOrders'[Total Quantity Supply Date]), 0,"ALL"),
+				    (" ", NAMEOF('factOrders'[AVG Price Supply Date Switch]), 1,"ALL"),
+				    ("Purchases", NAMEOF('factPurchaseOrder'[Total Purchase Quantity By Supply Date]), 2,"ALL"),
+				    (" ", NAMEOF('factPurchaseOrder'[Avg Cost Price Supply Date SWITCH]), 3,"ALL"),
+				    ("Sales", NAMEOF('factOrders'[Open Orders Quantity By Supply Date -]), 4,"OPEN"),
+				    (" ", NAMEOF('factOrders'[AVG Open Price Supply Date Switch]), 5,"OPEN"),
+				    ("Purchases", NAMEOF('factPurchaseOrder'[Open Purchase Quantity By Supply Date -]), 6,"OPEN"),
+				    (" ", NAMEOF('factPurchaseOrder'[Avg Cost Price Open Supply Date]), 7,"OPEN")
+				}
+
+	annotation PBI_Id = 4a66da2ac55045a2bc4af863f2568d3b
+

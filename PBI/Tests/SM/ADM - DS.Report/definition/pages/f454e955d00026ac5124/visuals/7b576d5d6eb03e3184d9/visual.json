@@ -1,0 +1,168 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
+  "name": "7b576d5d6eb03e3184d9",
+  "position": {
+    "x": 0,
+    "y": 236.78284182305629,
+    "z": 2000,
+    "height": 93.798033958891864,
+    "width": 995.17426273458443,
+    "tabOrder": 2000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dimPurchaseOrderNumber"
+                    }
+                  },
+                  "Property": "PurchaseOrderID"
+                }
+              },
+              "queryRef": "dimSubPurchaseOrderNumber.PurchaseOrderID",
+              "nativeQueryRef": "PurchaseOrderID1"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dimItemsSimple"
+                    }
+                  },
+                  "Property": "Article_Description"
+                }
+              },
+              "queryRef": "dimItemsSimple.Article_Description",
+              "nativeQueryRef": "Article_Description1"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factSales"
+                    }
+                  },
+                  "Property": "FOT Profit"
+                }
+              },
+              "queryRef": "factSales.FOT Profit",
+              "nativeQueryRef": "FOT Profit"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factSales"
+                    }
+                  },
+                  "Property": "AVG Unit Price (Sales) - FOT"
+                }
+              },
+              "queryRef": "factSales.AVG Unit Price (Sales) - FOT",
+              "nativeQueryRef": "AVG Unit Price (Sales) - FOT"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factPurchaseExpenses"
+                    }
+                  },
+                  "Property": "Avg Price USD (Expenses)"
+                }
+              },
+              "queryRef": "factPurchaseExpenses.Avg Price USD (Expenses)",
+              "nativeQueryRef": "Avg Price USD (Expenses)"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "dimPurchaseOrderNumber"
+                  }
+                },
+                "Property": "PurchaseOrderID"
+              }
+            },
+            "direction": "Descending"
+          }
+        ]
+      }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "86ee0cc442cc15e109da",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dimItems"
+              }
+            },
+            "Property": "ItemKey"
+          }
+        },
+        "type": "Advanced",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "d",
+              "Entity": "dimItems",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "Not": {
+                  "Expression": {
+                    "Comparison": {
+                      "ComparisonKind": 0,
+                      "Left": {
+                        "Column": {
+                          "Expression": {
+                            "SourceRef": {
+                              "Source": "d"
+                            }
+                          },
+                          "Property": "ItemKey"
+                        }
+                      },
+                      "Right": {
+                        "Literal": {
+                          "Value": "'96-96'"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "howCreated": "User"
+      }
+    ]
+  }
+}

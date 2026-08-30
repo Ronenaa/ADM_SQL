@@ -1,0 +1,26 @@
+table BankCostPrecentageParameter
+	lineageTag: 31bc9e46-5541-4903-a703-8844ca7af7db
+
+	measure 'BankCostPrecentageParameter Value' = SELECTEDVALUE(BankCostPrecentageParameter[BankCostPrecentageParameter], 0.05)
+		lineageTag: f1d3d7e1-a21c-4585-a21c-3591a89a96df
+
+	column BankCostPrecentageParameter
+		lineageTag: 964ba4a8-9d34-4722-b338-95fe19df995d
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition BankCostPrecentageParameter-239a609f-8edf-439e-a04b-bc2b21299697 = calculated
+		mode: import
+		source = GENERATESERIES(0, 20, 1)
+
+	annotation PBI_Id = 2c432605c44b4c1d9ebb0f9fe86d309e
+

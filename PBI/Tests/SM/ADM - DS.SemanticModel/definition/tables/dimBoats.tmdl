@@ -1,0 +1,148 @@
+table dimBoats
+	lineageTag: 31c9c63d-3563-4a2a-966e-91547c352ab9
+
+	column ShipID
+		dataType: int64
+		formatString: 0
+		lineageTag: 13e0f593-810e-42f9-a394-17aa02f634ec
+		summarizeBy: none
+		sourceColumn: ShipID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ShipDesc
+		dataType: string
+		lineageTag: 62e6026a-512a-4b94-896b-61f2fdd29a6c
+		summarizeBy: none
+		sourceColumn: ShipDesc
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ShipActive
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: d6306280-4022-4854-8157-0e7192926004
+		summarizeBy: none
+		sourceColumn: ShipActive
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ShipLength
+		dataType: double
+		lineageTag: 0a486cb9-42f0-41c4-a6b2-d7f0dde03436
+		summarizeBy: sum
+		sourceColumn: ShipLength
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column ShipWidth
+		dataType: double
+		lineageTag: 81ac24ee-86e7-4840-bb0a-fc59de6e2084
+		summarizeBy: sum
+		sourceColumn: ShipWidth
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column ShipMaxSinking
+		dataType: double
+		lineageTag: eb51f065-37d7-4d29-a5ac-53aee7691303
+		summarizeBy: sum
+		sourceColumn: ShipMaxSinking
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column ShipmanufactureYear
+		dataType: int64
+		formatString: 0
+		lineageTag: fb5e577c-6291-4e36-93a4-d27d999e7ef0
+		summarizeBy: sum
+		sourceColumn: ShipmanufactureYear
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ShipHoldType
+		dataType: string
+		lineageTag: 45ae22f5-ac6c-4ab9-9deb-6964b673844f
+		summarizeBy: none
+		sourceColumn: ShipHoldType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ShipStorageCapacity
+		dataType: int64
+		formatString: 0
+		lineageTag: 6321a66f-1661-473c-8217-626ea2fd4131
+		summarizeBy: sum
+		sourceColumn: ShipStorageCapacity
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column IMOnumber
+		dataType: string
+		lineageTag: 80d9931c-243a-4408-8ed2-2c360391db0c
+		summarizeBy: none
+		sourceColumn: IMOnumber
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column MaxLoadingFromDate
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 66325736-f87d-423e-bddb-663e0566f84d
+		summarizeBy: none
+		sourceColumn: MaxLoadingFromDate
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column LoadingRank
+		dataType: int64
+		formatString: 0
+		lineageTag: c501da43-0608-445c-b771-6d7da1025dbc
+		summarizeBy: sum
+		sourceColumn: LoadingRank
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dimBoats = m
+		mode: import
+		queryGroup: Dim
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="WITH LatestLoading AS (#(lf)    SELECT#(lf)        SA_ShipID,#(lf)        MAX(SA_DateForLoadingfrom) AS MaxLoadingFromDate#(lf)    FROM ShipsArrivals#(lf)    GROUP BY SA_ShipID#(lf))#(lf), RankedShips AS (#(lf)    SELECT#(lf)        sl.*,#(lf)        ll.MaxLoadingFromDate,#(lf)        ROW_NUMBER() #(lf)          OVER (#(lf)            ORDER BY #(lf)              -- newest dates first; NULLs (no loadings) last#(lf)              CASE WHEN ll.MaxLoadingFromDate IS NULL THEN 1 ELSE 0 END,#(lf)              ll.MaxLoadingFromDate DESC#(lf)          ) AS LoadingRank#(lf)    FROM ShipList sl#(lf)    LEFT JOIN LatestLoading ll #(lf)      ON ll.SA_ShipID = sl.ShipID#(lf)    WHERE sl.ShipActive = 1#(lf))#(lf)SELECT *#(lf)FROM RankedShips#(lf)--ORDER BY LoadingRank"])
+				in
+				    Source
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

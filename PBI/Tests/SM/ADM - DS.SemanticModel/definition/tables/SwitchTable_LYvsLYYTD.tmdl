@@ -1,0 +1,48 @@
+table SwitchTable_LYvsLYYTD
+	lineageTag: ccfd0a4d-8b96-4e26-8b33-6a7208faf828
+
+	column ID
+		dataType: int64
+		formatString: 0
+		lineageTag: b98e8863-e97d-4048-ad44-697bda923dca
+		summarizeBy: count
+		sourceColumn: ID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Value
+		dataType: string
+		lineageTag: 6ae15c0b-af0f-4650-bc71-4ffc5e1226eb
+		summarizeBy: none
+		sourceColumn: Value
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Sort
+		dataType: int64
+		formatString: 0
+		lineageTag: 384026ec-aeaf-40e6-8b70-f36d062ffef4
+		summarizeBy: sum
+		sourceColumn: Sort
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition SwitchTable_LYvsLYYTD = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WMlTSUXKLBBJGSrE60UBSRykyxAVIGirFxgIA", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [ID = _t, Value = _t, Sort = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"ID", Int64.Type}, {"Value", type text}, {"Sort", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

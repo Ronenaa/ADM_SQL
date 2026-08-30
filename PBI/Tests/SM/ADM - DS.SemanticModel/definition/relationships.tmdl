@@ -1,0 +1,541 @@
+relationship 19250cae-ac76-4d0f-9e4c-81dc92a83de8
+	fromColumn: factCollection.AccountKey
+	toColumn: dimCustomers.AccountKey
+
+relationship 09eec9aa-42c1-4a06-8e6d-da78482c7c6f
+	crossFilteringBehavior: bothDirections
+	fromColumn: dimHolidays.'Custom Date'
+	toColumn: dimDates.Date
+
+relationship fbdbf63a-f154-4b3f-9411-ca351d7c23e5
+	isActive: false
+	fromColumn: dimCustomers.'תאריך רכישה אחרונה'
+	toColumn: dimDates.Date
+
+relationship 6d7c1c18-13a4-4c4c-a583-f759cdaa83bc
+	isActive: false
+	fromColumn: factCollection.'תאריך קבלה'
+	toColumn: dimDates.Date
+
+relationship 14c4f80a-c048-476b-acc9-ad1c92dba589
+	isActive: false
+	fromColumn: factCollection.'תאריך תשלום צפוי'
+	toColumn: dimDates.Date
+
+relationship 4046daf8-7f88-48ef-9322-526bc1bfa33b
+	fromColumn: factOrders.AccountKey
+	toColumn: dimCustomers.AccountKey
+
+relationship 9a78bedb-a033-4c9f-a3cc-3c2b48eb32ef
+	fromColumn: factOrders.EntityID
+	toColumn: dimEntities.EntityID
+
+relationship e8f57ba9-c086-4101-a2b8-6d8cd4320280
+	fromColumn: factTargets.EntityID
+	toColumn: dimEntities.EntityID
+
+relationship 492e8dbb-5529-440a-a562-95b5ba45b2d1
+	fromColumn: factOrders.Date
+	toColumn: dimDates.Date
+
+relationship aacfec98-2d79-4e5a-81da-897480962942
+	fromColumn: factTargets.Date
+	toColumn: dimDates.Date
+
+relationship 0885c3e2-e2c7-4893-adc1-6057ab3a5bb9
+	fromColumn: factSales.AccountKey
+	toColumn: dimCustomers.AccountKey
+
+relationship 8fcd7a14-5384-4a38-9c32-3eb6e544afbc
+	fromColumn: factSales.Date
+	toColumn: dimDates.Date
+
+relationship a4ff1c4d-2b5d-4a9c-9866-2b503086a1c6
+	fromColumn: factSales.EntityID
+	toColumn: dimEntities.EntityID
+
+relationship 1ecbdbcd-8abe-4beb-8e25-d6aa9cb2a584
+	fromColumn: factTargets.ItemKey
+	toColumn: dimItems.ItemKey
+
+relationship 4ba3ac88-7a9b-4eed-b47a-be4c5e59a2d5
+	fromColumn: factOrders.ItemKey
+	toColumn: dimItems.ItemKey
+
+relationship 980aab59-c847-44c6-b660-43c1847dcf92
+	fromColumn: factSales.ItemKey
+	toColumn: dimItems.ItemKey
+
+relationship 13348d3d-3ec4-4c3e-a314-dfcf2d463914
+	fromColumn: factDailyPrices.ItemKey
+	toColumn: dimItems.ItemKey
+
+relationship 282c5664-440b-4b46-baf4-ed9e785d97fb
+	fromColumn: factDailyPrices.Date
+	toColumn: dimDates.Date
+
+relationship 2f766618-5cf2-4ece-b2be-53cd0678d1aa
+	isActive: false
+	fromColumn: factDailyPrices.AsOfDate
+	toColumn: dimDates.Date
+
+relationship 9e18711d-4e23-43cd-b9e2-392efda90270
+	isActive: false
+	fromColumn: factOrders.'תאריך אספקה'
+	toColumn: dimDates.Date
+
+relationship 98a1b203-c199-4df4-b807-28dcf3624bbf
+	fromColumn: factInventory.ItemKey
+	toColumn: dimItems.ItemKey
+
+relationship 95a64381-83b8-4cab-9b96-20de89c892fc
+	fromColumn: factInventory.SupplierKey
+	toColumn: dimCustomers.AccountKey
+
+relationship 90c7d6be-4859-4059-a52d-83f3d2711091
+	fromColumn: factPurchaseExpenses.EntityID
+	toColumn: dimEntities.EntityID
+
+relationship 7d0ea06e-f4be-41ce-8d50-5cb0ebff22c3
+	fromColumn: factInventory.Date
+	toColumn: dimDates.Date
+
+relationship 020f800a-e4ce-4500-be6a-34417708ec47
+	fromColumn: factPurchaseExpenses.SourceKey
+	toColumn: dimCustomers.AccountKey
+
+relationship c4dd614f-3550-4c5b-94a7-4dc41fe077ab
+	fromColumn: factPurchaseOrder.EntityID
+	toColumn: dimEntities.EntityID
+
+relationship 8a5b957e-684e-4447-b8f2-aa9ace25cc68
+	fromColumn: factPurchaseOrder.ItemKey
+	toColumn: dimItems.ItemKey
+
+relationship 3dbf900e-baad-4565-846c-6e7aa48b5264
+	fromColumn: factPurchaseExpenses.SupplierKey
+	toColumn: dimSuppliers.SupplierKey
+
+relationship d16991cc-0a16-4676-bc65-c3fa9e15f71b
+	fromColumn: factPurchaseOrder.SupplierKey
+	toColumn: dimSuppliers.SupplierKey
+
+relationship f2562eda-060e-447f-af8c-dfff14cbeed3
+	fromColumn: factPurchaseOrder.AccountKey
+	toColumn: dimCustomers.AccountKey
+
+relationship 0799078a-8330-4752-9907-2beabf63bd5c
+	fromColumn: factPurchaseOrder.'Order Date'
+	toColumn: dimDates.Date
+
+relationship f97df715-d79d-4f8b-9a51-51c2e484c286
+	isActive: false
+	fromColumn: factPurchaseOrder.'Supply Date'
+	toColumn: dimDates.Date
+
+relationship 6d1c3e69-c886-4804-b3b6-30272838eeb9
+	fromColumn: factInventory.SupplierKey
+	toColumn: dimSuppliers.SupplierKey
+
+relationship 4f14fad7-0a16-4b86-a796-1bdc5d3bb80b
+	fromColumn: factPurchaseExpenses.PNLKey
+	toColumn: dimPNL.PNLKey
+
+relationship cdc8c496-6d9c-4766-8735-f41998b77de2
+	fromColumn: factPurchaseExpenses.'Value Date'
+	toColumn: dimDates.Date
+
+relationship 83310bd4-7c59-4fb1-ac77-513d8c3fcf3b
+	isActive: false
+	fromColumn: factCollection.InvoiceDate
+	toColumn: Sub_DimDates.Date
+
+relationship 6964f16e-9a30-4c32-8293-a24641a75b72
+	isActive: false
+	fromColumn: factCollection.'תאריך קבלה'
+	toColumn: Sub_DimDates.Date
+
+relationship 8843a936-2180-4968-9764-a23fa9bb3571
+	fromColumn: factCollection.'תאריך תשלום צפוי'
+	toColumn: Sub_DimDates.Date
+
+relationship 57b88096-1438-4ee9-8a5c-f17353c71da9
+	fromColumn: factCollection.InvoiceDate
+	toColumn: dimDates.Date
+
+relationship 1c409c15-5517-4252-ade3-2f02f139c04e
+	isActive: false
+	fromColumn: factDailyPrices.Date
+	toColumn: Sub_DimDates.Date
+
+relationship 803c4c46-8947-4742-9b93-49d5de55c441
+	isActive: false
+	fromColumn: factDailyPrices.AsOfDate
+	toColumn: Sub_DimDates.Date
+
+relationship 81607a15-2b99-46da-9ed8-eb944a984420
+	fromColumn: factOrders.Date
+	toColumn: Sub_DimDates.Date
+
+relationship 1ff28aaf-870d-44da-b12c-0f340e4386c5
+	isActive: false
+	fromColumn: factOrders.'תאריך אספקה'
+	toColumn: Sub_DimDates.Date
+
+relationship ee488786-3016-48dd-9998-79281e1cb8ee
+	toCardinality: many
+	fromColumn: FactLimits.ProductGroup
+	toColumn: dimItems.'קבוצת פריט'
+
+relationship 991729c7-432b-4a93-86bc-aeb360bf4fa7
+	isActive: false
+	fromColumn: factCollection.DeliveryDate
+	toColumn: dimDates.Date
+
+relationship 1a5e5396-e3e4-43e2-a129-4ed4a57c3bab
+	fromColumn: factInventory.ItemKey
+	toColumn: dimItemsSimple.ItemKey
+
+relationship 2a904f8b-4cfa-4724-b755-cce2977f269e
+	fromColumn: factPurchaseOrder.ItemKey
+	toColumn: dimItemsSimple.ItemKey
+
+relationship c9737a97-ab30-4dff-946a-614f2d5bf98c
+	fromColumn: factDailyPrices.ItemKey
+	toColumn: dimItemsSimple.ItemKey
+
+relationship 1626a9da-00f7-4ca3-95ec-82f410c3649a
+	fromColumn: factTargets.ItemKey
+	toColumn: dimItemsSimple.ItemKey
+
+relationship 443e53ba-ff5c-8287-ecff-9e77ad88cce1
+	toCardinality: many
+	fromColumn: FactLimits.ProductGroup
+	toColumn: dimItemsSimple.'קבוצת פריט'
+
+relationship a21dcd26-baf4-17e0-7fae-400671f2e0a7
+	fromColumn: factSales.ItemKey
+	toColumn: dimItemsSimple.ItemKey
+
+relationship 41ad2b46-9a93-463a-ad8b-97737029f620
+	fromColumn: factOrders.ItemKey
+	toColumn: dimItemsSimple.ItemKey
+
+relationship b78f624c-559c-4e43-b3fb-f0efa89bebec
+	fromColumn: factSales.Date
+	toColumn: Sub_DimDates.Date
+
+relationship 602b6fbf-2924-46ff-b388-03cef2a67424
+	isActive: false
+	fromColumn: factOrders.Date
+	toColumn: Sub_DimDates_QA.Date
+
+relationship 429490e2-fde6-4f2e-82c6-bfe12e79250f
+	fromColumn: factOrders.'תאריך אספקה'
+	toColumn: Sub_DimDates_QA.Date
+
+relationship 069f0e58-2285-4c48-88fb-5bfe69dd01b4
+	fromColumn: factDailyPrices.Date
+	toColumn: Sub_DimDates_QA.Date
+
+relationship 9c89f540-8fa9-4e89-8375-8195868689f2
+	isActive: false
+	fromColumn: factDailyPrices.AsOfDate
+	toColumn: Sub_DimDates_QA.Date
+
+relationship 45ea4b39-1f9f-4fb0-a863-fd286132313a
+	isActive: false
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: dimItemsSimple.ItemKey
+	toColumn: dimItems.ItemKey
+
+relationship 948e6b39-e5f4-4b25-938c-e9012910f723
+	isActive: false
+	fromColumn: factSales.DeliveryDate
+	toColumn: dimDates.Date
+
+relationship 4138dee8-1ee8-4961-912a-7bcb80d6eed5
+	isActive: false
+	fromColumn: factSales.DeliveryDate
+	toColumn: Sub_DimDates.Date
+
+relationship 41090659-5924-4ab3-a300-02ec0c1753c5
+	fromColumn: factTargets.Date
+	toColumn: Sub_DimDates_QA.Date
+
+relationship 15c2a919-67e5-4959-8ffc-8ce0284afaeb
+	fromColumn: factTargets.Date
+	toColumn: Sub_DimDates.Date
+
+relationship 32c50ae8-548c-421a-aef7-a24bc74ac478
+	isActive: false
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: Sub_DimDates.Date
+	toColumn: dimDates.Date
+
+relationship bbdb9cdd-5cca-a81b-4748-d3b9afa22f65
+	fromColumn: factOrders.SpotFlag
+	toColumn: DimSpotOrder.Key
+
+relationship 09bdf321-5629-6446-46d4-45ee16a1fe7c
+	fromColumn: factSales.SupplierWarehouse
+	toColumn: dimSuppliers.SupplierKey
+
+relationship 96cdb5e7-9886-cc2d-192d-5981252437c0
+	toCardinality: many
+	fromColumn: HierarchySwitchMinimal.Value4
+	toColumn: HierarchySwitch.Value4
+
+relationship 8ce02612-6eec-4502-6baf-f5e0357e161b
+	fromColumn: factTargets.AccountKey
+	toColumn: dimCustomers.AccountKey
+
+relationship 7e18f630-51a9-c450-85fe-013e14a225f2
+	fromColumn: factInventoryActivity.AccountKey
+	toColumn: dimCustomers.AccountKey
+
+relationship 888c1ffc-fec3-58cf-81ce-df112c26efe6
+	fromColumn: factInventoryActivity.Date
+	toColumn: dimDates.Date
+
+relationship 4e3a22e1-ec57-425a-25db-6830a9e88683
+	fromColumn: factInventoryActivity.ItemKey
+	toColumn: dimItems.ItemKey
+
+relationship 1ce17e6d-c533-a1c6-d621-2b6ae2a75c0a
+	fromColumn: factSales.SupplierWarehouse
+	toColumn: dimWarehouses.WarehsKey
+
+relationship 814142ce-7d11-98c3-eb8c-9110a6175edc
+	fromColumn: factOrders.SupplierWarehouse
+	toColumn: dimWarehouses.WarehsKey
+
+relationship 6efde3b6-d209-3363-3357-c5c3932828ee
+	fromColumn: factInventory.SupplierKey
+	toColumn: dimWarehouses.WarehsKey
+
+relationship 7244973e-d63a-d853-d587-5de162daad05
+	fromColumn: factInventoryActivity.InventoryWarehouse
+	toColumn: dimWarehouses.WarehsKey
+
+relationship ed2b8d60-5579-fd2a-c404-2c649d1a4f59
+	fromColumn: factInventoryActivity.ItemKey
+	toColumn: dimItemsSimple.ItemKey
+
+relationship d03804ad-c48f-93d8-f160-1b73102a3ffd
+	fromColumn: factOrders.SupplierWarehouse
+	toColumn: dimSuppliers.SupplierKey
+
+relationship eeba9f08-a44b-5a66-dd55-db88358e2e24
+	fromColumn: factPurchaseOrder.סטטוס
+	toColumn: dimOrderStatus.Key
+
+relationship 9e75ac0b-4d65-3703-9133-7aa504deb3aa
+	fromColumn: factOrders.סטטוס
+	toColumn: dimOrderStatus.Key
+
+relationship 0b1d180f-bc7d-94d0-f957-2ac9f46a974d
+	fromColumn: factInventoryAllocation.ItemKey
+	toColumn: dimItemsSimple.ItemKey
+
+relationship 5e886350-b7b6-9170-452d-630f31f96efe
+	fromColumn: factInventoryAllocation.ItemKey
+	toColumn: dimItems.ItemKey
+
+relationship 09eb39d9-436b-25b1-8c4d-d3e6726d49d8
+	fromColumn: factInventoryAllocation.SupplierID
+	toColumn: dimSuppliers.SupplierKey
+
+relationship 1209cd54-45de-8f29-7337-ef3a3da8742d
+	fromColumn: factInventoryAllocation.Date
+	toColumn: dimDates.Date
+
+relationship ed964f55-4c91-cda0-4629-c19197c87d86
+	fromColumn: factInventoryAllocation.DocType
+	toColumn: tblInventoryFilter.Key
+
+relationship cca07aa6-a909-70a2-8365-2d29dbf11e01
+	fromColumn: factOrders.SupplierWarehouse
+	toColumn: dimSuppliersCompare.SupplierKey
+
+relationship 51914292-9670-8a92-c99d-0f9ad88be2a4
+	fromColumn: factInventoryAllocation.SupplierID
+	toColumn: dimSuppliersCompare.SupplierKey
+
+relationship 8ef47f33-3259-d660-d435-b539bcb74fe6
+	fromColumn: factSales.SupplierWarehouse
+	toColumn: dimSuppliersCompare.SupplierKey
+
+relationship 9c374329-f283-f86d-f368-c3a725ff4385
+	fromColumn: factPurchaseOrder.SupplierKey
+	toColumn: dimSuppliersCompare.SupplierKey
+
+relationship 4c3de87b-bb35-50de-3a57-8009b2d9e57f
+	fromColumn: factInventory.SupplierKey
+	toColumn: dimSuppliersCompare.SupplierKey
+
+relationship 985515b3-6e2d-2f51-b7c7-981b97909b30
+	fromColumn: factOrders.TransactionType
+	toColumn: dimTransactionType.ID
+
+relationship ff3263f9-6f4c-b650-243a-837c28e83f10
+	fromColumn: factPurchaseOrder.TransactionType
+	toColumn: dimTransactionType.ID
+
+relationship a5ef4c92-5514-e16f-d3b3-e3432a65c9d0
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: 'OrderSupplyExecution Parameter'.'OrderSupplyExecution Parameter Order'
+	toColumn: OrderVSExecutionVSSupply.ID
+
+relationship 69f9adc6-c4fe-b2c4-8aff-5536f27b8d65
+	fromColumn: OrderDetailsColumnsSwitch.Type
+	toColumn: 'OrderSupplyExecution Parameter'.'OrderSupplyExecution Parameter Order'
+
+relationship e8dca5e4-cd01-f269-85d9-81f6924a55fb
+	toCardinality: many
+	fromColumn: factOrders.OrderID
+	toColumn: dimOrderNumber.OrderID
+
+relationship 2d1b99e0-7623-9136-7a5a-f2468d154f16
+	fromColumn: factSales.DeliveryNote
+	toColumn: dimOrderNumber.DeliveryNote
+
+relationship a536fd96-e857-6b24-f0ee-e92e8ab08a48
+	crossFilteringBehavior: bothDirections
+	fromColumn: dimInvoiceDeliveryNumber.DeliveryNote
+	toColumn: dimOrderNumber.DeliveryNote
+
+relationship 2c28bae1-840b-8880-5595-97fb6f4c1b7c
+	crossFilteringBehavior: bothDirections
+	toCardinality: many
+	fromColumn: dimInvoiceDeliveryNumber.DeliveryNote
+	toColumn: factSales.DeliveryNote
+
+relationship c6e5c3c3-58ca-0e41-12ed-4c68726da97d
+	fromColumn: factOrders.'תאריך אספקה'
+	toColumn: dimDates_SupplyDelivered.Date
+
+relationship fe4815dd-72d5-bba5-e89b-4d3ff5a93814
+	fromColumn: factSales.DeliveryDate
+	toColumn: dimDates_SupplyDelivered.Date
+
+relationship c7a2bf19-cf83-1829-2be7-6a61620b5e67
+	fromColumn: dimCustomers.AgentKey
+	toColumn: AgentRLS.AgentKey
+
+relationship d35b580d-9b28-e889-1a7c-38c8c430634e
+	fromColumn: factPurchaseExpenses.ItemKey
+	toColumn: dimItems.ItemKey
+
+relationship 4c09ffc5-3cc5-c557-92cc-25df300d585b
+	fromColumn: factPurchaseOrder.StockExchangeMonth
+	toColumn: dimDates_StockExchange.Date
+
+relationship 71eeaef1-46b4-8adb-69e3-ba7ce61664c9
+	fromColumn: factOrders.POL_StockExchangeDate
+	toColumn: dimDates_StockExchange.Date
+
+relationship 913c01a5-8dc9-98af-87c8-9b2d13555796
+	isActive: false
+	fromColumn: factPurchaseExpenses.SupplyDate
+	toColumn: dimDates.Date
+
+relationship 78fdfb52-2687-78b4-c67a-46e6e01e3799
+	isActive: false
+	fromColumn: factPurchaseExpenses.OrderDate
+	toColumn: dimDates.Date
+
+relationship f7e0723e-0f7e-096d-951c-34738813ae61
+	fromColumn: factPurchaseExpenses.ShipID
+	toColumn: dimBoats.ShipID
+
+relationship 24904622-5e6c-540e-e811-73d3ca046e18
+	fromColumn: factPurchaseExpenses.OrderSupplierKey
+	toColumn: dimSuppliersCompare.SupplierKey
+
+relationship 1aed441f-95cf-a555-4a1a-3497512fac76
+	fromColumn: factPurchaseExpenses.ItemKey_backup
+	toColumn: dimItemsSimple.ItemKey
+
+relationship 9a1c82a5-2b00-273b-5dbe-cc1d298a3402
+	fromColumn: factSales.DeliveryNote
+	toColumn: dimSubPurchaseOrderNumber.DeliveryNote
+
+relationship f0437bda-ad78-3efd-2926-7002ca9f268d
+	fromColumn: factPurchaseExpenses.TransactionType
+	toColumn: dimTransactionType.ID
+
+relationship cca58645-6e78-15dd-ba3f-c42b779048db
+	fromColumn: factPurchaseExpenses.OrderSupplierKey
+	toColumn: dimSuppliersPurchase.SupplierKey
+
+relationship 4daa1f0a-3e37-9136-c4dd-a0fd93b8be13
+	fromColumn: factPurchaseIncome.AccountKey
+	toColumn: dimCustomers.AccountKey
+
+relationship 1d21bf19-7ac9-2493-63da-940cf49ee809
+	toCardinality: many
+	fromColumn: factPurchaseIncome.PurchaseOrderID
+	toColumn: dimSubPurchaseOrderNumber.PurchaseOrderID
+
+relationship d7802166-1523-5c80-1f50-d50c94c22df5
+	fromColumn: factPurchaseIncome.ItemKey
+	toColumn: dimItems.ItemKey
+
+relationship d861a493-952c-ff33-1977-38b18ee9e07d
+	fromColumn: factSales.ActionType
+	toColumn: dimActionType.Id
+
+relationship a53d0289-f251-5416-8d83-e11ebe55a7cf
+	fromColumn: factPurchaseExpenses.PurchaseOrderID
+	toColumn: dimPurchaseOrderNumber.PurchaseOrderID
+
+relationship 107cebc1-19ae-e96d-54c7-12adad281d50
+	fromColumn: dimSubPurchaseOrderNumber.PurchaseOrderID
+	toColumn: dimPurchaseOrderNumber.PurchaseOrderID
+
+relationship 0f5292a5-1aaa-ccc9-583b-57005238bd98
+	fromColumn: factGain.ItemKey
+	toColumn: dimItems.ItemKey
+
+relationship 13efb450-4a21-4e54-3dad-125cb31a70fb
+	fromColumn: factGain.SupplierKey
+	toColumn: dimSuppliers.SupplierKey
+
+relationship 07519004-bcc1-5bde-b954-7443bcbb53ae
+	fromColumn: factGain.PurchaseOrderID
+	toColumn: dimPurchaseOrderNumber.PurchaseOrderID
+
+relationship 1ce64856-95f5-3b0b-2581-a928c7abd464
+	fromColumn: factGain.AccountKey
+	toColumn: dimCustomers.AccountKey
+
+relationship b81cd100-1783-5788-9786-b8a24f4c43c7
+	fromColumn: factGain.ItemKey
+	toColumn: dimItemsSimple.ItemKey
+
+relationship 44efda9e-752f-6754-35fb-3e3ecc3596b2
+	fromColumn: factGain.DeliveryDate
+	toColumn: dimDates.Date
+
+relationship 97c7155c-0a27-a291-445e-0e4e0d03fe3a
+	isActive: false
+	fromColumn: factGain.ValueDate
+	toColumn: dimDates.Date
+
+relationship 22cda7e1-a7e6-39f0-6710-f118232df500
+	fromColumn: factGain.ShipID
+	toColumn: dimBoats.ShipID
+
+relationship 22f7c8f9-234e-d689-5313-667fa2ef374f
+	fromColumn: factGain.SupplierKey
+	toColumn: dimWarehouses.WarehsKey
+
+relationship ab9fd201-9454-5931-94b4-b9a332c76b8c
+	isActive: false
+	fromColumn: dimPeriods_Compare.Date
+	toColumn: dimDates.Date
+

@@ -1,0 +1,22 @@
+table 'Customer Days Range'
+	lineageTag: 51076b2a-3d1f-4095-b4d5-8ff421a24225
+
+	column 'Customer Days Range'
+		formatString: 0
+		lineageTag: d2ce7fa0-baa2-4122-b9e7-25bc660cb059
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+		annotation SummarizationSetBy = User
+
+	partition 'Customer Days Range' = calculated
+		mode: import
+		source = GENERATESERIES(-30, 30, 1)
+
+	annotation PBI_Id = 6fe58f4abd6e48ab9231fa9b9ccb6043
+

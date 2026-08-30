@@ -1,0 +1,48 @@
+table 'Dynamic Year Selection'
+	lineageTag: 7522dbb1-0cea-4aac-b011-06d8695cfcf3
+
+	column 'Dynamic Year Selection'
+		formatString: 0
+		lineageTag: 5917c1b6-32da-4b81-8eb9-a4b21f8fcf30
+		summarizeBy: sum
+		sourceColumn: [Value1]
+		sortByColumn: 'Dynamic Year Selection Order'
+
+		relatedColumnDetails
+			groupByColumn: 'Dynamic Year Selection Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Dynamic Year Selection Fields'
+		lineageTag: 99f79065-b1c3-4613-b58b-b61cf23f6ab4
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'Dynamic Year Selection Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Dynamic Year Selection Order'
+		formatString: 0
+		lineageTag: 370e8bdf-bd8a-48ff-9255-c7d146aa7af1
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Dynamic Year Selection' = calculated
+		mode: import
+		source =
+				{
+				    (YEAR(CALCULATE(MAX(Sub_DimDates[Date]),Sub_DimDates[IsHistory]=1)), NAMEOF('factOrders'[Quantity Sales USD NIS Switch]), 0),
+				    (YEAR(CALCULATE(MAX(Sub_DimDates[Date]),Sub_DimDates[IsHistory]=1))-1, NAMEOF('factOrders'[Quantity Sales USD NIS LY Switch]), 1),
+				    (YEAR(CALCULATE(MAX(Sub_DimDates[Date]),Sub_DimDates[IsHistory]=1))-2, NAMEOF('factOrders'[QQuantity Sales USD NIS 2Y Switch]), 2)
+				}
+
+	annotation PBI_Id = 9f0c54d9e69345d694baa7743b325e98
+

@@ -1,0 +1,53 @@
+table Period_ParametersTBL
+	lineageTag: 56bd1811-0ba0-4252-93cf-02f211079d19
+
+	column ID
+		dataType: int64
+		formatString: 0
+		lineageTag: 773a750d-6301-49f2-89d2-025ff92703f1
+		summarizeBy: count
+		sourceColumn: ID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'בחר תקופה'
+		dataType: string
+		lineageTag: dd38fa12-ab8c-48bc-993d-92fa7177c3c5
+		summarizeBy: none
+		sourceColumn: בחר תקופה
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Period
+		dataType: string
+		lineageTag: 206986cd-fe8a-483e-b895-555f45028040
+		summarizeBy: none
+		sourceColumn: Period
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Period_ParametersTBL-98013968-0424-432e-82de-cf45762e599f = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WMlTSUbq+6vry61OvL7k+ReH6PCBz4vWZ1+dcnwKUCUgsSszJSc1RCEgtysxPUYrViVYyQtOxHKh2wfXJ11cAda0Cyjkn5qTmpSQWwfXEAgA=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type text) meta [Serialized.Text = true]) in type table [ID = _t, #"בחר תקופה" = _t, Period = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"ID", Int64.Type}, {"Period", type text}})
+				in
+				    #"Changed Type"
+
+	changedProperty = IsHidden
+
+	annotation PBI_Id = 148d6f63-00ae-4972-81de-966005101e24
+
+	annotation LinkedQueryName = Period_ParametersTBL
+
+	annotation PBI_QueryRelationships = {"columnCount":3,"keyColumnNames":[],"queryRelationships":[],"columnIdentities":["Section1/Period_ParametersTBL/Changed Type.{ID,0}","Section1/Period_ParametersTBL/Source.{בחר תקופה,1}","Section1/Period_ParametersTBL/Changed Type.{Period,2}"],"ColumnCount":3,"KeyColumnNames":[],"ColumnIdentities":["Section1/Period_ParametersTBL/Changed Type.{ID,0}","Section1/Period_ParametersTBL/Source.{בחר תקופה,1}","Section1/Period_ParametersTBL/Changed Type.{Period,2}"],"RelationshipInfo":[]}
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,487 @@
+table factTargets
+	lineageTag: 48fec6bc-98b1-4166-b590-dc9a2ecfa038
+
+	measure 'מכירות חודשי לתקופה סניפים עם יעד' =
+			
+			VAR ThisMonth=CALCULATE(MAX(dimDates[YearMonthSum]),dimDates[IsHistory]=1)
+			return
+			 CALCULATE([כמות מכירה לתקופה וסניפים עם יעד],FILTER(dimDates,dimDates[YearMonthSum]=ThisMonth))
+		formatString: #,0
+		lineageTag: ca91f735-065e-4e67-90f0-42cc236a69dd
+
+		changedProperty = IsHidden
+
+	measure 'Agent Below 70% Target' = ```
+			
+			COUNTROWS(
+			FILTER(VALUES(dimCustomers[Agent]),
+			[אחוז ביצוע מיעד]<0.7 && [אחוז ביצוע מיעד] > 0 
+			))
+			```
+		formatString: #,0
+		lineageTag: 27982b4b-8b43-40c9-8337-03bfb5b3c372
+
+		changedProperty = IsHidden
+
+	measure 'Agent Abover Target' =
+			
+			COUNTROWS(
+			FILTER(VALUES(dimCustomers[Agent]),
+			[אחוז ביצוע מיעד]>=1.0
+			))
+		formatString: 0
+		lineageTag: dcdf6c06-9330-4055-aed1-78ffd553bf93
+
+		changedProperty = IsHidden
+
+	measure 'Agent Below 90% and Over 70% Target' =
+			
+			COUNTROWS(
+			FILTER(VALUES(dimCustomers[Agent]),
+			[אחוז ביצוע מיעד]>=0.7 && [אחוז ביצוע מיעד]<1
+			))
+		formatString: 0
+		lineageTag: 4e00edb0-bdca-4679-9f62-7e5eed3ecdb3
+
+		changedProperty = IsHidden
+
+	measure 'סוכני יעדים' =
+			COUNTROWS(
+			FILTER(VALUES(dimCustomers[Agent]),[אחוז ביצוע מיעד]>= 0))
+		formatString: 0
+		lineageTag: b5d44788-12b9-4308-b74c-694a5567f346
+
+		changedProperty = IsHidden
+
+	measure 'קצב חודשי ליום נדרש' =
+			
+			IF([קצב יומי נדרש לעמידה ביעד חודשי]<[ממוצע מכירות ליום חודשי]
+				,
+				 [ממוצע מכירות ליום חודשי יעדים]
+			      , [קצב יומי נדרש לעמידה ביעד חודשי])
+		formatString: #,0
+		displayFolder: קצב
+		lineageTag: 7e4b3ac2-f621-4388-bed2-39288632d845
+
+		changedProperty = IsHidden
+
+	measure 'קצב יומי נדרש לעמידה ביעד חודשי' =
+			
+			IF( [מרחק מיעד חודשי]>0,
+			    0,
+			[ממוצע מכירות ליום חודשי יעדים] + CALCULATE(DIVIDE([מרחק מיעד חודשי],[Remaining Working Days in Selected Period]),FILTER(dimDates,dimDates[Show This Year]=TRUE()))
+			*-1)
+		formatString: #,0
+		displayFolder: קצב
+		lineageTag: a627c786-a6ce-4167-acd8-6725bf668a85
+
+		changedProperty = IsHidden
+
+	measure 'קצב יומי נדרש לעמידה ביעד שנתי' =
+			
+			IF([מרחק מיעד]>0,
+			    0,
+			[ממוצע כמות מכירה ליום שנתי יעדים] + CALCULATE(DIVIDE([מרחק מיעד],[Remaining Working Days in Selected Period All Year]),FILTER(dimDates,dimDates[Show This Year]=TRUE()))
+			*-1)
+		displayFolder: קצב
+		lineageTag: f8a37b07-5531-4c53-983f-dfd02a07106c
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'קצב שנתי ליום נדרש' = ```
+			
+			IF([קצב יומי נדרש לעמידה ביעד שנתי]<[ממוצע כמות מכירה ליום שנתי]
+				,  [ממוצע כמות מכירה ליום שנתי יעדים]  
+			      , [קצב יומי נדרש לעמידה ביעד שנתי])
+			```
+		formatString: #,0
+		displayFolder: קצב
+		lineageTag: bbb63aa5-2f37-4ccc-9b10-fc9f52d6d0de
+
+		changedProperty = IsHidden
+
+	measure יעדים = ```
+			
+			// [Ly Target]
+			//Choose Target from the Above
+			 SUM(factTargets[Target]) //[Ly Target]
+			
+			
+			 /*IF(HASONEVALUE(VAT_MeasureSelctionTable[ID ANALYSIS]),
+				SWITCH(MAX(VAT_MeasureSelctionTable[ID ANALYSIS]),
+					1,[Total Target no VAT],
+					2,[Total Target VAT]),
+					
+				[Total Target no VAT])*/
+			```
+		formatString: #,0
+		displayFolder: יעדים כללי
+		lineageTag: 08b2ab5c-a6d5-4820-9460-ef67cc3e8212
+
+		changedProperty = IsHidden
+
+	measure 'יעד עד היום' =
+			
+			CALCULATE([יעדים],dimDates[IsHistory]=1)
+			
+			//DIVIDE([יעדים],[Working Days in Selected Period])*[Working Days Passed in Selected Period]
+		formatString: #,0
+		displayFolder: יעדים כללי
+		lineageTag: 66adb7cb-1703-44dd-b271-f3bc644fca43
+
+		changedProperty = IsHidden
+
+	measure 'כמות מכירה לתקופה וסניפים עם יעד' =
+			
+			SUMX(CROSSJOIN(dimCustomers,VALUES(dimDates[MonthInCalendarName])),CALCULATE(
+			    if([יעדים]
+			    >0,
+			   [Total Quantity]
+			    ,BLANK())))
+			/*SUMX(CROSSJOIN(dimBranches,VALUES(dimDates[חודש בשנה])),CALCULATE(
+			    if([יעדים]
+			    >0,
+			   [Total Sales]
+			    ,BLANK())))*/
+		formatString: #,0
+		displayFolder: יעדים כללי
+		lineageTag: 35e8c088-9a3b-4b7f-931f-cc931795124f
+
+		changedProperty = IsHidden
+
+	measure 'מרחק מיעד' = ```
+			[מכירות מצטברות יעדים] -[יעד עד היום]
+			/* If Module Is B2B
+			[יעד עד היום] - [מכירות מצטברות] 
+			*/
+			/*If Module Is B2C
+			[מכירות לתקופה וסניפים עם יעד]-
+			[יעדים]*/
+			```
+		formatString: #,0
+		displayFolder: יעדים כללי
+		lineageTag: 9653c1c4-e9da-4029-943a-37c9d36fd900
+
+		changedProperty = IsHidden
+
+	measure 'מרחק מיעד עד היום' =
+			
+			[Quantity YTD]-
+			[TargetToDate]
+		formatString: #,0
+		displayFolder: יעדים כללי
+		lineageTag: e9fa442d-5b3d-4e76-afd7-fe664708573b
+
+		changedProperty = IsHidden
+
+	measure 'אחוז ביצוע מיעד' =
+			DIVIDE([כמות מכירה],
+			[יעד עד היום])
+			/*B2B
+			DIVIDE([מכירות],
+			[יעד עד היום])
+			*/
+			/*B2C
+			DIVIDE([מכירות לתקופה וסניפים עם יעד],[יעדים])*/
+		formatString: 0%;-0%;0%
+		displayFolder: יעדים כללי
+		lineageTag: e239dd65-3cac-4dc5-b135-ea6bd28c61ec
+
+		changedProperty = IsHidden
+
+	measure '% Actual From Target' = DIVIDE([Quantity YTD],[TargetToDate])
+		formatString: 0.00%;(0.00)%;0.00%
+		displayFolder: יעדים כללי
+		lineageTag: 4883a3fb-5b3d-4a4e-a3ee-4f46701555ac
+
+		changedProperty = IsHidden
+
+	measure 'Target Param' = 0.97
+		displayFolder: יעדים כללי
+		lineageTag: 95b73815-3e4d-4ccd-95f5-be8be18f9e61
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Ly Target' = [Sales Comparison LY] *[Target Param]
+		formatString: 0
+		displayFolder: יעדים כללי
+		lineageTag: b02b44cd-7582-4708-bd30-613f7580061a
+
+		changedProperty = IsHidden
+
+	measure 'יעדים ממוצע מכירות ליום' =
+			DIVIDE([כמות מכירה לתקופה וסניפים עם יעד],
+				[כמות ימים עם מכירה])
+		displayFolder: יעדים כללי
+		lineageTag: 34ee169d-08d6-4bd2-8395-15ca207064d8
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'מכירות מצטברות יעדים' = CALCULATE(CALCULATE([כמות מכירה לתקופה וסניפים עם יעד],DATESYTD(dimDates[Date])),dimDates[IsHistory]=1)
+		displayFolder: יעדים כללי
+		lineageTag: a028a493-1727-4e53-ad70-a7b194f42485
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'יעד עד היום חודשי' =
+			
+			VAR ThisMonth=CALCULATE(MAX(dimDates[YearMonthSum]),dimDates[IsHistory]=1)
+			return
+			 CALCULATE([יעד עד היום],FILTER(dimDates,dimDates[YearMonthSum]=ThisMonth))
+		displayFolder: יעד חודשי
+		lineageTag: efccf089-72a8-4994-b9dd-ede792cfbe2c
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'מרחק מיעד חודשי' =
+			[מכירות חודשי לתקופה סניפים עם יעד]
+			-[יעד עד היום חודשי]
+			
+			/*[מכירות חודשי]
+			-[יעד עד היום חודשי]*/
+		formatString: #,0
+		displayFolder: יעד חודשי
+		lineageTag: 6c23a055-7450-4032-9cd3-ef6623351f01
+
+		changedProperty = IsHidden
+
+	measure 'ממוצע מכירות ליום חודשי יעדים' =
+			
+			VAR ThisMonth=CALCULATE(MAX(dimDates[YearMonthSum]),dimDates[IsHistory]=1)
+			return
+			 CALCULATE([יעדים ממוצע מכירות ליום],FILTER(dimDates,dimDates[YearMonthSum]=ThisMonth))
+		formatString: #,0
+		displayFolder: יעד חודשי
+		lineageTag: a73ac713-7f1e-430d-b09c-dac00b2dafd2
+
+		changedProperty = IsHidden
+
+	measure 'יעד עד היום מצטבר' =
+			
+			CALCULATE(CALCULATE([יעד עד היום],DATESYTD(dimDates[Date])),dimDates[IsHistory]=1)
+		displayFolder: יעד מצטבר
+		lineageTag: e3af215b-1e29-4dc7-b716-5443b19c52f0
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'ממוצע כמות מכירה ליום שנתי יעדים' = CALCULATE(CALCULATE([יעדים ממוצע מכירות ליום],DATESYTD(dimDates[Date])),dimDates[IsHistory]=1)
+		lineageTag: ba6b10db-ea6b-4965-bac4-bcf286b7c4e3
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Target' = SUM(factTargets[Target])
+		lineageTag: dec9c7d3-2605-48a9-bee6-f457b0ffd219
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure Potential =
+			SUM(factTargets[PotentialInTone])
+			--IF(ISBLANK(SUM(factTargets[PotentialInTone])),[Quantity Dynamic Table Switch LY No -]*1.5,SUM(factTargets[PotentialInTone]))
+		lineageTag: 593cb977-5dd5-4e78-8f92-b9bfb7a5eb90
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Target Current Year' =
+			
+			VAR _YEAR = YEAR(CALCULATE(MAX(dimDates[Date]),dimDates[IsHistory]=1))
+			
+			RETURN
+			CALCULATE([Total Target],Sub_DimDates[Year]=_YEAR)
+		lineageTag: ddf4f4a2-05b5-4ec8-b16b-f52acf08a6cd
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Potential Current Year' =
+			
+			VAR _YEAR = YEAR(CALCULATE(MAX(dimDates[Date]),dimDates[IsHistory]=1))
+			
+			RETURN
+			CALCULATE([Potential],Sub_DimDates[Year]=_YEAR)
+		lineageTag: 537cb4d8-b577-4736-b8b5-a1609317688c
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure TargetToDate = CALCULATE(CALCULATE([Total Target],DATESYTD(dimDates[Date]),DATESYTD(Sub_DimDates[Date])),dimDates[IsHistory]=1,Sub_DimDates[IsHistory]=1)
+		lineageTag: 552b5e27-9415-479b-9419-af1b4e909d9a
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Full Monthly Target' =
+			
+			VAR _YEAR = CALCULATE(YEAR(MAX(dimDates[Date])),dimDates[IsHistory]=1)
+			RETURN
+			CALCULATE([Total Target],FILTER(ALL(Sub_DimDates),Sub_DimDates[Year]=_YEAR))/12
+		lineageTag: 6f8e2124-b8dd-455e-ac93-8a7c159b77cb
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '% Actual From Potential' = DIVIDE([Quantity Dynamic Table Switch],[Potential Current Year])
+		formatString: 0.00%;(0.00)%;0.00%
+		displayFolder: יעדים כללי
+		lineageTag: 97212763-b71f-4ade-bfde-456fa7b27bc1
+
+		changedProperty = IsHidden
+
+	measure 'Full Monthly Potential' =
+			
+			VAR _YEAR = CALCULATE(YEAR(MAX(dimDates[Date])),dimDates[IsHistory]=1)
+			RETURN
+			CALCULATE([Potential],FILTER(ALL(Sub_DimDates),Sub_DimDates[Year]=_YEAR))/12
+		lineageTag: 8c0c2f92-e8e9-495b-9e67-367ae0e13f7c
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column EntityID
+		dataType: string
+		lineageTag: 09af6a64-cf2a-4947-a0e9-1366c7e7936e
+		summarizeBy: none
+		sourceColumn: EntityID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column AgentKey
+		dataType: string
+		lineageTag: 6c6d6ec4-7a9a-495f-98c1-92df977336f5
+		summarizeBy: none
+		sourceColumn: AgentKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column CategoryCode
+		dataType: int64
+		formatString: 0
+		lineageTag: 09a439c2-5cb4-4009-af98-d12f0cb1b063
+		summarizeBy: count
+		sourceColumn: CategoryCode
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ItemKey
+		dataType: string
+		lineageTag: b8f771f6-43c8-4c65-9f04-652bddc55596
+		summarizeBy: none
+		sourceColumn: ItemKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column PotentialInTone
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 4b8873ab-164c-4df9-9e43-3d9fc74c2ac2
+		summarizeBy: sum
+		sourceColumn: PotentialInTone
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column TargetVAT
+		dataType: int64
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 767e9a8c-fcfc-422d-8133-18dd16e46207
+		summarizeBy: sum
+		sourceColumn: TargetVAT
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column BranchKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 3ceeb423-ca89-473b-a925-00cc28185224
+		summarizeBy: count
+		sourceColumn: BranchKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Date
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: daef271f-1129-4d56-ac54-a3b0766c5442
+		summarizeBy: none
+		sourceColumn: Date
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Target
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 187d9fa6-607e-4194-9ee8-1d87256a8073
+		summarizeBy: sum
+		sourceColumn: Target
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column AccountKey
+		dataType: string
+		lineageTag: 1c1137b2-da54-40c4-a6b2-298b3ce3cc64
+		summarizeBy: none
+		sourceColumn: AccountKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition factTargets = m
+		mode: import
+		queryGroup: 'fact Tables'
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="WITH DateList AS (#(lf)                  SELECT CAST(DATEFROMPARTS(YEAR(GETDATE())-1,1,1) AS DATE) AS [Date]#(lf)                  UNION ALL#(lf)                  SELECT  DATEADD(DAY, 1, [Date]) AS 'Date'#(lf)                  FROM DateList#(lf)                  WHERE [Date]<DATEFROMPARTS(YEAR(GETDATE()),12,31)#(lf))#(lf),STG1 AS (#(lf)          SELECT #(lf)          '1' as 'EntityID'#(lf)#(tab)#(tab)  ,CPT.CPT_Year AS 'Year'#(lf)          ,CAST(CONVERT(INT, CONVERT(VARCHAR,AM.QOD)) AS VARCHAR) AS 'AgentKey'#(lf)          ,CAST(CONVERT(INT, CONVERT(VARCHAR,G.QOD_GORM))AS VARCHAR) AS 'AccountKey'#(lf)          ,NULL AS 'CategoryCode' #(lf)          ,CAST(CONVERT(INT, CONVERT(VARCHAR,CPT.CPT_ProductID)) AS VARCHAR)+ '-' + CAST(CONVERT(INT, CONVERT(VARCHAR,CPT.CPT_ProductID)) AS VARCHAR) AS 'ItemKey'#(lf)          --,DATENAME(MONTH,CONVERT(DATETIME,'1'+ (replace(Date,'PRICE','')) + '1')) AS 'Date'#(lf)          --,Year#(lf)          ,CPT.[CPT_PotentialInTone] AS 'PotentialInTone'#(lf)          ,CPT.[CPT_TargetInPercent] AS 'TargetInPercent'#(lf)          ,CPT.[CPT_PotentialInTone] * (CPT.[CPT_TargetInPercent]/100) as 'Target'#(lf)          ,NULL as 'TargetVAT'#(lf)          ,null as 'BranchKey'#(lf)         -- ,GETDATE() AS RowInsertDatetime#(lf)          FROM [tblCustomerProductYearTargets] CPT#(lf)          LEFT JOIN GORMIM G ON CPT.CPT_CustomerID=G.QOD_GORM#(lf)          LEFT JOIN TBLT_ANSHI_MCIROT AM ON AM.SHM_AISH_MCIROT = G.AISH_MCIROT_MTPL#(lf)          WHERE CPT.CPT_IsActive=1 #(lf)#(lf)#(tab)#(tab)  UNION ALL#(lf)#(lf)#(tab)#(tab)  SELECT #(lf)          '1' as 'EntityID'#(lf)#(tab)#(tab)  ,CPT.POT_Year AS 'Year'#(lf)          ,CAST(CONVERT(INT, CONVERT(VARCHAR,AM.QOD)) AS VARCHAR) AS 'AgentKey'#(lf)          ,CAST(CONVERT(INT, CONVERT(VARCHAR,G.QOD_GORM))AS VARCHAR) AS 'AccountKey'#(lf)          ,NULL AS 'CategoryCode' #(lf)          ,CAST(CONVERT(INT, CONVERT(VARCHAR,CPT.POT_Product)) AS VARCHAR)+ '-' + CAST(CONVERT(INT, CONVERT(VARCHAR,CPT.POT_Product)) AS VARCHAR) AS 'ItemKey'#(lf)          --,DATENAME(MONTH,CONVERT(DATETIME,'1'+ (replace(Date,'PRICE','')) + '1')) AS 'Date'#(lf)          --,Year#(lf)          ,CPT.[POT_PotentialInTone] AS 'PotentialInTone'#(lf)          ,CPT.[POT_TargetInPercent] AS 'TargetInPercent'#(lf)          ,CPT.[POT_TargetInTone] as 'Target'#(lf)          ,NULL as 'TargetVAT'#(lf)          ,null as 'BranchKey'#(lf)         -- ,GETDATE() AS RowInsertDatetime#(lf)          FROM [dbo].[tblCustomerPotential] CPT#(lf)          LEFT JOIN GORMIM G ON CPT.POT_Customer=G.QOD_GORM#(lf)          LEFT JOIN TBLT_ANSHI_MCIROT AM ON AM.SHM_AISH_MCIROT = G.AISH_MCIROT_MTPL#(lf)#(tab)#(tab)  WHERE POT_Year>=2024#(lf))#(lf),STG2 AS (#(lf)SELECT EntityID#(lf)      ,[Year]#(lf)#(tab)  --,DATEPART(WEEKDAY,[Date]) AS 'DayOfWeek'#(lf)#(tab)  --,CASE WHEN DATEPART(WEEKDAY,[Date]) IN (6,7) THEN 0 ELSE 1 END AS DayIndic#(lf)      ,[Date]#(lf)      ,AgentKey#(lf)#(tab)  ,AccountKey#(lf)#(tab)  ,CategoryCode#(lf)#(tab)  ,ItemKey#(lf)#(tab)  ,PotentialInTone#(lf)#(tab)  ,[Target]#(lf)#(tab)  ,TargetInPercent#(lf)#(tab)--,ROUND(CAST(((PotentialInTone) / #(lf)    --       (CASE WHEN YEAR([Date]) = [Year] THEN DATEDIFF(DAY, DATEFROMPARTS([Year], 1, 1), DATEFROMPARTS([Year], 12, 31)) + 1 ELSE 365 END))as decimal (8,3)),3) AS 'PotentialInTone'#(lf)#(tab)--,ROUND(CAST(((PotentialInTone * (TargetInPercent / 100)) / #(lf)    --       (CASE WHEN YEAR([Date]) = [Year] THEN DATEDIFF(DAY, DATEFROMPARTS([Year], 1, 1), DATEFROMPARTS([Year], 12, 31)) + 1 ELSE 365 END))as decimal (8,3)),3) AS 'Target'#(lf)#(tab)  ,TargetVAT#(lf)#(tab)  ,BranchKey#(lf)#(tab)  #(lf)FROM DateList DL#(lf)CROSS APPLY (#(lf)             SELECT *#(lf)             FROM STG1#(lf)             WHERE [Year] = YEAR(DL.[Date])#(lf)         ) AS STG#(lf))#(lf),NumOfDays AS (#(lf)SELECT *#(lf)#(tab)  ,SUM(VacationRate) OVER (PARTITION BY YEAR(VacationDate)) AS 'DaysOff'#(lf)#(tab)  ,DATEDIFF(DAY,DATEFROMPARTS(YEAR(VacationDate),01,01), DATEFROMPARTS(YEAR(VacationDate),12,31))+1 - SUM(VacationRate) OVER (PARTITION BY YEAR(VacationDate)) AS 'DaysInYear'#(lf)FROM ADM.dbo.tblVacationSettings#(lf)#(lf))#(lf),TotalDaysInYear AS (#(lf)SELECT DISTINCT DL.*#(lf),CASE WHEN N.VacationType IS NULL THEN 'יום עבודה' ELSE N.VacationType END AS 'VacationType' #(lf),CASE WHEN N.VacationRate IS NULL THEN 0 ELSE N.VacationRate END AS DayOff,N2.DaysInYear#(lf)FROM DateList DL#(lf)LEFT join NumOfDays N#(lf)ON DL.Date = N.VacationDate#(lf)LEFT JOIN NumOfDays N2 ON YEAR(DL.Date)=YEAR(N2.VacationDate)#(lf)#(lf))#(lf)#(lf)SELECT EntityID#(lf)#(tab)  ,STG2.[Date]#(lf)#(tab)  ,AgentKey#(lf)#(tab)  ,AccountKey#(lf)#(tab)  ,CategoryCode#(lf)#(tab)  ,ItemKey#(lf)#(tab)  ,ROUND(CAST((PotentialInTone / (DaysInYear))as decimal (8,4)),4) AS 'PotentialInTone'#(lf)      ,ROUND(CAST(CASE WHEN DayOff>0 THEN 0 ELSE [TARGET] / (DaysInYear) END AS DECIMAL(8,5)),5) AS 'Target'#(lf)#(tab)  ,TargetVAT#(lf)      ,BranchKey#(lf)FROM STG2#(lf)LEFT JOIN TotalDaysInYear TD ON STG2.[Date]=TD.[Date]#(lf)order by Date#(lf)OPTION (MAXRECURSION 0);"]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Date", type date}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

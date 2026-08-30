@@ -1,0 +1,22 @@
+table MinItemPriceParameter
+	lineageTag: a8f19a89-a8cb-4061-952b-9196c5b514de
+
+	column MinItemPriceParameter
+		formatString: 0
+		lineageTag: e6339a7d-1e5c-4780-b3bd-f8091e24aa45
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+		annotation SummarizationSetBy = User
+
+	partition MinItemPriceParameter-ac35324f-a34c-4e7a-8767-9059525d1315 = calculated
+		mode: import
+		source = GENERATESERIES(0, 100, 1)
+
+	annotation PBI_Id = 64e042551240443aa359494094f6f9f4
+

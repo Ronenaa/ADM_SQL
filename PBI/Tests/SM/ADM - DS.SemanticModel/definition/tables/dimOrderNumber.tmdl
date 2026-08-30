@@ -1,0 +1,52 @@
+table dimOrderNumber
+	lineageTag: ab49c126-f868-4717-af32-eca29fc7ff72
+
+	column UniqeID
+		dataType: double
+		lineageTag: bf99f33e-20ae-41f2-bd2e-d4f794256da7
+		summarizeBy: count
+		sourceColumn: UniqeID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column OrderID
+		dataType: string
+		lineageTag: bb578f74-15f4-4258-95b4-427e0d416bc8
+		summarizeBy: none
+		sourceColumn: OrderID
+
+		changedProperty = DataType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DeliveryNote
+		dataType: string
+		lineageTag: 98fb7581-4778-4172-9d9e-5b1937b57780
+		summarizeBy: none
+		sourceColumn: DeliveryNote
+
+		changedProperty = DataType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dimOrderNumber = m
+		mode: import
+		queryGroup: Dim
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="select#(lf)#(tab)k_uniqueident as UniqeID#(lf)#(tab),CAST (MS_HZMNH as VARCHAR) as OrderID#(lf)#(tab),MS_T_MSHLOCH as DeliveryNote#(lf)from QISHOR_T_MSHLOCH_HZMNOT#(lf)#(lf)UNION#(lf)#(lf)SELECT #(lf)#(tab)#(tab)HZ.k_uniqueident as UniqeID#(lf)#(tab)#(tab),HZ.MSPR_HZMNH as OrderID#(lf)#(tab)#(tab),-ROW_NUMBER() OVER (ORDER BY HZ.k_uniqueident) as DeliveryNote#(lf)FROM [HZMNOT] HZ#(lf)left join QISHOR_T_MSHLOCH_HZMNOT HZT#(lf)on HZ.MSPR_HZMNH = HZT.MS_HZMNH#(lf)WHERE 1=1 #(lf)AND HZT.MS_T_MSHLOCH is null"])
+				in
+				    Source
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

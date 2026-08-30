@@ -1,0 +1,9 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definitionProperties/2.0.0/schema.json",
+  "version": "4.0",
+  "datasetReference": {
+    "byConnection": {
+      "connectionString": "Data Source=\"powerbi://api.powerbi.com/v1.0/myorg/ADM - Tests\";initial catalog=\"ADM - DS\";access mode=readonly;integrated security=ClaimsToken;semanticmodelid=2de1594d-0715-4d48-813d-6f713d3c30f0"
+    }
+  }
+}

@@ -1,0 +1,68 @@
+table 'LYF_L2Y_Target Parameter'
+	lineageTag: 84fafaad-1652-4a5a-a398-19bf2d9b248a
+
+	column 'LYF_L2Y_Target Parameter'
+		lineageTag: 1e6d4822-28b4-4a42-bb38-86ee9fc61a28
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'LYF_L2Y_Target Parameter Order'
+
+		relatedColumnDetails
+			groupByColumn: 'LYF_L2Y_Target Parameter Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'LYF_L2Y_Target Parameter Fields'
+		lineageTag: 8206597c-5799-4664-ab9d-25fce5d40969
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'LYF_L2Y_Target Parameter Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'LYF_L2Y_Target Parameter Order'
+		formatString: 0
+		lineageTag: eaface08-76da-44f2-b0db-3cc4e76ec9f0
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Value4
+		lineageTag: 2e5bf058-5b60-4d6c-a1b8-17d373098988
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Value4]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'LYF_L2Y_Target Parameter' = calculated
+		mode: import
+		source = ```
+				{
+				    ("LY FY", NAMEOF('factOrders'[Quantity Dynamic Table Switch LY]), 14, "LY FY"),
+				    ("Target",NAMEOF('factOrders'[Dynamic Table Target]), 13, "Target"),
+				    ("2YA YTD", NAMEOF('factOrders'[Quantity Dynamic Table Switch 2Y YTD]), 12, "2YA YTD"),
+				    ("2YA FY", NAMEOF('factOrders'[Quantity Dynamic Table Switch 2Y]), 11, "2YA FY"),
+				    ("Potential", NAMEOF('factTargets'[Potential]), 10, "Potential"),
+				    ("  ", NAMEOF('factOrders'[_blank]), 9, "LY FY"),
+				    (" %", NAMEOF('factOrders'[Quantity Dynamic Table Switch Diff % LY]), 8, "LY FY"),
+				    ("   ", NAMEOF('factOrders'[_blank]), 7, "Target"),
+				    ("  %",NAMEOF('factTargets'[% Actual From Target]), 6, "Target"),
+				    ("    ", NAMEOF('factOrders'[_blank]), 5, "2YA YTD"),
+				    (" % ", NAMEOF('factOrders'[Quantity Dynamic Table Switch Diff % 2Y YTD]), 3, "2YA YTD"),
+				    ("     ", NAMEOF('factOrders'[_blank]), 4, "2YA FY"),
+				    ("  %  ", NAMEOF('factOrders'[Quantity Dynamic Table Switch Diff % 2Y]), 2, "2YA FY"),
+				    ("      ", NAMEOF('factOrders'[_blank]), 1, "Potential"),
+				    ("   %", NAMEOF('factTargets'[% Actual From Potential]),0, "Potential")    
+				}
+				```
+
+	annotation PBI_Id = d91854e7b62743d99dcd6f2003feb3bf
+

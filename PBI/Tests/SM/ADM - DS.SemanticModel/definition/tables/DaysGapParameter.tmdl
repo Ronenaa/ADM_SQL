@@ -1,0 +1,26 @@
+table DaysGapParameter
+	lineageTag: b6333169-3981-4060-a551-05d866aeca9f
+
+	measure MaxDaysGap = MAX(DaysGapParameter[Value])
+		formatString: 0
+		lineageTag: eebe105b-b0b8-40c6-ba6e-59c3c07a1c5f
+
+	measure MinDaysGap = MIN(DaysGapParameter[Value])
+		formatString: 0
+		lineageTag: 1bbfd1f8-74ba-406a-88f7-b80103a9c488
+
+	column Value
+		formatString: 0
+		lineageTag: 754d303c-1262-48f6-81f1-caba740ac8f2
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Value]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DaysGapParameter-e3698302-d61f-4ce6-bd89-3a5ebce03835 = calculated
+		mode: import
+		source = GENERATESERIES(1, 365, 1)
+
+	annotation PBI_Id = 0d2f835b1d394beaa5528459366cddfa
+

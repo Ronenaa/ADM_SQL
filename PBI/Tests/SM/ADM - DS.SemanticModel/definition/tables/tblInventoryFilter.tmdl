@@ -1,0 +1,39 @@
+table tblInventoryFilter
+	lineageTag: eba27c58-6602-441a-abf5-6992aa69bba4
+
+	column Key
+		dataType: int64
+		formatString: 0
+		lineageTag: da925962-ae5b-4a55-9d6f-7720d85a30a2
+		summarizeBy: none
+		sourceColumn: Key
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Type
+		dataType: string
+		lineageTag: 2e8ba88a-a905-42b3-b137-64cbce3844ac
+		summarizeBy: none
+		sourceColumn: Type
+		sortByColumn: Key
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition tblInventoryFilter = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WMlTSUfJNLS5OTE9VitWJVjIC8h1zcvKTE0sy8/PAQsZAIc+8stS8kvyiSqXYWAA=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Column1 = _t, Column2 = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Column1", Int64.Type}, {"Column2", type text}}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Changed Type",{{"Column1", "Key"}, {"Column2", "Type"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_ResultType = Table
+

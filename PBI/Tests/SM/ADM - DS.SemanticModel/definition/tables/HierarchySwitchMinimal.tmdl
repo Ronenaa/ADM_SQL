@@ -1,0 +1,54 @@
+table HierarchySwitchMinimal
+	lineageTag: bf5fd3d2-3241-4b97-ac3c-c202b9fae458
+
+	column HierarchySwitchMinimal
+		lineageTag: 8339f1a2-8df6-453d-8a63-42148a48a6ed
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'HierarchySwitchMinimal Order'
+
+		relatedColumnDetails
+			groupByColumn: 'HierarchySwitchMinimal Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'HierarchySwitchMinimal Fields'
+		lineageTag: a5562e01-bfe6-42fb-b897-bd30c2f3f371
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'HierarchySwitchMinimal Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'HierarchySwitchMinimal Order'
+		formatString: 0
+		lineageTag: d08e41d4-22c1-429f-8c75-c45228ff4b32
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Value4
+		lineageTag: d11f98a4-8195-4206-937b-586a9b732b1a
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Value4]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition HierarchySwitchMinimal = calculated
+		mode: import
+		source =
+				{
+				    ("Customer Group", NAMEOF('dimCustomers'[סוג לקוח]), 0,"Customer"),
+				    ("Product", NAMEOF('dimItemsSimple'[Article_Description]), 1,"Product")
+				}
+
+	annotation PBI_Id = 3ad5ac34d1c44a559bf1853e74dcf937
+

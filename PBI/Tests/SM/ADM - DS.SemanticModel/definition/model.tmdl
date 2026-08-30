@@ -1,0 +1,147 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-IL
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+queryGroup 'Dates Dim'
+
+	annotation PBI_QueryGroupOrder = 0
+
+queryGroup 'fact Tables'
+
+	annotation PBI_QueryGroupOrder = 1
+
+queryGroup Dim
+
+	annotation PBI_QueryGroupOrder = 2
+
+queryGroup HolidaysData
+
+	annotation PBI_QueryGroupOrder = 3
+
+queryGroup Parameters
+
+	annotation PBI_QueryGroupOrder = 4
+
+queryGroup 'RFM Model'
+
+	annotation PBI_QueryGroupOrder = 5
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["dimCustomers","dimItems","factOrders","dimDates","factCollection","Late Extension","AR_MeasuerSelectionTable","SwitchTable_LYvsLYYTD","dimEntities","dimBoats","factInventory","factGain","factPurchaseOrder","factPurchaseExpenses","dimWarehouses","HolidayPivot","HolidayNOTPivot","Sub_DimDates","dimHolidays","LastRefresh","dimPeriods_Compare","factTargets","VAT_MeasureSelctionTable","Inventory_MeasureSelctionTable","EntityID","CreatePeriodTable","CreatedimPeriodTable","CalcWorkingDays","dimHolidayYear","dimHolidayYear_Compare","REF_RFM_SELECTION","ParallelPeriodTBL","Period_ParametersTBL","TargetsIndicators_MeasuerSelectionTable","factSales","SubItemsMapping","factDailyPrices","FactLimits","dimSuppliers","dimPNL","SwitchMeasure","SQL Address","hlp_ExpensesMatrixTableFileds","ValuePriceMeasure","OrderVSExecutionVSSupply","dimItemsSimple","Sub_DimDates_QA","LazyCustomerTable","QtyPrice Table","DimSpotOrder","dimOrderStatus","factInventoryActivity","PriceType","factInventoryAllocation","tblInventoryFilter","dimSuppliersCompare","dimTransactionType","dimOrderNumber","dimInvoiceDeliveryNumber","dimDates_SupplyDelivered","AgentRLS","dimDates_StockExchange","dimSubPurchaseOrderNumber","dimSuppliersPurchase","factPurchaseIncome","dimActionType","dimPurchaseOrderNumber"]
+
+annotation __TEdtr = 1
+
+annotation PBI_ProTooling = ["DaxQueryView_Desktop","DevMode","MCP-PBIModeling"]
+
+ref table dimCustomers
+ref table dimDates
+ref table factCollection
+ref table AR_MeasuerSelectionTable
+ref table Sub_DimDates
+ref table dimHolidays
+ref table VAT_MeasureSelctionTable
+ref table Inventory_MeasureSelctionTable
+ref table dimEntities
+ref table LastRefresh
+ref table BankCostPrecentageParameter
+ref table TargetSlicer
+ref table dimHolidayYear
+ref table dimHolidayYear_Compare
+ref table VarietyParameter
+ref table DaysGapParameter
+ref table MinItemPriceParameter
+ref table MinStockDaysParameter
+ref table MaxStockDaysParameter
+ref table REF_RFM_SELECTION
+ref table ProfitScoreWeight
+ref table PurchaseMonthsParameter
+ref table ParallelPeriodTBL
+ref table Period_ParametersTBL
+ref table SalesParameter
+ref table TargetsIndicators_MeasuerSelectionTable
+ref table factOrders
+ref table dimItems
+ref table factTargets
+ref table factSales
+ref table factDailyPrices
+ref table factInventory
+ref table factPurchaseExpenses
+ref table dimSuppliers
+ref table factPurchaseOrder
+ref table dimPNL
+ref table SwitchMeasure
+ref table ValuePriceMeasure
+ref table dimPeriods_Compare
+ref table FactLimits
+ref table 'Customer Days Range'
+ref table OrderVSExecutionVSSupply
+ref table dimItemsSimple
+ref table 'Time Selection'
+ref table Sub_DimDates_QA
+ref table PricingMonthParameter
+ref table 'OrderSupplyExecution Parameter'
+ref table DynamicTableColumns
+ref table HierarchySwitch
+ref table RiskPlanMeasures
+ref table 'Dynamic Year Selection'
+ref table LazyCustomerSupplyLastYearMonths
+ref table LazyCustomerXMonths
+ref table LazyCustomerYMonths
+ref table LazyCustomerTable
+ref table LazyCustomerExecutionLastYearMonths
+ref table LazyCustomerExecutionXMonths
+ref table LazyCustomerExecutionYMonths
+ref table LazyCustomerInDeclinePercentage
+ref table 'QtyPrice Table'
+ref table DimSpotOrder
+ref table dimOrderStatus
+ref table OrderDetailsColumnsSwitch
+ref table HierarchySwitchMinimal
+ref table HierarchySwitchReverse
+ref table LYTargetPotentialParameter
+ref table InventoryOtherOrAllParameter
+ref table factInventoryActivity
+ref table dimWarehouses
+ref table PriceType
+ref table factInventoryAllocation
+ref table tblInventoryFilter
+ref table Table
+ref table dimSuppliersCompare
+ref table dimTransactionType
+ref table 'Table 2'
+ref table AVG_LY_Target_Parameter
+ref table 'LYF_L2Y_Target Parameter'
+ref table MonthsMeasures
+ref table ALLorOPEN
+ref table 'LFY_L2Y_Target AVG Parameter'
+ref table dimOrderNumber
+ref table dimInvoiceDeliveryNumber
+ref table dimDates_SupplyDelivered
+ref table SwitchTable_LYvsLYYTD
+ref table LY_2Y_Parameter
+ref table AgentRLS
+ref table dimDates_StockExchange
+ref table hlp_ExpensesMatrixTableFileds
+ref table dimBoats
+ref table dimSubPurchaseOrderNumber
+ref table dimSuppliersPurchase
+ref table factPurchaseIncome
+ref table dimActionType
+ref table dimPurchaseOrderNumber
+ref table 'Dynamic Year Selection Last 3Ys'
+ref table factGain
+ref table SortOptions
+ref table CustomerScore
+ref table FilterExecution
+ref table 'Top Months'
+
+ref role Managment
+ref role Agent
+
+ref cultureInfo en-US
+

@@ -1,0 +1,48 @@
+{
+  "build": "13.0.1500.307",
+  "version": "1.2.5",
+  "author": {
+    "name": "OKViz - a trademark of SQLBI",
+    "email": "support@okviz.com"
+  },
+  "licenseTerms": "http://okviz.com/license/",
+  "privacyTerms": "http://okviz.com/privacy/",
+  "resources": [
+    {
+      "resourceId": "rId1",
+      "sourceType": 0,
+      "file": "resources/Card_with_States_by_SQLBI.js"
+    },
+    {
+      "resourceId": "rId2",
+      "sourceType": 1,
+      "file": "resources/Card_with_States_by_SQLBI.css"
+    },
+    {
+      "resourceId": "rId3",
+      "sourceType": 3,
+      "file": "resources/icon.png"
+    }
+  ],
+  "visual": {
+    "guid": "CardWithStatesBySQLBI1445315565700",
+    "name": "Card with States by SQLBI",
+    "displayName": "Card with States by SQLBI",
+    "version": "1.2.5",
+    "description": "Based on the Power BI built-in Card, this visual allows you to bind a performance measure and to define up to three states that determine the color of the data label. Moreover, the category label is fully customizable (text size and word wrap included), and you can display an additional performance label.",
+    "supportUrl": "http://okviz.com/card-with-states/"
+  },
+  "images": {
+    "icon": {
+      "resourceId": "rId3"
+    }
+  },
+  "code": {
+    "javaScript": {
+      "resourceId": "rId1"
+    },
+    "css": {
+      "resourceId": "rId2"
+    }
+  }
+}

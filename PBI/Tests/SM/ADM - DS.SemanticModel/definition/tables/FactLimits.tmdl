@@ -1,0 +1,69 @@
+table FactLimits
+	lineageTag: 263f5d2c-7bf9-4355-ba47-2862625d3134
+
+	measure Limit_Max = MIN(FactLimits[MaxLimit])
+		formatString: #,0
+		lineageTag: be45a6b4-8254-4efa-a176-98db0c489c09
+
+		changedProperty = IsHidden
+
+	measure Limit_Min = MIN(FactLimits[MinLimit])
+		formatString: #,0
+		lineageTag: f9b8d2ee-cde8-47ce-9448-1c6606b65a40
+
+		changedProperty = IsHidden
+
+	column GroupID
+		dataType: int64
+		formatString: 0
+		lineageTag: 555bb3c0-85a6-465c-a700-64b4a63697cf
+		summarizeBy: count
+		sourceColumn: GroupID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ProductGroup
+		dataType: string
+		lineageTag: 4f06683b-8578-4d5c-9f0c-c5f426efa14a
+		summarizeBy: none
+		sourceColumn: ProductGroup
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column MaxLimit
+		dataType: int64
+		formatString: 0
+		lineageTag: 47047349-8e9a-4f74-84e9-4755e76c7f0b
+		summarizeBy: sum
+		sourceColumn: MaxLimit
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column MinLimit
+		dataType: int64
+		formatString: 0
+		lineageTag: b892ea13-e998-44ce-b9c3-a884d86d2edb
+		summarizeBy: sum
+		sourceColumn: MinLimit
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition FactLimits = m
+		mode: import
+		queryGroup: 'fact Tables'
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="#(lf)With InitalTable as(#(lf)Select QOD_QBOTSH as GroupID, #(lf)TAOR_QBOTSH AS 'ProductGroup'#(lf)  FROM ADM_QBOTSOT_PRIT#(lf))#(lf)#(lf)#(lf)Select#(lf)GroupID,#(lf)ProductGroup,#(lf)Case#(lf)#(tab)When GroupID = 1#(lf)#(tab)#(tab)Then 30000#(lf)#(tab)When GroupID = 2#(lf)#(tab)#(tab)Then 65000#(lf)#(tab)When GroupID = 5#(lf)#(tab)#(tab)Then 5000#(lf)#(tab)Else 10000#(lf)End as 'MaxLimit',#(lf)Case#(lf)#(tab)When GroupID = 1#(lf)#(tab)#(tab)Then -30000#(lf)#(tab)When GroupID = 2#(lf)#(tab)#(tab)Then -65000#(lf)#(tab)When GroupID = 5#(lf)#(tab)#(tab)Then -5000#(lf)#(tab)Else -10000#(lf)End as 'MinLimit'#(lf)From InitalTable#(lf)"])
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+

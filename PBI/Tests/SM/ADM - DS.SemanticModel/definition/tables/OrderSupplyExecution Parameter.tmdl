@@ -1,0 +1,58 @@
+table 'OrderSupplyExecution Parameter'
+	lineageTag: a4cc84b0-6873-4660-95d8-30a5cae78b93
+
+	column 'OrderSupplyExecution Parameter'
+		lineageTag: 1e5ce0f6-86f5-4acf-addb-e3ac5a693aff
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'OrderSupplyExecution Parameter Order'
+
+		relatedColumnDetails
+			groupByColumn: 'OrderSupplyExecution Parameter Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'OrderSupplyExecution Parameter Fields'
+		lineageTag: 292dd6a6-567b-4fc4-9392-db5842b991cf
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'OrderSupplyExecution Parameter Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'OrderSupplyExecution Parameter Order'
+		formatString: 0
+		lineageTag: 92f8bec5-8118-41ed-b6f4-6e9bb6fa0b9e
+		summarizeBy: none
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Value4
+		lineageTag: 1b45c600-13cc-47f8-9d5d-ea49bc66dfa5
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Value4]
+		sortByColumn: 'OrderSupplyExecution Parameter Order'
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'OrderSupplyExecution Parameter' = calculated
+		mode: import
+		source = ```
+				{
+				    ("Order", NAMEOF('factOrders'[Quantity Orders DynamicTable]), 1,"Order"),
+				    ("Supply", NAMEOF('factOrders'[Quantity Supply Date DynamicTable]), 2,"Supply"),
+				    ("Execution", NAMEOF('factOrders'[Quantity Execution DynamicTable]), 3,"Execution")
+				    
+				}
+				```
+
+	annotation PBI_Id = 39b35da5b1eb4f799ce72e9aedf923ca
+

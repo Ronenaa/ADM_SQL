@@ -1,0 +1,51 @@
+table VAT_MeasureSelctionTable
+	lineageTag: e67a8d4a-4b47-4ba2-b495-3ee0d73d960f
+
+	column 'ID ANALYSIS'
+		dataType: int64
+		formatString: 0
+		lineageTag: 1052ff77-4e9f-4178-971b-50c0fc5749f1
+		summarizeBy: sum
+		sourceColumn: ID ANALYSIS
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'בחר נתון'
+		dataType: string
+		lineageTag: 8590f2f1-e48f-47da-88e3-06ee6df83df9
+		summarizeBy: none
+		sourceColumn: בחר נתון
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Measurment
+		dataType: string
+		lineageTag: 8012f6d2-dbd3-4fe8-b993-076581d4cf73
+		summarizeBy: none
+		sourceColumn: Measurment
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition VAT_MeasureSelctionTable-b2055bed-e7ed-426a-8627-acd61dc7090e = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WMlTSUXrUtApI+nkGK8XqRCsZAdkqQBwa7ALmGwPZuSEQIjYWAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [#"ID ANALYSIS" = _t, #"בחר נתון" = _t, Measurment = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"ID ANALYSIS", Int64.Type}, {"בחר נתון", type text}})
+				in
+				    #"Changed Type"
+
+	changedProperty = IsHidden
+
+	annotation PBI_Id = 5d8c703a-7c35-4614-9e5b-bf81c585dc83
+
+	annotation LinkedQueryName = VAT_MeasureSelctionTable
+
+	annotation PBI_ResultType = Table
+

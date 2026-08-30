@@ -1,0 +1,46 @@
+table 'Table 2'
+	lineageTag: 3e534c34-92f4-4425-b7c2-bac87a253566
+
+	column 'שם לקוח אב'
+		lineageTag: 88879eb9-ad5a-4bb5-b50e-6ce66416789b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: dimCustomers[שם לקוח אב]
+
+		annotation SummarizationSetBy = Automatic
+
+	column MonthInCalendarName
+		lineageTag: 83fff429-3afd-496e-adf6-ee8f52cb3f53
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: dimDates[MonthInCalendarName]
+
+		annotation SummarizationSetBy = Automatic
+
+	column QtyCheck
+		formatString: 0
+		lineageTag: edb5d694-cc60-45ee-846d-c41612d7db37
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [QtyCheck]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Table 2' = calculated
+		mode: import
+		source =
+				VAR _MonthXParameter = 3
+				VAR _MonthYParameter = 6
+				VAR _Date = CALCULATE(MAX(dimDates[Date]),ALL(dimDates),dimDates[IsHistory]=1)
+				VAR _Ly = DATE(Year(_Date),MONTH(_Date)-6,DAY(_Date))
+				VAR _OpenOrders = CALCULATE([Total Quantity Supply Date],Filter(ALL(dimDates),dimDates[Date]>_Date),dimItemsSimple[Article_Description]="Corn")
+				VAR _QtyCheck = IF(ISBLANK(CALCULATE([Total Quantity Supply Date],FILTER(ALL(dimDates),dimDates[Date]>_Ly &&dimDates[Date]<=_Date),dimItemsSimple[Article_Description]="Corn")),0,1)
+				VAR _LYCheckTable = CALCULATETABLE(SUMMARIZE(factOrders,dimCustomers[שם לקוח אב],dimDates[MonthInCalendarName],"QtyCheck",_QtyCheck),FILTER(dimDates,dimDates[Date]>_Ly &&dimDates[Date]<=_Date))
+				VAR _LYSumTable=FILTER(
+				                    SUMMARIZE(_LYCheckTable,dimCustomers[שם לקוח אב],"Sum",SUMX(_LYCheckTable,[QtyCheck]))
+				                    ,[Sum]>=3)
+				RETURN
+				_LYCheckTable
+
+	annotation PBI_Id = 32dab2eba54249769dad97298de39b71
+

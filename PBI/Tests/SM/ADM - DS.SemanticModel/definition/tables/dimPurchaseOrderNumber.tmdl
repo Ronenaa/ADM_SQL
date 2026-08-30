@@ -1,0 +1,68 @@
+table dimPurchaseOrderNumber
+	lineageTag: e2839f02-f0d7-45ce-bb44-f7398a2bd547
+
+	column PurchaseOrderID
+		dataType: string
+		lineageTag: 3731345d-853d-474e-a28e-87e975808f35
+		summarizeBy: none
+		sourceColumn: PurchaseOrderID
+
+		annotation SummarizationSetBy = Automatic
+
+	column ShipDesc
+		dataType: string
+		lineageTag: fc14254d-a08d-46c7-9b36-6da18462e90a
+		summarizeBy: none
+		sourceColumn: ShipDesc
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Value Date'
+		dataType: string
+		lineageTag: 7c456524-19e2-4617-a92d-e095733ac838
+		summarizeBy: none
+		sourceColumn: Value Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column ValueDateMonth
+		dataType: string
+		lineageTag: 4b872fe3-339c-4cc3-b8b8-7162de307078
+		summarizeBy: none
+		sourceColumn: ValueDateMonth
+		sortByColumn: Sort
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column Sort
+		dataType: int64
+		formatString: 0
+		lineageTag: daa44dfa-c7b3-414f-9dd7-6bcdb70dea39
+		summarizeBy: sum
+		sourceColumn: Sort
+
+		annotation SummarizationSetBy = Automatic
+
+	column ExpenseSource
+		dataType: string
+		lineageTag: 4dac6d56-d3f8-47c4-a86e-0c67eb7af660
+		summarizeBy: none
+		sourceColumn: ExpenseSource
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dimPurchaseOrderNumber = m
+		mode: import
+		queryGroup: Dim
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="WITH#(lf)-- =========================#(lf)-- 1) Exchange Orders (parse dates once)#(lf)-- =========================#(lf)ExchangeOrders AS (#(lf)    SELECT#(lf)        HZ.MSPR_HZMNH AS OrderID,#(lf)        TRY_CONVERT(date, HZ.T_ASPQH, 112) AS [Value Date],#(lf)        CONVERT(char(6), TRY_CONVERT(date, HZ.T_ASPQH, 112), 112) AS [Year Month]#(lf)    FROM HZMNOT HZ#(lf)),#(lf)ExchangeOrdersOnly AS (#(lf)    SELECT#(lf)        HZ.MSPR_HZMNH,#(lf)        TRY_CONVERT(int, LEFT(HZ.T_HZMNH, 4)) AS OrderYear,#(lf)#(tab)#(tab)'Exchange' as ExpenseSource#(lf)    FROM HZMNOT HZ#(lf)    WHERE#(lf)        TRY_CONVERT(int, LEFT(HZ.T_HZMNH, 4)) >= 2024#(lf)        AND TRY_CONVERT(int, LEFT(HZ.T_HZMNH, 4)) BETWEEN 2018 AND YEAR(GETDATE())#(lf)        AND HZ.OrderStatus <> 3#(lf)        AND HZ.ActionType IN (6, 7)#(lf)),#(lf)#(lf)-- =========================#(lf)-- 2) Purchase Order value date/yearmonth (avoid DISTINCT + repeated logic)#(lf)-- =========================#(lf)PO_Base AS (#(lf)    SELECT#(lf)        HS.MS_MSMKH_QSHOR,#(lf)        -- Calculate the grouping key once#(lf)        CASE#(lf)            WHEN HS.MS_MSMKH_QSHOR = 0 THEN HZ.MSPR_HZMNH#(lf)            ELSE HS.MS_MSMKH_QSHOR#(lf)        END AS OrderKey,#(lf)        HS.QOD_SHROT,#(lf)        TRY_CONVERT(date, HC.T_ERKH, 112) AS DocDate#(lf)    FROM HOTSAOT_COTROT HC#(lf)    LEFT JOIN HOTSAOT_SHOROT HS#(lf)        ON HC.NOMRTOR = HS.NOMRTOR#(lf)    LEFT JOIN PurchaseOrderLines POL#(lf)        ON CONCAT(#(lf)            CAST(CONVERT(bigint, POL.POL_OrderID) AS varchar(20)),#(lf)            CAST(POL.POL_LineID AS varchar(10))#(lf)        ) = CAST(HS.MS_MSMKH_QSHOR AS varchar(30))#(lf)    LEFT JOIN HZMNOT HZ#(lf)        ON HS.MS_MSMKH_QSHOR = HZ.MSPR_HZMNH#(lf))#(lf),#(lf)Purchase_order AS (#(lf)    SELECT#(lf)        MS_MSMKH_QSHOR,#(lf)        -- Keep original behavior:#(lf)        -- If MS_MSMKH_QSHOR=0 take that row's DocDate, else take MIN DocDate where QOD_SHROT=0 per OrderKey.#(lf)        CASE#(lf)            WHEN MS_MSMKH_QSHOR = 0 THEN MAX(DocDate)#(lf)            ELSE MIN(CASE WHEN QOD_SHROT = 0 THEN DocDate END)#(lf)        END AS [Value Date],#(lf)        CASE#(lf)            WHEN MS_MSMKH_QSHOR = 0 THEN CONVERT(char(6), MAX(DocDate), 112)#(lf)            ELSE CONVERT(char(6), MIN(CASE WHEN QOD_SHROT = 0 THEN DocDate END), 112)#(lf)        END AS [Year Month]#(lf)    FROM PO_Base#(lf)    GROUP BY#(lf)        MS_MSMKH_QSHOR,#(lf)        OrderKey#(lf)),#(lf)#(lf)#(lf)-- =========================#(lf)-- 3) Shared enrichment for both Purchase + Exchange#(lf)-- =========================#(lf)BaseLink AS (#(lf)    SELECT#(lf)        a.MS_TEODT_MCIRH AS DeliveryNote,#(lf)        a.MS_TEODT_RCSH,#(lf)        b.MS_HZMNH AS PurchaseOrderID,#(lf)        ISNULL(sl.ShipDesc, '-') AS ShipDesc,#(lf)#(tab)#(tab)CASE#(lf)#(tab)#(tab)#(tab)WHEN POL.POL_OrderID IS NULL THEN 'Other'#(lf)#(tab)#(tab)#(tab)ELSE 'Import'#(lf)#(tab)#(tab)#(tab)END#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)as ExpenseSource#(lf)    FROM QISHOR_RCSH_LMCIRH a#(lf)    LEFT JOIN QISHOR_T_MSHLOCH_HZMNOT b#(lf)        ON a.MS_TEODT_RCSH = b.MS_T_MSHLOCH#(lf)    LEFT JOIN PurchaseOrderLines POL#(lf)        ON b.MS_HZMNH = POL.POL_SQL_POID#(lf)    LEFT JOIN ShipsArrivals sa#(lf)        ON POL.POL_ShipArrivalID = sa.SA_ID#(lf)    LEFT JOIN ShipList sl#(lf)        ON sa.SA_ShipID = sl.ShipID#(tab)#(lf))#(lf)#(lf)-- =========================#(lf)-- 4) Purchase / Exchange (keep INNER JOIN filters)#(lf)-- =========================#(lf),Purchase AS (#(lf)    SELECT#(lf)        bl.DeliveryNote,#(lf)        bl.MS_TEODT_RCSH,#(lf)        CAST(bl.PurchaseOrderID AS VARCHAR) as PurchaseOrderID,#(lf)        bl.ShipDesc,#(lf)#(tab)#(tab)bl.ExpenseSource#(lf)    FROM BaseLink bl#(lf)    INNER JOIN PurchaseOrderLines polFilter#(lf)        ON bl.PurchaseOrderID = polFilter.POL_SQL_POID#(lf)    LEFT JOIN Purchase_order p#(lf)        ON bl.PurchaseOrderID = p.MS_MSMKH_QSHOR#(lf)    LEFT JOIN ExchangeOrders o#(lf)        ON bl.PurchaseOrderID = o.OrderID#(lf)),#(lf)Order_First_Date as (#(lf)select distinct#(lf)HZ.MSPR_HZMNH as 'Order',#(lf)min(SUBSTRING(TM.TARIKH_MSHLOCH,1,4) + '-' + SUBSTRING(TM.TARIKH_MSHLOCH,5,2) + '-' + SUBSTRING(TM.TARIKH_MSHLOCH,7,2)) over (partition by HZ.MSPR_HZMNH)#(lf) AS 'FirstSalesDate'  #(lf)FROM CHSHBONIOT_SHOROT CS #(lf)LEFT JOIN TEODOT_MSHLOCH TM ON CS.MS_T_MSHLOCH = TM.MS_TEODH#(lf)Left Join (SELECT MS_HZMNH,MS_T_MSHLOCH#(lf)#(tab)#(tab)#(tab)FROM QISHOR_T_MSHLOCH_HZMNOT#(lf)#(tab)#(tab)#(tab)) HZT#(lf)#(tab)on TM.MS_TEODH = HZT.MS_T_MSHLOCH#(lf)Left Join HZMNOT HZ#(lf)#(tab)on HZ.MSPR_HZMNH = HZT.MS_HZMNH#(lf)LEFT JOIN HOTSAOT_SHOROT HS#(lf)#(tab) ON HS.MS_MSMKH_QSHOR = HZ.MSPR_HZMNH#(lf)where TM.ActionType = 1 #(lf)#(lf)union all#(lf)-------------------Purchase----------------------#(lf)SELECT distinct#(lf)#(tab)b.MS_HZMNH 'Order',#(lf)#(tab)min(SUBSTRING(TM.TARIKH_MSHLOCH,1,4) + '-' + SUBSTRING(TM.TARIKH_MSHLOCH,5,2) + '-' + SUBSTRING(TM.TARIKH_MSHLOCH,7,2)) over (partition by b.MS_HZMNH) AS 'FirstSalesDate'#(lf)FROM QISHOR_RCSH_LMCIRH a#(lf)LEFT JOIN QISHOR_T_MSHLOCH_HZMNOT b#(lf)    ON a.MS_TEODT_RCSH = b.MS_T_MSHLOCH#(lf)LEFT JOIN TEODOT_MSHLOCH TM#(lf)#(tab)ON TM.MS_TEODH = b.MS_T_MSHLOCH #(lf)),#(lf)Exchange AS (#(lf)    SELECT#(lf)        bl.DeliveryNote,#(lf)        bl.MS_TEODT_RCSH,#(lf)        CAST(bl.PurchaseOrderID AS VARCHAR) as PurchaseOrderID,#(lf)        bl.ShipDesc,#(lf)#(tab)#(tab)ex.ExpenseSource#(lf)    FROM BaseLink bl#(lf)    INNER JOIN ExchangeOrdersOnly ex#(lf)        ON ex.MSPR_HZMNH = bl.PurchaseOrderID#(lf)    LEFT JOIN Purchase_order p#(lf)        ON bl.PurchaseOrderID = p.MS_MSMKH_QSHOR#(lf)    LEFT JOIN ExchangeOrders o#(lf)        ON bl.PurchaseOrderID = o.OrderID#(lf)),#(lf)Final as (#(lf)SELECT * FROM Purchase#(lf)UNION ALL#(lf)SELECT * FROM Exchange)#(lf), RankedDeliveryNote AS (#(lf)    SELECT#(lf)        DeliveryNote,#(lf)        PurchaseOrderID,#(lf)        ShipDesc,#(lf)#(tab)#(tab)ExpenseSource,#(lf)        ROW_NUMBER() OVER (#(lf)            PARTITION BY DeliveryNote#(lf)            ORDER BY PurchaseOrderID DESC) AS rn#(lf)    FROM Final#(lf))#(lf)#(lf)SELECT distinct#(lf)    RDN.PurchaseOrderID,#(lf)    RDN.ShipDesc,#(lf)#(tab)OFD.FirstSalesDate as [Value Date],#(lf)    CONVERT(char(7),OFD.FirstSalesDate, 120) as ValueDateMonth,#(lf)#(tab)RDN.ExpenseSource,#(lf)    DENSE_RANK() OVER (#(lf)            ORDER BY  CONVERT(char(7),OFD.FirstSalesDate, 120) DESC#(lf)        ) AS Sort#(lf)FROM RankedDeliveryNote RDN#(lf)left join Order_First_Date OFD on RDN.PurchaseOrderID = OFD.[Order]#(lf)WHERE rn = 1"])
+				in
+				    Source
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

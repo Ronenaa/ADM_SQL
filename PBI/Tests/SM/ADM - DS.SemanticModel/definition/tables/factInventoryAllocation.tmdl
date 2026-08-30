@@ -1,0 +1,127 @@
+table factInventoryAllocation
+	lineageTag: 478c7a9e-9a9d-4465-beab-c05ec6dce0c3
+
+	measure 'Total Allocation Messages QTY' = SUM(factInventoryAllocation[Quantity])
+		lineageTag: 868da62b-abaa-464a-8885-01d1067e39f8
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column EntityID
+		dataType: string
+		lineageTag: ba3c847a-a4a5-4e1b-a9ed-135397dcff95
+		summarizeBy: none
+		sourceColumn: EntityID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DocID
+		dataType: int64
+		formatString: 0
+		lineageTag: 66c1f675-245e-4bd8-9dfc-17143c94f370
+		summarizeBy: count
+		sourceColumn: DocID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DocName
+		dataType: string
+		lineageTag: c1a38efe-8176-44f2-b60a-6f871d57e5e8
+		summarizeBy: none
+		sourceColumn: DocName
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Date
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 1780d5e8-9eec-4a89-bbf4-2ccfd275445c
+		summarizeBy: none
+		sourceColumn: Date
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column DueDate
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 242d8614-2bf4-419e-b674-90c20688f573
+		summarizeBy: none
+		sourceColumn: DueDate
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column ItemKey
+		dataType: string
+		lineageTag: 24722be5-5859-415f-b4b3-4563425f1a95
+		summarizeBy: none
+		sourceColumn: ItemKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SupplierID
+		dataType: int64
+		formatString: 0
+		lineageTag: 0b0a7121-a824-43ba-9957-5e8ec69e50d2
+		summarizeBy: none
+		sourceColumn: SupplierID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quantity
+		dataType: double
+		lineageTag: 12873536-2d4f-4624-8501-bd2d31dbb536
+		summarizeBy: sum
+		sourceColumn: Quantity
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column DocType
+		dataType: int64
+		formatString: 0
+		lineageTag: 6f228a6a-6515-4e33-950d-0350886c3b15
+		summarizeBy: none
+		sourceColumn: DocType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition factInventoryAllocation = m
+		mode: import
+		queryGroup: 'fact Tables'
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="Select#(lf)'1' as 'EntityID',#(lf)NOMRTOR_MSR AS 'DocID',#(lf)'Message' AS 'DocName',#(lf)1 AS 'DocType',#(lf)SUBSTRING(T_QLITH,1,4) + '-' + SUBSTRING(T_QLITH,5,2) + '-' + SUBSTRING(T_QLITH,7,2) AS 'Date',#(lf)SUBSTRING(TARIKH_OZMN_QLITH,5,4) + '-' + SUBSTRING(TARIKH_OZMN_QLITH,1,2) + '-' + SUBSTRING(TARIKH_OZMN_QLITH,3,2) as DueDate,#(lf)cast(CONVERT(INT, CONVERT(VARCHAR,QOD_CHOMR)) as varchar)+ '-' + cast(CONVERT(INT, CONVERT(VARCHAR,QOD_CHOMR)) as varchar) AS 'ItemKey'#(lf),CASE#(lf)#(tab)WHEN SHOLCH_MSR like N'%ל%'#(lf)#(tab)#(tab)THEN 1144#(lf)#(tab)WHEN SHOLCH_MSR like N'%מ%'#(lf)#(tab)#(tab)THEN 1220#(lf)#(tab)ELSE NULL#(lf)END AS SupplierID,#(lf)MSHQL_NTO_SOS+MSHQL_NTO_EGLH AS 'Quantity'#(lf)From MSRIM M#(lf)  LEFT JOIN (SELECT *#(lf)#(tab)#(tab)#(tab)FROM [dbo].[TRGOM_ANGLIT]#(lf)#(tab)#(tab)#(tab)WHERE SOG_PRIT_SOCN_BNQ_TM_SH_CHBRH = N'פ') T#(lf)#(tab)#(tab)#(tab)ON M.QOD_CHOMR = T.QOD#(lf)WHERE SHOLCH_MSR in (N'ל',N'מ')#(lf)AND STTOS = 0#(lf)AND T.TARO_ANGLIT_2_ART = '8052'#(lf)#(lf)UNION ALL#(lf)#(lf)SELECT #(lf)'1' as 'EntityID',#(lf)MSPR_HZMNH AS 'DocID',#(lf)'Allocation' AS 'DocName',#(lf)2 AS 'DocType',#(lf)SUBSTRING(T_HZMNH,1,4) + '-' + SUBSTRING(T_HZMNH,5,2) + '-' + SUBSTRING(T_HZMNH,7,2) as 'Date'#(lf),SUBSTRING(T_ASPQH,1,4) + '-' + SUBSTRING(T_ASPQH,5,2) + '-' + SUBSTRING(T_ASPQH,7,2) as 'DueDate'#(lf),cast(CONVERT(INT, CONVERT(VARCHAR,HZ.MOTSR_MOZMN)) as varchar)+ '-' + cast(CONVERT(INT, CONVERT(VARCHAR,HZ.MOTSR_MOZMN)) as varchar) AS 'ItemKey'#(lf),HZ.QOD_SHOLCH AS 'SupplierID'#(lf),HqR.Cmot AS 'Quantity'#(lf)from HZMNOT HZ#(lf)inner join (#(lf)#(tab)#(tab)#(tab)select HZMNT_MCIRH#(lf)#(tab)#(tab)#(tab),sum(CMOT_MOQTST_MTSTBRT) as Cmot#(lf)#(tab)#(tab)#(tab)from HQTSAOT_RCSH_HCHLPH#(lf)#(tab)#(tab)#(tab)group by HZMNT_MCIRH#(lf)#(tab)#(tab)#(tab)Having sum(CMOT_MOQTST_MTSTBRT) <> 0#(lf)#(tab)#(tab)#(tab)#(lf)#(tab)#(tab)#(tab)Union All#(lf)#(tab)#(tab)#(tab)select HZMNH#(lf)#(tab)#(tab)#(tab),sum(HQTSAH) as Cmot#(lf)#(tab)#(tab)#(tab)from HQTSAOT_MMLAI#(lf)#(tab)#(tab)#(tab)group by HZMNH#(lf)#(tab)#(tab)#(tab)Having sum(HQTSAH) <> 0#(lf)#(tab)#(tab)#(lf)#(tab)#(tab)#(tab)) HqR#(lf)#(tab)on  HZ.mspr_Hzmnh = HqR.HZMNT_MCIRH#(lf)#(lf)where OrderStatus in (1,2)#(lf)AND Cast(SUBSTRING(T_HZMNH,1,4) as int) >=2018 and Cast(SUBSTRING(T_HZMNH,1,4) as int) <= Year(Getdate())"]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Date", type date}, {"DueDate", type date}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,76 @@
+table InventoryOtherOrAllParameter
+	lineageTag: d02f5c67-fb85-43e4-a1ea-8cfb04197c8a
+
+	measure 'InventoryOtherOrAll Switch' =
+			
+			SWITCH(MIN(InventoryOtherOrAllParameter[InventoryOtherOrAllParameter Order]),
+			 0,[Inventory Balance - Quantity] - [Total Allocation Messages QTY] ,
+			 1,[Inventory Balance - Quantity Other]
+			 )
+		lineageTag: e3cc72ce-61a8-436d-90a7-a94399f71b1a
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'InventoryOtherOrAll Value Switch' =
+			
+			SWITCH(MIN(InventoryOtherOrAllParameter[InventoryOtherOrAllParameter Order]),
+			 0,[Inventory Balance - Value FOT],
+			 1,[Inventory Balance - Value Other]
+			 )
+		lineageTag: 205c4612-ae13-4ba8-92c0-d4842a37fc4f
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'InventoryOtherOrAll Avg Value Switch' =
+			
+			SWITCH(MIN(InventoryOtherOrAllParameter[InventoryOtherOrAllParameter Order]),
+			 0,[Inventory Balance - Avg Value FOT],
+			 1,[Inventory Balance - Avg Value Other]
+			 )
+		lineageTag: c84d5a69-7b53-4222-93bc-c51273955ad9
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column InventoryOtherOrAllParameter
+		lineageTag: 4c205582-11e8-46e9-9f82-9c12a538523c
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'InventoryOtherOrAllParameter Order'
+
+		relatedColumnDetails
+			groupByColumn: 'InventoryOtherOrAllParameter Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'InventoryOtherOrAllParameter Fields'
+		lineageTag: 6e7e56d3-8608-4d9a-8fe1-a2d02d527e29
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'InventoryOtherOrAllParameter Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'InventoryOtherOrAllParameter Order'
+		formatString: 0
+		lineageTag: b15daf2a-647f-4343-9d8f-11ea24e8faec
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition InventoryOtherOrAllParameter = calculated
+		mode: import
+		source =
+				{
+				    ("ALL", NAMEOF('factInventory'[Inventory Balance - Quantity -]), 0),
+				    ("Remove Under 350", NAMEOF('factInventory'[Inventory Balance - Quantity Other -]), 1)
+				}
+
+	annotation PBI_Id = 7febe18323ec4546a9bad15ad34029e4
+

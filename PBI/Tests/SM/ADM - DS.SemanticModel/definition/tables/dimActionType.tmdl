@@ -1,0 +1,48 @@
+table dimActionType
+	lineageTag: 384f40c1-da03-441c-9e8c-3245bc805992
+
+	column Id
+		dataType: int64
+		formatString: 0
+		lineageTag: 3d750ef1-f5dc-4e9e-81f3-f34f1fa53bb9
+		summarizeBy: none
+		sourceColumn: Id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ActionType
+		dataType: string
+		lineageTag: d8e9a4df-846d-4f5e-80ef-a7e15f731501
+		summarizeBy: none
+		sourceColumn: ActionType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Sort
+		dataType: int64
+		formatString: 0
+		lineageTag: 82c7efac-848f-4308-8a90-39580e8d9059
+		summarizeBy: none
+		sourceColumn: Sort
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dimActionType = m
+		mode: import
+		queryGroup: Dim
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="select #(lf)MS_AOPTSIH as Id,#(lf)CASE#(lf)#(tab)#(tab)WHEN MS_AOPTSIH = 1 THEN 'FOT'#(lf)#(tab)#(tab)WHEN MS_AOPTSIH = 11 THEN 'CIF'#(lf)#(tab)#(tab)ELSE ActionType#(lf)#(tab)#(tab)END AS ActionType,#(lf)RANK() OVER (ORDER BY MS_AOPTSIH) AS Sort#(lf)from TBLT_PEOLOT_HZMNH_T_MSHLOCH"])
+				in
+				    Source
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

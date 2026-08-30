@@ -1,0 +1,39 @@
+table Table
+	lineageTag: 8846106a-e106-4e8b-ae57-1abc85fdd242
+
+	column Supplier
+		lineageTag: f78d3e65-77d5-4ff1-9c33-3b7c112755b9
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Supplier]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quantity
+		lineageTag: f20b4374-b824-4603-becf-ed7afb4080ad
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Quantity]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition Table = calculated
+		mode: import
+		source = ```
+				
+				VAR _tbl = SUMMARIZE(dimSuppliers,dimSuppliers[Supplier Name],"TotalQty",CALCULATE([Inventory Balance - Quantity]-[Total Allocation Messages QTY],All(dimItemsSimple)))
+				VAR _Above350 = FILTER(SUMMARIZE(_tbl,dimSuppliers[Supplier Name],[TotalQty],"Qty",[Inventory Balance - Quantity]-[Total Allocation Messages QTY]),[TotalQty]>=350)
+				VAR _Under350 = FILTER(SUMMARIZE(_tbl,dimSuppliers[Supplier Name],[TotalQty],"Qty",[Inventory Balance - Quantity]-[Total Allocation Messages QTY]),[TotalQty]<350)
+				VAR _UnderOTHER = FILTER(SELECTCOLUMNS(_Under350,"Supplier",dimSuppliers[Supplier Name],"Quantity",ROUND(CALCULATE(SUMX(_Under350,[Qty]),ALL(dimSuppliers)),0)),[Supplier]="OTHER")
+				VAR _AboveOTHER = SELECTCOLUMNS(_Above350,"Supplier",dimSuppliers[Supplier Name],"Quantity",ROUND([Qty],0))
+				VAR _Combine = UNION(_AboveOTHER,_UnderOTHER)
+				Return
+				
+				_Combine
+				
+				```
+
+	annotation PBI_Id = 60917760d4774f56927242eca31ca0a9
+

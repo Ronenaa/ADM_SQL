@@ -1,0 +1,516 @@
+table dimSuppliers
+	lineageTag: 9e18c9ba-f0ad-4e8c-a483-516b741f1225
+
+	column EntityID
+		dataType: string
+		lineageTag: efc045dc-dc8f-4927-9a37-3d56f4b84b89
+		summarizeBy: none
+		sourceColumn: EntityID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'מספר לקוח'
+		dataType: int64
+		formatString: 0
+		lineageTag: b17a8d68-9003-4d9a-a732-54b777213404
+		summarizeBy: sum
+		sourceColumn: מספר לקוח
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'מזהה לקוח'
+		dataType: string
+		lineageTag: f3b1890c-9751-493f-a683-191c91ca962e
+		summarizeBy: none
+		sourceColumn: מזהה לקוח
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'מספר לקוח אב'
+		dataType: int64
+		formatString: 0
+		lineageTag: 3650c668-17f7-4701-97a0-b733270ce7b2
+		summarizeBy: sum
+		sourceColumn: מספר לקוח אב
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'שם לקוח אב'
+		dataType: string
+		lineageTag: 213f6439-5f61-4566-9c12-2ca38a09cf9d
+		summarizeBy: none
+		sourceColumn: שם לקוח אב
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'מזהה לקוח אב'
+		dataType: int64
+		formatString: 0
+		lineageTag: 5d0e131d-5f09-4cf1-8891-c07bb98b0971
+		summarizeBy: sum
+		sourceColumn: מזהה לקוח אב
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ParentChildCustomerName
+		dataType: string
+		lineageTag: b6ebd2f7-8579-422f-8382-7806d0b4eff2
+		summarizeBy: none
+		sourceColumn: ParentChildCustomerName
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'קוד סוג לקוח'
+		dataType: string
+		lineageTag: 74d61e34-7857-4270-9365-f7c07256cf44
+		summarizeBy: none
+		sourceColumn: קוד סוג לקוח
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'קטגוריית לקוח'
+		dataType: string
+		lineageTag: 9c84be14-d235-4f57-9a0f-b556d473cc0b
+		summarizeBy: none
+		sourceColumn: קטגוריית לקוח
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'סוג לקוח'
+		dataType: string
+		lineageTag: dc9231c4-7de8-40ed-b4c4-8d926404a6bd
+		summarizeBy: none
+		sourceColumn: סוג לקוח
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'פרמטר 1'
+		dataType: int64
+		formatString: 0
+		lineageTag: 0e2f98b1-dcb5-4080-94be-e9c8c582e1b5
+		summarizeBy: sum
+		sourceColumn: פרמטר 1
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'פרמטר 2'
+		dataType: int64
+		formatString: 0
+		lineageTag: e111fe39-a877-4073-a46d-5ab25e2585e1
+		summarizeBy: sum
+		sourceColumn: פרמטר 2
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'פרמטר 3'
+		dataType: int64
+		formatString: 0
+		lineageTag: 864b7d19-5e22-40a2-854f-ed5e22da7fba
+		summarizeBy: sum
+		sourceColumn: פרמטר 3
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'פרמטר 4'
+		dataType: int64
+		formatString: 0
+		lineageTag: b1c8b9d2-855b-4dd4-9d04-0cad773341b3
+		summarizeBy: sum
+		sourceColumn: פרמטר 4
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'פרמטר 5'
+		dataType: int64
+		formatString: 0
+		lineageTag: 236aeff0-e496-4fd6-83cd-ee057b57d838
+		summarizeBy: sum
+		sourceColumn: פרמטר 5
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'פרמטר 6'
+		dataType: int64
+		formatString: 0
+		lineageTag: 6a221ff0-b398-4ac8-85b8-eeb0081d2590
+		summarizeBy: sum
+		sourceColumn: פרמטר 6
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'פרמטר 7'
+		dataType: int64
+		formatString: 0
+		lineageTag: ec5778da-172a-4a86-b1d9-5fb556fb0353
+		summarizeBy: sum
+		sourceColumn: פרמטר 7
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'פרמטר 8'
+		dataType: int64
+		formatString: 0
+		lineageTag: e72f96f7-1089-4654-b2ba-4bd0a0a10e7c
+		summarizeBy: sum
+		sourceColumn: פרמטר 8
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column עיר
+		dataType: int64
+		formatString: 0
+		lineageTag: 9f0e8dbc-2817-422e-987d-e8e87e3a5c08
+		summarizeBy: sum
+		sourceColumn: עיר
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column כתובת
+		dataType: string
+		lineageTag: e3b22c76-da51-46da-ad93-ce26b3d10b38
+		summarizeBy: none
+		sourceColumn: כתובת
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'מספר טלפון'
+		dataType: string
+		lineageTag: 818a5ca3-2539-4f63-963c-6fa82b14d8fa
+		summarizeBy: none
+		sourceColumn: מספר טלפון
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'סטטוס לקוח'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: dcc28380-e496-45fd-bd54-7b7797cf1fe4
+		summarizeBy: none
+		sourceColumn: סטטוס לקוח
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column AgentKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 587a8e58-83df-43f3-800b-35e74e557d99
+		summarizeBy: count
+		sourceColumn: AgentKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'תנאי תשלום ללקוח'
+		dataType: string
+		lineageTag: 25eebc06-49e3-408a-9be0-15d87a538729
+		summarizeBy: none
+		sourceColumn: תנאי תשלום ללקוח
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column MAXOBLIGO
+		dataType: int64
+		formatString: 0
+		lineageTag: f6b81da2-22a0-4cc7-8ab8-87b4506b0361
+		summarizeBy: sum
+		sourceColumn: MAXOBLIGO
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column MAXCREDIT
+		dataType: int64
+		formatString: 0
+		lineageTag: 3c9a4ff4-23f0-48e1-b3f9-f229eb3c3a62
+		summarizeBy: sum
+		sourceColumn: MAXCREDIT
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column CHEQUE_DEBIT
+		dataType: int64
+		formatString: 0
+		lineageTag: d6453a6b-47a2-43a1-bd96-d43cbb8532d9
+		summarizeBy: sum
+		sourceColumn: CHEQUE_DEBIT
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column אובליגו
+		dataType: int64
+		formatString: 0
+		lineageTag: 827ba91e-99d8-4e42-9b63-a8975f73b394
+		summarizeBy: sum
+		sourceColumn: אובליגו
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'OBLIGO Balance'
+		dataType: int64
+		formatString: 0
+		lineageTag: f8291260-ac58-403f-b9e6-f494f791493c
+		summarizeBy: sum
+		sourceColumn: OBLIGO Balance
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'חוב ללקוח'
+		dataType: int64
+		formatString: 0
+		lineageTag: e0b59ab2-949e-4363-8831-8a9487c44191
+		summarizeBy: sum
+		sourceColumn: חוב ללקוח
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column IsClubMember
+		dataType: int64
+		formatString: 0
+		lineageTag: 74d79831-c287-496a-af94-7dc8695088b3
+		summarizeBy: sum
+		sourceColumn: IsClubMember
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column מגדר
+		dataType: int64
+		formatString: 0
+		lineageTag: b8711e34-dd36-41a0-a753-9323736c02cb
+		summarizeBy: sum
+		sourceColumn: מגדר
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column גיל
+		dataType: int64
+		formatString: 0
+		lineageTag: 08f86512-4c49-4efb-8a0c-7247c57e1603
+		summarizeBy: sum
+		sourceColumn: גיל
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'תאריך יום הולדת'
+		dataType: int64
+		formatString: 0
+		lineageTag: 9df6141a-b0f3-4302-b340-c63263f84252
+		summarizeBy: sum
+		sourceColumn: תאריך יום הולדת
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'תאריך הצטרפות'
+		dataType: int64
+		formatString: 0
+		lineageTag: e84c3fcd-586c-4375-a9b4-89a8dac978ad
+		summarizeBy: sum
+		sourceColumn: תאריך הצטרפות
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'תאריך תוקף מועדון'
+		dataType: int64
+		formatString: 0
+		lineageTag: 1f23317c-e29c-427c-bee4-6df1dca8dbc7
+		summarizeBy: sum
+		sourceColumn: תאריך תוקף מועדון
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'שיוך למועדון לקוחות'
+		dataType: int64
+		formatString: 0
+		lineageTag: 04713ec6-5cfa-44a0-bb2d-7b7b9330adce
+		summarizeBy: sum
+		sourceColumn: שיוך למועדון לקוחות
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'אישור מייל'
+		dataType: int64
+		formatString: 0
+		lineageTag: 0a4231e3-de26-43c2-b02a-427d486d7f88
+		summarizeBy: sum
+		sourceColumn: אישור מייל
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'אישור SMS'
+		dataType: int64
+		formatString: 0
+		lineageTag: 1cc564be-0c6f-4540-822c-89c70b13a070
+		summarizeBy: sum
+		sourceColumn: אישור SMS
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column BirthdayMonth
+		dataType: int64
+		formatString: 0
+		lineageTag: 08d5c20b-3aea-42bf-b642-7b64fe4f9bfa
+		summarizeBy: sum
+		sourceColumn: BirthdayMonth
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column JoinBranchID
+		dataType: int64
+		formatString: 0
+		lineageTag: e8113ccb-19e7-4f27-b957-4013dece5462
+		summarizeBy: count
+		sourceColumn: JoinBranchID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column RowInsertDatetime
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 23a5a56a-46cc-4470-8582-07206254b0a7
+		summarizeBy: none
+		sourceColumn: RowInsertDatetime
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SupplierKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 1d9c1ca9-6858-4bb8-a1b8-e0ea0fe4b597
+		summarizeBy: none
+		sourceColumn: SupplierKey
+		sortByColumn: SupplierOrder
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Supplier Name'
+		dataType: string
+		lineageTag: b4868570-4f6f-4ff7-836a-67ea75bbb822
+		summarizeBy: none
+		sourceColumn: Supplier Name
+		sortByColumn: SupplierOrder
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SupplierOrder
+		dataType: double
+		formatString: 0
+		lineageTag: 8c84071b-2c0f-4ac7-9fb5-d9ce43dc7405
+		summarizeBy: sum
+		sourceColumn: SupplierOrder
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SupplierType
+		dataType: string
+		lineageTag: 8436e75f-e15e-4dbe-8270-8d499ef93aa8
+		summarizeBy: none
+		sourceColumn: SupplierType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dimSuppliers = m
+		mode: import
+		queryGroup: Dim
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="With SupplierTable AS (#(lf)#(tab)SELECT#(lf)#(lf)#(tab)    '1' as 'EntityID'#(lf)#(lf)#(tab)    --,'1'+CONVERT(INT, CONVERT(VARCHAR, c.CUST)) AS 'AccountKey'#(lf)#(lf)#(tab)#(tab)--,CONCAT('1',CONVERT(INT, CONVERT(VARCHAR, c.CUST))) AS 'AccountKey'#(lf)#(lf)#(tab)#(tab),CAST(CONVERT(INT, CONVERT(VARCHAR,G.QOD_GORM))as varchar) AS 'SupplierKey'#(lf)#(lf)#(tab)#(tab),G.QOD_GORM AS 'מספר לקוח'#(lf)#(lf)#(tab)#(tab),Case#(lf)#(tab)#(tab)#(tab)when CHARINDEX('=',SHM_GORM,0) >0#(lf)#(tab)#(tab)#(tab)#(tab)Then RIGHT(SHM_GORM,Len(SHM_GORM)-1) #(lf)#(tab)#(tab)#(tab)Else SHM_GORM#(lf)#(tab)#(tab)End As 'Supplier Name'#(lf)#(lf)#(tab)#(tab),Case#(lf)#(tab)#(tab)#(tab)when CHARINDEX('=',SHM_GORM,0) >0#(lf)#(tab)#(tab)#(tab)#(tab)Then cast(G.QOD_GORM as nvarchar(9)) + ' | ' + RIGHT(SHM_GORM,Len(SHM_GORM)-1) #(lf)#(tab)#(tab)#(tab)Else cast(G.QOD_GORM as nvarchar(9)) + ' | ' + SHM_GORM#(lf)#(tab)#(tab)End as 'מזהה לקוח'#(lf)#(lf)#(tab)#(tab),null AS 'מספר לקוח אב'#(lf)#(lf)#(tab)#(tab),Case #(lf)#(tab)#(tab)#(tab)When ARGON_QNIOT = 'פרטי' or ARGON_QNIOT = ''#(lf)#(tab)#(tab)#(tab)#(tab)then 'No Main Customer'#(lf)#(tab)#(tab)#(tab)Else ARGON_QNIOT#(lf)#(tab)#(tab)END AS 'שם לקוח אב'#(lf)#(lf)#(tab)#(tab),null AS 'מזהה לקוח אב'#(lf)#(lf)#(tab)#(tab),Case #(lf)#(tab)#(tab)#(tab)When ARGON_QNIOT = 'פרטי' or ARGON_QNIOT = ''#(lf)#(tab)#(tab)#(tab)#(tab)then Case#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)When CHARINDEX('=',SHM_GORM,0) >0#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)Then RIGHT(SHM_GORM,Len(SHM_GORM)-1) #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)Else SHM_GORM#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)End#(lf)#(tab)#(tab)#(tab)Else Case#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)When CHARINDEX('=',SHM_GORM,0) >0#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)Then ARGON_QNIOT+' | '+RIGHT(SHM_GORM,Len(SHM_GORM)-1) #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)Else ARGON_QNIOT+' | '+SHM_GORM#(lf)#(tab)#(tab)#(tab)#(tab)end#(lf)#(tab)#(tab)#(tab)END AS 'ParentChildCustomerName' -- this fiels enable to contain all regular customers and all Fathers in the sam column#(lf)#(lf)#(tab)#(tab),SOG_GORM AS 'קוד סוג לקוח'#(lf)#(lf)#(tab)#(tab),EntityType AS 'קטגוריית לקוח' #(lf)#(lf)#(tab)#(tab),AOPI_PEILOT AS 'סוג לקוח'#(lf)#(lf)#(tab)#(tab),null AS 'פרמטר 1'#(lf)#(lf)#(tab)#(tab),null AS 'פרמטר 2'#(lf)#(lf)#(tab)#(tab),null AS 'פרמטר 3'#(lf)#(lf)#(tab)#(tab),null AS 'פרמטר 4'#(lf)#(lf)#(tab)#(tab),null AS 'פרמטר 5'#(lf)#(lf)#(tab)#(tab),null AS 'פרמטר 6'#(lf)#(lf)#(tab)#(tab),null AS 'פרמטר 7'#(lf)#(lf)#(tab)#(tab),null AS 'פרמטר 8'#(lf)#(lf)#(tab)#(tab),null AS 'עיר'#(lf)#(lf)#(tab)#(tab),G.CTOBT AS 'כתובת'#(lf)#(lf)#(tab)#(tab),G.TLPON_1 AS 'מספר טלפון'#(lf)#(lf)#(tab)#(tab),G.IsActive AS 'סטטוס לקוח'#(lf)#(lf)#(tab)#(tab),AM.QOD AS 'AgentKey' --- יש בעיברית#(lf)#(lf)#(lf)#(tab)#(tab),Case#(lf)#(tab)#(tab)#(tab)#(tab)When TNAI_TSHLOM_IMIM = 0#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)Then 'Immidate'#(lf)#(tab)#(tab)#(tab)Else '+'+cast(TNAI_TSHLOM_IMIM as nvarchar(3))#(lf)#(tab)#(tab)End as 'תנאי תשלום ללקוח'#(lf)#(lf)#(tab)#(tab),null AS 'MAXOBLIGO'#(lf)#(lf)#(tab)#(tab),0 as 'MAXCREDIT' --MAX_CREDIT#(lf)#(lf)#(tab)#(tab),0 as 'CHEQUE_DEBIT' --CHEQUE_DEBIT #(lf)#(lf)#(tab)#(tab),SCOM_AOBLIGO_GORM as 'אובליגו'#(lf)#(lf)#(tab)#(tab),/*MAX_OBLIGO-ob.OBLIGO*/ 0 as 'OBLIGO Balance' --יתרת אובליגו#(lf)#(lf)#(tab)#(tab), 0 as 'חוב ללקוח'#(lf)#(lf) #(lf)#(lf)#(tab)#(tab),/*case when cs.SPEC11='כן' then 1 else 0 end */ null as 'IsClubMember' --need to change according to your cust#(lf)#(lf)#(tab)#(tab),/*case when cs.SPEC12='כן' then 'זכר' else 'נקבה' end */ null as 'מגדר' --need to change according to your cust#(lf)#(lf)#(tab)#(tab),/*datediff(year,DATEADD(year, -18, CONVERT(SMALLDATETIME, (c.CREATEDDATE + 46283040) / 1440.0)),getdate())*/ null as 'גיל' --need to change according to your cust#(lf)#(lf)#(tab)#(tab),/*DATEADD(year, -18, CONVERT(SMALLDATETIME, (c.CREATEDDATE + 46283040) / 1440.0)) */ null as 'תאריך יום הולדת' --need to change according to your cust#(lf)#(lf)#(tab)#(tab),/*CONVERT(SMALLDATETIME, (c.CREATEDDATE + 46283040) / 1440.0)*/ null as 'תאריך הצטרפות'#(lf)#(lf)#(tab)#(tab),/*dateadd(year,1, CONVERT(SMALLDATETIME, (c.CREATEDDATE + 46283040) / 1440.0))*/ null as 'תאריך תוקף מועדון' --need to change according to your cust#(lf)#(lf)#(tab)#(tab),/*case when cs.SPEC11= 'כן' then ' חברי מועדון' else '  לא חברי מועדון' end */ null as 'שיוך למועדון לקוחות' --need to change according to your cust#(lf)#(lf)#(tab)#(tab),/*case when cs.SPEC12 is null or cs.SPEC12='' then  'כן' else  cs.SPEC12 end*/ null  as 'אישור מייל' --need to change according to your cust#(lf)#(lf)#(tab)#(tab),/*case when cs.SPEC12 is null or cs.SPEC12='' then  'כן' else  cs.SPEC12 end */ null as 'אישור SMS' --need to change according to your cust#(lf)#(lf)#(tab)#(tab),/*case when Month(getdate())= MoNTH(DATEADD(year, -18, CONVERT(SMALLDATETIME, (c.CREATEDDATE + 46283040) / 1440.0))) #(lf)#(lf)#(tab)#(tab)   then 'Current Month' else FORMAT(DATEADD(year, -18, CONVERT(SMALLDATETIME, (c.CREATEDDATE + 46283040) / 1440.0)),'MMMM')#(lf)#(lf)#(tab)#(tab)   END*/ null as 'BirthdayMonth' --need to change according to your cust#(lf)#(lf)#(tab)#(tab),null as 'JoinBranchID' --need to change according to your cust#(lf)#(tab)#(tab)#(lf)#(lf)#(tab)#(tab),GETDATE() AS 'RowInsertDatetime'#(lf)#(lf) #(lf)#(lf)#(tab)#(tab)#(lf)#(lf)#(tab)FROM GORMIM G#(lf)#(tab)LEFT JOIN TBLT_ANSHI_MCIROT AM on AM.SHM_AISH_MCIROT = G.AISH_MCIROT_MTPL#(lf)#(lf)#(tab)--LEFT JOIN  ACCOUNTS a on a.ACCNAME=c.CUSTNAME#(lf)#(lf)#(lf)#(tab)WHERE 1 = 1#(lf)#(tab)--order by CONVERT(SMALLDATETIME, (c.CREATEDDATE + 46283040) / 1440.0)#(lf)#(lf)#(tab)UNION ALL ----ספק דמה לריכוז ספקים אחר#(lf)#(lf)#(tab)SELECT#(lf)#(tab)#(tab)    '1' as 'EntityID'#(lf)#(lf)#(tab)    --,'1'+CONVERT(INT, CONVERT(VARCHAR, c.CUST)) AS 'AccountKey'#(lf)#(lf)#(tab)#(tab)--,CONCAT('1',CONVERT(INT, CONVERT(VARCHAR, c.CUST))) AS 'AccountKey'#(lf)#(lf)#(tab)#(tab),999999 AS 'SupplierKey'#(lf)#(lf)#(tab)#(tab),999999 AS 'מספר לקוח'#(lf)#(lf)#(tab)#(tab),'OTHER' As 'Supplier Name'#(lf)#(lf)#(tab)#(tab),'999999 | OTHER' as 'מזהה לקוח'#(lf)#(lf)#(tab)#(tab),NULL AS 'מספר לקוח אב'#(lf)#(lf)#(tab)#(tab),'No Main Customer' AS 'שם לקוח אב'#(lf)#(lf)#(tab)#(tab),999999 AS 'מזהה לקוח אב'#(lf)#(lf)#(tab)#(tab),'OTHER' AS 'ParentChildCustomerName' -- this fiels enable to contain all regular customers and all Fathers in the sam column#(lf)#(lf)#(tab)#(tab),NULL AS 'קוד סוג לקוח'#(lf)#(lf)#(tab)#(tab),NULL AS 'קטגוריית לקוח' #(lf)#(lf)#(tab)#(tab),NULL AS 'סוג לקוח'#(lf)#(lf)#(tab)#(tab),null AS 'פרמטר 1'#(lf)#(lf)#(tab)#(tab),null AS 'פרמטר 2'#(lf)#(lf)#(tab)#(tab),null AS 'פרמטר 3'#(lf)#(lf)#(tab)#(tab),null AS 'פרמטר 4'#(lf)#(lf)#(tab)#(tab),null AS 'פרמטר 5'#(lf)#(lf)#(tab)#(tab),null AS 'פרמטר 6'#(lf)#(lf)#(tab)#(tab),null AS 'פרמטר 7'#(lf)#(lf)#(tab)#(tab),null AS 'פרמטר 8'#(lf)#(lf)#(tab)#(tab),null AS 'עיר'#(lf)#(lf)#(tab)#(tab),NULL AS 'כתובת'#(lf)#(lf)#(tab)#(tab),NULL AS 'מספר טלפון'#(lf)#(lf)#(tab)#(tab),NULL AS 'סטטוס לקוח'#(lf)#(lf)#(tab)#(tab),NULL AS 'AgentKey' --- יש בעיברית#(lf)#(lf)#(lf)#(tab)#(tab),NULL as 'תנאי תשלום ללקוח'#(lf)#(lf)#(tab)#(tab),null AS 'MAXOBLIGO'#(lf)#(lf)#(tab)#(tab),0 as 'MAXCREDIT' --MAX_CREDIT#(lf)#(lf)#(tab)#(tab),0 as 'CHEQUE_DEBIT' --CHEQUE_DEBIT #(lf)#(lf)#(tab)#(tab),0 as 'אובליגו'#(lf)#(lf)#(tab)#(tab),/*MAX_OBLIGO-ob.OBLIGO*/ 0 as 'OBLIGO Balance' --יתרת אובליגו#(lf)#(lf)#(tab)#(tab), 0 as 'חוב ללקוח'#(lf)#(lf) #(lf)#(lf)#(tab)#(tab),/*case when cs.SPEC11='כן' then 1 else 0 end */ null as 'IsClubMember' --need to change according to your cust#(lf)#(lf)#(tab)#(tab),/*case when cs.SPEC12='כן' then 'זכר' else 'נקבה' end */ null as 'מגדר' --need to change according to your cust#(lf)#(lf)#(tab)#(tab),/*datediff(year,DATEADD(year, -18, CONVERT(SMALLDATETIME, (c.CREATEDDATE + 46283040) / 1440.0)),getdate())*/ null as 'גיל' --need to change according to your cust#(lf)#(lf)#(tab)#(tab),/*DATEADD(year, -18, CONVERT(SMALLDATETIME, (c.CREATEDDATE + 46283040) / 1440.0)) */ null as 'תאריך יום הולדת' --need to change according to your cust#(lf)#(lf)#(tab)#(tab),/*CONVERT(SMALLDATETIME, (c.CREATEDDATE + 46283040) / 1440.0)*/ null as 'תאריך הצטרפות'#(lf)#(lf)#(tab)#(tab),/*dateadd(year,1, CONVERT(SMALLDATETIME, (c.CREATEDDATE + 46283040) / 1440.0))*/ null as 'תאריך תוקף מועדון' --need to change according to your cust#(lf)#(lf)#(tab)#(tab),/*case when cs.SPEC11= 'כן' then ' חברי מועדון' else '  לא חברי מועדון' end */ null as 'שיוך למועדון לקוחות' --need to change according to your cust#(lf)#(lf)#(tab)#(tab),/*case when cs.SPEC12 is null or cs.SPEC12='' then  'כן' else  cs.SPEC12 end*/ null  as 'אישור מייל' --need to change according to your cust#(lf)#(lf)#(tab)#(tab),/*case when cs.SPEC12 is null or cs.SPEC12='' then  'כן' else  cs.SPEC12 end */ null as 'אישור SMS' --need to change according to your cust#(lf)#(lf)#(tab)#(tab),/*case when Month(getdate())= MoNTH(DATEADD(year, -18, CONVERT(SMALLDATETIME, (c.CREATEDDATE + 46283040) / 1440.0))) #(lf)#(lf)#(tab)#(tab)   then 'Current Month' else FORMAT(DATEADD(year, -18, CONVERT(SMALLDATETIME, (c.CREATEDDATE + 46283040) / 1440.0)),'MMMM')#(lf)#(lf)#(tab)#(tab)   END*/ null as 'BirthdayMonth' --need to change according to your cust#(lf)#(lf)#(tab)#(tab),null as 'JoinBranchID' --need to change according to your cust#(lf)#(tab)#(tab)#(lf)#(lf)#(tab)#(tab),GETDATE() AS 'RowInsertDatetime'#(lf))#(lf)#(lf)#(lf)Select *#(lf)#(tab)#(tab),CASE#(lf)#(tab)#(tab)#(tab)WHEN SupplierKey = 1144 ----לוגוס#(lf)#(tab)#(tab)#(tab)#(tab)THEN 1#(lf)#(tab)#(tab)#(tab)WHEN SupplierKey = 1411 ----גורן הכפר#(lf)#(tab)#(tab)#(tab)#(tab)THEN 2#(lf)#(tab)#(tab)#(tab)WHEN SupplierKey = 1220 ----מספנות ישראל#(lf)#(tab)#(tab)#(tab)#(tab)THEN 3#(lf)#(tab)#(tab)#(tab)WHEN SupplierKey = 999999 ----ספק דמה#(lf)#(tab)#(tab)#(tab)#(tab)THEN 10000000000000000#(lf)#(tab)#(tab)#(tab)ELSE Dense_Rank () OVER (Order By [Supplier Name]) + 3#(lf)#(tab)#(tab)END AS 'SupplierOrder'#(lf)#(tab)#(tab),CASE#(lf)#(tab)#(tab)#(tab)WHEN [קטגוריית לקוח] LIKE N'מקום אספקה' AND [סוג לקוח] LIKE '%אחסון%'#(lf)#(tab)#(tab)#(tab)#(tab)THEN 'Warehouse'#(lf)#(tab)#(tab)#(tab)ELSE 'Ship'#(lf)#(tab)#(tab)END AS 'SupplierType'#(lf)from SupplierTable"])
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

@@ -1,0 +1,38 @@
+table OrderVSExecutionVSSupply
+	lineageTag: ab612b9a-2ab9-40ea-a165-d603a81a1d6f
+
+	column ID
+		dataType: int64
+		formatString: 0
+		lineageTag: 84f0122c-8784-4e00-9afe-eb4c3cd233ef
+		summarizeBy: none
+		sourceColumn: ID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Value
+		dataType: string
+		lineageTag: 49ba13b7-bda5-4595-90b2-668655855905
+		summarizeBy: none
+		sourceColumn: Value
+		sortByColumn: ID
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition OrderVSExecutionVSSupply = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WMlTSUfIPcnENUorViVYyAvKCQwMCfCLBXGMg1zXC1Tk0xNPfTyk2FgA=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [ID = _t, Value = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"ID", Int64.Type}, {"Value", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

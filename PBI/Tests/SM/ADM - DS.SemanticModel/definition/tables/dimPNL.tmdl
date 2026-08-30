@@ -1,0 +1,59 @@
+table dimPNL
+	lineageTag: 0d2c5ad2-f0de-4bc5-a517-ef0ad815b88b
+
+	column 'PNL Code'
+		dataType: int64
+		formatString: 0
+		lineageTag: 5444408d-afb0-4b6e-847c-bf68e35f9ea8
+		summarizeBy: none
+		sourceColumn: PNL Code
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'PNL Description'
+		dataType: string
+		lineageTag: 06481513-fb14-432c-b4d8-6a24cc57a3f0
+		summarizeBy: none
+		sourceColumn: PNL Description
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column PNLKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 6c3aaf56-361d-4b2d-9518-d71966a3e6ad
+		summarizeBy: none
+		sourceColumn: PNLKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'PNL Description Purchase'
+		dataType: string
+		lineageTag: 955e069e-2d4c-4602-82ad-2f77bcc82a98
+		summarizeBy: none
+		sourceColumn: PNL Description Purchase
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dimPNL = m
+		mode: import
+		queryGroup: Dim
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="-- dimPNL#(lf)SELECT #(lf)    QOD_SHROT          AS PNLKey,#(lf)    PNL                AS [PNL Code],#(lf)    SHM_SHROT          AS [PNL Description],#(lf)    p.PNL_Desc         AS [PNL Description Purchase]#(lf)FROM HOTSAOT_SHROTIM_New h#(lf)LEFT JOIN (#(lf)    SELECT * #(lf)    FROM tblPnlList #(lf)    WHERE PNL_Type = 'OUT'#(lf)) p#(lf)  ON h.PNL = p.PNL_ID#(lf)#(lf)UNION ALL#(lf)#(lf)-- the extra “Purchase of inventory” row#(lf)SELECT#(lf)    999                AS PNLKey,#(lf)    '1010'             AS [PNL Code],#(lf)    ''                 AS [PNL Description],        #(lf)    'Purchase of inventory' AS [PNL Description Purchase]"]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"PNL Code", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

@@ -1,0 +1,40 @@
+table hlp_ExpensesMatrixTableFileds
+	lineageTag: ebefc730-3377-4ece-9600-e7b295a77669
+
+	column Filed
+		dataType: string
+		lineageTag: 8767f442-b8e2-4354-ad62-9d8136d08e72
+		summarizeBy: none
+		sourceColumn: Filed
+		sortByColumn: Sort
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Sort
+		dataType: int64
+		formatString: 0
+		lineageTag: e48a65ab-b2f2-4da6-bd18-adf9f56a0f0d
+		summarizeBy: sum
+		sourceColumn: Sort
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition hlp_ExpensesMatrixTableFileds = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WcspPLFHSUTJQitWJVgouLSjIyUwtAgoYggUCivJTSpNBCozAfP+ilNQiTxcg3xjBd0ksSQWKmCCMqIQKmYKFAksT80oySyqBAmYIXQohlQUgNeZgIWdPN4WAosxkkIgFWATIsFSKjQUA", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Filed = _t, Sort = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Filed", type text}, {"Sort", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

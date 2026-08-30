@@ -1,0 +1,48 @@
+table dimSubPurchaseOrderNumber
+	lineageTag: 107415e8-b0d9-4ae3-ac70-1bc6af9c3742
+
+	column PurchaseOrderID
+		dataType: string
+		lineageTag: 37af0bf3-aa4b-4751-a98a-713953ac1a84
+		summarizeBy: none
+		sourceColumn: PurchaseOrderID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DeliveryNote
+		dataType: int64
+		formatString: 0
+		lineageTag: c0586a05-3e46-48f6-97cd-f2e76622e588
+		summarizeBy: none
+		sourceColumn: DeliveryNote
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Sort
+		dataType: int64
+		formatString: 0
+		lineageTag: ae3bf1dc-6ae2-44b3-9b01-fc156e9f1b8d
+		summarizeBy: sum
+		sourceColumn: Sort
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dimSubPurchaseOrderNumber = m
+		mode: import
+		queryGroup: Dim
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="WITH#(lf)-- =========================#(lf)-- 1) Exchange Orders (parse dates once)#(lf)-- =========================#(lf)ExchangeOrders AS (#(lf)    SELECT#(lf)        HZ.MSPR_HZMNH AS OrderID,#(lf)        TRY_CONVERT(date, HZ.T_ASPQH, 112) AS [Value Date],#(lf)        CONVERT(char(6), TRY_CONVERT(date, HZ.T_ASPQH, 112), 112) AS [Year Month]#(lf)    FROM HZMNOT HZ#(lf)),#(lf)ExchangeOrdersOnly AS (#(lf)    SELECT#(lf)        HZ.MSPR_HZMNH,#(lf)        TRY_CONVERT(int, LEFT(HZ.T_HZMNH, 4)) AS OrderYear#(lf)    FROM HZMNOT HZ#(lf)    WHERE#(lf)        TRY_CONVERT(int, LEFT(HZ.T_HZMNH, 4)) >= 2024#(lf)        AND TRY_CONVERT(int, LEFT(HZ.T_HZMNH, 4)) BETWEEN 2018 AND YEAR(GETDATE())#(lf)        AND HZ.OrderStatus <> 3#(lf)        AND HZ.ActionType IN (6, 7)#(lf)),#(lf)#(lf)-- =========================#(lf)-- 2) Purchase Order value date/yearmonth (avoid DISTINCT + repeated logic)#(lf)-- =========================#(lf)PO_Base AS (#(lf)    SELECT#(lf)        HS.MS_MSMKH_QSHOR,#(lf)        -- Calculate the grouping key once#(lf)        CASE#(lf)            WHEN HS.MS_MSMKH_QSHOR = 0 THEN HZ.MSPR_HZMNH#(lf)            ELSE HS.MS_MSMKH_QSHOR#(lf)        END AS OrderKey,#(lf)        HS.QOD_SHROT,#(lf)        TRY_CONVERT(date, HC.T_ERKH, 112) AS DocDate#(lf)    FROM HOTSAOT_COTROT HC#(lf)    LEFT JOIN HOTSAOT_SHOROT HS#(lf)        ON HC.NOMRTOR = HS.NOMRTOR#(lf)    LEFT JOIN PurchaseOrderLines POL#(lf)        ON CONCAT(#(lf)            CAST(CONVERT(bigint, POL.POL_OrderID) AS varchar(20)),#(lf)            CAST(POL.POL_LineID AS varchar(10))#(lf)        ) = CAST(HS.MS_MSMKH_QSHOR AS varchar(30))#(lf)    LEFT JOIN HZMNOT HZ#(lf)        ON HS.MS_MSMKH_QSHOR = HZ.MSPR_HZMNH#(lf)),#(lf)Purchase_order AS (#(lf)    SELECT#(lf)        MS_MSMKH_QSHOR,#(lf)        -- Keep original behavior:#(lf)        -- If MS_MSMKH_QSHOR=0 take that row's DocDate, else take MIN DocDate where QOD_SHROT=0 per OrderKey.#(lf)        CASE#(lf)            WHEN MS_MSMKH_QSHOR = 0 THEN MAX(DocDate)#(lf)            ELSE MIN(CASE WHEN QOD_SHROT = 0 THEN DocDate END)#(lf)        END AS [Value Date],#(lf)        CASE#(lf)            WHEN MS_MSMKH_QSHOR = 0 THEN CONVERT(char(6), MAX(DocDate), 112)#(lf)            ELSE CONVERT(char(6), MIN(CASE WHEN QOD_SHROT = 0 THEN DocDate END), 112)#(lf)        END AS [Year Month]#(lf)    FROM PO_Base#(lf)    GROUP BY#(lf)        MS_MSMKH_QSHOR,#(lf)        OrderKey#(lf)),#(lf)#(lf)-- =========================#(lf)-- 3) Shared enrichment for both Purchase + Exchange#(lf)-- =========================#(lf)BaseLink AS (#(lf)    SELECT#(lf)        a.MS_TEODT_MCIRH AS DeliveryNote,#(lf)        a.MS_TEODT_RCSH,#(lf)        b.MS_HZMNH AS PurchaseOrderID,#(lf)        ISNULL(sl.ShipDesc, '-') AS ShipDesc#(lf)    FROM QISHOR_RCSH_LMCIRH a#(lf)    LEFT JOIN QISHOR_T_MSHLOCH_HZMNOT b#(lf)        ON a.MS_TEODT_RCSH = b.MS_T_MSHLOCH#(lf)    LEFT JOIN PurchaseOrderLines POL#(lf)        ON b.MS_HZMNH = POL.POL_SQL_POID#(lf)    LEFT JOIN ShipsArrivals sa#(lf)        ON POL.POL_ShipArrivalID = sa.SA_ID#(lf)    LEFT JOIN ShipList sl#(lf)        ON sa.SA_ShipID = sl.ShipID#(lf)),#(lf)#(lf)-- =========================#(lf)-- 4) Purchase / Exchange (keep INNER JOIN filters)#(lf)-- =========================#(lf)Purchase AS (#(lf)    SELECT#(lf)        bl.DeliveryNote,#(lf)        bl.MS_TEODT_RCSH,#(lf)        CAST(bl.PurchaseOrderID AS VARCHAR) as PurchaseOrderID,#(lf)        bl.ShipDesc,#(lf)        COALESCE(p.[Value Date], o.[Value Date]) AS [Value Date],#(lf)        -- Display month: choose a cheaper format (example: yyyy-MM)#(lf)        CONVERT(char(7), COALESCE(p.[Value Date], o.[Value Date]), 120) AS ValueDateMonth,#(lf)        DENSE_RANK() OVER (#(lf)            ORDER BY COALESCE(p.[Year Month], o.[Year Month]) DESC#(lf)        ) AS Sort#(lf)    FROM BaseLink bl#(lf)    INNER JOIN PurchaseOrderLines polFilter#(lf)        ON bl.PurchaseOrderID = polFilter.POL_SQL_POID#(lf)    LEFT JOIN Purchase_order p#(lf)        ON bl.PurchaseOrderID = p.MS_MSMKH_QSHOR#(lf)    LEFT JOIN ExchangeOrders o#(lf)        ON bl.PurchaseOrderID = o.OrderID#(lf)),#(lf)Exchange AS (#(lf)    SELECT#(lf)        bl.DeliveryNote,#(lf)        bl.MS_TEODT_RCSH,#(lf)        CAST(bl.PurchaseOrderID AS VARCHAR) as PurchaseOrderID,#(lf)        bl.ShipDesc,#(lf)        COALESCE(p.[Value Date], o.[Value Date]) AS [Value Date],#(lf)        CONVERT(char(7), COALESCE(p.[Value Date], o.[Value Date]), 120) AS ValueDateMonth,#(lf)        DENSE_RANK() OVER (#(lf)            ORDER BY COALESCE(p.[Year Month], o.[Year Month]) DESC#(lf)        ) AS Sort#(lf)    FROM BaseLink bl#(lf)    INNER JOIN ExchangeOrdersOnly ex#(lf)        ON ex.MSPR_HZMNH = bl.PurchaseOrderID#(lf)    LEFT JOIN Purchase_order p#(lf)        ON bl.PurchaseOrderID = p.MS_MSMKH_QSHOR#(lf)    LEFT JOIN ExchangeOrders o#(lf)        ON bl.PurchaseOrderID = o.OrderID#(lf)),#(lf)Final as (#(lf)SELECT * FROM Purchase#(lf)UNION ALL#(lf)SELECT * FROM Exchange)#(lf), RankedDeliveryNote AS (#(lf)    SELECT#(lf)        DeliveryNote,#(lf)        PurchaseOrderID,#(lf)        Sort,#(lf)        ROW_NUMBER() OVER (#(lf)            PARTITION BY DeliveryNote#(lf)            ORDER BY PurchaseOrderID DESC) AS rn#(lf)    FROM Final#(lf))#(lf)#(lf)SELECT#(lf)    DeliveryNote,#(lf)    PurchaseOrderID,#(lf)    Sort#(lf)FROM RankedDeliveryNote#(lf)WHERE rn = 1"])
+				in
+				    Source
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

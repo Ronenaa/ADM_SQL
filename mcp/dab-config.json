@@ -1,0 +1,55 @@
+{
+  "$schema": "https://dataapibuilder.azureedge.net/schemas/v1.4.19/dab.draft.schema.json",
+  "data-source": {
+    "database-type": "mssql",
+    "connection-string": "@env('SQL_CONN_STRING')",
+    "options": {
+      "set-session-context": false
+    }
+  },
+  "runtime": {
+    "rest": { "enabled": false },
+    "graphql": { "enabled": false },
+    "mcp": {
+      "enabled": true,
+      "dml-tools": {
+        "describe-entities": true,
+        "read-records": true,
+        "aggregate-records": true,
+        "create-record": false,
+        "update-record": false,
+        "delete-record": false,
+        "execute-entity": false
+      }
+    },
+    "host": {
+      "mode": "production",
+      "cors": { "origins": [], "allow-credentials": false },
+      "authentication": { "provider": "Unauthenticated" }
+    }
+  },
+  "entities": {
+    "SheriMtbe":              { "source": "SHERI_MTBE",                 "permissions": [{ "role": "anonymous", "actions": ["read"] }] },
+    "HotsaotCotrot":          { "source": "HOTSAOT_COTROT",             "permissions": [{ "role": "anonymous", "actions": ["read"] }] },
+    "HotsaotShorot":          { "source": "HOTSAOT_SHOROT",             "permissions": [{ "role": "anonymous", "actions": ["read"] }] },
+    "PurchaseOrderLines":     { "source": "PurchaseOrderLines",         "permissions": [{ "role": "anonymous", "actions": ["read"] }] },
+    "HotsaotShrotimNew":      { "source": "HOTSAOT_SHROTIM_New",        "permissions": [{ "role": "anonymous", "actions": ["read"] }] },
+    "TeodotMshloch":          { "source": "TEODOT_MSHLOCH",             "permissions": [{ "role": "anonymous", "actions": ["read"] }] },
+    "Gormim":                 { "source": "GORMIM",                     "permissions": [{ "role": "anonymous", "actions": ["read"] }] },
+    "QishorRcshLmcirh":       { "source": "QISHOR_RCSH_LMCIRH",         "permissions": [{ "role": "anonymous", "actions": ["read"] }] },
+    "QishorTMshlochHzmnot":   { "source": "QISHOR_T_MSHLOCH_HZMNOT",    "permissions": [{ "role": "anonymous", "actions": ["read"] }] },
+    "ShipsArrivals":          { "source": "ShipsArrivals",              "permissions": [{ "role": "anonymous", "actions": ["read"] }] },
+    "ShipList":               { "source": "ShipList",                   "permissions": [{ "role": "anonymous", "actions": ["read"] }] },
+    "ChiobiChotsCotrot":      { "source": "CHIOBI_CHOTS_COTROT",        "permissions": [{ "role": "anonymous", "actions": ["read"] }] },
+    "ChiobiChotsShorot":      { "source": "CHIOBI_CHOTS_SHOROT",        "permissions": [{ "role": "anonymous", "actions": ["read"] }] },
+    "Motsrim":                { "source": "MOTSRIM",                   "permissions": [{ "role": "anonymous", "actions": ["read"] }] },
+    "Hzmnot":                 { "source": "HZMNOT",                    "permissions": [{ "role": "anonymous", "actions": ["read"] }] },
+    "PurchaseOrder":          { "source": "PurchaseOrder",             "permissions": [{ "role": "anonymous", "actions": ["read"] }] },
+    "TblInventory":           { "source": "tblInventory",              "permissions": [{ "role": "anonymous", "actions": ["read"] }] },
+    "TblProductsCost":        { "source": "tblProductsCost",           "permissions": [{ "role": "anonymous", "actions": ["read"] }] },
+    "ChshbonyotCotrot":       { "source": "CHSHBONIOT_COTROT",         "permissions": [{ "role": "anonymous", "actions": ["read"] }] },
+    "ChshbonyotShorot":       { "source": "CHSHBONIOT_SHOROT",         "permissions": [{ "role": "anonymous", "actions": ["read"] }] },
+    "TbltAnshiMcirot":        { "source": "TBLT_ANSHI_MCIROT",         "permissions": [{ "role": "anonymous", "actions": ["read"] }] },
+    "TbltPeolotHzmnhTMshloch":{ "source": "TBLT_PEOLOT_HZMNH_T_MSHLOCH","permissions": [{ "role": "anonymous", "actions": ["read"] }] }
+  }
+}

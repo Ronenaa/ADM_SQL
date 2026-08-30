@@ -1,0 +1,50 @@
+table MonthsMeasures
+	lineageTag: c79451b5-543b-4e94-84c6-d64b3343c7b5
+
+	column MonthsMeasures
+		lineageTag: 8e184f3d-7b2c-48b4-a6a0-e0c55db3f5c8
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'MonthsMeasures Order'
+
+		relatedColumnDetails
+			groupByColumn: 'MonthsMeasures Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'MonthsMeasures Fields'
+		lineageTag: 6e17c0a0-66d6-4ac0-9c8f-eae115ceeeb5
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'MonthsMeasures Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'MonthsMeasures Order'
+		formatString: 0
+		lineageTag: 3bb6b54e-d673-4c64-bde3-f771cb1fdaa2
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition MonthsMeasures = calculated
+		mode: import
+		source =
+				{
+				    ([MonthInCalenderShortName_LM2], NAMEOF('factOrders'[Quantity Dynamic Table Switch Previous 2 Months]), 0),
+				    ([MonthInCalenderShortName_LM], NAMEOF('factOrders'[Quantity Dynamic Table Switch Previous Month]), 1),
+				    ([MonthInCalenderShortName_Current], NAMEOF('factOrders'[Quantity Dynamic Table Switch Current Month]), 2),
+				    ([MonthInCalenderShortName_NM], NAMEOF('factOrders'[Quantity Dynamic Table Switch Next Month]), 3),
+				    ([MonthInCalenderShortName_NM2], NAMEOF('factOrders'[Quantity Dynamic Table Switch Next 2 Months]), 4),
+				    ([MonthInCalenderShortName_NM3], NAMEOF('factOrders'[Quantity Dynamic Table Switch Next 3 Months]), 5)
+				}
+
+	annotation PBI_Id = 5d69e99c8b234110b1aa511a244d3f88
+

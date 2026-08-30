@@ -1,0 +1,336 @@
+table Sub_DimDates_QA
+	lineageTag: 87bf9e4f-e0ca-499a-abfe-7f36c4b4ee06
+
+	column Date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: c0a83d0b-89a5-4378-bb63-f25c6d153285
+		summarizeBy: none
+		sourceColumn: Date
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Year
+		dataType: string
+		lineageTag: 13ad6e82-8e7a-4f38-92cf-ebfa32984e19
+		summarizeBy: none
+		sourceColumn: Year
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column MonthNumberOfYear
+		dataType: double
+		lineageTag: ffdc1441-c489-44f9-a70a-618feb108089
+		summarizeBy: sum
+		sourceColumn: MonthNumberOfYear
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column DateInt
+		dataType: double
+		lineageTag: 5d013c8c-444a-434d-9bb1-2240bc1dd15d
+		summarizeBy: sum
+		sourceColumn: DateInt
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MonthName
+		dataType: string
+		lineageTag: d4746344-df07-4666-8a44-56d2c845a874
+		summarizeBy: none
+		sourceColumn: MonthName
+		sortByColumn: MonthNumberOfYear
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column MonthInCalendarName
+		dataType: string
+		lineageTag: 25fa173f-90a3-431c-aa7a-658200d95e92
+		summarizeBy: none
+		sourceColumn: MonthInCalendarName
+		sortByColumn: YearMonthNumber
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Show Dates'
+		dataType: string
+		lineageTag: 212aa55b-0c3a-4215-a933-a07fc82a301e
+		summarizeBy: none
+		sourceColumn: Show Dates
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Show Months'
+		dataType: string
+		lineageTag: b2d65410-fb85-4e81-98c1-f12a4c6bf7c3
+		summarizeBy: none
+		sourceColumn: Show Months
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DaysInMonth
+		dataType: double
+		lineageTag: 55ccdcd1-b8e4-43a0-9853-56db90d3257a
+		summarizeBy: sum
+		sourceColumn: DaysInMonth
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column WeekInYearName
+		dataType: string
+		lineageTag: aed9d607-88a4-45f4-abf4-c865649b9c6b
+		summarizeBy: none
+		sourceColumn: WeekInYearName
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column WeekInYear
+		dataType: double
+		lineageTag: 03f01dbf-aaac-4805-8310-bab5c4820b94
+		summarizeBy: sum
+		sourceColumn: WeekInYear
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column YearMonthNumber
+		dataType: double
+		lineageTag: 330af871-79ff-4fee-9d2d-79703bce1ea6
+		summarizeBy: sum
+		sourceColumn: YearMonthNumber
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Show This Year'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: c1b63638-520d-4aca-92d8-f0e3a49ac399
+		summarizeBy: none
+		sourceColumn: Show This Year
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Show Last 7 Days'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: f379ae21-02ea-4930-9230-e47f5de68e23
+		summarizeBy: none
+		sourceColumn: Show Last 7 Days
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Show Last 30 Days'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 72f9159e-6852-4233-9054-d1fc602c5db0
+		summarizeBy: none
+		sourceColumn: Show Last 30 Days
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Show Last 12 Months'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 4e55e07e-9fd7-47dc-ae84-64092d47e021
+		summarizeBy: none
+		sourceColumn: Show Last 12 Months
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Show Next 12 Months'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 459a2c95-2efd-4365-a536-5b60df0be3a8
+		summarizeBy: none
+		sourceColumn: Show Next 12 Months
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Show Last 6 Months'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 810baedb-8091-428d-816c-079f1c3a782c
+		summarizeBy: none
+		sourceColumn: Show Last 6 Months
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Show Last 3 Months'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 728a68af-1c26-416d-a8dd-ddd6f2e77e4c
+		summarizeBy: none
+		sourceColumn: Show Last 3 Months
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column FirstDayOfMonth
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: a02d2863-752d-4912-8d4d-38e84a14eb86
+		summarizeBy: none
+		sourceColumn: FirstDayOfMonth
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column LastMonth
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: fee782ec-7e03-49ca-964c-d0b99b88657a
+		summarizeBy: none
+		sourceColumn: LastMonth
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column LastYear
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 4989d223-3307-4257-bafa-e44511a56de9
+		summarizeBy: none
+		sourceColumn: LastYear
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column IsHistory
+		dataType: int64
+		formatString: 0
+		lineageTag: 82ea46b7-4249-4b2e-8ce5-a38e60f91a68
+		summarizeBy: sum
+		sourceColumn: IsHistory
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is History To Today'
+		dataType: int64
+		formatString: 0
+		lineageTag: 24dbb02e-c273-45fd-9fe2-62fcd6686de9
+		summarizeBy: sum
+		sourceColumn: Is History To Today
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column UntilNextMonth
+		dataType: int64
+		formatString: 0
+		lineageTag: 4ee2c45c-7886-40b5-b832-20e950063d6d
+		summarizeBy: sum
+		sourceColumn: UntilNextMonth
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column UntilThisMonth
+		dataType: int64
+		formatString: 0
+		lineageTag: 62facd9e-f92f-41b8-a463-2122d0771a81
+		summarizeBy: sum
+		sourceColumn: UntilThisMonth
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Show Around 6 Months'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 714f4b06-9142-43d3-974e-91bed92d7f43
+		summarizeBy: none
+		sourceColumn: Show Around 6 Months
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Show Around 12 Months'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: f5e321bc-b67c-4adf-94ce-f0f0bd2005c0
+		summarizeBy: none
+		sourceColumn: Show Around 12 Months
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Sub_DimDates_QA = m
+		mode: import
+		queryGroup: 'Dates Dim'
+		source =
+				let
+				    Source = (dimDates),
+				    #"Removed Other Columns" = Table.SelectColumns(Source,{"Date", "Year", "MonthNumberOfYear", "DateInt", "MonthName", "MonthInCalendarName", "Show Dates", "Show Months", "DaysInMonth", "WeekInYearName","WeekInYear", "YearMonthNumber", "Show This Year", "Show Last 7 Days", "Show Last 30 Days", "Show Last 12 Months", "Show Next 12 Months", "Show Last 6 Months", "Show Last 3 Months", "FirstDayOfMonth", "LastMonth", "LastYear", "IsHistory", "Is History To Today", "UntilNextMonth", "UntilThisMonth","Show Around 6 Months","Show Around 12 Months"})
+				in
+				    #"Removed Other Columns"
+
+	annotation PBI_ResultType = Table
+

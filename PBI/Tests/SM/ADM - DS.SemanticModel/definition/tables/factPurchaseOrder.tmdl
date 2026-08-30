@@ -1,0 +1,1840 @@
+table factPurchaseOrder
+	lineageTag: fbbb3463-e783-46e7-8d9e-312c387e973f
+
+	measure 'Total Purchase Quantity' = SUM(factPurchaseOrder[Quantity])
+		formatString: #,0.00
+		lineageTag: e1688650-8138-497e-af2d-3d7f607dd697
+
+		changedProperty = IsHidden
+
+	measure 'Avg Lead Time' = AVERAGE([LeadTime])
+		lineageTag: 4b21b374-d205-4d38-8d3e-5dd1ba34bfb8
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Avg Cost Price' = DIVIDE([Total Purchases Cost] , [Total Purchase Quantity])
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: e3b5228d-a200-490e-937c-2473b49283c8
+
+		changedProperty = IsHidden
+
+	measure 'Cumulative Open Purchase' =
+			CALCULATE([Open Purchase Quantity By Supply Date],FILTER(All(DimDates),DimDates[Date]<=MAX(DimDates[Date]) && dimDates[IsHistory]=0))
+			
+			// old calc IF(MIN(DimDates[תאריך])>CALCULATE(MAX(factPurchase[תאריך הזמנה צפוי]),FILTER(ALL(factPurchase),factPurchase[IsOpen]=1)),CALCULATE([Open Purchase Quantity By Arrival Date],FILTER(All(DimDates),DimDates[תאריך]<=MAX(DimDates[תאריך]) && dimDates[IsHistory]=0)),BLANK())
+		lineageTag: 6586a128-3394-4d02-a0d9-a70892176bfe
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Open Purchase Quantity By Supply Date' = CALCULATE(SUM(factPurchaseOrder[Balance]),factPurchaseOrder[IsOpen]="1",USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+		lineageTag: 2e716326-4376-41fa-a7f5-56d738cf4e7c
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Purchases Cost' =
+			
+			IF(HASONEVALUE(VAT_MeasureSelctionTable[ID ANALYSIS]),
+				SWITCH(MAX(VAT_MeasureSelctionTable[ID ANALYSIS]),
+					1,SUM(factPurchaseOrder[LineTotalNetUSD]),
+					2,SUM(factPurchaseOrder[LineTotalNetNIS])
+			    ),
+			   SUM(factPurchaseOrder[LineTotalNetUSD]))
+		formatString: #,0
+		lineageTag: 352e3007-deeb-4c1d-898d-d8958b5659ff
+
+		changedProperty = IsHidden
+
+	measure 'המלצת רכש - חודש אחרון' = CALCULATE([המלצת רכש],FILTER(ALL(Inventory_MeasureSelctionTable),Inventory_MeasureSelctionTable[ID]=1))
+		displayFolder: מדדים
+		lineageTag: 4a460bdb-396b-4f5d-bb0a-178d1406acf4
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'מספר הזמנות' = DISTINCTCOUNT(factPurchaseOrder[OrderID])
+		formatString: #,0
+		displayFolder: מדדים
+		lineageTag: f058039e-2b32-4bb5-aa17-bbeef1dc0455
+
+		changedProperty = IsHidden
+
+	measure 'המלצת רכש - 3 חודשים' = CALCULATE([המלצת רכש],FILTER(ALL(Inventory_MeasureSelctionTable),Inventory_MeasureSelctionTable[ID]=2))
+		displayFolder: מדדים
+		lineageTag: 795302f2-3e0f-4b0b-b8a4-814e2971f36b
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'All Open Purchase By Supply Date - Risk Plan' =
+			
+			VAR _MaxDate = MAX(dimDates[Date])
+			return CALCULATE(
+			    [Open Purchase Quantity By Supply Date]
+			    ,FILTER(ALL(dimDates),dimDates[Date]<=_MaxDate),USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date])
+			)
+		formatString: #,0.0
+		displayFolder: Risk Plan
+		lineageTag: f9fe8546-aaf2-4b86-8fe3-7e298b6beb38
+
+		changedProperty = IsHidden
+
+	measure 'Purchase - Risk Plan' = ```
+			
+			VAR _MaxDate = CALCULATE(MAX(factPurchaseOrder[Supply Date]),USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+			VAR MinDate = MIN(dimDates[Date])
+			
+			var allOpenChosenMonth = 
+			CALCULATE(
+			    [Open Purchase Quantity By Supply Date]
+			    ,FILTER(ALL(dimDates),dimDates[Date]<=_MaxDate && dimDates[Date]>=MinDate)
+			)
+			return 
+			//allOpenChosenMonth
+			IF(MAX(dimDates[Show Months])="This Month",[All Open Purchase By Supply Date - Risk Plan],allOpenChosenMonth)
+			```
+		displayFolder: Risk Plan
+		lineageTag: 66e05604-e089-43bc-b63c-262a2f7872a6
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Avg Cost Price Supply Date' =
+			
+			CALCULATE(DIVIDE([Total Purchase Cost Flat+FlatValue SWITCH] , [Total Purchase Quantity]),USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+			--CALCULATE(DIVIDE([Total Purchases Cost] , [Total Purchase Quantity]),USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: df143c94-3dcc-43c0-8e21-5a091544d81a
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Open Purchase Cost By Supply Date' =
+			
+			//CALCULATE([Total Purchase Balance Cost SWITCH],factPurchaseOrder[IsOpen]="1",USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+			CALCULATE([Total Purchase Cost Flat+FlatValue SWITCH],factPurchaseOrder[IsOpen]="1",USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+		lineageTag: 30d6f3b5-89c1-4c7f-8887-4634d728d757
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'All Open Purchase Cost By Supply Date - Risk Plan' =
+			
+			VAR _MaxDate = MAX(dimDates[Date])
+			return CALCULATE(
+			    [Open Purchase Cost By Supply Date]
+			    ,FILTER(ALL(dimDates),dimDates[Date]<=_MaxDate),USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date])
+			)
+		displayFolder: Risk Plan
+		lineageTag: 9fcdfff9-61a1-4949-88ef-54166b6bd646
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Purchase Quantity By Supply Date' =
+			
+			CALCULATE([Total Purchase Quantity],USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+		lineageTag: 81cf36e3-50c6-45d1-905b-8478bda70da4
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Avg CF Cost Price' = DIVIDE([Total Purchases CF Cost] , [Total Purchase Quantity])
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: CF
+		lineageTag: fcd3670f-1516-4aeb-b05c-d15776082552
+
+		changedProperty = IsHidden
+
+	measure 'Avg CF Cost Price Supply Date' = CALCULATE(DIVIDE([Total Purchases CF Cost] , [Total Purchase Quantity]),USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: CF
+		lineageTag: b07fe705-f5c5-4361-ab76-c2b2f21b6b19
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Purchases CF Cost' =
+			
+			IF(HASONEVALUE(VAT_MeasureSelctionTable[ID ANALYSIS]),
+			    SWITCH(MAX(VAT_MeasureSelctionTable[ID ANALYSIS]),
+			        1,SUM(factPurchaseOrder[LineTotalCF_USD]),
+			        2,SUM(factPurchaseOrder[LineTotalCF_NIS])
+			    ),
+			   SUM(factPurchaseOrder[LineTotalCF_USD]))
+		formatString: #,0
+		displayFolder: CF
+		lineageTag: 88d25220-290e-46cb-b62a-d737a5ae165e
+
+		changedProperty = IsHidden
+
+	measure 'Avg FOT Cost Price' = DIVIDE([Total Purchases FOT Cost] , [Total Purchase Quantity])
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: FOT
+		lineageTag: 26854752-d66c-42d1-91a3-5e6afee4ef94
+
+		changedProperty = IsHidden
+
+	measure 'Avg FOT Cost Price Supply Date' = CALCULATE(DIVIDE([Total Purchases FOT Cost] , [Total Purchase Quantity]),USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: FOT
+		lineageTag: aadd04df-88d1-466c-9cad-4b32d60463eb
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Purchases FOT Cost' =
+			
+			IF(HASONEVALUE(VAT_MeasureSelctionTable[ID ANALYSIS]),
+			    SWITCH(MAX(VAT_MeasureSelctionTable[ID ANALYSIS]),
+			        1,SUM(factPurchaseOrder[LineTotalFOT_USD]),
+			        2,SUM(factPurchaseOrder[LineTotalFOT_NIS])
+			    ),
+			   SUM(factPurchaseOrder[LineTotalFOT_USD]))
+		formatString: #,0
+		displayFolder: FOT
+		lineageTag: 090fd558-288f-4de4-b101-526d380e08d1
+
+		changedProperty = IsHidden
+
+	measure 'Avg Cost Price Supply Date SWITCH' =
+			SWITCH(MIN(PriceType[ID]),
+			1,[Avg Cost Price Supply Date],
+			2,[Avg CF Cost Price Supply Date],
+			3,[Avg FOT Cost Price Supply Date],
+			[Avg Cost Price Supply Date]
+			)
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: b990e05f-2332-4cb4-97c9-c514682edba3
+
+		changedProperty = IsHidden
+
+	measure 'Avg Cost Price Supply Date - Risk Plan' = ```
+			
+			VAR _MaxDate = CALCULATE(MAX(dimDates[Date]),USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+			VAR MinDate = MIN(dimDates[Date])
+			
+			var allOpenChosenMonth = 
+			CALCULATE(
+			    DIVIDE([Open Purchase Cost By Supply Date],[Open Purchase Quantity Basis By Supply Date]+[Open Purchase Quantity Flat By Supply Date])
+			    ,FILTER(ALL(dimDates),dimDates[Date]<=_MaxDate && dimDates[Date]>=MinDate)
+			)
+			    
+			
+			var _Quantity = --CALCULATE(([Total Purchase Quantity Flat] + [Total Purchase Quantity Basis]), USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+			--CALCULATE(SUM(factPurchaseOrder[Quantity]),factPurchaseOrder[IsOpen]="1",FILTER(ALL(dimDates),dimDates[Date]<=_MaxDate),USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date])) -- before
+			--CALCULATE(SUM(factPurchaseOrder[Balance]),factPurchaseOrder[IsOpen]="1",FILTER(ALL(dimDates),dimDates[Date]<=_MaxDate),USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+			CALCULATE([Open Purchase Quantity Basis By Supply Date]+[Open Purchase Quantity Flat By Supply Date]
+			            ,factPurchaseOrder[IsOpen]="1"
+			            ,FILTER(ALL(dimDates),dimDates[Date]<=_MaxDate)
+			            ,USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date])
+			            )
+			var firstMonth =
+			CALCULATE(
+			    DIVIDE([All Open Purchase Cost By Supply Date - Risk Plan],_Quantity)
+			    ,FILTER(ALL(dimDates),dimDates[Date]<=_MaxDate)-- && dimDates[Date]>=MinDate)
+			)
+			
+			return 
+			IF(MAX(dimDates[Show Months])="This Month",firstMonth,allOpenChosenMonth)
+			
+			```
+		displayFolder: Risk Plan
+		lineageTag: 3049d6a5-288b-4489-8c23-89cc8ed9605c
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Avg Cost Price Open Supply Date' = DIVIDE([Open Purchase Cost By Supply Date] , [Open Purchase Quantity By Supply Date])
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: b508c180-9270-4317-bd30-e4f1adb5b972
+
+		changedProperty = IsHidden
+
+	measure 'Open Purchase Quantity By Supply Date -' =
+			
+			VAR _MinO = CALCULATE(MIN(factOrders[תאריך אספקה]),ALL(dimDates),ALL(Sub_DimDates),factOrders[סטטוס]=1 || factOrders[סטטוס]=2)
+			VAR _MaxO = CALCULATE(MAX(factOrders[תאריך אספקה]),ALL(dimDates),ALL(Sub_DimDates),factOrders[סטטוס]=1 || factOrders[סטטוס]=2)
+			VAR _MinP = CALCULATE(MIN(factPurchaseOrder[Supply Date]),ALL(dimDates),ALL(Sub_DimDates),factPurchaseOrder[IsOpen]="1")
+			VAR _MaxP = CALCULATE(MAX(factPurchaseOrder[Supply Date]),ALL(dimDates),ALL(Sub_DimDates),factPurchaseOrder[IsOpen]="1")
+			VAR _Min = IF(_MinO<=_MinP,_MinO,_MinP)
+			VAR _Max = IF(_MaxO>=_MaxP,_MaxO,_MaxP)
+			
+			
+			RETURN
+			SWITCH(TRUE(),
+			MAX(DimDates[Date]) <_Min,BLANK(),
+			MIN(DimDates[Date]) > _Max,BLANK(),
+			[Open Purchase Quantity By Supply Date]=0,"-",
+			[Open Purchase Quantity By Supply Date]
+			)
+		formatString: #,0.00
+		lineageTag: a9b39dba-ffda-464f-9601-c2bcca0aeaf5
+
+		changedProperty = IsHidden
+
+	measure 'Total Purchases Balance CF Cost' =
+			
+			IF(HASONEVALUE(VAT_MeasureSelctionTable[ID ANALYSIS]),
+			    SWITCH(MAX(VAT_MeasureSelctionTable[ID ANALYSIS]),
+			        1,SUM(factPurchaseOrder[LineTotalBalanceCF_USD]),
+			        2,SUM(factPurchaseOrder[LineTotalBalanceCF_NIS])
+			    ),
+			   SUM(factPurchaseOrder[LineTotalBalanceCF_USD]))
+		displayFolder: CF
+		lineageTag: 5b332f6e-ace7-4b82-8adb-0a59a9309d35
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Purchases Balance FOT Cost' =
+			
+			IF(HASONEVALUE(VAT_MeasureSelctionTable[ID ANALYSIS]),
+			    SWITCH(MAX(VAT_MeasureSelctionTable[ID ANALYSIS]),
+			        1,SUM(factPurchaseOrder[LineTotalFOT_USD]),
+			        2,SUM(factPurchaseOrder[LineTotalFOT_NIS])
+			    ),
+			   SUM(factPurchaseOrder[LineTotalBalanceFOT_USD]))
+		displayFolder: FOT
+		lineageTag: 958f4b37-5e5f-49b7-b9fd-05e2f98306ef
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Purchases Balance Cost' =
+			
+			IF(HASONEVALUE(VAT_MeasureSelctionTable[ID ANALYSIS]),
+				SWITCH(MAX(VAT_MeasureSelctionTable[ID ANALYSIS]),
+					1,SUM(factPurchaseOrder[LineTotalBalanceUSD]),
+					2,SUM(factPurchaseOrder[LineTotalBalanceNIS])
+			    ),
+			   SUM(factPurchaseOrder[LineTotalBalanceUSD]))
+		lineageTag: d75befc5-5b02-4fc7-8e97-2261b2013a20
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Purchase Balance Cost SWITCH' =
+			SWITCH(MIN(PriceType[ID]),
+			1,[Total Purchases Balance Cost],
+			2,[Total Purchases Balance CF Cost],
+			3,[Total Purchases Balance FOT Cost],
+			[Total Purchases Balance Cost]
+			)
+		lineageTag: ddba8c9e-25e2-4592-91f3-3c93b80df5c6
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Purchase Quantity Balance' = SUM(factPurchaseOrder[Balance])
+		formatString: #,0
+		lineageTag: 36d98b90-e17a-4e43-b4ff-55467cf1f79c
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'Total Purchase Quantity Balance By Supply Date' =
+			
+			CALCULATE([Total Purchase Quantity Balance],USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+		formatString: #,0
+		lineageTag: 5d355bc9-5f9f-43ec-a301-ae4d47c85725
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'Open Purchase Quantity Basis By Supply Date' =
+			
+			CALCULATE(SUM(factPurchaseOrder[BasisQTY]),
+			             factPurchaseOrder[IsOpen]="1",USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+		lineageTag: 5ebec1c7-45f5-49d3-b581-5bd3254c3869
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'All Open Purchase Basis By Supply Date - Risk Plan' =
+			
+			VAR _MaxDate = MAX(dimDates[Date])
+			return CALCULATE(
+			    [Open Purchase Quantity Basis By Supply Date]
+			    ,FILTER(ALL(dimDates),dimDates[Date]<=_MaxDate),USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date])
+			)
+		displayFolder: Risk Plan
+		lineageTag: 2e4a0be6-7cd7-43e1-84f8-9665df178a04
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Open Purchase Quantity Flat By Supply Date' =
+			
+			CALCULATE(
+			    SUM(factPurchaseOrder[FlatQTY])
+			    ,factPurchaseOrder[IsOpen]="1",USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+		lineageTag: 0f716e22-8333-453c-9335-0ede126d1648
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'All Open Purchase Flat By Supply Date - Risk Plan' =
+			
+			VAR _MaxDate = MAX(dimDates[Date])
+			return CALCULATE(
+			    [Open Purchase Quantity Flat By Supply Date]
+			    ,FILTER(ALL(dimDates),dimDates[Date]<=_MaxDate),USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date])
+			)
+		displayFolder: Risk Plan
+		lineageTag: e8c2f0ee-1135-4bf8-8ed8-43f4291c0a10
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Purchase - Risk Plan Basis' = ```
+			
+			VAR _MaxDate = CALCULATE(MAX(factPurchaseOrder[Supply Date]),USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+			VAR MinDate = MIN(dimDates[Date])
+			
+			var allOpenChosenMonth = 
+			CALCULATE(
+			    [Open Purchase Quantity Basis By Supply Date]
+			    ,FILTER(ALL(dimDates),dimDates[Date]<=_MaxDate && dimDates[Date]>=MinDate)
+			)
+			return 
+			//allOpenChosenMonth
+			IF(MAX(dimDates[Show Months])="This Month",[All Open Purchase Basis By Supply Date - Risk Plan],allOpenChosenMonth)
+			```
+		displayFolder: Risk Plan
+		lineageTag: d8f7dc94-c70d-4c90-8387-a1b7b5562a42
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Purchase - Risk Plan Flat' = ```
+			
+			VAR _MaxDate = CALCULATE(MAX(factPurchaseOrder[Supply Date]),USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+			VAR MinDate = MIN(dimDates[Date])
+			
+			var allOpenChosenMonth = 
+			CALCULATE(
+			    [Open Purchase Quantity Flat By Supply Date]
+			    ,FILTER(ALL(dimDates),dimDates[Date]<=_MaxDate && dimDates[Date]>=MinDate)
+			)
+			return 
+			//allOpenChosenMonth
+			IF(MAX(dimDates[Show Months])="This Month",[All Open Purchase Flat By Supply Date - Risk Plan],allOpenChosenMonth)
+			```
+		displayFolder: Risk Plan
+		lineageTag: 8c8b027f-8d21-45c3-9a69-023174ad9c8b
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Purchase Quantity Basis' = SUM(factPurchaseOrder[BasisQTY])
+		lineageTag: c18d507e-7e85-4619-bae9-ade51435f871
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Purchase Quantity Flat' = SUM(factPurchaseOrder[FlatQTY])
+		lineageTag: 307d55b0-4cc2-4f0e-9e5b-38f335521fe6
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Purchases Cost Flat Value' =
+			
+			IF(HASONEVALUE(VAT_MeasureSelctionTable[ID ANALYSIS]),
+				SWITCH(MAX(VAT_MeasureSelctionTable[ID ANALYSIS]),
+					1,SUM(factPurchaseOrder[LineTotalFlatValueBalanceUSD]),
+					2,BLANK()--SUM(factPurchaseOrder[LineTotalNetNIS])
+			    ),
+			   SUM(factPurchaseOrder[LineTotalFlatValueBalanceUSD]))
+		lineageTag: 804974af-ae07-4d9d-b34f-0bb8155a884d
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Avg Cost Price Basis Flat Value' = DIVIDE([Total Purchases Cost Flat Value] , [Total Purchase Quantity Basis])
+		lineageTag: e58058ba-1929-4712-ac60-5e8a53f1071a
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Avg Cost Price Basis Flat Value Supply Date' = CALCULATE([Avg Cost Price Basis Flat Value],USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+		lineageTag: bd84ac88-ef29-454c-98d7-e8726c970411
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Purchases Cost Flat' =
+			
+			IF(HASONEVALUE(VAT_MeasureSelctionTable[ID ANALYSIS]),
+				SWITCH(MAX(VAT_MeasureSelctionTable[ID ANALYSIS]),
+					1,SUM(factPurchaseOrder[LineTotalFlatBalanceUSD]),
+					2,BLANK()--SUM(factPurchaseOrder[LineTotalNetNIS])
+			    ),
+			   SUM(factPurchaseOrder[LineTotalFlatBalanceUSD]))
+		lineageTag: 2793907b-c7f5-4748-b4bd-df758c80ac6c
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Avg Cost Price Flat' = DIVIDE([Total Purchases Cost Flat] , [Total Purchase Quantity Flat])
+		lineageTag: 0b480c01-c83b-4d60-abd3-ccc9d855ec29
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Avg Cost Price Flat Supply Date' = CALCULATE([Avg Cost Price Flat],USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+		lineageTag: 027cf5e9-c17e-4560-86e5-0017a2a37fc0
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Avg Cost Price Supply Date - Risk Plan Flat' = ```
+			
+			VAR _MaxDate = CALCULATE(MAX(dimDates[Date]),USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+			VAR MinDate = MIN(dimDates[Date])
+			
+			var allOpenChosenMonth = 
+			CALCULATE(
+			    DIVIDE([Total Purchase Cost Flat By Supply Date],[Open Purchase Quantity Flat By Supply Date])
+			    ,FILTER(ALL(dimDates),dimDates[Date]<=_MaxDate && dimDates[Date]>=MinDate)
+			)
+			
+			var _Quantity = 
+			--CALCULATE(SUM(factPurchaseOrder[Quantity]),factPurchaseOrder[IsOpen]="1",FILTER(ALL(dimDates),dimDates[Date]<=_MaxDate),USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+			CALCULATE(SUM(factPurchaseOrder[FlatQTY]),factPurchaseOrder[IsOpen]="1",FILTER(ALL(dimDates),dimDates[Date]<=_MaxDate),USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+			
+			var firstMonth =
+			CALCULATE(
+			    DIVIDE([All Open Purchase Cost By Supply Date - Risk Plan Flat],_Quantity)
+			    ,FILTER(ALL(dimDates),dimDates[Date]<=_MaxDate)-- && dimDates[Date]>=MinDate)
+			)
+			
+			return 
+			IF(MAX(dimDates[Show Months])="This Month",firstMonth,allOpenChosenMonth)
+			```
+		displayFolder: Risk Plan
+		lineageTag: 76edc075-93f2-4382-9115-3a9947bd8d3d
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Purchase Cost SWITCH Flat' =
+			
+			SWITCH(MIN(PriceType[ID]),
+			1,SUM(factPurchaseOrder[LineTotalFlatBalanceUSD]),
+			2,SUM(factPurchaseOrder[LineTotalBalanceCF_USD]),--SUM(factPurchaseOrder[LineTotalCF_USD]),
+			3,SUM(factPurchaseOrder[LineTotalBalanceFOT_USD]),--SUM(factPurchaseOrder[LineTotalFOT_USD]),
+			SUM(factPurchaseOrder[LineTotalFlatBalanceUSD])
+			/*SWITCH(MIN(PriceType[ID]),
+			1,[Total Purchases Cost Flat],
+			--2,[Total Purchases CF Cost],
+			--3,[Total Purchases FOT Cost],
+			[Total Purchases Cost Flat]
+			)*/)
+		lineageTag: a4e39b9f-cc86-405f-a9c2-5349565fff6d
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Open Purchase Cost By Supply Date Flat' =
+			
+			CALCULATE([Total Purchase Cost SWITCH Flat],factPurchaseOrder[IsOpen]="1",USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+		lineageTag: 2e081b66-86f1-4e4a-ba12-0eb85a5c6122
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'All Open Purchase Cost By Supply Date - Risk Plan Flat' =
+			
+			VAR _MaxDate = MAX(dimDates[Date])
+			return CALCULATE(
+			    [Open Purchase Cost By Supply Date Flat]
+			    ,FILTER(ALL(dimDates),dimDates[Date]<=_MaxDate),USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date])
+			)
+		displayFolder: Risk Plan
+		lineageTag: 22360c15-712e-44f5-b1e4-131115833cf7
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Purchase Cost Flat By Supply Date' = CALCULATE([Total Purchase Cost SWITCH Flat],factPurchaseOrder[IsOpen]="1",USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))--
+		lineageTag: 42393936-074d-4f9a-a7af-237640dde840
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Purchase Cost SWITCH Flat Value' =
+			SWITCH(MIN(PriceType[ID]),
+			1,SUM(factPurchaseOrder[LineTotalFlatValueBalanceUSD]),
+			2,SUM(factPurchaseOrder[LineTotalFlatValueBalanceCFFUSD]),
+			3,SUM(factPurchaseOrder[LineTotalFlatValueBalanceFOTUSD]),
+			SUM(factPurchaseOrder[LineTotalFlatValueBalanceUSD])
+			
+			/*1,[Total Purchases Cost Flat Value],
+			--2,[Total Purchases CF Cost],
+			--3,[Total Purchases FOT Cost],
+			[Total Purchases Cost Flat Value]
+			)*/)
+		lineageTag: 8e56c609-b11e-4faf-b4a6-aea3ab4eaf30
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Purchase Cost Flat Value By Supply Date' = CALCULATE([Total Purchase Cost SWITCH Flat Value],factPurchaseOrder[IsOpen]="1",USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+		lineageTag: 700eeb43-5f2c-44dc-9980-52fb15f8da6d
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Open Purchase Cost By Supply Date Flat Value' =
+			
+			CALCULATE([Total Purchase Cost SWITCH Flat Value],factPurchaseOrder[IsOpen]="1",USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+		lineageTag: a6e2e37d-4275-43f6-8033-3b53695cb4ba
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'All Open Purchase Cost By Supply Date - Risk Plan Flat Value' =
+			
+			VAR _MaxDate = MAX(dimDates[Date])
+			return CALCULATE(
+			    [Open Purchase Cost By Supply Date Flat Value]
+			    ,FILTER(ALL(dimDates),dimDates[Date]<=_MaxDate),USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date])
+			)
+		displayFolder: Risk Plan
+		lineageTag: 559bfd73-dade-4493-b42a-1994bd410bff
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Avg Cost Price Supply Date - Risk Plan Flat Value' = ```
+			
+			VAR _MaxDate = CALCULATE(MAX(factPurchaseOrder[Supply Date]),USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+			VAR MinDate = MIN(dimDates[Date])
+			
+			var allOpenChosenMonth = 
+			CALCULATE(
+			    DIVIDE([Total Purchase Cost Flat Value By Supply Date],[Open Purchase Quantity Basis By Supply Date])
+			    ,FILTER(ALL(dimDates),dimDates[Date]<=_MaxDate && dimDates[Date]>=MinDate)
+			)
+			
+			var _Quantity = 
+			--CALCULATE(SUM(factPurchaseOrder[Quantity]),factPurchaseOrder[IsOpen]="1",FILTER(ALL(dimDates),dimDates[Date]<=_MaxDate),USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+			CALCULATE(SUM(factPurchaseOrder[BasisQTY]),factPurchaseOrder[IsOpen]="1",FILTER(ALL(dimDates),dimDates[Date]<=_MaxDate),USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+			
+			var firstMonth =
+			CALCULATE(
+			    DIVIDE([All Open Purchase Cost By Supply Date - Risk Plan Flat Value],_Quantity)
+			    ,FILTER(ALL(dimDates),dimDates[Date]<=_MaxDate)-- && dimDates[Date]>=MinDate)
+			)
+			
+			return 
+			//allOpenChosenMonth
+			IF(MAX(dimDates[Show Months])="This Month",firstMonth,allOpenChosenMonth)
+			```
+		displayFolder: Risk Plan
+		lineageTag: adf28712-6516-4065-b29c-3ea3cc70d541
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Purchase Cost Flat+FlatValue SWITCH' =
+			SWITCH(MIN(PriceType[ID]),
+			1,SUM(factPurchaseOrder[LineTotalFlatValueUSD]),
+			2,SUM(factPurchaseOrder[LineTotalFlatValueCFFUSD]),
+			3,SUM(factPurchaseOrder[LineTotalFlatValueFOTUSD]),
+			SUM(factPurchaseOrder[LineTotalFlatValueUSD])
+			)
+		lineageTag: 2ea4cce1-6ccb-498f-ba09-988c74c83c7f
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Avg Cost Price Flat+FlatValue' = DIVIDE([Total Purchase Cost Flat+FlatValue SWITCH] , [Total Purchase Quantity])
+		lineageTag: 6c429ad9-9328-4061-88b0-3de35012213b
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Purchase Quantity Basis By Supply Date' =
+			
+			CALCULATE([Total Purchase Quantity Basis],USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+		lineageTag: 173b4261-dcd4-4124-bb23-ea8441812d62
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Purchase Quantity Flat By Supply Date' =
+			
+			CALCULATE([Total Purchase Quantity Flat],USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+		lineageTag: 10fafb53-4439-4229-b47e-dae3fc6ebce8
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Open Purchase Cost By Supply Date Flat+FlatValue' =
+			
+			CALCULATE([Total Purchase Cost Flat+FlatValue SWITCH],factPurchaseOrder[IsOpen]="1",USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date]))
+		lineageTag: 499647e2-ddd6-4d59-b68b-c509ff07aecb
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'All Open Purchase Cost By Supply Date - Risk Plan Flat+FlatValue' =
+			
+			VAR _MaxDate = MAX(dimDates[Date])
+			return CALCULATE(
+			    [Open Purchase Cost By Supply Date Flat+FlatValue]
+			    ,FILTER(ALL(dimDates),dimDates[Date]<=_MaxDate),USERELATIONSHIP(dimDates[Date],factPurchaseOrder[Supply Date])
+			)
+		displayFolder: Risk Plan
+		lineageTag: 48849c1b-5107-4546-a8c7-216661571ec9
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Diff Basis Quantity Purch vs Sales' = ```
+			
+			 [Total Purchase Quantity Basis] - [Total Quantity Basis]
+			```
+		lineageTag: c64bd27d-ee30-498d-b1ea-c36ad9d45080
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column EntityID
+		dataType: string
+		lineageTag: a70c8928-e115-44ac-b536-a3f766780f70
+		summarizeBy: none
+		sourceColumn: EntityID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column OrderID
+		dataType: string
+		lineageTag: f2ce7d8c-972e-47f2-987e-5e296b541c73
+		summarizeBy: none
+		sourceColumn: OrderID
+
+		changedProperty = DataType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column OrderLineNumber
+		dataType: double
+		formatString: 0
+		lineageTag: 83eec75e-aee3-4f6d-989a-ce6cf9891d4f
+		summarizeBy: sum
+		sourceColumn: OrderLineNumber
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DocName
+		dataType: string
+		lineageTag: e2008ffe-7312-456f-97ff-1c9777bda54b
+		summarizeBy: none
+		sourceColumn: DocName
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column AccountKey
+		dataType: string
+		lineageTag: ce37e30f-0b79-4afc-bfcd-6e59a9eccec8
+		summarizeBy: none
+		sourceColumn: AccountKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SupplierKey
+		dataType: string
+		lineageTag: 51d6c243-5223-4f93-8019-bae9f7e78874
+		summarizeBy: none
+		sourceColumn: SupplierKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Transport Type'
+		dataType: string
+		lineageTag: af88898d-6ec5-4082-b65c-f6539e87d547
+		summarizeBy: none
+		sourceColumn: Transport Type
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Supply Date'
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 2297c0f2-6a3f-4dae-9d7b-e364c8801e21
+		summarizeBy: none
+		sourceColumn: Supply Date
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Order Date'
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 79ae4b4a-a8f0-48ce-958f-39562615a36e
+		summarizeBy: none
+		sourceColumn: Order Date
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column AgentKey
+		dataType: string
+		lineageTag: 4b65a64b-a0fa-4e86-b187-6cc44cb23fa8
+		summarizeBy: none
+		sourceColumn: AgentKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ItemKey
+		dataType: string
+		lineageTag: 8af05482-ed5e-428b-8bf0-ed2a8436d473
+		summarizeBy: none
+		sourceColumn: ItemKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column IsOpen
+		dataType: string
+		lineageTag: baf0218f-b226-4444-8948-57c6b3ee6389
+		summarizeBy: none
+		sourceColumn: IsOpen
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column IsFuture
+		dataType: int64
+		formatString: 0
+		lineageTag: f156657e-23a2-4c99-920c-dde645e2f11f
+		summarizeBy: sum
+		sourceColumn: IsFuture
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column IsLate
+		dataType: int64
+		formatString: 0
+		lineageTag: 10edf89c-4087-46b7-82a7-d8059aa109af
+		summarizeBy: sum
+		sourceColumn: IsLate
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DiscountPercent
+		dataType: int64
+		formatString: 0
+		lineageTag: ed6ac201-4529-4e37-b84e-80ae405c8dea
+		summarizeBy: sum
+		sourceColumn: DiscountPercent
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column LineTotalDiscount
+		dataType: int64
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 50fe96f5-2697-4691-87cd-2f1cb16104d8
+		summarizeBy: sum
+		sourceColumn: LineTotalDiscount
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column UnitGrossPrice
+		dataType: double
+		formatString: 0
+		lineageTag: 213657cd-c53d-4167-835a-a095661ccb27
+		summarizeBy: sum
+		sourceColumn: UnitGrossPrice
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column UnitNetPriceUSD
+		dataType: double
+		lineageTag: e44cbbe6-e051-429b-b36f-8f120feb501a
+		summarizeBy: sum
+		sourceColumn: UnitNetPriceUSD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Quantity
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: a5340af5-a2d9-490f-9071-6b3b75498df4
+		summarizeBy: sum
+		sourceColumn: Quantity
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Balance
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: c6c51e42-6135-4500-b91c-68fcd4031cb2
+		summarizeBy: sum
+		sourceColumn: Balance
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalCost
+		dataType: int64
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 91c4f496-84e4-4941-88ba-f5840585072d
+		summarizeBy: sum
+		sourceColumn: LineTotalCost
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column LineTotalNetUSD
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 26f1a9d9-5ca3-4d1e-91b0-5195f6ed0565
+		summarizeBy: sum
+		sourceColumn: LineTotalNetUSD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalBalanceUSD
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: d19dcd2f-5eb0-4e11-a6c2-e83106ccb777
+		summarizeBy: sum
+		sourceColumn: LineTotalBalanceUSD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column UnitNetPriceNIS
+		dataType: double
+		lineageTag: 84d81e31-38da-49ec-8d19-a0b04006ba66
+		summarizeBy: sum
+		sourceColumn: UnitNetPriceNIS
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalNetNIS
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: d6e1bc93-a7aa-48de-b764-1d166c83115c
+		summarizeBy: sum
+		sourceColumn: LineTotalNetNIS
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalBalanceNIS
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 5e77ba83-eb9a-45a3-b2c6-bbb6fade6a2d
+		summarizeBy: sum
+		sourceColumn: LineTotalBalanceNIS
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column YearMonth
+		dataType: int64
+		formatString: 0
+		lineageTag: efff3f98-90b7-4568-bc27-3d20efda086d
+		summarizeBy: sum
+		sourceColumn: YearMonth
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column סטטוס
+		dataType: string
+		lineageTag: 6d64aff4-efcb-4eb0-8597-e3da1ea73b52
+		summarizeBy: none
+		sourceColumn: סטטוס
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column RowInsertDatetime
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: b73c7b9e-5831-491f-8250-39d5397efdde
+		summarizeBy: none
+		sourceColumn: RowInsertDatetime
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column LeadTime = ```
+			IF(factPurchaseOrder[Supply Date]<factPurchaseOrder[Order Date] || 
+			    ISBLANK(factPurchaseOrder[Supply Date])
+			    ,0
+			    ,DATEDIFF(factPurchaseOrder[Order Date],factPurchaseOrder[Supply Date],DAY))
+			```
+		formatString: 0
+		lineageTag: bcdc77ac-05c3-449b-83f3-41bae0e7f4f3
+		summarizeBy: sum
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column OrderLineStatus
+		dataType: string
+		lineageTag: ea5e9ef6-24a2-438c-9c2b-e7838692ff1e
+		summarizeBy: none
+		sourceColumn: OrderLineStatus
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column UnitPriceCF
+		dataType: double
+		lineageTag: ac5f4db0-4d37-4c11-a43d-592d62cdc378
+		summarizeBy: sum
+		sourceColumn: UnitPriceCF
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalCF_USD
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 33f8c2d3-80b4-4aa9-8672-acdc5c9c9e17
+		summarizeBy: sum
+		sourceColumn: LineTotalCF_USD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalCF_NIS
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: e5fc1b42-20df-41aa-9ed3-e322d7524009
+		summarizeBy: sum
+		sourceColumn: LineTotalCF_NIS
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column UnitPriceFOT
+		dataType: double
+		lineageTag: 7dcd29c8-aa1b-4219-9b78-bebd940d3611
+		summarizeBy: sum
+		sourceColumn: UnitPriceFOT
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalFOT_USD
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: d908f625-6322-4df1-871b-50e27a7dc7af
+		summarizeBy: sum
+		sourceColumn: LineTotalFOT_USD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalFOT_NIS
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: a97dd1b7-b947-4d2c-9cce-a7cf4bf4cbe9
+		summarizeBy: sum
+		sourceColumn: LineTotalFOT_NIS
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column PremiumFlag
+		dataType: int64
+		formatString: 0
+		lineageTag: 63ea6f36-e82e-4845-9725-ef6e27810cbb
+		summarizeBy: sum
+		sourceColumn: PremiumFlag
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column TransactionType
+		dataType: int64
+		formatString: 0
+		lineageTag: d53855a3-705d-41b2-9c9c-760857e19abf
+		summarizeBy: none
+		sourceColumn: TransactionType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column PO_Family
+		dataType: int64
+		formatString: 0
+		lineageTag: 924d7e6c-0fbf-49c6-96fa-3cf928486c0c
+		summarizeBy: sum
+		sourceColumn: PO_Family
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Basis
+		dataType: double
+		lineageTag: 8b9d5767-ee93-4f20-b142-68336fb134c6
+		summarizeBy: sum
+		sourceColumn: Basis
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Flat
+		dataType: double
+		lineageTag: 65065db9-b714-44ac-a3df-04c61bb61477
+		summarizeBy: sum
+		sourceColumn: Flat
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column BasisQTY
+		dataType: double
+		lineageTag: 2a4275e3-da51-443b-9c10-cfce839a6032
+		summarizeBy: sum
+		sourceColumn: BasisQTY
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column FlatQTY
+		dataType: double
+		lineageTag: 02acc22d-4fc4-402a-8ad8-00ef2793d440
+		summarizeBy: sum
+		sourceColumn: FlatQTY
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column StockExchangeMonth
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 1d74285f-a371-47fd-955e-ff1ad7b51ccf
+		summarizeBy: none
+		sourceColumn: StockExchangeMonth
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column POL_PremiumPrice
+		dataType: double
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: fb7027d5-7141-4526-9ef0-54dcb9d64fd7
+		summarizeBy: sum
+		sourceColumn: POL_PremiumPrice
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SMP_Symbol
+		dataType: string
+		lineageTag: e1f9c679-9805-4fdc-bc06-8e40fd278b17
+		summarizeBy: none
+		sourceColumn: SMP_Symbol
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column BasisQ
+		dataType: double
+		lineageTag: 2152da69-3752-4458-b8bf-1bd6307468a3
+		summarizeBy: sum
+		sourceColumn: BasisQ
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column FlatQ
+		dataType: double
+		lineageTag: c08af63f-170c-413c-b110-d1cc81340307
+		summarizeBy: sum
+		sourceColumn: FlatQ
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column PricedContractsAvgPrice
+		dataType: double
+		lineageTag: 4833d77e-a05a-4a37-9aa0-c80b1e5641ac
+		summarizeBy: sum
+		sourceColumn: PricedContractsAvgPrice
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column PF_GeneralFactor
+		dataType: double
+		lineageTag: 2f83b8fe-35e2-40b0-bdd7-e76bc781393f
+		summarizeBy: sum
+		sourceColumn: PF_GeneralFactor
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column POL_UnitPrice
+		dataType: double
+		lineageTag: fb84949a-ec3d-41f6-b089-d823e0349d47
+		summarizeBy: sum
+		sourceColumn: POL_UnitPrice
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column POL_StockMarketTempPrice
+		dataType: double
+		lineageTag: 901641b5-8031-4c4f-961c-d71e661087c5
+		summarizeBy: sum
+		sourceColumn: POL_StockMarketTempPrice
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column POL_FinalPrice
+		dataType: double
+		lineageTag: 1115c7fd-fd66-47fd-9875-cf26f63f7924
+		summarizeBy: sum
+		sourceColumn: POL_FinalPrice
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column POL_StockMarketPrice
+		dataType: double
+		lineageTag: 47626f21-3e7b-41b8-abcd-0878fb448df9
+		summarizeBy: sum
+		sourceColumn: POL_StockMarketPrice
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalFlatValueBalanceUSD
+		dataType: double
+		lineageTag: 6395aa94-d417-4367-ae34-87bb0a24a941
+		summarizeBy: sum
+		sourceColumn: LineTotalFlatValueBalanceUSD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalFlatBalanceUSD
+		dataType: double
+		lineageTag: 8f1fbcac-0247-47bd-81bd-7d18606cd272
+		summarizeBy: sum
+		sourceColumn: LineTotalFlatBalanceUSD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column SMPE_TempPrice
+		dataType: double
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: bc70b3dd-c2a3-4561-9bb7-e562f1993566
+		summarizeBy: none
+		sourceColumn: SMPE_TempPrice
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = User
+
+	column CFFlat
+		dataType: double
+		lineageTag: 0b37740d-2364-4ae7-ae54-1a4ef2e5b5d3
+		summarizeBy: sum
+		sourceColumn: CFFlat
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column CFFLAT_CC
+		dataType: double
+		lineageTag: e375843c-769a-4742-a2e4-69c93d306f4a
+		summarizeBy: sum
+		sourceColumn: CFFLAT_CC
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column CFFLAT_NCC
+		dataType: double
+		lineageTag: ed29324a-ee87-4563-83b5-648d6e7b6675
+		summarizeBy: sum
+		sourceColumn: CFFLAT_NCC
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column FotPrice
+		dataType: double
+		lineageTag: 6b398b4e-4ab4-47a3-8081-e8c5636df901
+		summarizeBy: sum
+		sourceColumn: FotPrice
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column FOT_CC
+		dataType: double
+		lineageTag: c35eea88-df0a-4044-b077-ee126cc85aeb
+		summarizeBy: sum
+		sourceColumn: FOT_CC
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column FOT_NCC
+		dataType: double
+		lineageTag: 8b46afa4-74d6-409c-a14e-56c8506dd7f1
+		summarizeBy: sum
+		sourceColumn: FOT_NCC
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column OriginalQty
+		dataType: double
+		lineageTag: 062ab49c-4a67-4fd2-bd3f-60ae90889b77
+		summarizeBy: sum
+		sourceColumn: OriginalQty
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MarketTempPrice
+		dataType: double
+		lineageTag: 376ae77a-600c-4232-adbc-c9a7ee0b271c
+		summarizeBy: sum
+		sourceColumn: MarketTempPrice
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column FinalPriceClosedContract
+		dataType: double
+		lineageTag: 44a06460-7c80-4dbc-b212-de1d23f66943
+		summarizeBy: sum
+		sourceColumn: FinalPriceClosedContract
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalFlatValueUSD
+		dataType: double
+		lineageTag: 9adc3b0b-50fc-41ef-bbe0-96acc0eddb43
+		summarizeBy: sum
+		sourceColumn: LineTotalFlatValueUSD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MarketTempPriceCFF_USD
+		dataType: double
+		lineageTag: 6eaf7b1c-97ea-455c-934a-e26704ce431f
+		summarizeBy: sum
+		sourceColumn: MarketTempPriceCFF_USD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalFlatValueBalanceCFFUSD
+		dataType: double
+		lineageTag: 3fe71a67-fe1a-4a6d-a6ed-d6263f46d869
+		summarizeBy: sum
+		sourceColumn: LineTotalFlatValueBalanceCFFUSD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MarketTempPriceFOT_USD
+		dataType: double
+		lineageTag: 00684a26-e53b-42f8-97da-8c39e7ce822d
+		summarizeBy: sum
+		sourceColumn: MarketTempPriceFOT_USD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalFlatValueBalanceFOTUSD
+		dataType: double
+		lineageTag: 1783482e-7064-44c5-abe4-3227ece1a97e
+		summarizeBy: sum
+		sourceColumn: LineTotalFlatValueBalanceFOTUSD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalFlatValueCFFUSD
+		dataType: double
+		lineageTag: 578957fa-2461-45f2-8337-91a4420b84d5
+		summarizeBy: sum
+		sourceColumn: LineTotalFlatValueCFFUSD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalFlatValueFOTUSD
+		dataType: double
+		lineageTag: 6769d724-3b03-4114-9e1a-16e1fb9e981d
+		summarizeBy: sum
+		sourceColumn: LineTotalFlatValueFOTUSD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalBalanceCF_USD
+		dataType: double
+		lineageTag: 09c6bb30-6ffc-40c5-9f4f-cd977a21678d
+		summarizeBy: sum
+		sourceColumn: LineTotalBalanceCF_USD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalBalanceCF_NIS
+		dataType: double
+		lineageTag: 678e2039-b468-4cc3-883f-d1fb55fd242a
+		summarizeBy: sum
+		sourceColumn: LineTotalBalanceCF_NIS
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalBalanceFOT_USD
+		dataType: double
+		lineageTag: 1da55529-b496-45b4-bb73-6b445abcc72e
+		summarizeBy: sum
+		sourceColumn: LineTotalBalanceFOT_USD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalBalanceFOT_NIS
+		dataType: double
+		lineageTag: 584c920d-4106-4e6b-af84-bc33e5963bbf
+		summarizeBy: sum
+		sourceColumn: LineTotalBalanceFOT_NIS
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalBalancePremium_USD
+		dataType: double
+		lineageTag: efcb11df-110f-4b76-affb-a7923464a5ca
+		summarizeBy: sum
+		sourceColumn: LineTotalBalancePremium_USD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalBalancePremium_NIS
+		dataType: double
+		lineageTag: 798ea6ad-3743-4cf8-81da-0e095383e5eb
+		summarizeBy: sum
+		sourceColumn: LineTotalBalancePremium_NIS
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column ShipDesc
+		dataType: string
+		lineageTag: 7609d580-bd3b-4649-af22-91a39718e391
+		summarizeBy: none
+		sourceColumn: ShipDesc
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Loading_Port
+		dataType: string
+		lineageTag: 6a1aa3a1-95af-4100-8aec-2f95ceae643f
+		summarizeBy: none
+		sourceColumn: Loading_Port
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Arrival_From
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 069b543c-36ef-460b-9b00-8dda2a354ac8
+		summarizeBy: none
+		sourceColumn: Arrival_From
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column Arrival_To
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: d97e87e0-92ee-4065-8cf3-625571f662b5
+		summarizeBy: none
+		sourceColumn: Arrival_To
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column OriginCountry
+		dataType: string
+		lineageTag: bed5923d-091d-4d98-8ba6-ee028889acee
+		summarizeBy: none
+		sourceColumn: OriginCountry
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ActualETA
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: d8d2b218-a8d6-4553-a629-6a1f65cd0515
+		summarizeBy: none
+		sourceColumn: ActualETA
+
+		changedProperty = DataType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column ActualETB
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 06038f28-3edb-462d-8f5c-f9c97b746ac7
+		summarizeBy: none
+		sourceColumn: ActualETB
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column PurchaseOrderStatus
+		dataType: string
+		lineageTag: 2ea731bd-a3cc-41bc-8547-deae9f6cf6cf
+		summarizeBy: none
+		sourceColumn: PurchaseOrderStatus
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column LineTotalBalanceCF_USD_
+		dataType: double
+		lineageTag: b2a4d700-2f68-45a0-ad6d-c051fc16edd0
+		summarizeBy: sum
+		sourceColumn: LineTotalBalanceCF_USD_
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalBalanceFOT_USD_
+		dataType: double
+		lineageTag: d5052b3e-838c-4230-a9f9-19f131b95186
+		summarizeBy: sum
+		sourceColumn: LineTotalBalanceFOT_USD_
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column NEW_SHER
+		dataType: double
+		lineageTag: 2b415d74-9194-44b7-8603-9481d0bc13c0
+		summarizeBy: sum
+		sourceColumn: NEW_SHER
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition factPurchaseOrder = m
+		mode: import
+		queryGroup: 'fact Tables'
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="----------25-05-14 Purchases#(lf)#(lf)With LastCreation as (#(lf)Select OrderId,MAX(CreateDate) AS LastCreation#(lf)From tblOrderPriceS#(lf)Group By OrderID#(lf))#(lf)#(lf),LastVersion as (#(lf)Select o.OrderId,Max(DayVersion) as LastVersion#(lf)From tblOrderPriceS o#(lf)Inner Join LastCreation LC#(lf)#(tab)ON o.OrderID=LC.OrderID AND o.CreateDate=LC.LastCreation#(lf)Group By o.OrderID#(lf))#(lf)#(lf),OrderPrices as (#(lf)Select O.*#(lf)from tblOrderPriceS o#(lf)Inner Join LastCreation LC#(lf)#(tab)ON o.OrderID=LC.OrderID And o.CreateDate=LC.LastCreation#(lf)Inner Join LastVersion LV#(lf)#(tab)ON o.OrderID=LV.OrderID AND o.DayVersion = LV.LastVersion#(lf)Where 1=1#(lf)),#(lf)#(lf)SMPE as (#(lf)select * #(lf)--,ROW_NUMBER() OVER (PARTITION BY SMPE_ProductID,SMPE_Year,SMPE_Month ORDER BY SMPE_CreateDate DESC) as rownum#(lf),ROW_NUMBER() OVER (#(lf) PARTITION BY SMPE_ProductID, SMPE_Year, SMPE_Month#(lf)    ORDER BY #(lf)        CASE #(lf)            WHEN SMPE_TempPrice <> 0 THEN SMPE_CreateDate #(lf)            ELSE NULL #(lf)        END DESC#(lf)           ) as rownum#(lf)from [dbo].[StockMarketProductEOM]#(lf)),#(lf)#(lf)CurrencyConvertion as (#(lf)SELECT *, #(lf)         CASE#(lf)         #(tab)WHEN sher = 0#(lf)         #(tab)THEN FIRST_VALUE(sher) OVER (PARTITION BY value_partition ORDER BY Tarikh) #(lf)         #(tab)ELSE sher#(lf)         END AS new_sher#(lf)         ,CASE#(lf)         #(tab)WHEN SHER_EURO = 0#(lf)         #(tab)THEN FIRST_VALUE(SHER_EURO) OVER (PARTITION BY value_partitionEuro ORDER BY Tarikh) #(lf)         #(tab)ELSE  SHER_EURO#(lf)         END AS new_sherEuro#(lf) FROM (#(lf)          SELECT *#(lf) ,SUM(CASE WHEN sher=0 THEN 0 ELSE 1 END) OVER (ORDER BY tarikh ) AS value_partition#(lf) ,SUM(CASE WHEN SHER_EURO=0 THEN 0 ELSE 1 END) OVER (ORDER BY tarikh ) AS value_partitionEuro#(lf)          FROM SHERI_MTBE#(lf) ) m#(lf)),#(lf)#(lf)Purchases as (#(lf)#(lf)--------------------הזמנות רכש------------------#(lf)SELECT #(lf)#(lf)'1' as 'EntityID'#(lf)        ,CAST(HZ.MSPR_HZMNH AS VARCHAR) AS 'OrderID'#(lf)#(tab)#(tab),1 AS 'OrderLineNumber'#(lf)#(tab)#(tab),'Orders' AS 'DocName'#(lf)#(tab)#(tab),CAST(CONVERT(INT, CONVERT(VARCHAR,HZ.QOD_MQBL))as varchar) AS 'AccountKey' -- customer from invoices in case you need just invoices #(lf)#(tab)#(tab),CAST(CONVERT(INT, CONVERT(VARCHAR,HZ.QOD_SHOLCH))as varchar) AS 'SupplierKey'#(lf)#(tab)#(tab),M.SHM_MOBIL AS 'Transport Type'#(lf)#(tab)#(tab),SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2) as 'Supply Date'#(lf)        ,SUBSTRING(HZ.T_HZMNH,1,4) + '-' + SUBSTRING(HZ.T_HZMNH,5,2) + '-' + SUBSTRING(HZ.T_HZMNH,7,2) as 'Order Date'#(lf)#(tab)#(tab),cast(CONVERT(INT, CONVERT(VARCHAR,HZ.AISH_MCIROT)) as varchar) AS 'AgentKey' #(lf)#(tab)#(tab),cast(CONVERT(INT, CONVERT(VARCHAR,HZ.MOTSR_MOZMN)) as varchar)+ '-' + cast(CONVERT(INT, CONVERT(VARCHAR,HZ.MOTSR_MOZMN)) as varchar) AS 'ItemKey'#(lf)#(tab)#(tab),Case when HZ.OrderStatus=1 Then 1 else 0 end as 'IsOpen'#(lf)#(tab)#(tab),case when convert(smalldatetime, SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2)) > cast(getdate() as date) then 1 else 0 end as 'IsFuture'#(lf)#(tab)#(tab),case when  convert(smalldatetime, SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2)) < cast(getdate() as date) AND  HZ.OrderStatus=1 THEN 1 ELSE 0 END AS 'IsLate'#(lf)#(tab)#(tab)--,CAST('1' as varchar) + CAST(CONVERT(INT, CONVERT(VARCHAR, i.BRANCH)) as varchar) AS 'BranchKey'#(lf)#(tab)#(tab)--,(1 - (1 - ii.[T$PERCENT] / 100) * (1 - i.[T$PERCENT] / 100)) AS 'DiscountPercent' -- the DiscountPercent for the invoice and invoice line#(lf)#(tab)#(tab),null AS 'DiscountPercent'#(lf)#(tab)#(tab) --,(1 - (1 - ii.[T$PERCENT] / 100) * (1 - i.[T$PERCENT] / 100)) * ii.TQUANT / 1000 * ROUND(ii.PRICE, 2) * ii.IEXCHANGE AS 'LineTotalDiscount' -- the discount from gross price to the net#(lf)#(tab)#(tab),NULL AS 'LineTotalDiscount'#(lf)#(tab)#(tab)--,ROUND(ii.PRICE, 2) * ii.IEXCHANGE AS 'UnitGrossPrice'#(lf)#(tab)#(tab),NULL AS 'UnitGrossPrice'#(lf)#(tab)#(tab)--,ROUND(ii.PRICE * (1 - ii.[T$PERCENT] / 100) * (1 - i.[T$PERCENT] / 100), 2) * ii.IEXCHANGE AS 'UnitNetPrice'#(lf)#(tab)#(tab),CASE#(lf)#(tab)         WHEN HZ.MTBE = '$' THEN MCHIR_ICH#(lf)#(tab)#(tab)   --THEN CAST(HZ.MCHIR_ICH AS decimal (12,4))#(lf)#(tab)         ELSE CAST(HZ.MCHIR_ICH *(1/SM.NEW_SHER)  AS decimal (12,4))#(lf)         END AS 'UnitNetPriceUSD'#(lf)#(tab)#(tab) ,SM.NEW_SHER -- ronen#(lf)#(tab)#(tab),HZ.CMOT_MOZMNT AS 'Quantity'#(lf)#(tab)#(tab)--,HZ.CMOT_SHSOPQH AS 'Supplied Quantity'#(lf)#(tab)#(tab),HZ.CMOT_MOZMNT - CMOT_SHSOPQH AS 'Balance'#(lf)#(tab)#(tab)--The cost can be tor.cost * Quant or just tor.cost#(lf)#(tab)#(tab)--Option 1#(lf)#(tab)#(tab)/*,CASE WHEN tor.COSTFLAG NOT IN ('C', '\0') #(lf)#(tab)#(tab)      THEN tor.COST * (CASE WHEN (tor.QUANT) < 0.0 THEN - 1 ELSE 1 END)#(lf)#(tab)#(tab)      ELSE p.COST * ((ii.QUANT / 1000) / p.COSTQUANT) * (CASE WHEN i.DEBIT = 'C' THEN - 1 ELSE 1 END) * (CASE WHEN ii.CREDITFLAG = 'Y' THEN 0 ELSE 1 END)#(lf)#(tab)#(tab)END AS 'LineTotalCost' --------Cost without Quant#(lf)#(tab)#(tab)*/#(lf)#(tab)#(tab),NULL AS 'LineTotalCost'#(lf)#(tab)#(tab)/*,(CASE WHEN ii.CURRENCY <> '-1'#(lf)#(tab)#(tab)#(tab)THEN round(ii.IVCOST, 2) * ii.IEXCHANGE#(lf)#(tab)#(tab)#(tab)ELSE round(ii.IVCOST, 2) END) * (CASE WHEN (i.DEBIT = 'C') #(tab)THEN - 1 ELSE 1 END) AS 'LineTotalNet'*/#(lf)#(tab)#(tab),CASE#(lf)#(tab)         WHEN HZ.MTBE = '$'#(lf)#(tab)#(tab)     THEN CAST((HZ.MCHIR_ICH)*CMOT_MOZMNT AS decimal (12,4))#(lf)#(tab)         ELSE CAST(HZ.MCHIR_ICH*HZ.CMOT_MOZMNT*(1/SM.NEW_SHER) AS decimal (12,4))#(lf)         END AS 'LineTotalNetUSD'#(lf)#(tab)#(tab)#(tab)#(tab),CASE#(lf)#(tab)         WHEN HZ.MTBE = '$'#(lf)#(tab)#(tab)     THEN CAST((HZ.MCHIR_ICH)*(HZ.CMOT_MOZMNT - CMOT_SHSOPQH) AS decimal (12,4))#(lf)#(tab)         ELSE CAST(HZ.MCHIR_ICH*(HZ.CMOT_MOZMNT - CMOT_SHSOPQH)*(1/SM.NEW_SHER) AS decimal (12,4))#(lf)         END AS 'LineTotalBalanceUSD'#(tab)#(lf)#(tab)#(tab)--, (round(ii.IVCOST, 2)/ii.IEXCHANGE) *fnc.EXCHANGE2   *(CASE WHEN (i.DEBIT = 'C') THEN - 1 ELSE 1 END) AS 'LineTotalNet_USD'#(lf)#(tab)#(tab),CASE#(lf)#(tab)         WHEN HZ.MTBE = '$'#(lf)#(tab)#(tab)     THEN CAST(HZ.MCHIR_ICH*SM.NEW_SHER AS decimal (12,4))#(lf)#(tab)         ELSE CAST(HZ.MCHIR_ICH AS decimal (12,4))#(lf)         END AS 'UnitNetPriceNIS'#(lf)#(tab)    ,CASE#(lf)#(tab)         WHEN HZ.MTBE = '$'#(lf)#(tab)#(tab)     THEN CAST((HZ.MCHIR_ICH*SM.NEW_SHER)*CMOT_MOZMNT AS decimal (12,4))#(lf)#(tab)         ELSE CAST(HZ.MCHIR_ICH*HZ.CMOT_MOZMNT AS decimal (12,4))#(lf)         END AS 'LineTotalNetNIS'#(lf)#(tab)#(tab) ,CASE#(lf)#(tab)         WHEN HZ.MTBE = '$'#(lf)#(tab)#(tab)     THEN CAST((HZ.MCHIR_ICH*SM.NEW_SHER)*(HZ.CMOT_MOZMNT - CMOT_SHSOPQH) AS decimal (12,4))#(lf)#(tab)         ELSE CAST(HZ.MCHIR_ICH*(HZ.CMOT_MOZMNT - CMOT_SHSOPQH) AS decimal (12,4))#(lf)         END AS 'LineTotalBalanceNIS'#(lf)#(lf)#(tab)#(tab) #(lf)#(tab)#(tab) --,Op.CFFlat AS 'UnitPriceCF'#(lf)#(tab)#(tab) --,Op.CFFlat*OriginalQty AS 'LineTotalCF_USD'#(lf)#(tab)#(tab) ,OP.CFFlat*DollarRate*OriginalQty AS 'LineTotalCF_NIS'#(lf)#(tab)#(tab) --,OP.FotPrice AS 'UnitPriceFOT'#(lf)#(tab)#(tab) --,Op.FotPrice*OriginalQty AS 'LineTotalFOT_USD'#(lf)#(tab)#(tab) ,OP.FotPrice*DollarRate*OriginalQty AS 'LineTotalFOT_NIS'#(lf)#(tab)#(tab) --,CFPremium AS 'UnitPricePremium'#(lf)#(tab)#(tab) --,Op.CFPremium*OriginalQty AS 'LineTotalPremium_USD'#(lf)#(tab)#(tab) --,OP.CFPremium*DollarRate*OriginalQty AS 'LineTotalPremium_NIS'#(lf)#(tab)#(tab) --#(lf)#(tab)#(tab) ,Op.CFFlat*Op.Balance AS 'LineTotalBalanceCF_USD_'#(lf)#(tab)#(tab) ,OP.CFFlat*DollarRate*Op.Balance AS 'LineTotalBalanceCF_NIS'#(lf)#(tab)#(tab) ,Op.FotPrice*Balance AS 'LineTotalBalanceFOT_USD_'#(lf)#(tab)#(tab) ,OP.FotPrice*DollarRate*Op.Balance AS 'LineTotalBalanceFOT_NIS'#(lf)#(tab)#(tab) ,Op.CFPremium*Op.Balance AS 'LineTotalBalancePremium_USD'#(lf)#(tab)#(tab) ,OP.CFPremium*DollarRate*Op.Balance AS 'LineTotalBalancePremium_NIS'#(lf)#(lf)#(tab)#(tab) ,Case#(lf)#(tab)#(tab)#(tab)WHEN CFPremium <>0#(lf)#(tab)#(tab)#(tab)#(tab)THEN 1#(lf)#(tab)#(tab)#(tab)ELSE 0#(lf)#(tab)#(tab)END AS 'PremiumFlag'#(lf)#(tab)#(tab)--,null AS 'LineTotalNetVAT'#(lf)#(tab)#(tab)--,null AS 'LineTotalNetVAT_USD'#(lf)#(tab)#(tab)--,CONVERT(INT, LEFT(CONVERT(VARCHAR, CONVERT(DATETIME, (HZ.T_ASPQH + 46283040) / 1440.0), 112), 6)) AS YearMonth#(lf)#(tab)#(tab),CONVERT(INT, CONVERT(VARCHAR,SUBSTRING(HZ.T_ASPQH,1,4) + SUBSTRING(HZ.T_ASPQH,5,2))) AS YearMonth#(lf)#(tab)#(tab)--,case when (i.DEBIT='C')  then round(ii.IVCOST  ,2)*-1 else round(ii.IVCOST  ,2) end  as 'LineTotalNet'  -- Without Exchange#(lf)#(tab)#(tab)--,case when (i.DEBIT='C')  then round(ii.IVCOST  ,2)*-1*ii.IEXCHANGE else round(ii.IVCOST  ,2)*ii.IEXCHANGE end  as 'LineTotalNet' --always exchange#(lf)#(tab)#(tab)--,case when (i.DEBIT='C')  then round(ii.QPRICE  ,2)*-1*ii.IEXCHANGE else round(ii.QPRICE  ,2)*ii.IEXCHANGE end  as 'LineTotalNet' -- the invoice items price without the total invoice discount#(lf)#(tab)#(tab)----#(lf)#(tab)#(tab),CAST(HZ.OrderStatus AS varchar) AS 'סטטוס'#(lf)#(tab)#(tab),NULL AS 'OrderLineStatus'#(lf)#(tab)#(tab),OP.ActionType AS 'TransactionType'#(lf)#(tab)#(tab)--,0 as toc#(lf)#(tab)#(tab)--,0 as  tipc#(lf)#(tab)#(tab)--,0 as tcc#(lf)#(tab)#(tab)--,0 as tc#(lf)#(tab)#(tab),t.PO_Family#(lf)#(tab)#(tab),Null AS 'Basis'#(lf)#(tab)#(tab),1 AS 'Flat'#(lf)#(tab)#(tab),null as 'BasisQ'#(lf)#(tab)#(tab),null as 'FlatQ'#(lf)#(tab)#(tab),null as StockExchangeMonth#(lf)#(tab)#(tab),null as PricedContractsAvgPrice#(lf)#(tab)#(tab),null as PF_GeneralFactor#(lf)#(tab)#(tab),null as POL_PremiumPrice#(lf)#(tab)#(tab),null as POL_UnitPrice#(lf)#(tab)#(tab),null as POL_StockMarketTempPrice#(lf)#(tab)#(tab),null as POL_StockMarketPrice#(lf)#(tab)#(tab),null as POL_FinalPrice#(lf)#(tab)#(tab),null as SMP_Symbol#(lf)#(tab)#(tab),null as SMPE_TempPrice#(lf)#(tab)#(tab),null as CFFlat#(lf)#(tab)#(tab),null as CFFLAT_CC#(lf)#(tab)#(tab),null as CFFLAT_NCC#(lf)#(tab)#(tab),null as FotPrice#(lf)#(tab)#(tab),null as FOT_CC#(lf)#(tab)#(tab),null as FOT_NCC#(lf)#(tab)#(tab),null as OriginalQty#(lf)#(tab)#(tab),null as MarketTempPrice#(lf)#(tab)#(tab),null as FinalPriceClosedContract#(lf)#(tab)#(tab),null as ShipDesc#(lf)#(tab)#(tab),null as Loading_Port#(lf)#(tab)#(tab),null as Arrival_From#(lf)#(tab)#(tab),null as Arrival_To#(lf)#(tab)#(tab),null as OriginCountry#(lf)#(tab)#(tab),null as ActualETA#(lf)#(tab)#(tab),null as ActualETB#(lf)#(tab)#(tab),null as PurchaseOrderStatus#(lf)FROM [HZMNOT] HZ#(lf)LEFT JOIN (#(lf)           SELECT *, #(lf)                    CASE#(lf)                    #(tab)WHEN sher = 0#(lf)                    #(tab)THEN FIRST_VALUE(sher) OVER (PARTITION BY value_partition ORDER BY Tarikh) #(lf)                    #(tab)ELSE sher#(lf)                    END AS new_sher#(lf)            FROM (#(lf)                     SELECT *#(lf)#(tab)#(tab)#(tab)#(tab)#(tab) ,SUM(CASE WHEN sher=0 THEN 0 ELSE 1 END) OVER (ORDER BY tarikh ) AS value_partition#(lf)                     FROM SHERI_MTBE) m#(lf)           #(lf)           ) SM #(lf)ON SM.TARIKH=HZ.T_HZMNH#(lf)LEFT JOIN MOBILIM M ON HZ.QOD_MOBIL=M.MS_MOBIL#(lf)Left Join OrderPrices OP#(lf)#(tab)ON op.OrderID = Hz.MSPR_HZMNH#(lf)LEFT JOIN PurchaseOrderTypes t#(lf)#(tab)ON t.PO_TypeID = OP.ActionType#(lf)WHERE Cast(SUBSTRING(T_HZMNH,1,4) as int) >=2018 and Cast(SUBSTRING(T_HZMNH,1,4) as int) <= Year(Getdate())#(lf)--AND HZ.OrderStatus<>3#(lf)AND HZ.ActionType IN(2,10)#(lf)#(lf)#(lf)#(lf)UNION ALL#(lf)#(lf)#(lf)--------------------הזמנות רכש - מערכת חדשה------------------#(lf)SELECT #(lf)#(lf)'1' as 'EntityID'#(lf)        ,PO.PO_OrderID  AS 'OrderID'#(lf)#(tab)#(tab),POL.POL_LineID AS 'OrderLineNumber'#(lf)#(tab)#(tab),'Orders-New' AS 'DocName'#(lf)#(tab)#(tab),CAST(CONVERT(INT, CONVERT(VARCHAR,PO.PO_CustomerID))as varchar) AS 'AccountKey' -- customer from invoices in case you need just invoices #(lf)#(tab)#(tab),CAST(CONVERT(INT, CONVERT(VARCHAR,PO.PO_SuplierID))as varchar) AS 'SupplierKey'#(lf)#(tab)#(tab),NULL AS 'Transport Type'#(lf)#(tab)#(tab),CAST(POL.POL_SupplyDateFrom AS date) AS 'Supply Date'#(lf)        ,CAST(PO.PO_OrderCreateDate AS date) as 'Order Date'#(lf)#(tab)#(tab),cast(CONVERT(INT, CONVERT(VARCHAR,PO.PO_SalesID)) as varchar) AS 'AgentKey' #(lf)#(tab)#(tab),cast(CONVERT(INT, CONVERT(VARCHAR,POL.POL_ProductID)) as varchar)+ '-' + cast(CONVERT(INT, CONVERT(VARCHAR,POL.POL_ProductID)) as varchar) AS 'ItemKey'#(lf)#(tab)#(tab),CASE#(lf)#(tab)#(tab)#(tab)WHEN pol.POL_OrderLineStatus >= 40 AND pol.POL_OrderLineStatus <= 60 #(lf)#(tab)#(tab)#(tab)#(tab)THEN 0#(lf)#(tab)#(tab)#(tab)ELSE 1#(lf)#(tab)#(tab)END AS 'IsOpen'#(lf)#(tab)#(tab),case when CAST(POL.POL_SupplyDateFrom AS date) > cast(getdate() as date) then 1 else 0 end as 'IsFuture'#(lf)#(tab)#(tab),case when CAST(POL.POL_SupplyDateUntil AS date) < cast(getdate() as date) AND  PO.PO_OrderStatus=1 THEN 1 ELSE 0 END AS 'IsLate'#(lf)#(tab)#(tab),null AS 'DiscountPercent'#(lf)#(tab)#(tab),NULL AS 'LineTotalDiscount'#(lf)#(tab)#(tab),CASE#(lf)#(tab)         WHEN POL_Currency = '$' THEN POL_UnitPrice#(lf)#(tab)#(tab)#(tab) WHEN POL_Currency = 'Eur' THEN POL_UnitPrice *( SM.NEW_SHEREURO/SM.NEW_SHER)#(lf)#(tab)#(tab)   --THEN CAST(HZ.MCHIR_ICH AS decimal (12,4))#(lf)#(tab)         ELSE POL_UnitPrice *(1/CASE WHEN SM.NEW_SHER <> 0 THEN SM.NEW_SHER ELSE 1 END)#(lf)         END AS 'UnitGrossPrice'#(lf)#(tab)#(tab),CASE#(lf)#(tab)         WHEN POL_Currency = '$' THEN POL_FinalPrice#(lf)#(tab)#(tab)#(tab) WHEN POL_Currency = 'Eur' THEN POL_FinalPrice *( SM.NEW_SHEREURO/SM.NEW_SHER)#(lf)#(tab)#(tab)   --THEN CAST(HZ.MCHIR_ICH AS decimal (12,4))#(lf)#(tab)         ELSE POL_FinalPrice *(1/CASE WHEN SM.NEW_SHER <> 0 THEN SM.NEW_SHER ELSE 1 END)#(lf)         END AS 'UnitNetPriceUSD'#(lf)#(tab)#(tab) ,SM.NEW_SHER -- ronen#(lf)#(tab)#(tab),CASE #(lf)#(tab)#(tab)#(tab)WHEN POB.FinalWeightReceived = 0#(lf)#(tab)#(tab)#(tab)#(tab)THEN Case #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)WHEN POB.OriginalWeightOrderd <> 0#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)THEN POB.OriginalWeightOrderd#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)ELSE POL.POL_QuantityOrdered#(lf)#(tab)#(tab)#(tab)#(tab)END#(lf)#(tab)#(tab)#(tab)ELSE POL_FinalWeightReceived#(lf)#(tab)#(tab)END AS 'Quantity'#(lf)#(tab)#(tab),POB.Balance AS 'Balance'#(lf)#(tab)#(tab),NULL AS 'LineTotalCost'#(lf)#(tab)#(tab),CASE#(lf)#(tab)         WHEN POL_Currency = '$' THEN POL_TotalPrice#(lf)#(tab)#(tab)#(tab) WHEN POL_Currency = 'Eur' THEN POL_TotalPrice *( SM.NEW_SHEREURO/SM.NEW_SHER)#(lf)#(tab)         ELSE POL_TotalPrice*(1/CASE WHEN SM.NEW_SHER <> 0 THEN SM.NEW_SHER ELSE 1 END)#(lf)         END AS 'LineTotalNetUSD'#(lf)#(tab)#(tab),CASE#(lf)#(tab)         WHEN POL_Currency = '$' THEN POB.Balance * POL.POL_FinalPrice#(lf)#(tab)#(tab)     --THEN (POL.POL_OriginalWeightOrderd - POB.TotalSupplied) * POL.POL_FinalPrice #(lf)#(tab)#(tab)#(tab) WHEN POL_Currency = 'Eur' THEN POB.Balance*(POL.POL_FinalPrice *( SM.NEW_SHEREURO/SM.NEW_SHER))#(lf)#(tab)         --ELSE (POL.POL_OriginalWeightOrderd - POB.TotalSupplied)*POL.POL_FinalPrice*(1/CASE WHEN SM.NEW_SHER <> 0 THEN SM.NEW_SHER ELSE 1 END)#(lf)#(tab)#(tab)#(tab) ELSE POB.Balance*POL.POL_FinalPrice*(1/CASE WHEN SM.NEW_SHER <> 0 THEN SM.NEW_SHER ELSE 1 END)#(lf)         END AS 'LineTotalBalanceUSD'#(tab)#(lf)#(tab)#(tab)--, (round(ii.IVCOST, 2)/ii.IEXCHANGE) *fnc.EXCHANGE2   *(CASE WHEN (i.DEBIT = 'C') THEN - 1 ELSE 1 END) AS 'LineTotalNet_USD'#(lf)#(tab)#(tab),CASE#(lf)#(tab)         WHEN POL_Currency = '$' THEN POL.POL_FinalPrice*SM.NEW_SHER#(lf)#(tab)#(tab)#(tab) WHEN POL_Currency = 'Eur' THEN POL.POL_FinalPrice*SM.NEW_SHEREURO#(lf)#(tab)         ELSE POL.POL_FinalPrice#(lf)         END AS 'UnitNetPriceNIS'#(lf)#(tab)    ,CASE#(lf)#(tab)         WHEN POL_Currency = '$' THEN POL_TotalPrice*SM.NEW_SHER #(lf)#(tab)#(tab)#(tab) WHEN POL_Currency = 'Eur' THEN POL_TotalPrice*SM.NEW_SHEREURO#(lf)#(tab)         ELSE POL_TotalPrice#(lf)         END AS 'LineTotalNetNIS'#(lf)#(tab)#(tab) /*,CASE#(lf)#(tab)         WHEN POL_Currency = '$'#(lf)#(tab)#(tab)     THEN POL.POL_FinalPrice*SM.NEW_SHER*(POL.POL_OriginalWeightOrderd - POL.POL_FinalWeightReceived)#(lf)#(tab)         ELSE POL.POL_FinalPrice*(POL.POL_OriginalWeightOrderd - POL.POL_FinalWeightReceived)#(lf)         END AS 'LineTotalBalanceNIS'*/#(lf)#(tab)#(tab) ,CASE#(lf)#(tab)         WHEN POL_Currency = '$' THEN POL.POL_FinalPrice*SM.NEW_SHER*POB.Balance--(POL.POL_OriginalWeightOrderd - POB.TotalSupplied)#(lf)#(tab)#(tab)#(tab) WHEN POL_Currency = 'Eur' THEN POL.POL_FinalPrice*SM.NEW_SHEREURO*POB.Balance#(lf)#(tab)         ELSE POL.POL_FinalPrice*POB.Balance--(POL.POL_OriginalWeightOrderd - POB.TotalSupplied)#(lf)         END AS 'LineTotalBalanceNIS'#(lf)#(tab)#(tab) #(lf)#(tab)#(tab) --,Op.CFFlat AS 'UnitPriceCF'#(lf)#(tab)#(tab) --,Op.CFFlat*OriginalQty AS 'LineTotalCF_USD'#(lf)#(tab)#(tab) ,OP.CFFlat*DollarRate*OriginalQty AS 'LineTotalCF_NIS'#(lf)#(tab)#(tab) --,OP.FotPrice AS 'UnitPriceFOT'#(lf)#(tab)#(tab) --Op.FotPrice*OriginalQty AS 'LineTotalFOT_USD'#(lf)#(tab)#(tab) ,OP.FotPrice*DollarRate*OriginalQty AS 'LineTotalFOT_NIS'#(lf)#(tab)#(tab) --,CFPremium AS 'UnitPricePremium'#(lf)#(tab)#(tab) --,Op.CFPremium*OriginalQty AS 'LineTotalPremium_USD'#(lf)#(tab)#(tab) --,OP.CFPremium*DollarRate*OriginalQty AS 'LineTotalPremium_NIS'#(lf)#(tab)#(tab) #(lf)#(tab)#(tab) ,Op.CFFlat*Op.Balance AS 'LineTotalBalanceCF_USD_'#(tab)#(tab)-----------------#(lf)#(tab)#(tab) ,OP.CFFlat*DollarRate*Op.Balance AS 'LineTotalBalanceCF_NIS'#(lf)#(tab)#(tab) ,Op.FotPrice*Op.Balance AS 'LineTotalBalanceFOT_USD_'   ---------------#(lf)#(tab)#(tab) ,OP.FotPrice*DollarRate*Op.Balance AS 'LineTotalBalanceFOT_NIS'#(lf)#(tab)#(tab) ,Op.CFPremium*Op.Balance AS 'LineTotalBalancePremium_USD'#(lf)#(tab)#(tab) ,OP.CFPremium*DollarRate*Op.Balance AS 'LineTotalBalancePremium_NIS'#(lf)#(lf)#(lf)#(tab)#(tab) ,Case#(lf)#(tab)#(tab)#(tab)WHEN CFPremium <>0#(lf)#(tab)#(tab)#(tab)#(tab)THEN 1#(lf)#(tab)#(tab)#(tab)ELSE 0#(lf)#(tab)#(tab)END AS 'PremiumFlag' #(lf)#(tab)#(tab),CONCAT(YEAR(PO.PO_OrderCreateDate),FORMAT(PO.PO_OrderCreateDate,'MM')) AS YearMonth#(lf)#(tab)#(tab),POL.POL_OrderLineStatus as 'OrderStatus'#(lf)#(tab)#(tab),CASE WHEN POL.POL_OrderLineStatus BETWEEN 10 AND 29 THEN 'Open' #(lf)#(tab)#(tab)      --WHEN POL.POL_OrderLineStatus BETWEEN 30 AND 39 THEN 'Canceled'#(lf)#(tab)#(tab)#(tab)  ELSE 'Closed'#(lf)#(tab)#(tab)#(tab)  END AS 'OrderLineStatus'#(lf)#(tab)#(tab),OP.ActionType AS 'TransactionType'#(lf)#(tab)#(tab)--,POL.POL_TotalOpenContract as toc#(lf)#(tab)#(tab)--,POL.POL_TotalInProcessContract tipc#(lf)#(tab)#(tab)--,POL.POL_TotalClosedContract tcc#(lf)#(tab)#(tab)--,POL.POL_totalContracts tc#(lf)#(tab)#(tab),t.PO_Family#(lf)#(tab)#(tab),CASE #(lf)#(tab)#(tab)#(tab)WHEN POL.POL_OrderLineStatus NOT IN (10,15)#(lf)#(tab)#(tab)#(tab)#(tab)THEN NULL#(lf)#(tab)#(tab)#(tab)WHEN t.PO_Family = 2#(lf)#(tab)#(tab)#(tab)#(tab)THEN CASE#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)WHEN POL.POL_totalContracts <> 0 #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)THEN CAST((CAST(POL.POL_TotalOpenContract as decimal(18,2))+CAST(POL.POL_TotalInProcessContract as decimal(18,2)))/CAST(POL.POL_totalContracts as decimal(18,2)) AS decimal(18,2))--*POL.POL_QuantityOrdered ---- כמות שלא תומחרה =כמות הזמנה כפול(סך הכל חוזים אפשריים - חוזים שנחתמו חלקי סך כל החוזים האפשריים#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)ELSE 1--POL.POL_QuantityOrdered#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)END#(lf)#(tab)#(tab)#(tab)WHEN t.PO_Family = 1#(lf)#(tab)#(tab)#(tab)#(tab)Then Null#(lf)#(tab)#(tab)#(tab)ELSE NULL#(lf)#(tab)#(tab)END AS 'Basis'#(lf)#(tab)#(tab),CASE #(lf)#(tab)#(tab)#(tab)WHEN POL.POL_OrderLineStatus NOT IN (10,15)#(lf)#(tab)#(tab)#(tab)#(tab)Then 1--POL.POL_QuantityOrdered#(lf)#(tab)#(tab)#(tab)WHEN t.PO_Family = 2#(lf)#(tab)#(tab)#(tab)#(tab)THEN CASE#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)WHEN POL.POL_totalContracts <> 0#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)THEN CAST(CAST(POL.POL_TotalClosedContract as decimal(18,2))/CAST(POL.POL_totalContracts as decimal(18,2)) as decimal(18,2))---*POL.POL_QuantityOrdered ---- כמות שתומחרה =כמות הזמנה כפול חוזים שנחתמו חלקי סך כל החוזים האפשריים#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)ELSE NULL#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)END#(lf)#(tab)#(tab)#(tab)WHEN t.PO_Family = 1#(lf)#(tab)#(tab)#(tab)#(tab)Then 1 ----POL.POL_QuantityOrdered#(lf)#(tab)#(tab)#(tab)ELSE 1 ----POL.POL_QuantityOrdered#(lf)#(tab)#(tab)END AS 'Flat'#(lf)----------------------#(lf)#(tab)#(tab),CASE #(lf)#(tab)#(tab)#(tab)WHEN POL.POL_OrderLineStatus NOT IN (10,15)#(lf)#(tab)#(tab)#(tab)#(tab)THEN NULL#(lf)#(tab)#(tab)#(tab)WHEN t.PO_Family = 2#(lf)#(tab)#(tab)#(tab)#(tab)THEN CASE#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)WHEN POL.POL_totalContracts <> 0 #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)THEN (POL.POL_TotalOpenContract)* pr.QtyTonePerContract--*POL.POL_QuantityOrdered ---- כמות שלא תומחרה =כמות הזמנה כפול(סך הכל חוזים אפשריים - חוזים שנחתמו חלקי סך כל החוזים האפשריים   THEN (POL.POL_TotalOpenContract+POL.POL_TotalInProcessContract)* pr.QtyTonePerContract#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)ELSE POL.POL_TotalClosedContract * pr.QtyTonePerContract--POL.POL_QuantityOrdered#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)END#(lf)#(tab)#(tab)#(tab)WHEN t.PO_Family = 1#(lf)#(tab)#(tab)#(tab)#(tab)Then Null#(lf)#(tab)#(tab)#(tab)ELSE NULL#(lf)#(tab)#(tab)END AS 'BasisQ'#(lf)#(tab)#(tab),CASE #(lf)#(tab)#(tab)#(tab)WHEN POL.POL_OrderLineStatus NOT IN (10,15)#(lf)#(tab)#(tab)#(tab)#(tab)Then POB.Balance--POL.POL_TotalOpenContract * pr.QtyTonePerContract#(lf)#(tab)#(tab)#(tab)WHEN t.PO_Family = 2#(lf)#(tab)#(tab)#(tab)#(tab)THEN CASE#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)WHEN POL.POL_totalContracts <> 0#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)--THEN CAST(CAST(POL.POL_TotalClosedContract as decimal(18,2))/CAST(POL.POL_totalContracts as decimal(18,2)) as decimal(18,2))---*POL.POL_QuantityOrdered ---- כמות שתומחרה =כמות הזמנה כפול חוזים שנחתמו חלקי סך כל החוזים האפשריים#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)THEN POL.POL_TotalClosedContract * pr.QtyTonePerContract#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)ELSE NULL#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)END#(lf)#(tab)#(tab)#(tab)WHEN t.PO_Family = 1#(lf)#(tab)#(tab)#(tab)#(tab)Then POB.Balance --POL.POL_totalContracts * pr.QtyTonePerContract----POL.POL_QuantityOrdered --- פה לקוחת כמיות FLAT של כלל ההזמנה#(lf)#(tab)#(tab)#(tab)ELSE  POB.Balance--POL.POL_totalContracts ----POL.POL_QuantityOrdered#(lf)#(tab)#(tab)END AS 'FlatQ'#(lf)-------------------#(lf)#(lf)#(tab)#(tab),POL_StockExchangeDate#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)as StockExchangeMonth#(lf)#(tab)#(tab),(POL_StockMarketPrice+POL_PremiumPrice)*sf.PF_GeneralFactor#(tab)as PricedContractsAvgPrice#(lf)#(tab)#(tab),sf.PF_GeneralFactor#(lf)#(tab)#(tab),POL_PremiumPrice#(lf)#(tab)#(tab),POL_UnitPrice#(lf)#(tab)#(tab),POL_StockMarketTempPrice#(lf)#(tab)#(tab),POL_StockMarketPrice#(lf)#(tab)#(tab),POL_FinalPrice#(lf)#(tab)#(tab),smp.SMP_Symbol#(lf)#(tab)#(tab),smpe.SMPE_TempPrice#(lf)#(tab)#(tab),OP.CFFlat#(lf)#(tab)#(tab),OP.CFFLAT_CC#(lf)#(tab)#(tab),OP.CFFLAT_NCC#(lf)#(tab)#(tab),OP.FotPrice#(lf)#(tab)#(tab),OP.FOT_CC#(lf)#(tab)#(tab),OP.FOT_NCC#(lf)#(tab)#(tab),OP.OriginalQty #(lf)#(tab)#(tab),POL.POL_StockMarketTempPriceForNoneClosed  as MarketTempPrice#(lf)#(tab)#(tab),POL_FinalPriceForClosedContract#(tab)#(tab)#(tab)as FinalPriceClosedContract#(lf)#(tab)#(tab),sl.ShipDesc#(lf)#(tab)#(tab),sa.SA_ShipLoadingPort#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)as Loading_Port#(lf)#(tab)#(tab),sa.SA_DateForLoadingFrom#(tab)#(tab)#(tab)#(tab)#(tab)as Arrival_From#(lf)#(tab)#(tab),sa.SA_DateForLoadingUntil#(tab)#(tab)#(tab)#(tab)#(tab)as Arrival_To#(lf)#(tab)#(tab),cl.CO_CountryNameENG#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)as OriginCountry#(lf)#(tab)#(tab),sa.SA_ActualETA#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)as ActualETA#(lf)#(tab)#(tab),sa.SA_ActualETB#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)as ActualETB#(lf)#(tab)#(tab),pos.PO_StatusDesc#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)as PurchaseOrderStatus#(lf)FROM PurchaseOrder PO#(lf)LEFT JOIN PurchaseOrderLines POL ON PO.PO_OrderID=POL.POL_OrderID#(lf)LEFT JOIN CurrencyConvertion SM #(lf)#(tab)ON SM.TARIKH=CAST(PO.PO_OrderCreateDate AS date)#(lf)Left Join viewPurchaseOrderBalance POB#(lf)#(tab)ON POL.POL_OrderID = POB.POID AND POL.POL_LineID = POB.POLineID#(lf)Left Join OrderPrices OP#(lf)#(tab)ON op.OrderID = PO.PO_OrderID AND op.OrderIDLine = POL.POL_LineID#(lf)LEFT JOIN PurchaseOrderTypes t#(lf)#(tab)ON t.PO_TypeID = OP.ActionType#(lf)left join StockMarketProduct smp#(lf)#(tab)on POL.POL_ProductID = smp.SMP_ProductID AND MONTH(POL.POL_StockExchangeDate) = smp.SMP_MonthID#(lf)left join MOTSRIM PR#(lf)#(tab)on PR.QOD_MOTSR = POL.POL_ProductID#(lf)left join ProductStockMarketFactors sf#(lf)#(tab)on pol.POL_ProductID = sf.PF_ProductID and POL.POL_FactorCode = sf.PF_FactorID #(lf)left join (select * from SMPE where  rownum = 1) smpe#(lf)#(tab)on POL.POL_ProductID = smpe.SMPE_ProductID AND YEAR(POL.POL_StockExchangeDate) = smpe.SMPE_Year AND MONTH(POL.POL_StockExchangeDate) = smpe.SMPE_Month#(lf)#(lf)LEFT JOIN ShipsArrivals sa ON POL.POL_ShipArrivalID = sa.SA_ID#(lf)LEFT JOIN ShipList sl ON sa.SA_ShipID = sl.ShipID#(lf)LEFT JOIN tblCountryList cl ON sa.SA_CountryOfOrigin = cl.CO_CountryID#(lf)LEFT JOIN PurchaseOrderStatus pos ON POL.POL_ContractStage = pos.PO_StatusID#(lf)#(lf)WHERE YEAR(PO.PO_OrderCreateDate)>=2018 and YEAR(PO.PO_OrderCreateDate) <= Year(Getdate())#(lf)--AND HZ.OrderStatus<>3#(lf)--AND HZ.ActionType IN(2,10)#(lf)and POL.POL_OrderLineStatus NOT BETWEEN 30 AND 39 --- לבטל לפני #(lf)#(lf)--and POL.POL_FinalWeightReceived <>0#(lf) #(lf)--and PO.PO_OrderID = 2000360#(lf)#(lf))#(lf)#(lf)SELECT#(tab)P.*#(lf)#(tab)#(tab)--Basis*Balance AS BasisQTY,#(lf)#(tab)#(tab)--Flat*Balance AS FlatQTY,#(lf)#(tab)#(tab),p.BasisQ#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS BasisQTY#(lf)#(tab)#(tab),p.FlatQ#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS FlatQTY#(lf)#(tab)#(tab)--,(PF_GeneralFactor*(SMPE_TempPrice+POL_PremiumPrice))*p.BasisQ#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS LineTotalFlatValueBalanceUSD#(lf)#(tab)#(tab)--,(PF_GeneralFactor*(POL_StockMarketPrice+POL_PremiumPrice))*p.FlatQ#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS LineTotalFlatBalanceUSD#(lf)#(tab)#(tab)    -- New computed field: if PremiumFlag = 1 then multiply FlatQTY by FinalPriceClosedContract, otherwise use LineTotalNetUSD#(lf)    ,CASE #(lf)        WHEN p.PremiumFlag = 1 THEN p.FlatQ * p.FinalPriceClosedContract#(lf)        ELSE p.LineTotalBalanceUSD#(lf)    END AS LineTotalFlatBalanceUSD,#(lf)#(lf)#(tab)------#(lf)    CASE #(lf)        WHEN p.PremiumFlag = 1 THEN p.FlatQ * p.FOT_CC#(lf)        ELSE LineTotalBalanceFOT_USD_#(lf)    END AS LineTotalBalanceFOT_USD,#(lf)#(lf)#(tab)CASE #(lf)        WHEN p.PremiumFlag = 1 THEN p.FlatQ  * p.CFFLAT_CC#(lf)        ELSE LineTotalBalanceCF_USD_#(lf)    END AS LineTotalBalanceCF_USD,#(lf)#(tab)---------#(lf)    -- New computed field: combine two calculations based on PremiumFlag#(lf)    (#(lf)      CASE #(lf)          WHEN p.PremiumFlag = 1 THEN p.BasisQ * p.MarketTempPrice#(lf)          ELSE 0#(lf)      END#(lf)      +#(lf)      CASE #(lf)          WHEN p.PremiumFlag = 1 THEN p.FlatQ * p.FinalPriceClosedContract #(lf)          ELSE p.LineTotalNetUSD * (p.FlatQ/p.OriginalQty)#(tab)#(tab)#(tab)#(tab)#(tab)-------------!!!!!!!******#(lf)      END#(lf)    ) AS LineTotalFlatValueUSD,#(lf)#(lf)    -- New computed field: choose CF unit price based on PremiumFlag#(lf)    CASE #(lf)        WHEN p.PremiumFlag = 1 THEN p.CFFLAT_CC #(lf)        ELSE p.CFFlat #(lf)    END AS UnitPriceCF,#(lf)#(lf)    -- New computed field: calculate CF total in USD#(lf)    CASE #(lf)        WHEN p.PremiumFlag = 1 THEN p.CFFLAT_CC * p.FlatQ #(lf)        ELSE p.CFFlat * p.OriginalQty #(lf)    END AS LineTotalCF_USD,#(lf)#(lf)    -- New computed field: choose FOT unit price based on PremiumFlag#(lf)    CASE #(lf)        WHEN p.PremiumFlag = 1 THEN p.FOT_CC #(lf)        ELSE p.FotPrice #(lf)    END AS UnitPriceFOT,#(lf)#(lf)    -- New computed field: calculate FOT total in USD#(lf)    CASE #(lf)        WHEN p.PremiumFlag = 1 THEN p.FOT_CC * p.FlatQ #(lf)        ELSE p.FotPrice * p.OriginalQty #(lf)    END AS LineTotalFOT_USD,#(lf)#(lf)    -- New computed field: use BasisQTY to compute flat value balance in USD#(lf)    p.MarketTempPrice * p.BasisQ AS LineTotalFlatValueBalanceUSD,#(lf)#(lf)    -- New computed field: MarketTempPriceCFF_USD (only when PremiumFlag = 1)#(lf)    CASE #(lf)        WHEN p.PremiumFlag = 1 THEN p.CFFLAT_NCC #(lf)        ELSE NULL #(lf)    END AS MarketTempPriceCFF_USD,#(lf)#(lf)    -- New computed field: multiply MarketTempPriceCFF_USD by BasisQTY#(lf)    CASE #(lf)        WHEN p.PremiumFlag = 1 THEN p.CFFLAT_NCC * p.BasisQ #(lf)        ELSE NULL #(lf)    END AS LineTotalFlatValueBalanceCFFUSD,#(lf)#(lf)    -- New computed field: MarketTempPriceFOT_USD (only when PremiumFlag = 1)#(lf)    CASE #(lf)        WHEN p.PremiumFlag = 1 THEN p.FOT_NCC #(lf)        ELSE NULL #(lf)    END AS MarketTempPriceFOT_USD,#(lf)#(lf)    -- New computed field: multiply MarketTempPriceFOT_USD by BasisQTY#(lf)    CASE #(lf)        WHEN p.PremiumFlag = 1 THEN p.FOT_NCC * p.BasisQ #(lf)        ELSE NULL #(lf)    END AS LineTotalFlatValueBalanceFOTUSD,#(lf)#(lf)    -- New computed field: combined calculation for CFF total value in USD#(lf)    CASE #(lf)        WHEN p.PremiumFlag = 1 THEN (p.CFFLAT_NCC * p.BasisQ) + (p.CFFLAT_CC * p.FlatQ)#(lf)        ELSE p.CFFlat * p.OriginalQty * (p.FlatQ/p.OriginalQty)#(tab)#(tab)#(tab)#(tab)#(tab)-------------!!!!!!!****** #(lf)    END AS LineTotalFlatValueCFFUSD,#(lf)#(lf)    -- New computed field: combined calculation for FOT total value in USD#(lf)    CASE #(lf)        WHEN p.PremiumFlag = 1 THEN (p.FOT_NCC * p.BasisQ) + (p.FOT_CC * p.FlatQ)#(lf)        ELSE p.FotPrice * p.OriginalQty * (p.FlatQ/p.OriginalQty)#(tab)#(tab)#(tab)#(tab)#(tab)-------------!!!!!!!****** #(lf)    END AS LineTotalFlatValueFOTUSD#(lf)#(lf)#(tab)#(tab),GETDATE()#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS RowInsertDatetime#(lf)FROM Purchases p#(lf)--where OrderID IN ('2000416','2000430','2000369','2000274','2000354','2000344','2000343','2000367','2000360') --'2000344'--'2000274'#(lf)--where OrderID IN ('2000484')--,'2000482')#(lf)#(lf)where (p.OriginalQty <> 0 OR p.OriginalQty IS NULL)#(lf)--and OrderID = 2000490"]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Supply Date", type date}, {"Order Date", type date}, {"סטטוס", type text}, {"IsOpen", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

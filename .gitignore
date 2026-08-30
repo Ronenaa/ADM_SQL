@@ -1,2 +1,8 @@
 **/.pbi/localSettings.json
 **/.pbi/cache.abf
+
+# DAB MCP server (SQL Server read access for Claude) — contains DB credentials
+mcp/.env
+mcp/.config/
+mcp/bin/
+mcp/obj/

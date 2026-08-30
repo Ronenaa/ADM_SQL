@@ -1,0 +1,48 @@
+table DimSpotOrder
+	lineageTag: 8828a1e8-fdd6-4069-a61a-e3d365afd72b
+
+	column Key
+		dataType: int64
+		formatString: 0
+		lineageTag: d50a6d1a-e016-477d-9188-328be2940286
+		summarizeBy: none
+		sourceColumn: Key
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Desc
+		dataType: string
+		lineageTag: 44384e28-bfc6-4d03-b0e0-32c5128a55d3
+		summarizeBy: none
+		sourceColumn: Desc
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Filter
+		dataType: string
+		lineageTag: b0d3060a-e70a-4b63-81e3-d8c189580cd2
+		summarizeBy: none
+		sourceColumn: Filter
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DimSpotOrder = m
+		mode: import
+		queryGroup: Dim
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WMlTSUfLJz0sHUkGpufllqQrBBfklSrE60UpGQLHgjPyiEiDtn5dTCZWJBQA=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Key = _t, Desc = _t, Filter = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Key", Int64.Type}, {"Desc", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

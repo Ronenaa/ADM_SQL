@@ -1,0 +1,60 @@
+table AVG_LY_Target_Parameter
+	lineageTag: 3de739e6-93cb-425c-9d1d-7c4c3ba7b8ce
+
+	column AVG_LY_Target_Parameter
+		lineageTag: e71f5a20-df2b-4315-a36b-bcacdab83cc3
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'AVG_LY_Target_Parameter Order'
+
+		relatedColumnDetails
+			groupByColumn: 'AVG_LY_Target_Parameter Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'AVG_LY_Target_Parameter Fields'
+		lineageTag: d138d159-71d7-468a-a33a-bbc44a8a6a8f
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'AVG_LY_Target_Parameter Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'AVG_LY_Target_Parameter Order'
+		formatString: 0
+		lineageTag: 145e58e3-2464-4afe-9cd6-81a5a6ccd7fd
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Value4
+		lineageTag: 13af790d-388d-496f-a735-3eaf2c09e9c4
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Value4]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition AVG_LY_Target_Parameter = calculated
+		mode: import
+		source =
+				{
+				    ("Avg", NAMEOF('factOrders'[Monthly Avg]), 0,"Avg"),
+				    ("YTD", NAMEOF('factOrders'[Quantity Dynamic Table Switch]), 1,"YTD"),
+				    ("LY", NAMEOF('factOrders'[Quantity Dynamic Table Switch LY YTD]), 2,"YTD"),
+				    ("LY", NAMEOF('factOrders'[Monthly Avg LY Full]), 3,"Avg"),
+				    --("Target", NAMEOF('factOrders'[Dynamic Table Target]), 4,"YTD"),
+				    ("Target", NAMEOF('LYF_L2Y_Target Parameter'[LYF_L2Y_Target Parameter]), 4,"YTD"),
+				    ("Target", NAMEOF('factTargets'[Full Monthly Target]), 5,"Avg")
+				    --("Target", NAMEOF('LFY_L2Y_Target AVG Parameter'[LFY_L2Y_Target AVG Parameter]), 5,"Avg")
+				}
+
+	annotation PBI_Id = 99833df04129496ca2a48727dc5bf2db
+

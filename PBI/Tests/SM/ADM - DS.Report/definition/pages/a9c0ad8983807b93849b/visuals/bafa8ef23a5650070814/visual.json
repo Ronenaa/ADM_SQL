@@ -1,0 +1,3724 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
+  "name": "bafa8ef23a5650070814",
+  "position": {
+    "x": 0,
+    "y": 1242.9699842022117,
+    "z": 3000,
+    "height": 457.81990521327015,
+    "width": 1360.1895734597158,
+    "tabOrder": 3000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dimCustomers"
+                    }
+                  },
+                  "Property": "שם לקוח אב"
+                }
+              },
+              "queryRef": "dimCustomers.שם לקוח אב",
+              "nativeQueryRef": "שם לקוח אב"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factOrders"
+                    }
+                  },
+                  "Property": "Norm Avg"
+                }
+              },
+              "queryRef": "factOrders.Norm Avg",
+              "nativeQueryRef": "Norm Avg"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factOrders"
+                    }
+                  },
+                  "Property": "Gap Next Month vs Norm"
+                }
+              },
+              "queryRef": "factOrders.Gap Next Month vs Norm",
+              "nativeQueryRef": "Gap Next Month vs Norm"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factOrders"
+                    }
+                  },
+                  "Property": "Gap Next Month - No Booking"
+                }
+              },
+              "queryRef": "factOrders.Gap Next Month - No Booking",
+              "nativeQueryRef": "Gap Next Month - No Booking"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factOrders"
+                    }
+                  },
+                  "Property": "Months With Purchases"
+                }
+              },
+              "queryRef": "factOrders.Months With Purchases",
+              "nativeQueryRef": "Months With Purchases"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factOrders"
+                    }
+                  },
+                  "Property": "Total Months"
+                }
+              },
+              "queryRef": "factOrders.Total Months",
+              "nativeQueryRef": "Total Months"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "factOrders"
+                  }
+                },
+                "Property": "Gap Next Month vs Norm"
+              }
+            },
+            "direction": "Descending"
+          }
+        ]
+      }
+    },
+    "objects": {
+      "values": [
+        {
+          "properties": {
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Calibri'"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "18D"
+                }
+              }
+            },
+            "fontColorPrimary": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#28225E'"
+                    }
+                  }
+                }
+              }
+            },
+            "fontColorSecondary": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#28225E'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Conditional": {
+                      "Cases": [
+                        {
+                          "Condition": {
+                            "And": {
+                              "Left": {
+                                "Comparison": {
+                                  "ComparisonKind": 2,
+                                  "Left": {
+                                    "Measure": {
+                                      "Expression": {
+                                        "SourceRef": {
+                                          "Entity": "factOrders"
+                                        }
+                                      },
+                                      "Property": "InactiveCustomer – Flag Scoure Count"
+                                    }
+                                  },
+                                  "Right": {
+                                    "Literal": {
+                                      "Value": "3D"
+                                    }
+                                  }
+                                }
+                              },
+                              "Right": {
+                                "Comparison": {
+                                  "ComparisonKind": 3,
+                                  "Left": {
+                                    "Measure": {
+                                      "Expression": {
+                                        "SourceRef": {
+                                          "Entity": "factOrders"
+                                        }
+                                      },
+                                      "Property": "InactiveCustomer – Flag Scoure Count"
+                                    }
+                                  },
+                                  "Right": {
+                                    "Literal": {
+                                      "Value": "99D"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "Value": {
+                            "Literal": {
+                              "Value": "'#DC3912'"
+                            }
+                          }
+                        },
+                        {
+                          "Condition": {
+                            "And": {
+                              "Left": {
+                                "Comparison": {
+                                  "ComparisonKind": 2,
+                                  "Left": {
+                                    "Measure": {
+                                      "Expression": {
+                                        "SourceRef": {
+                                          "Entity": "factOrders"
+                                        }
+                                      },
+                                      "Property": "InactiveCustomer – Flag Scoure Count"
+                                    }
+                                  },
+                                  "Right": {
+                                    "Literal": {
+                                      "Value": "2D"
+                                    }
+                                  }
+                                }
+                              },
+                              "Right": {
+                                "Comparison": {
+                                  "ComparisonKind": 3,
+                                  "Left": {
+                                    "Measure": {
+                                      "Expression": {
+                                        "SourceRef": {
+                                          "Entity": "factOrders"
+                                        }
+                                      },
+                                      "Property": "InactiveCustomer – Flag Scoure Count"
+                                    }
+                                  },
+                                  "Right": {
+                                    "Literal": {
+                                      "Value": "3D"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "Value": {
+                            "Literal": {
+                              "Value": "'#FF9900'"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "backColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Conditional": {
+                      "Cases": [
+                        {
+                          "Condition": {
+                            "And": {
+                              "Left": {
+                                "Comparison": {
+                                  "ComparisonKind": 2,
+                                  "Left": {
+                                    "Measure": {
+                                      "Expression": {
+                                        "SourceRef": {
+                                          "Entity": "factOrders"
+                                        }
+                                      },
+                                      "Property": "InactiveCustomer – Flag Scoure Count"
+                                    }
+                                  },
+                                  "Right": {
+                                    "Literal": {
+                                      "Value": "3D"
+                                    }
+                                  }
+                                }
+                              },
+                              "Right": {
+                                "Comparison": {
+                                  "ComparisonKind": 3,
+                                  "Left": {
+                                    "Measure": {
+                                      "Expression": {
+                                        "SourceRef": {
+                                          "Entity": "factOrders"
+                                        }
+                                      },
+                                      "Property": "InactiveCustomer – Flag Scoure Count"
+                                    }
+                                  },
+                                  "Right": {
+                                    "Literal": {
+                                      "Value": "99D"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "Value": {
+                            "Literal": {
+                              "Value": "'#DC3912'"
+                            }
+                          }
+                        },
+                        {
+                          "Condition": {
+                            "And": {
+                              "Left": {
+                                "Comparison": {
+                                  "ComparisonKind": 2,
+                                  "Left": {
+                                    "Measure": {
+                                      "Expression": {
+                                        "SourceRef": {
+                                          "Entity": "factOrders"
+                                        }
+                                      },
+                                      "Property": "InactiveCustomer – Flag Scoure Count"
+                                    }
+                                  },
+                                  "Right": {
+                                    "Literal": {
+                                      "Value": "2D"
+                                    }
+                                  }
+                                }
+                              },
+                              "Right": {
+                                "Comparison": {
+                                  "ComparisonKind": 3,
+                                  "Left": {
+                                    "Measure": {
+                                      "Expression": {
+                                        "SourceRef": {
+                                          "Entity": "factOrders"
+                                        }
+                                      },
+                                      "Property": "InactiveCustomer – Flag Scoure Count"
+                                    }
+                                  },
+                                  "Right": {
+                                    "Literal": {
+                                      "Value": "3D"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "Value": {
+                            "Literal": {
+                              "Value": "'#FF9900'"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "dataViewWildcard": {
+                  "matchingOption": 2
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        }
+      ],
+      "grid": [
+        {
+          "properties": {
+            "outlineColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "ThemeDataColor": {
+                      "ColorId": 2,
+                      "Percent": 0
+                    }
+                  }
+                }
+              }
+            },
+            "gridHorizontalWeight": {
+              "expr": {
+                "Literal": {
+                  "Value": "1D"
+                }
+              }
+            },
+            "rowPadding": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
+                }
+              }
+            },
+            "textSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "8D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "columnHeaders": [
+        {
+          "properties": {
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Calibri'"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "13D"
+                }
+              }
+            },
+            "bold": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "ThemeDataColor": {
+                      "ColorId": 2,
+                      "Percent": 0
+                    }
+                  }
+                }
+              }
+            },
+            "backColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "ThemeDataColor": {
+                      "ColorId": 0,
+                      "Percent": 0
+                    }
+                  }
+                }
+              }
+            },
+            "columnAdjustment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'growToFit'"
+                }
+              }
+            },
+            "wordWrap": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "columnFormatting": [
+        {
+          "properties": {
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "ThemeDataColor": {
+                      "ColorId": 0,
+                      "Percent": 0
+                    }
+                  }
+                }
+              }
+            },
+            "styleTotal": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "ThemeDataColor": {
+                      "ColorId": 2,
+                      "Percent": 0
+                    }
+                  }
+                }
+              }
+            },
+            "backColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#8CF0D0'"
+                    }
+                  }
+                }
+              }
+            },
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Center'"
+                }
+              }
+            },
+            "styleValues": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "styleTotal": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        }
+      ],
+      "columnWidth": [
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "91.67742938797238D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Jan 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Jan 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Feb 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Mar 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Apr 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'May 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Jun 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Jul 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Aug 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Sep 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Oct 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Nov 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Dec 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Jan 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Feb 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Mar 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Apr 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'May 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Jun 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Jul 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Aug 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Sep 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "80.51580385655839D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Sep 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Oct 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "79.22490778711997D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Oct 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Nov 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "76.86953078123125D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Nov 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Dec 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "87.67635140960428D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Dec 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "119.16466924565958D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "total": [
+                  {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Sub_DimDates"
+                        }
+                      },
+                      "Property": "MonthInCalendarShortName"
+                    }
+                  }
+                ]
+              }
+            ],
+            "metadata": "factOrders.Quantity Dynamic Table Switch Open Orders"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Nov 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Oct 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Sep 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Jan 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Feb 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Mar 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Apr 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'May 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Jun 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Jul 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Aug 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Sep 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Oct 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Nov 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Dec 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Jan 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Feb 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Mar 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Apr 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'May 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "66.48261134838316D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Jun 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Jun 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "78.88443654363691D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Jul 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Jul 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "89.28599369366968D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Aug 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Aug 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "4D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Dec 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "38.72720761210182D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "total": [
+                  {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Sub_DimDates"
+                        }
+                      },
+                      "Property": "MonthInCalendarShortName"
+                    }
+                  }
+                ]
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "34.5346112886049D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "total": [
+                  {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Sub_DimDates"
+                        }
+                      },
+                      "Property": "MonthInCalendarShortName"
+                    }
+                  }
+                ]
+              }
+            ],
+            "metadata": "factOrders.Sort Measure"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "79D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Feb 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "79D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Mar 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "79D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Apr 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "79D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'May 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "79D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Jun 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "79D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Jul 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "79D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Aug 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "79D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Sep 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "79D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Oct 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "67D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Nov 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "79D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Dec 25'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "67D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Jan 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "79D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Feb 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "79D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Mar 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "79D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'Apr 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "79D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "scopeId": {
+                  "Comparison": {
+                    "ComparisonKind": 0,
+                    "Left": {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "Sub_DimDates"
+                          }
+                        },
+                        "Property": "MonthInCalendarShortName"
+                      }
+                    },
+                    "Right": {
+                      "Literal": {
+                        "Value": "'May 26'"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "metadata": "factOrders.Quantity Months Table Switch (Sales Analyzer)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "443D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "dimCustomers.שם לקוח אב"
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "titleWrap": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "ThemeDataColor": {
+                      "ColorId": 2,
+                      "Percent": 0
+                    }
+                  }
+                }
+              }
+            },
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'left'"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "18D"
+                }
+              }
+            },
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Calibri'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "ThemeDataColor": {
+                      "ColorId": 2,
+                      "Percent": 0
+                    }
+                  }
+                }
+              }
+            },
+            "transparency": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "ThemeDataColor": {
+                      "ColorId": 2,
+                      "Percent": 0
+                    }
+                  }
+                }
+              }
+            },
+            "radius": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            },
+            "width": {
+              "expr": {
+                "Literal": {
+                  "Value": "1D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "visualTooltip": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "type": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Canvas'"
+                }
+              }
+            },
+            "section": {
+              "expr": {
+                "Literal": {
+                  "Value": "'13e09b6f1a77adc46267'"
+                }
+              }
+            },
+            "showActionsInTooltips": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "titleFontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            },
+            "valueFontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "stylePreset": [
+        {
+          "properties": {
+            "name": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Condensed'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "visualHeader": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "showSeeDataLayoutToggleButton": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "d13ff627b656d616db10",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "factOrders"
+              }
+            },
+            "Property": "DynamicFilter"
+          }
+        },
+        "type": "Advanced",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "f",
+              "Entity": "factOrders",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "Comparison": {
+                  "ComparisonKind": 1,
+                  "Left": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Source": "f"
+                        }
+                      },
+                      "Property": "DynamicFilter"
+                    }
+                  },
+                  "Right": {
+                    "Literal": {
+                      "Value": "0L"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "howCreated": "User"
+      }
+    ]
+  }
+}

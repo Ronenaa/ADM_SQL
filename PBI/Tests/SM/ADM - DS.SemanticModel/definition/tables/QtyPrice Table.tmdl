@@ -1,0 +1,48 @@
+table 'QtyPrice Table'
+	lineageTag: e62a07b0-5ecc-41c3-b672-c2fac7f76c08
+
+	column ID
+		dataType: int64
+		formatString: 0
+		lineageTag: 2f2a8e49-c876-4af4-9054-3346efcfcabc
+		summarizeBy: count
+		sourceColumn: ID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Measure
+		dataType: string
+		lineageTag: a34b4529-59e5-4589-903c-172f96bda685
+		summarizeBy: none
+		sourceColumn: Measure
+		sortByColumn: ID
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Name
+		dataType: string
+		lineageTag: 2e8bfe1b-df80-48b7-80fc-f28ddc7f24a1
+		summarizeBy: none
+		sourceColumn: Name
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'QtyPrice Table' = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WMlTSUQosqQSSCkqxOtFKRkBWQFFmciqQ1lOKjQUA", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [ID = _t, Measure = _t, Name = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"ID", Int64.Type}, {"Measure", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

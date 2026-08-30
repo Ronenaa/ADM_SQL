@@ -1,0 +1,26 @@
+table PricingMonthParameter
+	lineageTag: 90dd6a99-2f89-4856-b157-7f7cc49e3bef
+
+	measure 'PricingMonthParameter Value' = SELECTEDVALUE('PricingMonthParameter'[PricingMonthParameter])
+		formatString: 0
+		lineageTag: 9a00ff7e-cc01-467d-b923-4de19652fec9
+
+	column PricingMonthParameter
+		formatString: 0
+		lineageTag: ff88095d-59f9-4542-8a38-c2ee39466e42
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+		annotation SummarizationSetBy = User
+
+	partition PricingMonthParameter = calculated
+		mode: import
+		source = GENERATESERIES(0, 12, 1)
+
+	annotation PBI_Id = 6fb03b4c8b2e48be95d92063e6f507ac
+

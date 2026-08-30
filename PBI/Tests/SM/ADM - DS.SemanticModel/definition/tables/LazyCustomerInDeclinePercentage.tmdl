@@ -1,0 +1,22 @@
+table LazyCustomerInDeclinePercentage
+	lineageTag: 497f1f2a-f5d3-4f35-85a8-9f48d6e45f0d
+
+	column LazyCustomerInDeclinePercentage
+		formatString: 0
+		lineageTag: adda6dfa-926c-459e-9004-7353a072b95e
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+		annotation SummarizationSetBy = User
+
+	partition LazyCustomerInDeclinePercentage = calculated
+		mode: import
+		source = GENERATESERIES(0, 100, 5)
+
+	annotation PBI_Id = 59d2e965ebc1448f86eb1ce7fa12410c
+

@@ -1,0 +1,22 @@
+table LazyCustomerYMonths
+	lineageTag: e3285b0d-719e-4c5d-a06e-a62e06db847f
+
+	column LazyCustomerYMonths
+		formatString: 0
+		lineageTag: d21bf6e0-3ccd-4cc3-9fe4-aca6437b7133
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+		annotation SummarizationSetBy = User
+
+	partition LazyCustomerYMonths = calculated
+		mode: import
+		source = GENERATESERIES(1, 12, 1)
+
+	annotation PBI_Id = 4d15465d0cd7482dbe2c2e8744e307ed
+

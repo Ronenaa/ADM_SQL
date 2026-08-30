@@ -1,0 +1,1265 @@
+table factSales
+	lineageTag: e38f7eaf-3218-463b-8f0c-3aeb4e3e6d09
+
+	measure 'Total Quantity (Sales)' =
+			
+			CALCULATE(SUM(factSales[Quantity]), factSales[AdjustmentFlag] <> 1)
+			--SUM(factSales[Quantity])
+		formatString: #,0.00
+		lineageTag: 6f9bc699-c669-4ea0-8b72-a3568bb1b762
+
+		changedProperty = IsHidden
+
+	measure 'Total Sales NIS (Sales)' =
+			
+			CALCULATE(SUM(factSales[LineTotalNetNIS]), factSales[AdjustmentFlag] <> 1)
+			--SUM(factSales[LineTotalNetNIS])
+		lineageTag: 6b6d88ee-bcf2-4488-8e3e-4ac638963262
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Sales USD (Sales)' =
+			
+			CALCULATE(SUM(factSales[LineTotalNet_USD]), factSales[AdjustmentFlag] <> 1)
+			--SUM(factSales[LineTotalNet_USD])
+		lineageTag: 0ec0b298-2d8b-4c8e-b1df-f5e819d7e072
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Sales (Sales)' =
+			//SUM(factSales[LineTotalNet])
+			IF(HASONEVALUE(VAT_MeasureSelctionTable[ID ANALYSIS]),
+				SWITCH(MAX(VAT_MeasureSelctionTable[ID ANALYSIS]),
+					1,[Total Sales NIS (Sales)],
+					2,[Total Sales USD (Sales)]
+			    ),
+			   [Total Sales USD (Sales)])
+		lineageTag: 76e9e111-124e-4593-afd9-b317a64341ab
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Quantity YTD (Sales)' =
+			
+			CALCULATE(CALCULATE([Total Quantity (Sales)],DATESYTD(dimDates[Date]),DATESYTD(Sub_DimDates[Date])),dimDates[IsHistory]=1,Sub_DimDates[IsHistory]=1)
+		lineageTag: 63bcfb90-377c-4600-8cea-5cabb47389cb
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Quantity Comparison LY (Sales)' = ```
+			
+			 var MinDate = [Mindate - LY] 
+			 var MaxDate = [Maxdate - LY] 
+			return  CALCULATE([Total Quantity (Sales)],DATEADD(dimDates[Date],-1,YEAR),DATEADD(Sub_DimDates[Date],-1,YEAR))
+			
+			```
+		formatString: #,0.00
+		lineageTag: 929c0b67-32df-4f8e-8ece-8396440ffecc
+
+		changedProperty = IsHidden
+
+	measure 'Quantity LY YTD (Sales)' = CALCULATE(CALCULATE([Quantity Comparison LY (Sales)],DATESYTD(dimDates[Date]),DATESYTD(Sub_DimDates[Date])),dimDates[IsHistory]=1,Sub_DimDates[IsHistory]=1)
+		formatString: #,0.00
+		lineageTag: f4650aea-8f6e-4e9f-b2f9-c0339223af26
+
+		changedProperty = IsHidden
+
+	measure 'Quantity Comparison LY YTD Full (Sales)' = ```
+			
+			var MinDate = [Mindate - LY] 
+			var MaxDate = [Maxdate - LY_Full] 
+			return CALCULATE([Quantity YTD (Sales)],FILTER(ALL(dimDates),dimDates[Date]>= minDate &&dimDates[Date]<=MaxDate))
+			```
+		formatString: #,0.00
+		lineageTag: 88ec2720-cb98-4a58-ac24-24bef106fedb
+
+		changedProperty = IsHidden
+
+	measure '% Change YTD Quantity LY Comparsion (Sales)' = DIVIDE([Quantity YTD (Sales)]-[Quantity LY YTD (Sales)],[Quantity LY YTD (Sales)])
+		formatString: #,0.0%;-#,0.0%;#,0.0%
+		lineageTag: 596b9e83-2c1c-4fad-9158-f5716d6b613e
+
+		changedProperty = IsHidden
+
+	measure 'Quantity Comparison LY Full (Sales)' = ```
+			
+			var MinDate = [Mindate - LY] 
+			var MaxDate = [Maxdate - LY_Full] 
+			return  CALCULATE([Total Quantity (Sales)],FILTER(ALL(dimDates),dimDates[Date]>= minDate &&dimDates[Date]<=MaxDate))
+			```
+		formatString: #,0.00
+		lineageTag: 54e61459-f376-4cc8-97c5-711a74a1cdd3
+
+		changedProperty = IsHidden
+
+	measure 'Items Variety (Sales)' = DISTINCTCOUNT(factSales[ItemKey])
+		formatString: #,0
+		lineageTag: 7cba33d7-9404-4c03-a455-41214c96d396
+
+		changedProperty = IsHidden
+
+	measure 'Variety Per Client (Sales)' = AVERAGEX(VALUES(dimCustomers[שם לקוח]),[Items Variety (Sales)])
+		formatString: #,0.00
+		lineageTag: b26b948c-fce6-42f9-a51c-d5e4174f2322
+
+		changedProperty = IsHidden
+
+	measure 'Quantity MTD (Sales)' =
+			
+			VAR ThisMonth=CALCULATE(MAX(dimDates[YearMonthSum]),dimDates[IsHistory]=1)
+			VAR SubThisMonth=CALCULATE(MAX(Sub_DimDates[YearMonthSum]),Sub_DimDates[IsHistory]=1)
+			VAR _Month = IF(HASONEVALUE(Sub_DimDates[MonthInCalendarName]),SubThisMonth,ThisMonth)
+			return
+			CALCULATE([Total Quantity (Sales)],FILTER(dimDates,dimDates[YearMonthSum]=_Month),FILTER(Sub_DimDates,Sub_DimDates[YearMonthSum]=_Month))
+		formatString: #,0.00
+		lineageTag: e186a81b-d323-44e5-8225-95908c109a07
+
+		changedProperty = IsHidden
+
+	measure 'Quantity Comparison LY MTD Full (Sales)' = ```
+			
+			var MinDate = [Mindate - LY] 
+			var MaxDate = [Maxdate MTD - LY_Full] 
+			return  CALCULATE([Quantity MTD (Sales)],FILTER(ALL(dimDates),dimDates[Date]>= minDate &&dimDates[Date]<=MaxDate))
+			```
+		lineageTag: 9d6ba75c-5645-4cfe-93e7-5dbcebc39d8d
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sales Comparison LY MTD (Sales)' = ```
+			
+			var MinDate = [Mindate - LY] 
+			var MaxDate = [Maxdate - LY] 
+			return  CALCULATE(CALCULATE([Sales MTD (Sales)],DATEADD(dimDates[Date],-1,YEAR),DATEADD(Sub_DimDates[Date],-1,YEAR)),dimDates[IsHistory]=1)
+			```
+		lineageTag: bb9a814c-8e67-40d0-9e4e-87c2f0431d3f
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '% Change Sales LY MTD Comparison (Sales)' = DIVIDE([Sales MTD (Sales)]-[Sales Comparison LY MTD (Sales)],([Sales Comparison LY MTD (Sales)]))
+		formatString: #,0.0%;-#,0.0%;#,0.0%
+		lineageTag: ece3d4f1-90f5-4632-bba5-4284b9b62398
+
+		changedProperty = IsHidden
+
+	measure 'Sales Comparison LY MTD Full (Sales)' = ```
+			
+			var MinDate = [Mindate - LY] 
+			var MaxDate = [Maxdate MTD - LY_Full] 
+			return  CALCULATE([Sales MTD (Sales)],FILTER(ALL(dimDates),dimDates[Date]>= minDate &&dimDates[Date]<=MaxDate))
+			```
+		formatString: #,0.00
+		lineageTag: 042caba8-c055-48eb-969d-fd63ce2d36da
+
+		changedProperty = IsHidden
+
+	measure 'Quantity Comparison LY MTD (Sales)' = ```
+			
+			var MinDate = [Mindate - LY] 
+			var MaxDate = [Maxdate - LY] 
+			return  CALCULATE([Quantity MTD (Sales)],DATEADD(dimDates[Date],-1,YEAR),DATEADD(Sub_DimDates[Date],-1,YEAR))
+			```
+		formatString: #,0.00
+		lineageTag: e2539629-328f-430b-93cf-1b5a366dd67e
+
+		changedProperty = IsHidden
+
+	measure 'Total Sales Current Year (Sales)' =
+			
+			 IF(HASONEVALUE(dimDates[Year]),[Total Sales (Sales)],
+				 CALCULATE(
+				TOTALYTD([Total Sales (Sales)],
+					dimDates[Date],
+					dimDates[IsHistory]=1
+				),
+				dimDates[IsHistory]=1
+				))
+		formatString: #,0.00
+		lineageTag: eda70576-0ded-4659-bd7c-b70f17d15c3e
+
+		changedProperty = IsHidden
+
+	measure 'Sales Comparison LY (Sales)' = ```
+			
+			var MinDate = [Mindate - LY] 
+			var MaxDate = [Maxdate - LY] 
+			return  CALCULATE([Total Sales (Sales)],DATEADD(dimDates[Date],-1,YEAR),DATEADD(Sub_DimDates[Date],-1,YEAR))
+			```
+		formatString: #,0.00
+		lineageTag: 5e10442e-fad2-49d4-8187-a0877b39f8e8
+
+		changedProperty = IsHidden
+
+	measure 'Customers Quant (Sales)' = DISTINCTCOUNT('factSales'[AccountKey])
+		formatString: #,0
+		lineageTag: 5b89e363-589b-4e75-a8d8-7b82a9560b3d
+
+		changedProperty = IsHidden
+
+	measure 'AVG Client Sales (Sales)' = DIVIDE([Total Sales (Sales)],[Customers Quant (Sales)])
+		formatString: #,0.00
+		lineageTag: 9520a8d0-871f-4f73-a370-fdc0054a9b67
+
+		changedProperty = IsHidden
+
+	measure 'New Customers (Sales)' = ```
+			
+			
+			SUMX(
+			    VALUES(dimDates[MonthInCalendarName]),
+			CALCULATE(COUNTROWS (
+			
+			    FILTER (
+			        ADDCOLUMNS (
+			            //CROSSJOIN(VALUES(factSales[AccountKey]),VALUES(factSales[AgentKey])),
+			            VALUES ('factSales'[AccountKey]), 
+			            "PreviousSales", 
+			                CALCULATE (
+			                  
+			                    COUNTROWS ( 'factSales'), //Original Calc
+			                    ALL(dimCustomers),
+			                    FILTER (
+			                        ALL ( dimDates ),
+			                        dimDates[Date] < min(dimDates[Date])
+			                    )
+			                )
+			                ,"ThisSales"
+			              ,[Total Sales (Sales)]
+			        ),
+			      
+			          [PreviousSales]=0
+			          && [ThisSales]>0
+			         
+			    )
+			)))
+			```
+		formatString: #,0
+		lineageTag: 7e749d17-16c5-4456-9a64-8d5163effcea
+
+		changedProperty = IsHidden
+
+	measure 'Transactions Quantity (Sales)' = DISTINCTCOUNT('factSales'[DocID])
+		formatString: #,0
+		lineageTag: e7d11684-ab19-4bf0-93d2-257cb6155bee
+
+		changedProperty = IsHidden
+
+	measure '% Change Quantity Comparison LY (Sales)' =
+			
+			DIVIDE([Quantity YTD (Sales)]-[Quantity LY YTD (Sales)],[Quantity LY YTD (Sales)])
+		formatString: #,0.0%;-#,0.0%;#,0.0%
+		lineageTag: 803c8b6b-731f-4aa1-94d4-ef4d3d32b0df
+
+		changedProperty = IsHidden
+
+	measure 'Sales MTD (Sales)' =
+			
+			VAR ThisMonth=CALCULATE(MAX(dimDates[YearMonthSum]),dimDates[IsHistory]=1)
+			VAR SubThisMonth=CALCULATE(MAX(Sub_DimDates[YearMonthSum]),Sub_DimDates[IsHistory]=1)
+			VAR _Month = IF(HASONEVALUE(Sub_DimDates[MonthInCalendarName]),SubThisMonth,ThisMonth)
+			return
+			CALCULATE([Total Sales (Sales)],FILTER(dimDates,dimDates[YearMonthSum]=_Month))
+		lineageTag: fa203997-4cb3-4cad-b3e8-fca4bfbaa808
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'YTD OR MTD (Sales)' = IF(HASONEVALUE(Sub_DimDates[MonthInCalendarName]),[Switch MTD (Sales)],[Switch YTD (Sales)])
+		lineageTag: f5554c0d-35a6-44af-aa51-2d552dd1cdc6
+
+		formatStringDefinition =
+				SWITCH(MAX(VAT_MeasureSelctionTable[ID ANALYSIS]),
+				3,SWITCH(TRUE(),
+				        ABS(IF(HASONEVALUE(Sub_DimDates[MonthInCalendarName]),[Switch MTD (Sales)],[Switch YTD (Sales)]))<1000,",#,0",
+				        ABS(IF(HASONEVALUE(Sub_DimDates[MonthInCalendarName]),[Switch MTD (Sales)],[Switch YTD (Sales)]))<1000000,",#,0.0",
+				        ",#,0.00"),
+				2,SWITCH(TRUE(),
+				        ABS(IF(HASONEVALUE(Sub_DimDates[MonthInCalendarName]),[Switch MTD (Sales)],[Switch YTD (Sales)]))<1000,"$  ,#,0",
+				        ABS(IF(HASONEVALUE(Sub_DimDates[MonthInCalendarName]),[Switch MTD (Sales)],[Switch YTD (Sales)]))<1000000,"$  ,#,0.0",
+				        "$ ,#,0.00"),
+				1,SWITCH(TRUE(),
+				        ABS(IF(HASONEVALUE(Sub_DimDates[MonthInCalendarName]),[Switch MTD (Sales)],[Switch YTD (Sales)]))<1000,"₪ ,#,0",
+				        ABS(IF(HASONEVALUE(Sub_DimDates[MonthInCalendarName]),[Switch MTD (Sales)],[Switch YTD (Sales)]))<1000000,"₪ ,#,0.0",
+				        "₪ ,#,0.00")
+				)
+
+		changedProperty = IsHidden
+
+	measure 'Switch YTD (Sales)' =
+			
+			SWITCH(SELECTEDVALUE(VAT_MeasureSelctionTable[ID ANALYSIS]),
+			1, [Sales YTD (Sales)],
+			2, [Sales YTD (Sales)],
+			3, [Quantity YTD (Sales)]
+			)
+		lineageTag: 7b873175-2ac7-44e3-962e-107ca60c6d55
+
+		changedProperty = IsHidden
+
+	measure 'Sales YTD (Sales)' =
+			
+			CALCULATE(CALCULATE([Total Sales (Sales)],DATESYTD(dimDates[Date]),DATESYTD(Sub_DimDates[Date])),dimDates[IsHistory]=1,Sub_DimDates[IsHistory]=1)
+		lineageTag: 47f1cb5a-ca20-4e0f-b189-102257f1ddaf
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Switch MTD (Sales)' =
+			
+			SWITCH(SELECTEDVALUE(VAT_MeasureSelctionTable[ID ANALYSIS]),
+			1, [Sales MTD (Sales)],
+			2, [Sales MTD (Sales)],
+			3, [Quantity MTD (Sales)]
+			)
+		lineageTag: 05fb6c90-3f0a-4b8a-96f8-51b7fad1dd6b
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Switch LY YTD (Sales)' =
+			
+			SWITCH(SELECTEDVALUE(VAT_MeasureSelctionTable[ID ANALYSIS]),
+			1, [Sales LY YTD (Sales)],
+			2, [Sales LY YTD (Sales)],
+			3, [Quantity LY YTD (Sales)]
+			)
+		lineageTag: f1592bf4-bc9d-4204-b4f3-fcf3c6246454
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sales LY YTD (Sales)' = CALCULATE(CALCULATE([Sales Comparison LY (Sales)],DATESYTD(dimDates[Date]),DATESYTD(Sub_DimDates[Date])),dimDates[IsHistory]=1,Sub_DimDates[IsHistory]=1)
+		lineageTag: 22bfb115-d156-4e4c-90f2-50ed6aa37739
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Switch LY MTD (Sales)' =
+			
+			SWITCH(SELECTEDVALUE(VAT_MeasureSelctionTable[ID ANALYSIS]),
+			1, [Sales Comparison LY MTD (Sales)],
+			2, [Sales Comparison LY MTD (Sales)],
+			3, [Quantity Comparison LY MTD (Sales)]
+			)
+		lineageTag: 19a433d2-d025-4867-9aa9-f09d58b21a6e
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Switch % MTD (Sales)' =
+			
+			SWITCH(SELECTEDVALUE(VAT_MeasureSelctionTable[ID ANALYSIS]),
+			1, [% Change Sales LY MTD Comparison (Sales)],
+			2, [% Change Sales LY MTD Comparison (Sales)],
+			3, [% Change Quantity LY MTD Comparison (Sales)]
+			)
+		formatString: 0.00%;(0.00%);0.00%
+		lineageTag: 283e85c1-a0a4-4f60-829e-b46ff28ad8e9
+
+		changedProperty = IsHidden
+
+	measure '% Change Quantity LY MTD Comparison (Sales)' = DIVIDE([Quantity MTD (Sales)]-[Quantity Comparison LY MTD (Sales)],([Quantity Comparison LY MTD (Sales)]))
+		formatString: 0.00%;(0.00%);0.00%
+		lineageTag: ef8d1b39-2434-41a4-b2a5-8b1476ad5a78
+
+		changedProperty = IsHidden
+
+	measure 'Switch % YTD (Sales)' =
+			
+			SWITCH(SELECTEDVALUE(VAT_MeasureSelctionTable[ID ANALYSIS]),
+			1, [% change YTD Sales LY Comparsion (Sales)],
+			2, [% change YTD Sales LY Comparsion (Sales)],
+			3, [% change YTD Quantity LY Comparsion (Sales)]
+			)
+		formatString: 0.00%;(0.00%);0.00%
+		lineageTag: 58251af1-046d-4e7e-92f6-24b6ec271ad2
+
+		changedProperty = IsHidden
+
+	measure '% Change YTD Sales LY Comparsion (Sales)' = DIVIDE([Sales YTD (Sales)]-[Sales LY YTD (Sales)],[Sales LY YTD (Sales)])
+		lineageTag: 0ef92753-966d-4849-8b94-8c30980a7574
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'YTD OR MTD LY (Sales)' = IF(HASONEVALUE(Sub_DimDates[MonthInCalendarName]),[Switch LY MTD (Sales)],[Switch LY YTD (Sales)])
+		lineageTag: b562baa5-f3b4-4632-b2c8-1152222ee49e
+
+		formatStringDefinition =
+				SWITCH(MAX(VAT_MeasureSelctionTable[ID ANALYSIS]),
+				3,SWITCH(TRUE(),
+				        ABS(IF(HASONEVALUE(Sub_DimDates[MonthInCalendarName]),[Switch LY MTD (Sales)],[Switch LY YTD (Sales)]))<1000,",#,0",
+				        ABS(IF(HASONEVALUE(Sub_DimDates[MonthInCalendarName]),[Switch LY MTD (Sales)],[Switch LY YTD (Sales)]))<1000000,",#,0.0",
+				        ",#,0.00"),
+				2,SWITCH(TRUE(),
+				        ABS(IF(HASONEVALUE(Sub_DimDates[MonthInCalendarName]),[Switch LY MTD (Sales)],[Switch LY YTD (Sales)]))<1000,"$  ,#,0",
+				        ABS(IF(HASONEVALUE(Sub_DimDates[MonthInCalendarName]),[Switch LY MTD (Sales)],[Switch LY YTD (Sales)]))<1000000,"$  ,#,0.0",
+				        "$ ,#,0.00"),
+				1,SWITCH(TRUE(),
+				        ABS(IF(HASONEVALUE(Sub_DimDates[MonthInCalendarName]),[Switch LY MTD],[Switch LY YTD (Sales)]))<1000,"₪ ,#,0",
+				        ABS(IF(HASONEVALUE(Sub_DimDates[MonthInCalendarName]),[Switch LY MTD],[Switch LY YTD (Sales)]))<1000000,"₪ ,#,0.0",
+				        "₪ ,#,0.00")
+				)
+
+		changedProperty = IsHidden
+
+	measure 'YTD OR MTD % (Sales)' = IF(HASONEVALUE(Sub_DimDates[MonthInCalendarName]),[Switch % MTD (Sales)],[Switch % YTD (Sales)])
+		formatString: 0.00%;(0.00%);0.00%
+		lineageTag: 5bb62650-6c5b-42fd-8b6f-17c100830b7e
+
+		changedProperty = IsHidden
+
+	measure 'Avg Unit Price (Sales)' = ```
+			
+			 DIVIDE([Total Sales (Sales)],[Total Quantity (Sales)])
+			```
+		lineageTag: 20e4b74e-ccd2-4482-93b3-7142124208c1
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Quantity (Sales) By Delivery Date' =
+			
+			CALCULATE([Total Quantity (Sales)],USERELATIONSHIP(dimDates[Date],factSales[DeliveryDate]))
+			--CALCULATE(SUM(factSales[Quantity]),USERELATIONSHIP(dimDates[Date],factSales[DeliveryDate]))
+		formatString: #,0.00
+		lineageTag: 9e267b6e-a840-428d-9ee3-3e8f312ae2ce
+
+		changedProperty = IsHidden
+
+	measure 'Total WarehouseExpense' = CALCULATE([Total Sales (Sales)],factSales[AdditionalKey] = 1005)
+		formatString: #,0.00
+		lineageTag: 17fab555-f930-4cc8-aabd-83eee5ae2171
+
+		changedProperty = IsHidden
+
+	measure 'Total WarehouseExpense Quantity' = CALCULATE(SUM(factSales[AdditionalQuantity]),factSales[AdditionalKey] = 1005)
+		lineageTag: ba1437a9-7d51-4a2d-b636-bf3a47b5764a
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total WarehouseExpenses Quantity LY' = CALCULATE(CALCULATE([Total WarehouseExpense Quantity],DATEADD(dimDates[Date],-1,YEAR)),dimDates[IsHistory]=1)
+		lineageTag: 270eb9b9-a269-43a3-a7a7-65060180045e
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total WarehouseExpenses LY' = CALCULATE(CALCULATE([Total WarehouseExpense],DATEADD(dimDates[Date],-1,YEAR)),dimDates[IsHistory]=1)
+		lineageTag: 043fbe6e-01db-40b9-9074-f2b2f80ba31f
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Warehouse Withdrawal' = CALCULATE([Total Sales (Sales)],factSales[WarehouseFlag] = 1)
+		lineageTag: 0ccaa518-922e-4a3d-a805-b001320a86ef
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Warehouse Withdrawal Quantity' = CALCULATE(SUM(factSales[Quantity]),factSales[WarehouseFlag] = 1)
+		lineageTag: 94d938f1-ee35-44de-ad2f-fe2266ffd608
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Warehouse Withdrawal Expense Quantity' = CALCULATE(SUM(factSales[AdditionalQuantity]),factSales[WarehouseFlag]=1,factSales[AdditionalKey] = 1005)
+		lineageTag: af5ac8b3-4fb2-4543-8e2d-b1c4a4098815
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Warehouse Withdrawal Switch' =
+			
+			SWITCH(MAX(VAT_MeasureSelctionTable[ID ANALYSIS]),
+			        1, [Total Warehouse Withdrawal],
+			        2, [Total Warehouse Withdrawal],
+			        3, [Total Warehouse Withdrawal Quantity])
+		lineageTag: e1eaf4c7-cd46-45b9-801f-14e3761220b7
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Warehouse Withdrawal Quantity LY' = CALCULATE(CALCULATE([Total Warehouse Withdrawal Quantity],DATEADD(dimDates[Date],-1,YEAR)),dimDates[IsHistory]=1)
+		lineageTag: f33a141c-9bdd-4bf8-826c-89f32a5ff7a2
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Warehouse Withdrawal Expense Quantity LY' = CALCULATE(CALCULATE([Total Warehouse Withdrawal Expense Quantity],DATEADD(dimDates[Date],-1,YEAR)),dimDates[IsHistory]=1)
+		lineageTag: b8d3626d-9678-4c05-bda1-5b32acb8570b
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Warehouse Withdrawal Expense Quantity LY %' = DIVIDE( [Total Warehouse Withdrawal Expense Quantity LY] ,[Total Warehouse Withdrawal Quantity LY])
+		formatString: 0.00%;(0.00%);0.00%
+		lineageTag: f161cf9b-5ebe-4000-87f2-08e6f95c42f8
+
+		changedProperty = IsHidden
+
+	measure 'Total Warehouse Withdrawal Expense Quantity % ' = DIVIDE( [Total Warehouse Withdrawal Expense Quantity] ,[Total Warehouse Withdrawal Quantity],0)
+		formatString: 0.00%;(0.00%);0.00%
+		lineageTag: c738a0f0-751c-44c6-93b8-def2ce1716b3
+
+		changedProperty = IsHidden
+
+	measure 'Total Warehouse Withdrawal Expense' = CALCULATE([Total Sales (Sales)],factSales[WarehouseFlag]=1,factSales[AdditionalKey] = 1005)
+		lineageTag: 60be4266-9c61-4745-9d58-93db7c536ddb
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Warehouse Withdrawal Expense Switch' =
+			
+			SWITCH(MAX(VAT_MeasureSelctionTable[ID ANALYSIS]),
+			        1, [Total Warehouse Withdrawal Expense],
+			        2, [Total Warehouse Withdrawal Expense],
+			        3, [Total Warehouse Withdrawal Expense Quantity])
+		lineageTag: c6c6e2d0-6f2f-44a9-b9aa-434dd4257d7d
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Quantity (Sales) By Delivery Date TO DATE' = ```
+			
+			    CALCULATE([Total Quantity (Sales) By Delivery Date]
+			                  ,dimDates[Is History To Today]=1
+			                )
+			```
+		lineageTag: 45b9a50c-90a9-4530-a68c-db3c7fa80146
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Quantity Adjustment (Sales)' =
+			
+			CALCULATE(SUM(factSales[Quantity]), factSales[AdjustmentFlag] = 1)
+		lineageTag: 34165083-ac82-490a-9230-6f2c1d5a6568
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Adjustment Quantity Shortage' =
+			
+			CALCULATE([Total Quantity Adjustment (Sales)],
+			            factSales[TransactionType] = "פחת"
+			)
+		lineageTag: 890ecbf1-ec7b-4d99-bb4d-a468fe02d828
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'AVG Unit Price (Sales) - CIF' =
+			
+			CALCULATE([Avg Unit Price (Sales) Item],FILTER(factSales,[ActionTypeDesc]="מכירה בדוקומנטים"))
+		formatString: \$#,0.0;(\$#,0.0);\$#,0.0
+		lineageTag: b39fe157-3a9e-4981-b746-85b2de76d846
+
+		changedProperty = IsHidden
+
+	measure 'AVG Unit Price (Sales) - FOT' =
+			
+			CALCULATE(
+			    [Avg Unit Price (Sales) Item],
+			    FILTER(factSales,[ActionTypeDesc] = "מכירה")
+			    )
+		lineageTag: 172e9098-a909-488e-8790-bbff3ca24a52
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Adjustment Shortage %' =
+			
+			IF( [Adjustment Quantity Shortage] && [Total Order Quantity (Hzmnot)],
+			DIVIDE(
+			[Adjustment Quantity Shortage],
+			[Total Order Quantity (Hzmnot)],0)
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 199fddf0-cdb4-4c97-96de-6687d211a458
+
+		changedProperty = IsHidden
+
+	measure 'Quantity CIF' =
+			
+			CALCULATE(
+			    SUM(factSales[Quantity]),
+			    FILTER(factSales,[ActionTypeDesc]="מכירה בדוקומנטים")
+			)
+		formatString: #,0.00
+		lineageTag: d11fa984-6f5a-4386-ab9b-ec577ae4388f
+
+		changedProperty = IsHidden
+
+	measure 'Quantity FOT' =
+			
+			CALCULATE(
+			    SUM(factSales[Quantity]),
+			    FILTER(factSales,[ActionTypeDesc] = "מכירה")
+			)
+		formatString: #,0.00
+		lineageTag: 7abfeec1-c36d-4cf4-b5a4-60eb424bc1ae
+
+		changedProperty = IsHidden
+
+	measure 'Total Quantity Adjustment+Sales' =
+			
+			[Total Quantity Adjustment (Sales)] + [Total Quantity (Sales)]
+		formatString: #,0
+		lineageTag: 3b6d10ee-6a14-4721-8f5e-e2b1811df391
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'CIF Profit' =
+			
+			IF(
+			    [AVG Unit Price (Sales) - CIF], --check if exist
+			    [AVG Unit Price (Sales) - CIF] - [CIF Price],
+			    BLANK()
+			)
+		formatString: \$#,0.0;(\$#,0.0);\$#,0.0
+		lineageTag: e30af17e-4c78-4a5a-8686-3b477a4dd18e
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'FOT Profit' =
+			
+			IF(
+			    [AVG Unit Price (Sales) - FOT], --check if exist
+			    [AVG Unit Price (Sales) - FOT] - [Avg Price USD (Expenses) Non Invoice]
+			    ,BLANK()
+			
+			)
+		formatString: \$#,0.0;(\$#,0.0);\$#,0.0
+		lineageTag: dad1a141-6125-4050-9b51-9509aa875563
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Price Term' =
+			
+			SWITCH(TRUE(),
+			    SELECTEDVALUE(factSales[ActionTypeDesc]) = "מכירה", "FOT",
+			    SELECTEDVALUE(factSales[ActionTypeDesc]) = "FOT Premium", "FOT Premium",
+			    SELECTEDVALUE(factSales[ActionTypeDesc]) = "מכירה בדוקומנטים", "CIF",
+			    SELECTEDVALUE(factSales[QuantityCategory])
+			)
+			
+			// if(
+			//     [AVG Unit Price (Sales) - CIF] , "CIF",
+			//     IF(
+			//         [AVG Unit Price (Sales) - FOT], "FOT",
+			//         IF(MAX(factSales[ActionTypeDesc]) = "FOT Premium", "FOT Premium",
+			//         MAX(factSales[QuantityCategory])
+			//         )
+			//     )
+			// )
+		lineageTag: db694b24-796f-4e1a-9a8e-58a48efd072b
+
+		changedProperty = IsHidden
+
+	measure 'Total Gain' = ```
+			
+			 [FOT Profit]*[Quantity FOT]+[CIF Profit]*[Quantity CIF]+[FOT Premium Profit]*[Quantity FOT Premium]
+			// SUMX (
+			//     factSales,
+			//     VAR Qty = [Total Quantity (Sales)]
+			//     VAR SalePricePerUnit =
+			//         DIVIDE ([Total Sales (Sales)], Qty )
+			//     VAR PurchasePricePerUnit =
+			//         SWITCH (
+			//             factSales[ActionTypeDesc],
+			//             "מכירה בדוקומנטים", [CIF Price],
+			//             "מכירה", [Avg Price USD (Expenses)],
+			//             BLANK()
+			//         )
+			//     RETURN
+			//         (SalePricePerUnit - PurchasePricePerUnit) * Qty
+			// )
+			
+			```
+		formatString: \$#,0.0;(\$#,0.0);\$#,0.0
+		lineageTag: 68d00b2b-0a66-42eb-a9da-68ab9aebfed0
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Total Gain per Ton' =
+			
+			DIVIDE(
+			    [Total Gain],
+			    [Total Quantity Adjustment+Sales]
+			)
+		formatString: \$#,0.0;(\$#,0.0);\$#,0.0
+		lineageTag: 896f5323-b14f-4cce-9ef7-f601768172bd
+
+		changedProperty = IsHidden
+
+	measure 'AVG Unit Price (Sales) - FOT Premium' =
+			
+			CALCULATE(
+			    [Avg Unit Price (Sales) Item],
+			    FILTER(factSales,[ActionTypeDesc] = "FOT Premium")
+			    )
+		lineageTag: 686d9397-286a-46ec-b417-cbdc777bc965
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'FOT Premium Profit' = ```
+			
+			IF(
+			    // SELECTEDVALUE(factSales[ActionTypeDesc]) = "FOT Premium",
+			    [AVG Unit Price (Sales) - FOT Premium], --check if exist
+			    [AVG Unit Price (Sales) - FOT Premium] - [Avg Price USD (Expenses)]
+			    ,BLANK()
+			)
+			
+			```
+		formatString: \$#,0.0;(\$#,0.0);\$#,0.0
+		lineageTag: 00bcff9c-41f7-4f61-8d40-896f2a3c8617
+
+		changedProperty = IsHidden
+
+	measure 'Quantity FOT Premium' =
+			
+			CALCULATE(
+			    SUM(factSales[Quantity]),
+			    FILTER(factSales,[ActionTypeDesc]="FOT Premium")
+			)
+		lineageTag: b0d1d07f-619d-4505-882f-4c31ef91437f
+
+		changedProperty = IsHidden
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Sales - CIF' =
+			
+			CALCULATE([Total Sales (Sales)],FILTER(factSales,[ActionTypeDesc]="מכירה בדוקומנטים"))
+		lineageTag: 6be6548c-33b9-4d3a-adca-9a9c95f3a4a1
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Sales - FOT' =
+			
+			CALCULATE([Total Sales (Sales)],FILTER(factSales,[ActionTypeDesc]="מכירה"))
+		lineageTag: 9f52ccfc-028e-42d3-aa22-016e31283708
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Sales - FOT Premium' =
+			
+			CALCULATE([Total Sales (Sales)],FILTER(factSales,[ActionTypeDesc]="FOT Premium"))
+		lineageTag: 25fafde6-7e9e-4bd3-88c6-2c52432e7d08
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Sales (other)' =
+			
+			CALCULATE(
+			    [Total Sales (Sales)],
+			    FILTER(factSales,NOT(factSales[ActionTypeDesc] IN {"מכירה","מכירה בדוקומנטים","FOT Premium"})
+			    )
+			)
+		lineageTag: faa8deca-5af5-462e-a56a-84dbce9fb987
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Sales USD (Sales) Only Item' =
+			
+			CALCULATE(SUM(factSales[LineTotalNet_USD]), factSales[AdjustmentFlag] <> 1 && factSales[LineType] = "Item")
+		lineageTag: eb753dcb-1771-4297-a17c-fffa743d02aa
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Avg Unit Price (Sales) Item' = ```
+			
+			 DIVIDE([Total Sales USD (Sales) Only Item],[Total Quantity (Sales)])
+			```
+		lineageTag: 5fb49693-5510-4a47-b643-4a3c0c4fedfc
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column EntityID
+		dataType: string
+		lineageTag: be3a5b45-3400-4158-b69a-fb3cd2cd911d
+		summarizeBy: none
+		sourceColumn: EntityID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column InvoiceLineNumber
+		dataType: int64
+		formatString: 0
+		lineageTag: 6f353d7a-5dcb-454f-a5cc-1dffcb679b77
+		summarizeBy: sum
+		sourceColumn: InvoiceLineNumber
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DocName
+		dataType: string
+		lineageTag: 485579f6-e2e5-4d32-a461-8ec277059a48
+		summarizeBy: none
+		sourceColumn: DocName
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column AccountKey
+		dataType: string
+		lineageTag: 8928a17a-4ec2-49b3-a2ae-0bba088cdd7f
+		summarizeBy: none
+		sourceColumn: AccountKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Date
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 7e49d51a-71a4-450a-a4ca-c453a9e88c18
+		summarizeBy: none
+		sourceColumn: Date
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column AgentKey
+		dataType: int64
+		formatString: 0
+		lineageTag: c2b7250d-d063-49de-bace-673c3f130ed2
+		summarizeBy: count
+		sourceColumn: AgentKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ItemKey
+		dataType: string
+		lineageTag: 87a0c1e3-ad53-4635-afda-a7be83b11c1e
+		summarizeBy: none
+		sourceColumn: ItemKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DiscountPercent
+		dataType: int64
+		formatString: 0
+		lineageTag: efd3fe4e-f75d-4161-8792-00c21793fc26
+		summarizeBy: sum
+		sourceColumn: DiscountPercent
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column LineTotalDiscount
+		dataType: int64
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: a36ada73-e6fb-441c-b73c-dd8b8b297999
+		summarizeBy: sum
+		sourceColumn: LineTotalDiscount
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column UnitGrossPrice
+		dataType: double
+		lineageTag: 830b81c5-d8eb-4f59-b66f-1b0f4d8348a4
+		summarizeBy: sum
+		sourceColumn: UnitGrossPrice
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Quantity
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 6b4708d3-ee31-4ab4-a69b-251bb2900558
+		summarizeBy: sum
+		sourceColumn: Quantity
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalCost
+		dataType: int64
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 1ac9ce91-9f5c-4a2a-8d75-a90174d53dd4
+		summarizeBy: sum
+		sourceColumn: LineTotalCost
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column LineTotalNetNIS
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 98d50f21-678e-4d50-970a-935287edde50
+		summarizeBy: sum
+		sourceColumn: LineTotalNetNIS
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalNet_USD
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 92d920bc-9115-42f5-90fe-d16b761e90ee
+		summarizeBy: sum
+		sourceColumn: LineTotalNet_USD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineTotalNetVAT
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 7b6c076b-c242-4aed-a8ca-68ed80341f2d
+		summarizeBy: sum
+		sourceColumn: LineTotalNetVAT
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column LineTotalNetVAT_USD
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 0de6cd68-de72-46bf-b40f-61a2c1c57aef
+		summarizeBy: sum
+		sourceColumn: LineTotalNetVAT_USD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column YearMonth
+		dataType: int64
+		formatString: 0
+		lineageTag: 99443868-0373-4b35-8518-8b713c263ba2
+		summarizeBy: sum
+		sourceColumn: YearMonth
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column RowInsertDatetime
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 1ff3584d-b28d-479d-9f77-cf7be1980f7a
+		summarizeBy: none
+		sourceColumn: RowInsertDatetime
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DocID
+		dataType: string
+		lineageTag: 7d3b2e7b-674e-4c41-95f2-9b4a7987cae4
+		summarizeBy: none
+		sourceColumn: DocID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column UnitNetPriceUSD
+		dataType: double
+		lineageTag: 8031982a-4418-41dd-ad8d-f7dd382739d7
+		summarizeBy: sum
+		sourceColumn: UnitNetPriceUSD
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column UnitNetPriceNIS
+		dataType: double
+		lineageTag: 79e7994b-78c0-430f-9da9-f36fbd2303d3
+		summarizeBy: sum
+		sourceColumn: UnitNetPriceNIS
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Status
+		dataType: int64
+		formatString: 0
+		lineageTag: 5bb7e448-806b-4a6a-8cd1-07068643832a
+		summarizeBy: sum
+		sourceColumn: Status
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DeliveryNote
+		dataType: int64
+		formatString: 0
+		lineageTag: 0ffdf5d0-d35e-49bf-9d95-d8827c2bf8a0
+		summarizeBy: none
+		sourceColumn: DeliveryNote
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DeliveryDate
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 9d60e74a-f3f4-4b85-a0d0-131e0da9526e
+		summarizeBy: none
+		sourceColumn: DeliveryDate
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column OrderID
+		dataType: int64
+		formatString: 0
+		lineageTag: 1abfea88-69e5-44dc-8646-7e043e3c392f
+		summarizeBy: count
+		sourceColumn: OrderID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SupplierWarehouse
+		dataType: int64
+		formatString: 0
+		lineageTag: 0c9c057c-09bf-408b-9ae5-95c9f1cc699c
+		summarizeBy: none
+		sourceColumn: SupplierWarehouse
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column AdditionalQuantity
+		dataType: double
+		formatString: " #,#.##;(#,#.##)"
+		lineageTag: 6203e98a-7ea6-4da8-9227-5d41c00fb2b5
+		summarizeBy: sum
+		sourceColumn: AdditionalQuantity
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LineType
+		dataType: string
+		lineageTag: 89ef9aa1-b35c-46ed-9067-5f980a3e5d57
+		summarizeBy: none
+		sourceColumn: LineType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column LineTypeCode
+		dataType: int64
+		formatString: 0
+		lineageTag: 4965b712-bc23-45d0-9965-3c4be657c1a4
+		summarizeBy: count
+		sourceColumn: LineTypeCode
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Item
+		dataType: int64
+		formatString: 0
+		lineageTag: a6dd6525-250a-4301-8f55-5cf3ed433cee
+		summarizeBy: sum
+		sourceColumn: Item
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column AdditionalKey
+		dataType: int64
+		formatString: 0
+		lineageTag: cdcb5877-df10-4e72-a9ee-b5fa227e3d92
+		summarizeBy: count
+		sourceColumn: AdditionalKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column WarehouseFlag
+		dataType: int64
+		formatString: 0
+		lineageTag: 4382e73c-d594-490d-92b9-13803b64b549
+		summarizeBy: sum
+		sourceColumn: WarehouseFlag
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ItemKey_backup
+		dataType: string
+		lineageTag: afbba169-63c1-4592-91b0-e3e0182da425
+		summarizeBy: none
+		sourceColumn: ItemKey_backup
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ActionType
+		dataType: int64
+		formatString: 0
+		lineageTag: a78a7a3d-556a-4539-a5e9-d18c07ec7ae1
+		summarizeBy: none
+		sourceColumn: ActionType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = User
+
+	column ActionTypeDesc
+		dataType: string
+		lineageTag: 57a03303-3244-47a2-a5de-2981f605d65f
+		summarizeBy: none
+		sourceColumn: ActionTypeDesc
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column AdjustmentFlag
+		dataType: int64
+		formatString: 0
+		lineageTag: 269de438-6ef2-4c92-af6b-45e9a9f1d2dd
+		summarizeBy: sum
+		sourceColumn: AdjustmentFlag
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column TransactionType
+		dataType: string
+		lineageTag: abd42f6f-b314-41b6-9caf-035de8d4b217
+		summarizeBy: none
+		sourceColumn: TransactionType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column QuantityCategory
+		dataType: string
+		lineageTag: 791607e2-ef0c-41fd-a9c2-9b2f3bc131cf
+		summarizeBy: none
+		sourceColumn: QuantityCategory
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition factSales = m
+		mode: import
+		queryGroup: 'fact Tables'
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="---factSales#(lf)-- Create a temporary table with the values#(lf)DECLARE @SubItemsMapping TABLE (#(lf)    ItemID varchar(10),#(lf)    ItemDesc varchar(20)#(lf));#(lf)#(lf)-- Insert values into the table variable#(lf)INSERT INTO @SubItemsMapping (ItemID, ItemDesc)#(lf)VALUES (9990, 'ריבית'),#(lf)       (9991, 'הובלה'),#(lf)       (9992, 'הפרשי שער');#(lf)#(lf)with CurrencyConvertion as ( --Curenncy COnvertion Table--#(lf)SELECT *, #(lf)         CASE#(lf)         #(tab)WHEN sher = 0#(lf)         #(tab)THEN FIRST_VALUE(sher) OVER (PARTITION BY value_partition ORDER BY Tarikh) #(lf)         #(tab)ELSE sher#(lf)         END AS new_sher#(lf)         ,CASE#(lf)         #(tab)WHEN SHER_EURO = 0#(lf)         #(tab)THEN FIRST_VALUE(SHER_EURO) OVER (PARTITION BY value_partitionEuro ORDER BY Tarikh) #(lf)         #(tab)ELSE  SHER_EURO#(lf)         END AS new_sherEuro#(lf) FROM ( SELECT *#(lf) ,SUM(CASE WHEN sher=0 THEN 0 ELSE 1 END) OVER (ORDER BY tarikh ) AS value_partition#(lf) ,SUM(CASE WHEN SHER_EURO=0 THEN 0 ELSE 1 END) OVER (ORDER BY tarikh ) AS value_partitionEuro#(lf)          FROM SHERI_MTBE) m#(lf)#(tab)#(tab)  )#(lf)----------------חשבוניות--------------------#(lf)SELECT #(lf)        '1' as 'EntityID'#(lf)        ,CH.MS_CHSHBONIT  AS 'DocID'#(lf)#(tab)#(tab),ROW_NUMBER () over (partition by CH.MS_CHSHBONIT order by CS.T_CHSHBONIT,TM.TARIKH_MSHLOCH) AS 'InvoiceLineNumber'#(lf)#(tab)#(tab),'Invoice' AS 'DocName'#(lf)#(tab)#(tab),Case#(lf)#(tab)#(tab)#(tab)WHEN CS.QOD_MOTSR = TM.QOD_MOTSR#(lf)#(tab)#(tab)#(tab)#(tab)THEN 'Item'#(lf)#(tab)#(tab)#(tab)ELSE 'Additional Expense'#(lf)#(tab)#(tab)END AS 'LineType'#(lf)#(tab)#(tab),Case#(lf)#(tab)#(tab)#(tab)WHEN CS.QOD_MOTSR = TM.QOD_MOTSR#(lf)#(tab)#(tab)#(tab)#(tab)THEN 0#(lf)#(tab)#(tab)#(tab)ELSE 1#(lf)#(tab)#(tab)END AS 'LineTypeCode'#(lf)#(tab)#(tab)--,CONCAT('1' , CONVERT(INT, CONVERT(VARCHAR, c.CUST)))   AS 'AccountKey' -- customer from invoices in case you need just invoices #(lf)#(tab)#(tab),CONVERT(VARCHAR,CS.QOD_LQOCH) 'AccountKey' -- customer from invoices in case you need just invoices #(lf)#(tab)#(tab),SUBSTRING(CS.T_CHSHBONIT,1,4) + '-' + SUBSTRING(CS.T_CHSHBONIT,5,2) + '-' + SUBSTRING(CS.T_CHSHBONIT,7,2) AS 'Date' -- Invoice date  #(lf)#(tab)#(tab)--,null AS 'Time'#(lf)#(tab)#(tab),CAST(CONVERT(INT, CONVERT(VARCHAR,AM.QOD))as varchar) 'AgentKey' -- Agent from Customer method#(lf)#(tab)#(tab)--,'1' + CONVERT(INT, CONVERT(VARCHAR, ii.PART)) AS 'ItemKey'#(lf)#(tab)#(tab)--,CONCAT('1' , CONVERT(INT, CONVERT(VARCHAR, ii.PART))  AS 'ItemKey'#(lf)#(tab)#(tab)--,CASE WHEN CS.QOD_MOTSR<>0 THEN CAST('1' as varchar) + CAST(CONVERT(INT, CONVERT(VARCHAR,CS.QOD_MOTSR)) as varchar) ELSE CAST('1' as varchar) + CAST(CONVERT(INT, CONVERT(VARCHAR,CS.QOD_MOTSR)) as varchar) +'-'+SIM.ItemID END AS 'ItemKey'#(lf)#(tab)#(tab),CAST( CONVERT(VARCHAR,CS.QOD_MOTSR) as varchar) +'-' + CAST( CONVERT(VARCHAR,CS.QOD_MOTSR) as varchar) AS 'ItemKey'#(lf)#(tab)#(tab),CASE WHEN TM.QOD_MOTSR IS NOT NULL THEN CAST(CONVERT(VARCHAR,TM.QOD_MOTSR) as varchar) ELSE CAST( CONVERT(VARCHAR,CS.QOD_MOTSR) as varchar) END +'-' + CASE WHEN CS.QOD_MOTSR<>0 THEN CAST( CONVERT(VARCHAR,CS.QOD_MOTSR) as varchar) ELSE SIM.ItemID END AS 'ItemKey_backup'#(lf)#(tab)#(tab),CASE WHEN TM.QOD_MOTSR IS NOT NULL THEN CAST(CONVERT(VARCHAR,TM.QOD_MOTSR) as varchar) ELSE CAST( CONVERT(VARCHAR,CS.QOD_MOTSR) as varchar) END AS Item#(lf)#(tab)#(tab),CASE WHEN CS.QOD_MOTSR<>0 THEN CAST( CONVERT(VARCHAR,CS.QOD_MOTSR) as varchar) ELSE SIM.ItemID END AS AdditionalKey#(lf)#(tab)#(tab)--,CAST('1' as varchar) + CAST(CONVERT(INT, CONVERT(VARCHAR, i.BRANCH)) as varchar) AS 'BranchKey'#(lf)#(tab)#(tab)--,null as 'EmployeeKey'#(lf)#(tab)#(tab)--,NULL AS 'BranchKey'#(lf)#(tab)#(tab)--,null as 'חבר מועדון'#(lf)#(tab)#(tab)--,(1 - (1 - ii.[T$PERCENT] / 100) * (1 - i.[T$PERCENT] / 100)) AS 'DiscountPercent' -- the DiscountPercent for the invoice and invoice line#(lf)#(tab)#(tab),NULL AS 'DiscountPercent'#(lf)#(tab)#(tab)--,(1 - (1 - ii.[T$PERCENT] / 100) * (1 - i.[T$PERCENT] / 100)) * ii.TQUANT / 1000 * ROUND(ii.PRICE, 2) * ii.IEXCHANGE AS 'LineTotalDiscount' -- the discount from gross price to the net#(lf)#(tab)#(tab),NULL AS 'LineTotalDiscount'#(lf)#(tab)#(tab)--,ROUND(ii.PRICE, 2) * ii.IEXCHANGE AS 'UnitGrossPrice'#(lf)#(tab)#(tab),NULL AS 'UnitGrossPrice'#(lf)#(tab)#(tab)--,ROUND(ii.PRICE * (1 - ii.[T$PERCENT] / 100) * (1 - i.[T$PERCENT] / 100), 2) * ii.IEXCHANGE AS 'UnitNetPrice'#(lf)#(tab)#(tab),CAST(CS.MCHIR_ICH_LLA_ME_M/(case when SHER_LCHISHOB<>0 then SHER_LCHISHOB else 1 end) AS decimal (12,2)) AS 'UnitNetPriceUSD'#(lf)#(tab)#(tab),CAST(CS.MCHIR_ICH_LLA_ME_M as decimal(12,2)) 'UnitNetPriceNIS'#(lf)#(tab)#(tab)--,ii.TQUANT / 1000 * (CASE WHEN i.DEBIT = 'C' THEN - 1 ELSE 1 END) AS 'Quantity'#(lf)#(tab)#(tab),CS.MSHQL_NTO AS 'Quantity'#(lf)#(tab)#(tab),CASE#(lf)#(tab)#(tab)#(tab)WHEN CS.QOD_MOTSR=TM.QOD_MOTSR#(lf)#(tab)#(tab)#(tab)#(tab)THEN 0#(lf)#(tab)#(tab)#(tab)ELSE Cs.CMOT#(lf)#(tab)#(tab)END as AdditionalQuantity#(lf)#(tab)#(tab)--The cost can be tor.cost * Quant or just tor.cost#(lf)#(tab)#(tab)--Option 1#(lf)#(tab)#(tab)--,CASE WHEN tor.COSTFLAG NOT IN ('C', '\0') #(lf)#(tab)#(tab)--THEN tor.COST * (CASE WHEN (tor.QUANT) < 0.0 THEN - 1 ELSE 1 END)#(lf)#(tab)#(tab)--ELSE p.COST * ((ii.QUANT / 1000) / p.COSTQUANT) * (CASE WHEN i.DEBIT = 'C' THEN - 1 ELSE 1 END) * (CASE WHEN ii.CREDITFLAG = 'Y' THEN 0 ELSE 1 END)#(lf)#(tab)#(tab)--END AS 'LineTotalCost' --------Cost without Quant#(lf)#(tab)#(tab),NULL AS 'LineTotalCost'#(lf)#(tab)#(tab)--Option 2#(lf)#(tab)#(tab)--,Case when tor.COSTFLAG NOT IN ('C','\0') then tor.COST * (ii.TQUANT/1000) * (Case when (tor.QUANT) < 0.0 then -1 else 1 end)#(lf)#(tab)#(tab)-- else #(lf)#(tab)#(tab)-- p.COST * ((ii.QUANT/1000) / p.COSTQUANT) * (CASE when i.DEBIT = 'C' then -1 else 1 end) *(case when ii.CREDITFLAG = 'Y' then 0 else 1 end) #(lf)#(tab)#(tab)-- end as 'Line Total Cost' ----Cost with Quant#(lf)#(tab)#(tab)--choose one of the above , The defauls is uncomment :#(lf)#(tab)#(tab),CAST(CASE #(lf)#(tab)#(tab)#(tab)WHEN CS.QOD_MOTSR<>0 #(lf)#(tab)#(tab)#(tab)#(tab)THEN CAST((CS.MCHIR_ICH_LLA_ME_M * CS.MSHQL_NTO) AS decimal (18,2)) #(lf)#(tab)#(tab)#(tab)ELSE CS.MCHIR_ICH_LLA_ME_M #(lf)#(tab)#(tab)END #(lf)#(tab)#(tab)+#(lf)#(tab)#(tab)CASE#(lf)#(tab)#(tab)#(tab)WHEN CS.QOD_MOTSR=TM.QOD_MOTSR#(lf)#(tab)#(tab)#(tab)#(tab)THEN 0#(lf)#(tab)#(tab)#(tab)--WHEN TM.QOD_MOTSR IS NULL#(lf)#(tab)#(tab)#(tab)--#(tab)THEN 0#(lf)#(tab)#(tab)#(tab)ELSE Cs.CMOT*CAST(CS.MCHIR_ICH_LLA_ME_M as decimal(12,2))#(lf)#(tab)#(tab)END #(lf)#(tab)#(tab)AS decimal (18,2))#(tab)AS 'LineTotalNetNIS'#(lf)#(lf)#(tab)#(tab),CAST(CASE #(lf)#(tab)#(tab)#(tab)WHEN CS.QOD_MOTSR<>0 #(lf)#(tab)#(tab)#(tab)#(tab)THEN CAST((CS.MCHIR_ICH_LLA_ME_M * CS.MSHQL_NTO)/(case when SHER_LCHISHOB<>0 then SHER_LCHISHOB else CC.new_sher end) AS decimal (18,2))#(lf)#(tab)#(tab)     ELSE CAST((CS.MCHIR_ICH_LLA_ME_M)/case when SHER_LCHISHOB<>0 then SHER_LCHISHOB else CC.new_sher end AS decimal (18,2)) #(lf)#(tab)#(tab)END#(lf)#(tab)#(tab)+#(lf)#(tab)#(tab)CASE#(lf)#(tab)#(tab)#(tab)WHEN CS.QOD_MOTSR=TM.QOD_MOTSR#(lf)#(tab)#(tab)#(tab)#(tab)THEN 0#(lf)#(tab)#(tab)#(tab)WHEN TM.QOD_MOTSR IS NULL#(lf)#(tab)#(tab)#(tab)#(tab)THEN 0#(lf)#(tab)#(tab)#(tab)ELSE Cs.CMOT * CAST(CS.MCHIR_ICH_LLA_ME_M/(case when SHER_LCHISHOB<>0 then SHER_LCHISHOB else CC.new_sher  end) AS decimal (12,2))#(lf)#(tab)#(tab)END AS decimal (18,2))#(tab)#(tab)AS'LineTotalNet_USD' --Invoices are always in NIS#(lf)#(lf)#(tab)#(tab),null AS 'LineTotalNetVAT'#(lf)#(tab)#(tab),null AS 'LineTotalNetVAT_USD'#(lf)#(tab)#(tab),CONVERT(INT, CONVERT(VARCHAR,SUBSTRING(CS.T_CHSHBONIT,1,4) + SUBSTRING(CS.T_CHSHBONIT,5,2))) AS YearMonth#(lf)#(tab)#(tab)--,case when (i.DEBIT='C')  then round(ii.IVCOST  ,2)*-1 else round(ii.IVCOST  ,2) end  as 'LineTotalNet'  -- Without Exchange#(lf)#(tab)#(tab)--,case when (i.DEBIT='C')  then round(ii.IVCOST  ,2)*-1*ii.IEXCHANGE else round(ii.IVCOST  ,2)*ii.IEXCHANGE end  as 'LineTotalNet' --allways exchange#(lf)#(tab)#(tab)--,case when (i.DEBIT='C')  then round(ii.QPRICE  ,2)*-1*ii.IEXCHANGE else round(ii.QPRICE  ,2)*ii.IEXCHANGE end  as 'LineTotalNet' -- the invoice items price without the total invoice discount#(lf)#(tab)#(tab)----#(lf)#(tab)#(tab),NULL as 'Status'#(lf)#(tab)#(tab)--,NULL as 'ChargeFlag'  #(lf)#(tab)#(tab)--,null as 'סטטוס ליקוט כותרת'#(lf)#(tab)   -- ,null  as 'סטטוס ליקוט שורה'#(lf)#(tab)--#(tab),NULL as 'דגל סטורנו'#(lf)#(tab)#(tab), TM.MS_TEODH as 'DeliveryNote'#(lf)#(tab)#(tab),CASE#(lf)#(tab)#(tab)#(tab)WHEN SUBSTRING(TM.TARIKH_MSHLOCH,1,4) = '0000'#(lf)#(tab)#(tab)#(tab)#(tab)THEN CAST(SUBSTRING(CS.T_CHSHBONIT,1,4) + '-' + SUBSTRING(CS.T_CHSHBONIT,5,2) + '-' + SUBSTRING(CS.T_CHSHBONIT,7,2) as date)#(lf)#(tab)#(tab)#(tab)ELSE CAST(ISNULL(SUBSTRING(TM.TARIKH_MSHLOCH,1,4) + '-' + SUBSTRING(TM.TARIKH_MSHLOCH,5,2) + '-' + SUBSTRING(TM.TARIKH_MSHLOCH,7,2),#(lf)#(tab)#(tab)ISNULL(SUBSTRING(FTM.FirstDeliveryDateTM,1,4) + '-' + SUBSTRING(FTM.FirstDeliveryDateTM,5,2) + '-' + SUBSTRING(FTM.FirstDeliveryDateTM,7,2),#(lf)#(tab)#(tab)SUBSTRING(CS.T_CHSHBONIT,1,4) + '-' + SUBSTRING(CS.T_CHSHBONIT,5,2) + '-' + SUBSTRING(CS.T_CHSHBONIT,7,2)))#(lf)#(tab)#(tab)AS date) #(lf)#(tab)#(tab)END as 'DeliveryDate'#(lf)#(tab)#(tab),HZ.MSPR_HZMNH as 'OrderID'#(lf)#(tab)#(tab),TM.QOD_SHOLCH as 'SupplierWarehouse'#(lf)#(tab)#(tab),CASE#(lf)#(tab)#(tab)#(tab)WHEN W.Qod_Gorm is Null#(lf)#(tab)#(tab)#(tab)#(tab)THEN 0#(lf)#(tab)#(tab)#(tab)ELSE 1#(lf)#(tab)#(tab)END AS 'WarehouseFlag'#(lf)#(tab)#(tab),GETDATE() AS RowInsertDatetime#(lf)#(tab)#(tab),TM.ActionType#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)as 'ActionType'#(lf)#(tab)#(tab)--,act.ActionType#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)as 'ActionTypeDesc'#(lf)#(tab)#(tab),CASE #(lf)#(tab)#(tab)#(tab)WHEN TM.ActionType = 6 THEN G.AOPI_PEILOT#(lf)#(tab)#(tab)#(tab)ELSE act.ActionType#(lf)#(tab)#(tab)END#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)as 'ActionTypeDesc'#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(lf)#(tab)#(tab),'0'#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)as 'AdjustmentFlag'#(lf)#(tab)#(tab),null#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)as  'TransactionType'#(lf)#(tab)#(tab),'Sales'#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)as  'QuantityCategory'#(lf)#(tab)#(tab)#(lf)#(tab)#(tab)--,SIM.ItemID AS 'SubItemID'#(lf)FROM CHSHBONIOT_COTROT CH#(lf)/*left join (Select CHSHBONIT, SUM(SCOM_MOTAM) as SCOM#(lf)#(tab)#(tab)#(tab)from QISHOR_QBLOT_CHSHBONIOT#(lf)#(tab)#(tab)#(tab)GROUP BY CHSHBONIT#(lf)) QCH#(lf)on CH.MS_CHSHBONIT = QCH.CHSHBONIT*/#(lf)--left join QISHOR_QBLOT_CHSHBONIOT QB #(lf)--   on CH.MS_CHSHBONIT = QB.CHSHBONIT#(lf)--left join QBLOT_COTROT Q#(lf)--on QB.QBLH = Q.MS_QBLH#(lf)Left Join GORMIM G#(lf)#(tab)on CH.QOD_LQOCH = G.QOD_GORM#(lf)Left Join TBLT_ANSHI_MCIROT AM #(lf)#(tab)on AM.SHM_AISH_MCIROT = G.AISH_MCIROT_MTPL#(lf)LEFT JOIN CHSHBONIOT_SHOROT CS #(lf)    ON CH.MS_CHSHBONIT = CS.MS_CHSHBONIT#(lf)LEFT JOIN @SubItemsMapping SIM #(lf)#(tab)ON (#(lf)#(tab)#(tab)CASE WHEN (TAOR_MOTSR LIKE '%ריבית%' OR TAOR_MOTSR LIKE '%הובלה%' OR TAOR_MOTSR LIKE '%הפרשי שער%') AND  CS.QOD_MOTSR=0 AND TAOR_MOTSR LIKE '%'+SIM.ItemDesc+'%'#(lf)#(tab)#(tab)then 1 else 0 end = 1)#(lf)LEFT JOIN TEODOT_MSHLOCH TM #(lf)#(tab)ON CS.MS_T_MSHLOCH = TM.MS_TEODH#(lf)LEFT JOIN (SELECT MS_CHSHBONIT , Min (TM.TARIKH_MSHLOCH) as 'FirstDeliveryDateTM',Min (CHS.TARIKH_MSHLOCH) as 'FirstDeliveryDateCHS'#(lf)#(tab)#(tab)#(tab)FROM CHSHBONIOT_SHOROT CHS#(lf)#(tab)#(tab)#(tab)Left Join TEODOT_MSHLOCH TM#(lf)#(tab)#(tab)#(tab)#(tab)ON TM.MS_TEODH = CHS.MS_T_MSHLOCH#(lf)#(tab)#(tab)#(tab)Where 1=1#(lf)#(tab)#(tab)#(tab)AND TM.TARIKH_MSHLOCH <>00000000#(lf)#(tab)#(tab)#(tab)AND CHS.TARIKH_MSHLOCH <>00000000#(lf)#(tab)#(tab)#(tab)Group By CHS.MS_CHSHBONIT) FTM#(lf)#(tab)ON FTM.MS_CHSHBONIT = CH.MS_CHSHBONIT#(lf)Left Join (SELECT MS_HZMNH,MS_T_MSHLOCH#(lf)#(tab)#(tab)#(tab)FROM QISHOR_T_MSHLOCH_HZMNOT#(lf)#(tab)#(tab)#(tab)) HZT#(lf)#(tab)on TM.MS_TEODH = HZT.MS_T_MSHLOCH#(lf)Left Join HZMNOT HZ#(lf)#(tab)on HZ.MSPR_HZMNH = HZT.MS_HZMNH#(lf)Left Join (#(lf)#(tab)#(tab)#(tab)Select *#(lf)#(tab)#(tab)#(tab)From GORMIM#(lf)#(tab)#(tab)#(tab)Where EntityType Like N'%מקום אספקה%') W#(lf)#(tab)On W.QOD_GORM = TM.QOD_SHOLCH#(lf)left join TBLT_PEOLOT_HZMNH_T_MSHLOCH act#(lf)#(tab)on TM.ActionType = act.MS_AOPTSIH#(lf)left join CurrencyConvertion CC #(lf)#(tab)ON cs.[TARIKH_MSHLOCH] = cc.Tarikh#(lf)#(lf)/*Inner Join (Select *,#(lf)Case#(lf)#(tab)WHEN SCOM_MOTAM = Amount and Amount = Lag(Amount) over (partition by CHSHBONIT,QBLH order by T_Preon)#(lf)#(tab)#(tab)THEN 0#(lf)#(tab)WHEN Amount is null#(lf)#(tab)#(tab)THEN SCOM_MOTAM#(lf)#(tab)ELSE Amount#(lf)END as 'Scom'#(lf)From Qblot_Chshbonit) QQC#(lf)#(tab)on CH.MS_CHSHBONIT = QQC.CHSHBONIT and QQC.QBLH = Q.MS_QBLH*/#(lf)#(lf)#(lf)WHERE 1=1  #(lf)--and QCH.CHSHBONIT is not null #(lf)--and Round(CH.SH_C_LLA_ME_M + ME_M-isnull(QCH.SCOM,0),0) = 0#(lf)AND Cast(SUBSTRING(cs.T_CHSHBONIT,1,4) as int) >=2018 and Cast(SUBSTRING(cs.T_CHSHBONIT,1,4) as int) <= Year(Getdate())#(lf)#(lf)--AND CH.MS_CHSHBONIT IN (64577,70531,66916)#(lf)#(lf)#(lf)#(lf)#(tab)#(tab)#(tab)-------OPEN Orders----------------------------------------------------------------------------------#(lf)#(tab)#(lf)UNION ALL#(lf)#(lf)#(lf) SELECT #(lf) '1' as 'EntityID'#(lf),MS_TEODH as 'DocID'#(lf),NULL as 'InvoiceLineNumber'#(lf),'Delivery Note' as  'DocName'#(lf),'Item' AS 'LineType'#(lf),0 AS 'LineTypeCode'#(lf),CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MQBL)) AS 'AccountKey'#(lf),SUBSTRING(TARIKH_MSHLOCH,1,4) + '-' + SUBSTRING(TARIKH_MSHLOCH,5,2) + '-' + SUBSTRING(TARIKH_MSHLOCH,7,2) as 'Date'#(lf)--,null AS 'Time'#(lf),CONVERT(INT, CONVERT(VARCHAR, TM.AISH_MCIROT)) AS 'AgentKey'#(lf),CONVERT(VARCHAR, TM.QOD_MOTSR)+'-'+CONVERT(VARCHAR, TM.QOD_MOTSR) AS 'ItemKey'#(lf),CONVERT(VARCHAR, TM.QOD_MOTSR)+'-'+CONVERT(VARCHAR, TM.QOD_MOTSR) AS 'ItemKey_backup'#(lf),TM.QOD_MOTSR AS Item#(lf),TM.QOD_MOTSR AS AdditionalKey#(lf)--,concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR)))+'-'+concat('1',CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MOTSR))) AS 'SubItemKey'#(lf)--,concat('1',CONVERT(INT, CONVERT(VARCHAR, o.BRANCH))) AS 'BranchKey'#(lf)--,null as 'EmployeeKey'#(lf)--,null as 'חבר מועדון'#(lf)--,(1-(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100))*100  as 'DiscountPercent'#(lf),null AS 'DiscountPercent'#(lf)--,(round((oi.TQUANT/1000)* oi.PRICE,2)*oi.IEXCHANGE)-((oi.TQUANT/1000)*round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE) as 'LineTotalDiscount' #(lf),NULL AS 'LineTotalDiscount' #(lf)--,round(oi.PRICE ,2)*oi.IEXCHANGE as 'Unit Gross Price' #(lf),NULL AS 'UnitGrossPrice'#(lf)--,round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE as 'Unit Net Price'#(lf),CASE#(lf)#(tab)         WHEN TM.MTBE_SH = '$' THEN CAST(TM.MCHIR_ICH as decimal(12,2))#(lf)#(tab)#(tab)   --THEN CAST(HZ.MCHIR_ICH AS decimal (12,4))#(lf)#(tab)         ELSE CAST(TM.MCHIR_ICH *(1/SM.NEW_SHER)  AS decimal (12,2))#(lf)         END AS 'UnitNetPriceUSD'#(lf),CASE#(lf)#(tab)  WHEN TM.MTBE_SH = '$'#(lf)#(tab)  THEN CAST(TM.MCHIR_ICH*SM.NEW_SHER AS decimal (12,2))#(lf)#(tab)  ELSE CAST(TM.MCHIR_ICH AS decimal (12,2))#(lf)      END AS 'UnitNetPriceNIS'#(lf),TM.MSHQL_NTO as 'Quantity'#(lf),0 AS 'AdditionalQuantity'#(lf)/*,tor.COST * (#(lf)#(tab)#(tab)#(tab)CASE #(lf)#(tab)#(tab)#(tab)#(tab)WHEN doct.DEBIT = 'C'#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)THEN - 1#(lf)#(tab)#(tab)#(tab)#(tab)ELSE 1#(lf)#(tab)#(tab)#(tab)#(tab)END#(lf)#(tab)#(tab)#(tab)) AS 'LineTotalCost' */#(lf),NULL AS 'LineTotalCost' #(lf)--,(oi.TQUANT/1000)*round(oi.PRICE*(1 - oi.[T$PERCENT] / 100)*(1 - o.[T$PERCENT] / 100) ,2)*oi.IEXCHANGE  as 'LineTotalNet'#(lf),CASE#(lf)#(tab)         WHEN TM.MTBE_SH = '$'#(lf)#(tab)#(tab)     THEN CAST((TM.MCHIR_ICH * SM.NEW_SHER) * TM.MSHQL_NTO AS decimal (18,2))#(lf)#(tab)         ELSE CAST( TM.MCHIR_ICH * TM.MSHQL_NTO AS decimal (18,2))#(lf)         END AS 'LineTotalNetNIS'#(lf),CASE#(lf)#(tab)         WHEN TM.MTBE_SH = '$'#(lf)#(tab)#(tab)     THEN CAST((TM.MCHIR_ICH)*TM.MSHQL_NTO/*TM.CMOT_SHSOPQH*/ AS decimal (18,2))#(lf)#(tab)         ELSE CAST(TM.MCHIR_ICH * TM.MSHQL_NTO/* TM.CMOT_SHSOPQH*/ * (1/SM.NEW_SHER) AS decimal (18,2))#(lf)         END AS 'LineTotalNet_USD'#(lf),null AS 'LineTotalNetVAT'#(lf),null AS 'LineTotalNetVAT_USD'#(lf),CONVERT(INT, CONVERT(VARCHAR,SUBSTRING(T_ASPQH,1,4) + SUBSTRING(T_ASPQH,5,2))) AS YearMonth#(lf),STTOS as 'Status'#(lf)--,null as 'ChargeFlag'  #(lf)--,null as 'סטטוס ליקוט כותרת'#(lf)--,null as 'סטטוס ליקוט שורה'#(lf)--,null  as 'דגל סטורנו'#(lf),TM.MS_TEODH as 'DeliveryNote'#(lf),CAST(SUBSTRING(TARIKH_MSHLOCH,1,4) + '-' + SUBSTRING(TARIKH_MSHLOCH,5,2) + '-' + SUBSTRING(TARIKH_MSHLOCH,7,2) as date) as 'DeliveryDate'#(lf),HZ.MSPR_HZMNH as 'OrderID'#(lf),TM.QOD_SHOLCH as 'SupplierWarehouse'#(lf),CASE#(lf)#(tab)WHEN W.Qod_Gorm is Null#(lf)#(tab)#(tab)THEN 0#(lf)#(tab)ELSE 1#(lf)END AS 'WarehouseFlag'#(lf),GETDATE() AS RowInsertDatetime#(lf),TM.ActionType#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)as 'ActionType'#(lf)--,act.ActionType#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)as 'ActionTypeDesc'#(lf),CASE #(lf)#(tab)WHEN TM.ActionType = 6 THEN G.AOPI_PEILOT#(lf)#(tab)ELSE act.ActionType#(lf)END as 'ActionTypeDesc'#(lf),CASE#(lf)#(tab)WHEN TM.MCHIR_ICH = 0#(lf)#(tab)#(tab)THEN 1#(lf)#(tab)ELSE 0#(lf)END AS 'AdjustmentFlag'#(lf),CASE#(lf)#(tab)WHEN TM.MCHIR_ICH = 0 AND W.QOD_GORM IS NOT NULL THEN G.AOPI_PEILOT#(lf)#(tab)WHEN TM.MCHIR_ICH = 0 AND W.QOD_GORM IS NULL#(tab) THEN 'החלפה'#(lf)#(tab)ELSE NULL#(lf)END AS  'TransactionType'#(lf),CASE#(lf)#(tab)WHEN TM.MCHIR_ICH <> 0 THEN 'Sales'#(lf)#(tab)WHEN TM.MCHIR_ICH = 0 and G.AOPI_PEILOT = 'פחת' THEN 'Shortage'#(lf)#(tab)WHEN TM.MCHIR_ICH = 0 and G.AOPI_PEILOT = 'אחסון' THEN 'Storage'#(lf)#(tab)WHEN TM.MCHIR_ICH = 0 and G.AOPI_PEILOT NOT IN ('פחת','אחסון') then 'Exchange'#(lf)END AS 'QuantityCategory'#(lf)--,NULL AS SubItemID#(lf)#(lf)#(lf)FROM TEODOT_MSHLOCH TM#(lf)Left Join (SELECT distinct MS_T_MSHLOCH#(lf)#(tab)#(tab)#(tab)FROM CHSHBONIOT_SHOROT#(lf)#(tab)#(tab)) CH#(lf)#(tab)on TM.MS_TEODH = CH.MS_T_MSHLOCH#(lf)Left Join (SELECT MS_HZMNH,MS_T_MSHLOCH#(lf)#(tab)#(tab)#(tab)FROM QISHOR_T_MSHLOCH_HZMNOT#(lf)#(tab)#(tab)) HZT#(lf)#(tab)on TM.MS_TEODH = HZT.MS_T_MSHLOCH#(lf)Left Join HZMNOT HZ#(lf)#(tab)on HZ.MSPR_HZMNH = HZT.MS_HZMNH#(lf)Left Join (select *, #(lf)Case#(lf)#(tab)when sher = 0#(lf)#(tab)#(tab)then first_value(sher) over (partition by value_partition order by Tarikh) #(lf)#(tab)else sher#(lf)end as new_sher#(lf)from (#(lf)  select *, sum(case when sher=0 then 0 else 1 end) over (order by tarikh ) as value_partition#(lf)  from SHERI_MTBE) m#(lf)#(lf)) SM  #(lf)#(tab)on SM.TARIKH=HZ.T_HZMNH#(lf)Left Join GORMIM G#(lf)#(tab)on TM.QOD_MQBL = G.QOD_GORM#(lf)Left Join (#(lf)#(tab)#(tab)#(tab)Select *#(lf)#(tab)#(tab)#(tab)From GORMIM#(lf)#(tab)#(tab)#(tab)Where EntityType Like N'%מקום אספקה%') W#(lf)#(tab)On W.QOD_GORM = TM.QOD_SHOLCH#(lf)left join TBLT_PEOLOT_HZMNH_T_MSHLOCH act#(lf)#(tab)on TM.ActionType = act.MS_AOPTSIH#(lf)WHERE CH.MS_T_MSHLOCH is null#(lf)AND Cast(SUBSTRING(TARIKH_MSHLOCH,1,4) as int) >=2018 and Cast(SUBSTRING(TARIKH_MSHLOCH,1,4) as int) <= Year(Getdate())#(lf)AND STTOS in (0,1)#(lf)--AND TM.ActionType in (1,11,12)#(lf)--AND TM.MCHIR_ICH <> 0#(lf)AND TM.PurchaseOrderType = 0"]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Date", type date}, {"UnitNetPriceNIS", type number}, {"LineTotalNetNIS", type number}, {"LineTotalNet_USD", type number}, {"DocID", type text}, {"LineTotalNetVAT_USD", type number}, {"LineTotalNetVAT", type number}, {"UnitNetPriceUSD", type number}, {"UnitGrossPrice", type number}, {"DeliveryDate", type date}, {"AccountKey", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+
