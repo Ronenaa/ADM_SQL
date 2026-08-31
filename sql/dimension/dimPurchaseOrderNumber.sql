@@ -34,7 +34,13 @@ PO_Base AS (
             ELSE HS.MS_MSMKH_QSHOR
         END AS OrderKey,
         HS.QOD_SHROT,
-        TRY_CONVERT(date, HC.T_ERKH, 112) AS DocDate
+        TRY_CONVERT(date, HC.T_ERKH, 112) AS DocDate,
+        -- Order-level supplier key (from the header row where QOD_SHROT = 0), same logic as factPurchaseExpenses.OrderSupplierKey
+        MAX(
+            CASE WHEN HS.QOD_SHROT = 0
+                 THEN CONVERT(int, CONVERT(varchar, HC.QOD_SPQ))
+            END
+        ) OVER (PARTITION BY HS.MS_MSMKH_QSHOR) AS OrderSupplierKey
     FROM HOTSAOT_COTROT HC
     LEFT JOIN HOTSAOT_SHOROT HS
         ON HC.NOMRTOR = HS.NOMRTOR
@@ -45,6 +51,14 @@ PO_Base AS (
         ) = CAST(HS.MS_MSMKH_QSHOR AS varchar(30))
     LEFT JOIN HZMNOT HZ
         ON HS.MS_MSMKH_QSHOR = HZ.MSPR_HZMNH
+)
+,
+PO_Supplier AS (
+    SELECT
+        MS_MSMKH_QSHOR,
+        MAX(OrderSupplierKey) AS OrderSupplierKey
+    FROM PO_Base
+    GROUP BY MS_MSMKH_QSHOR
 )
 ,
 Purchase_order AS (
@@ -174,9 +188,13 @@ SELECT distinct
 	OFD.FirstSalesDate as [Value Date],
     CONVERT(char(7),OFD.FirstSalesDate, 120) as ValueDateMonth,
 	RDN.ExpenseSource,
+	PS.OrderSupplierKey,
+	G.SHM_GORM as SupplierName,
     DENSE_RANK() OVER (
             ORDER BY  CONVERT(char(7),OFD.FirstSalesDate, 120) DESC
         ) AS Sort
 FROM RankedDeliveryNote RDN
 left join Order_First_Date OFD on RDN.PurchaseOrderID = OFD.[Order]
+left join PO_Supplier PS on TRY_CONVERT(bigint, RDN.PurchaseOrderID) = PS.MS_MSMKH_QSHOR
+left join GORMIM G on PS.OrderSupplierKey = G.QOD_GORM
 WHERE rn = 1

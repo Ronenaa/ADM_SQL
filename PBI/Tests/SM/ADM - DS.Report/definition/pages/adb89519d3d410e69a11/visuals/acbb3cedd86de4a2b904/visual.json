@@ -1,0 +1,84 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
+  "name": "acbb3cedd86de4a2b904",
+  "position": {
+    "x": 9.72644376899696,
+    "y": 0,
+    "z": 0,
+    "height": 198.419452887538,
+    "width": 610.82066869300911,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dimPNL"
+                    }
+                  },
+                  "Property": "PNL Description Purchase"
+                }
+              },
+              "queryRef": "dimPNL.PNL Description Purchase",
+              "nativeQueryRef": "PNL Description Purchase"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factPurchaseExpenses"
+                    }
+                  },
+                  "Property": "Cost per ton"
+                }
+              },
+              "queryRef": "factPurchaseExpenses.Cost per ton",
+              "nativeQueryRef": "Cost per ton"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "4b54cc0e78077502cc49",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "factPurchaseExpenses"
+              }
+            },
+            "Property": "Cost per ton"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "256456fd0ede3a8a8cec",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dimPNL"
+              }
+            },
+            "Property": "PNL Description Purchase"
+          }
+        },
+        "type": "Categorical"
+      }
+    ]
+  }
+}

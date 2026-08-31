@@ -242,14 +242,7 @@ table factPurchaseExpenses
 
 		annotation PBI_FormatHint = {"currencyCulture":"en-IL"}
 
-	measure Total_Balance_USD =
-			
-			CALCULATE(
-			    SUM(factPurchaseExpenses[LineTotalBalanceUSD]),
-			    REMOVEFILTERS(dimSuppliers),
-			    REMOVEFILTERS(dimItems),
-			    KEEPFILTERS(dimPurchaseOrderNumber)
-			)
+	measure Total_Balance_USD = SUM(factPurchaseExpenses[LineTotalBalanceUSD])
 		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
 		lineageTag: 703730b5-c8b2-4b1e-986e-87b00fbc4c05
 
@@ -263,6 +256,54 @@ table factPurchaseExpenses
 			)
 		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
 		lineageTag: f92a90ef-9800-4acd-931f-285b4aa7b4ba
+
+	measure 'Order Qty' =
+			
+			SUMX(
+			    VALUES(factPurchaseExpenses[OrderID]),
+			    CALCULATE(
+			        SUM(factPurchaseExpenses[OrderQuantity]),
+			        ALLEXCEPT(factPurchaseExpenses, factPurchaseExpenses[OrderID])
+			    )
+			)
+		lineageTag: a32a4cfa-3877-4b64-be5a-704863275488
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Cost per ton' =
+			
+			SUMX(
+			    VALUES(dimPNL[PNL Code]),
+			    VAR _pnlCode = dimPNL[PNL Code]
+			    VAR _balance = CALCULATE([Total_Balance_USD])
+			    VAR _divisor =
+			        IF(
+			            _pnlCode = 2270,
+			            [Order Qty] - [CIF Qty (for PO)],
+			            [Order Qty]
+			        )
+			    RETURN
+			    DIVIDE(_balance, _divisor, 0)
+			)
+		lineageTag: 026a9f77-937c-44bf-8479-5677ef886165
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'CIF Qty (for PO)' =
+			
+			SUMX(
+			    VALUES(factPurchaseExpenses[PurchaseOrderID]),
+			    VAR _po = CONVERT(factPurchaseExpenses[PurchaseOrderID], STRING)
+			    RETURN
+			    CALCULATE(
+			        [CIF Qty (Sales)],
+			        REMOVEFILTERS(factGain),
+			        TREATAS({_po}, factGain[PurchaseOrderID])
+			    )
+			)
+		lineageTag: 3d7f5a1c-8e2b-4c9d-af6e-1b0c3d4e5f6a
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	column EntityID
 		dataType: string
