@@ -72,10 +72,15 @@ BaseLink AS (
         a.MS_TEODT_MCIRH AS DeliveryNote,
         a.MS_TEODT_RCSH,
         b.MS_HZMNH AS PurchaseOrderID,
-        ISNULL(sl.ShipDesc, '-') AS ShipDesc
+        ISNULL(sl.ShipDesc, '-') AS ShipDesc,
+        -- Delivery note's own date (TARIKH_MSHLOCH is a YYYYMMDD string; TRY_CONVERT
+        -- so the known bad values, e.g. year '0000', land as NULL instead of erroring)
+        TRY_CONVERT(date, tmDN.TARIKH_MSHLOCH, 112) AS DeliveryDate
     FROM QISHOR_RCSH_LMCIRH a
     LEFT JOIN QISHOR_T_MSHLOCH_HZMNOT b
         ON a.MS_TEODT_RCSH = b.MS_T_MSHLOCH
+    LEFT JOIN TEODOT_MSHLOCH tmDN
+        ON tmDN.MS_TEODH = a.MS_TEODT_MCIRH
     LEFT JOIN PurchaseOrderLines POL
         ON b.MS_HZMNH = POL.POL_SQL_POID
     LEFT JOIN ShipsArrivals sa
@@ -96,6 +101,8 @@ Purchase AS (
         COALESCE(p.[Value Date], o.[Value Date]) AS [Value Date],
         -- Display month: choose a cheaper format (example: yyyy-MM)
         CONVERT(char(7), COALESCE(p.[Value Date], o.[Value Date]), 120) AS ValueDateMonth,
+        bl.DeliveryDate,
+        CONVERT(char(7), bl.DeliveryDate, 120) AS DeliveryMonth,
         DENSE_RANK() OVER (
             ORDER BY COALESCE(p.[Year Month], o.[Year Month]) DESC
         ) AS Sort
@@ -115,6 +122,8 @@ Exchange AS (
         bl.ShipDesc,
         COALESCE(p.[Value Date], o.[Value Date]) AS [Value Date],
         CONVERT(char(7), COALESCE(p.[Value Date], o.[Value Date]), 120) AS ValueDateMonth,
+        bl.DeliveryDate,
+        CONVERT(char(7), bl.DeliveryDate, 120) AS DeliveryMonth,
         DENSE_RANK() OVER (
             ORDER BY COALESCE(p.[Year Month], o.[Year Month]) DESC
         ) AS Sort
@@ -137,6 +146,8 @@ SELECT * FROM Exchange)
         ShipDesc,
         [Value Date],
         ValueDateMonth,
+        DeliveryDate,
+        DeliveryMonth,
         Sort,
         ROW_NUMBER() OVER (
             PARTITION BY DeliveryNote
@@ -150,6 +161,8 @@ SELECT
     ShipDesc,
     [Value Date],
     ValueDateMonth,
+    DeliveryDate,
+    DeliveryMonth,
     Sort
 FROM RankedDeliveryNote
 WHERE rn = 1

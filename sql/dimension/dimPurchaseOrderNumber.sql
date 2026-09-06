@@ -61,6 +61,40 @@ PO_Supplier AS (
     GROUP BY MS_MSMKH_QSHOR
 )
 ,
+-- Swap orders have no HOTSAOT_COTROT/SHOROT rows (no purchase-expense document), so PO_Supplier
+-- is NULL for them. Fall back to the swap's own movement chain: goods often pass through an
+-- internal distribution/emergency warehouse before reaching the customer (supplier -> warehouse ->
+-- customer(s)), so the party that actually supplied the order is whichever DeliveredFrom NEVER
+-- shows up as another row's DeliveredTo within the same order (the root of the chain) -- not just
+-- MAX(DeliveredFrom), which can land on the intermediate warehouse instead of the real supplier.
+Swap_Moves AS (
+    SELECT
+        ISNULL(b.MS_HZMNH, bb.MS_HZMNH) AS OrderID,
+        TM.QOD_SHOLCH  AS DeliveredFrom,
+        TM.QOD_MQBL    AS DeliveredTo
+    FROM TEODOT_MSHLOCH TM
+    LEFT JOIN GORMIM G                   ON TM.QOD_MQBL       = G.QOD_GORM
+    LEFT JOIN QISHOR_RCSH_LMCIRH a       ON a.MS_TEODT_MCIRH  = TM.MS_TEODH
+    LEFT JOIN QISHOR_T_MSHLOCH_HZMNOT b  ON a.MS_TEODT_RCSH   = b.MS_T_MSHLOCH
+    LEFT JOIN QISHOR_T_MSHLOCH_HZMNOT bb ON bb.MS_T_MSHLOCH   = TM.MS_TEODH
+    WHERE G.AOPI_PEILOT NOT IN (N'אחסון')
+      AND ISNULL(b.MS_HZMNH, bb.MS_HZMNH) IS NOT NULL
+)
+,
+Swap_Supplier AS (
+    SELECT
+        OrderID,
+        -- MIN() is just a deterministic tie-break for the rare order with more than one
+        -- independent root supplier; normally there's exactly one.
+        MIN(DeliveredFrom) AS SwapSupplierKey
+    FROM Swap_Moves m
+    WHERE NOT EXISTS (
+        SELECT 1 FROM Swap_Moves m2
+        WHERE m2.OrderID = m.OrderID AND m2.DeliveredTo = m.DeliveredFrom
+    )
+    GROUP BY OrderID
+)
+,
 Purchase_order AS (
     SELECT
         MS_MSMKH_QSHOR,
@@ -188,7 +222,7 @@ SELECT distinct
 	OFD.FirstSalesDate as [Value Date],
     CONVERT(char(7),OFD.FirstSalesDate, 120) as ValueDateMonth,
 	RDN.ExpenseSource,
-	PS.OrderSupplierKey,
+	ISNULL(PS.OrderSupplierKey, SS.SwapSupplierKey) AS OrderSupplierKey,
 	G.SHM_GORM as SupplierName,
     DENSE_RANK() OVER (
             ORDER BY  CONVERT(char(7),OFD.FirstSalesDate, 120) DESC
@@ -196,5 +230,6 @@ SELECT distinct
 FROM RankedDeliveryNote RDN
 left join Order_First_Date OFD on RDN.PurchaseOrderID = OFD.[Order]
 left join PO_Supplier PS on TRY_CONVERT(bigint, RDN.PurchaseOrderID) = PS.MS_MSMKH_QSHOR
-left join GORMIM G on PS.OrderSupplierKey = G.QOD_GORM
+left join Swap_Supplier SS on TRY_CONVERT(bigint, RDN.PurchaseOrderID) = SS.OrderID
+left join GORMIM G on ISNULL(PS.OrderSupplierKey, SS.SwapSupplierKey) = G.QOD_GORM
 WHERE rn = 1

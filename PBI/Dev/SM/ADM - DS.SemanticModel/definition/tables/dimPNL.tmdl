@@ -38,6 +38,31 @@ table dimPNL
 		lineageTag: 955e069e-2d4c-4602-82ad-2f77bcc82a98
 		summarizeBy: none
 		sourceColumn: PNL Description Purchase
+		sortByColumn: 'PNL Sort'
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Expense Group'
+		dataType: string
+		lineageTag: 6f1d5c9b-7e2a-4f8d-ca4b-1a3e7d9f5b26
+		summarizeBy: none
+		sourceColumn: Expense Group
+		sortByColumn: 'PNL Sort'
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'PNL Sort'
+		dataType: int64
+		formatString: 0
+		lineageTag: 4b8f2d6a-1c3e-4f9b-ad7c-6e0f2a4b8c1d
+		summarizeBy: none
+		sourceColumn: PNL Sort
 
 		changedProperty = IsHidden
 
@@ -48,7 +73,7 @@ table dimPNL
 		queryGroup: Dim
 		source =
 				let
-				    Source = Sql.Database(#"SQL Address", "MT", [Query="-- dimPNL#(lf)SELECT #(lf)    QOD_SHROT          AS PNLKey,#(lf)    PNL                AS [PNL Code],#(lf)    SHM_SHROT          AS [PNL Description],#(lf)    p.PNL_Desc         AS [PNL Description Purchase]#(lf)FROM HOTSAOT_SHROTIM_New h#(lf)LEFT JOIN (#(lf)    SELECT * #(lf)    FROM tblPnlList #(lf)    WHERE PNL_Type = 'OUT'#(lf)) p#(lf)  ON h.PNL = p.PNL_ID#(lf)#(lf)UNION ALL#(lf)#(lf)-- the extra “Purchase of inventory” row#(lf)SELECT#(lf)    999                AS PNLKey,#(lf)    '1010'             AS [PNL Code],#(lf)    ''                 AS [PNL Description],        #(lf)    'Purchase of inventory' AS [PNL Description Purchase]"]),
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="-- dimPNL#(lf)SELECT#(lf)    QOD_SHROT          AS PNLKey,#(lf)    PNL                AS [PNL Code],#(lf)    SHM_SHROT          AS [PNL Description],#(lf)    p.PNL_Desc         AS [PNL Description Purchase],#(lf)    CASE#(lf)        WHEN PNL = 2270 THEN 'Discharge cost'#(lf)        WHEN PNL = 1111 THEN 'Shortage'#(lf)        WHEN PNL = 1201 THEN 'Demurrage / Despatch'#(lf)        ELSE 'Other Expenses'#(lf)    END                AS [Expense Group],#(lf)    CASE#(lf)        WHEN PNL = 2270 THEN 2#(lf)        WHEN PNL = 1111 THEN 3#(lf)        WHEN PNL = 1201 THEN 4#(lf)        ELSE 5#(lf)    END                AS [PNL Sort]#(lf)FROM HOTSAOT_SHROTIM_New h#(lf)LEFT JOIN (#(lf)    SELECT *#(lf)    FROM tblPnlList#(lf)    WHERE PNL_Type = 'OUT'#(lf)) p#(lf)  ON h.PNL = p.PNL_ID#(lf)#(lf)UNION ALL#(lf)#(lf)-- the extra ""Purchase of inventory"" row#(lf)SELECT#(lf)    999                AS PNLKey,#(lf)    '1010'             AS [PNL Code],#(lf)    ''                 AS [PNL Description],#(lf)    'Purchase of inventory' AS [PNL Description Purchase],#(lf)    'Purchase of inventory' AS [Expense Group],#(lf)    1                  AS [PNL Sort]"]),
 				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"PNL Code", Int64.Type}})
 				in
 				    #"Changed Type"

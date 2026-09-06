@@ -1,13 +1,12 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
-  "name": "acbb3cedd86de4a2b904",
+  "name": "84a5c1afadf422a406c3",
   "position": {
-    "x": 9.72644376899696,
-    "y": 0,
-    "z": 0,
-    "height": 198.419452887538,
-    "width": 610.82066869300911,
-    "tabOrder": 0
+    "x": 829.7842923421008,
+    "y": 169.59095025969944,
+    "z": 1001,
+    "height": 549.6563834309901,
+    "width": 449.71885917081011
   },
   "visual": {
     "visualType": "tableEx",
@@ -20,28 +19,42 @@
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "dimPNL"
+                      "Entity": "dimPurchaseOrderNumber"
                     }
                   },
-                  "Property": "Expense Group"
+                  "Property": "PurchaseOrderID"
                 }
               },
-              "queryRef": "dimPNL.Expense Group",
-              "nativeQueryRef": "Expense Group"
+              "queryRef": "dimPurchaseOrderNumber.PurchaseOrderID",
+              "nativeQueryRef": "PurchaseOrderID"
             },
             {
               "field": {
-                "Measure": {
+                "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "factPurchaseExpenses"
+                      "Entity": "dimPurchaseOrderNumber"
                     }
                   },
-                  "Property": "Cost per ton"
+                  "Property": "SupplierName"
                 }
               },
-              "queryRef": "factPurchaseExpenses.Cost per ton",
-              "nativeQueryRef": "Cost per ton"
+              "queryRef": "dimPurchaseOrderNumber.SupplierName",
+              "nativeQueryRef": "SupplierName"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dimBoats"
+                    }
+                  },
+                  "Property": "ShipDesc"
+                }
+              },
+              "queryRef": "dimBoats.ShipDesc",
+              "nativeQueryRef": "ShipDesc"
             },
             {
               "field": {
@@ -50,17 +63,17 @@
                     "Column": {
                       "Expression": {
                         "SourceRef": {
-                          "Entity": "factPurchaseExpenses"
+                          "Entity": "factGain"
                         }
                       },
-                      "Property": "OrderQuantity"
+                      "Property": "CIF_Purchase"
                     }
                   },
                   "Function": 0
                 }
               },
-              "queryRef": "Sum(factPurchaseExpenses.OrderQuantity)",
-              "nativeQueryRef": "Sum of OrderQuantity"
+              "queryRef": "Sum(factGain.CIF_Purchase)",
+              "nativeQueryRef": "Sum of CIF_Purchase"
             }
           ]
         }
@@ -71,51 +84,32 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "400f2ad2b7c601725ddd",
+        "name": "bad7f63f2a047a2548be",
         "field": {
           "Column": {
             "Expression": {
               "SourceRef": {
-                "Entity": "dimPNL"
+                "Entity": "dimPurchaseOrderNumber"
               }
             },
-            "Property": "Expense Group"
+            "Property": "PurchaseOrderID"
           }
         },
         "type": "Categorical"
       },
       {
-        "name": "49b27c75b99f335309bb",
+        "name": "79d32ad7b8059c9e476d",
         "field": {
-          "Measure": {
+          "Column": {
             "Expression": {
               "SourceRef": {
-                "Entity": "factPurchaseExpenses"
+                "Entity": "dimPurchaseOrderNumber"
               }
             },
-            "Property": "Cost per ton"
+            "Property": "SupplierName"
           }
         },
-        "type": "Advanced"
-      },
-      {
-        "name": "b7c2d1d66e376ac6e09b",
-        "field": {
-          "Aggregation": {
-            "Expression": {
-              "Column": {
-                "Expression": {
-                  "SourceRef": {
-                    "Entity": "factPurchaseExpenses"
-                  }
-                },
-                "Property": "OrderQuantity"
-              }
-            },
-            "Function": 0
-          }
-        },
-        "type": "Advanced"
+        "type": "Categorical"
       }
     ]
   }

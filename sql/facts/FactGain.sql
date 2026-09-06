@@ -229,6 +229,42 @@ exchange_priced AS (
         ) ship_sub ON ship_sub.PurchaseOrderID = CAST(p.PurchaseOrderID AS VARCHAR(30))
 )
 
+-- Swap_RootSupplier: a swap order's real supplier, independent of exchange_movements' matching
+-- logic above. Goods often pass through an internal distribution/emergency warehouse before
+-- reaching the customer (supplier -> warehouse -> customer(s)); exchange_movements' raw
+-- DeliveredFrom can land on that intermediate warehouse instead of the true supplier. This CTE
+-- finds the root of the chain at the raw per-transaction grain (before exchange_movements'
+-- month/from/to aggregation folds legs together): the DeliveredFrom that never appears as
+-- another row's DeliveredTo for the same order. Used ONLY to override SupplierKey below — the
+-- Cif_price/discharge/demurrage matching in exchange_movements/exchange_p_orders/exchange_priced
+-- is untouched.
+,Swap_Moves AS (
+    SELECT
+        ISNULL(b.MS_HZMNH, bb.MS_HZMNH) AS OrderID,
+        TM.QOD_SHOLCH  AS DeliveredFrom,
+        TM.QOD_MQBL    AS DeliveredTo
+    FROM TEODOT_MSHLOCH TM
+    LEFT JOIN GORMIM G                   ON TM.QOD_MQBL       = G.QOD_GORM
+    LEFT JOIN QISHOR_RCSH_LMCIRH a       ON a.MS_TEODT_MCIRH  = TM.MS_TEODH
+    LEFT JOIN QISHOR_T_MSHLOCH_HZMNOT b  ON a.MS_TEODT_RCSH   = b.MS_T_MSHLOCH
+    LEFT JOIN QISHOR_T_MSHLOCH_HZMNOT bb ON bb.MS_T_MSHLOCH   = TM.MS_TEODH
+    WHERE G.AOPI_PEILOT NOT IN (N'אחסון')
+      AND ISNULL(b.MS_HZMNH, bb.MS_HZMNH) IS NOT NULL
+)
+,Swap_RootSupplier AS (
+    SELECT
+        OrderID,
+        -- MIN() is a deterministic tie-break for the rare order with more than one independent
+        -- root supplier; normally there's exactly one.
+        MIN(DeliveredFrom) AS RootSupplierKey
+    FROM Swap_Moves m
+    WHERE NOT EXISTS (
+        SELECT 1 FROM Swap_Moves m2
+        WHERE m2.OrderID = m.OrderID AND m2.DeliveredTo = m.DeliveredFrom
+    )
+    GROUP BY OrderID
+)
+
 -----------------------------------------------------------------------------------------------------------------------------------------------
 ,purchase_orders as (
 
@@ -386,7 +422,7 @@ UNION ALL
 SELECT
     CAST(HZ.MSPR_HZMNH AS VARCHAR)                                      AS PurchaseOrderID,
     'Swap'                                                          AS DocName,  -- was: 'Orders'
-    t.DeliveredFrom	                                            AS SupplierKey,
+    ISNULL(rs.RootSupplierKey, t.DeliveredFrom)                        AS SupplierKey,
     CAST(SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2)
          AS DATE)                                                       AS [Value Date],
     CAST(CONVERT(INT, CONVERT(VARCHAR,HZ.MOTSR_MOZMN)) AS VARCHAR) + '-' +
@@ -411,6 +447,8 @@ LEFT JOIN exchange_priced t
         CAST(CONVERT(INT, CONVERT(VARCHAR,HZ.MOTSR_MOZMN)) AS VARCHAR) + '-' +
         CAST(CONVERT(INT, CONVERT(VARCHAR,HZ.MOTSR_MOZMN)) AS VARCHAR)
    AND t.rn = 1
+LEFT JOIN Swap_RootSupplier rs
+    ON rs.OrderID = HZ.MSPR_HZMNH
 WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
   AND HZ.OrderStatus <> 3
   AND HZ.ActionType IN (6,7)
@@ -507,18 +545,45 @@ WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
     FROM purchase_orders pe
 )
 
+-- A swap PO can match against more than one candidate import (exchange_priced ranks a match
+-- independently per DeliveredFrom/ItemKey/Date partition), giving purchase_orders several rows
+-- with different MatchedImportPO/ShipID pairs for the same swap PurchaseOrderID. P_costs used to
+-- pick 'boat' via its own independent MAX(ShipID) and MatchedImportPO via MAX(pe.MatchedImportPO)
+-- — two unrelated tie-breaks that can (and did) land on different imports, showing one ship's
+-- name next to another ship's CIF price. This CTE picks ONE winning row per swap PO (same
+-- MAX(MatchedImportPO) tie-break as before) and carries THAT row's own ShipID forward, so boat
+-- always names the same import MatchedImportPO/Cif_price actually come from.
+,Swap_WinningMatch AS (
+    SELECT PurchaseOrderID, MatchedImportPO, ShipID
+    FROM (
+        SELECT
+            pe.PurchaseOrderID,
+            pe.MatchedImportPO,
+            pe.ShipID,
+            ROW_NUMBER() OVER (
+                PARTITION BY pe.PurchaseOrderID
+                ORDER BY pe.MatchedImportPO DESC
+            ) AS rn
+        FROM purchase_orders pe
+        WHERE pe.MatchedImportPO IS NOT NULL
+    ) x
+    WHERE rn = 1
+)
+
 ,P_costs as (
     select
 	pe.PurchaseOrderID,
 	dt.DocName,
 	min([Value Date]) as ValueDate,
 	max(case when [PNLKey] = 999 then SupplierKey else null end) as SupplierKey,
-	max(ShipID) as boat,
+	CASE WHEN dt.DocName = 'Swap' THEN MAX(sw.ShipID) ELSE MAX(pe.ShipID) END as boat,
 	SUM(CASE WHEN [PNL Code] = 2270 THEN LineTotalNetUSD ELSE 0 END) as DischargeCosts,
-	CAST(ROUND(SUM(CASE WHEN [PNL Code] = 1201 THEN LineTotalNetUSD ELSE 0 END) / NULLIF(SUM(orderquantity), 0), 2) AS FLOAT) as [demurrage / Despatch],
+	SUM(CASE WHEN [PNL Code] = 1201 THEN LineTotalNetUSD ELSE 0 END) as DemurrageCosts,
 	CAST(ROUND(SUM(CASE WHEN [PNL Code] = 1111 THEN LineTotalNetUSD ELSE 0 END) / NULLIF(SUM(orderquantity), 0), 2) AS FLOAT) as [Shortage],
 	CAST(ROUND(SUM(CASE WHEN [PNL Code] not in (1010,2270,1201,1111) THEN LineTotalNetUSD ELSE 0 END) / NULLIF(SUM(orderquantity), 0), 2) AS FLOAT) as [Other_Expenses],
-	sum (orderquantity) as orderquantity,
+	-- Swap rows repeat the same t.OrderQuantity on every row, so SUM would multiply it by the
+	-- row count; Invoice/Import zero out non-header rows, so SUM is correct there.
+	CASE WHEN dt.DocName = 'Swap' THEN MAX(orderquantity) ELSE SUM(orderquantity) END as orderquantity,
 	sum(LineTotalNetUSD) as LineTotalNetUSD,
 	CAST(ROUND(
 		SUM(CASE WHEN PNLKey = 999 THEN LineTotalNetUSD ELSE 0 END)
@@ -528,6 +593,7 @@ WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
 	MAX(pe.MatchedImportPO) AS MatchedImportPO
   from purchase_orders pe
   LEFT JOIN po_doctype dt ON dt.PurchaseOrderID = pe.PurchaseOrderID
+  LEFT JOIN Swap_WinningMatch sw ON sw.PurchaseOrderID = pe.PurchaseOrderID
   group by pe.PurchaseOrderID, dt.DocName
   )
 ,sales as (
@@ -539,8 +605,7 @@ WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
 			ELSE 'Additional Expense'
 		END AS 'LineType'
 		,CONVERT(VARCHAR,CS.QOD_LQOCH) 'AccountKey' -- customer from invoices in case you need just invoices 
-		,SUBSTRING(CS.T_CHSHBONIT,1,4) + '-' + SUBSTRING(CS.T_CHSHBONIT,5,2) + '-' + SUBSTRING(CS.T_CHSHBONIT,7,2) AS 'Date' -- Invoice date  
-		,CAST(CONVERT(INT, CONVERT(VARCHAR,AM.QOD))as varchar) 'AgentKey' -- Agent from Customer method
+		,SUBSTRING(CS.T_CHSHBONIT,1,4) + '-' + SUBSTRING(CS.T_CHSHBONIT,5,2) + '-' + SUBSTRING(CS.T_CHSHBONIT,7,2) AS 'Date' -- Invoice date
 		,CAST( CONVERT(VARCHAR,CS.QOD_MOTSR) as varchar) +'-' + CAST( CONVERT(VARCHAR,CS.QOD_MOTSR) as varchar) AS 'ItemKey'
 		,CAST(CONVERT(VARCHAR,M.MasterProductInPurchase) as varchar) +'-' + CAST(CONVERT(VARCHAR,M.MasterProductInPurchase) as varchar) AS [מוצר על]
 		,CAST(ROUND(CS.MCHIR_ICH_LLA_ME_M / NULLIF(CASE WHEN SHER_LCHISHOB <> 0 THEN SHER_LCHISHOB ELSE 1 END, 0), 2) AS FLOAT) AS 'UnitNetPriceUSD'
@@ -596,7 +661,6 @@ WHERE CAST(SUBSTRING(HZ.T_HZMNH,1,4) AS INT) BETWEEN 2018 AND YEAR(GETDATE())
 		END										as 'ActionTypeDesc'										
 		,'0'									as 'AdjustmentFlag'
 		,'Sales'								as  'QuantityCategory'
-		,NULL									as  'TransactionType'  -- invoices are always direct sales
 FROM CHSHBONIOT_COTROT CH
 Left Join GORMIM G
 	on CH.QOD_LQOCH = G.QOD_GORM
@@ -642,7 +706,6 @@ UNION ALL
 	,'Item' AS 'LineType'
 	,CONVERT(INT, CONVERT(VARCHAR, TM.QOD_MQBL)) AS 'AccountKey'
 	,SUBSTRING(TARIKH_MSHLOCH,1,4) + '-' + SUBSTRING(TARIKH_MSHLOCH,5,2) + '-' + SUBSTRING(TARIKH_MSHLOCH,7,2) as 'Date'
-	,CONVERT(INT, CONVERT(VARCHAR, TM.AISH_MCIROT)) AS 'AgentKey'
 	,CONVERT(VARCHAR, TM.QOD_MOTSR)+'-'+CONVERT(VARCHAR, TM.QOD_MOTSR) AS 'ItemKey'
 	,CAST(CONVERT(VARCHAR,M.MasterProductInPurchase) as varchar) +'-' + CAST(CONVERT(VARCHAR,M.MasterProductInPurchase) as varchar) AS [מוצר על]
 	,CAST(ROUND(CASE
@@ -691,11 +754,6 @@ UNION ALL
 		WHEN TM.MCHIR_ICH = 0 and G.AOPI_PEILOT = 'אחסון' THEN 'Storage'
 		WHEN TM.MCHIR_ICH = 0 and G.AOPI_PEILOT NOT IN ('פחת','אחסון') then 'Swap'
 	END AS 'QuantityCategory'
-	,CASE
-		WHEN TM.MCHIR_ICH = 0 AND W.QOD_GORM IS NOT NULL THEN G.AOPI_PEILOT
-		WHEN TM.MCHIR_ICH = 0 AND W.QOD_GORM IS NULL     THEN 'החלפה'
-		ELSE NULL
-	END AS 'TransactionType'
 FROM TEODOT_MSHLOCH TM
 Left Join (SELECT distinct MS_T_MSHLOCH
 			FROM CHSHBONIOT_SHOROT
@@ -760,13 +818,11 @@ AND TM.QOD_SHOLCH <> TM.QOD_MQBL   -- exclude internal docs (same source and des
         s.DeliveryDate,
         FORMAT(s.DeliveryDate, 'yyyy-MM')                                           AS [Year-Month],
         s.AccountKey,
-        s.AgentKey,
         s.ActionType,
         s.ActionTypeDesc,
         s.SupplierWarehouse,
         s.AdjustmentFlag,
         s.QuantityCategory,
-        MAX(s.TransactionType)                                                      AS TransactionType,
         -- ItemKey, sale price, and SalesType come from the 'Item' line only
         MAX(CASE WHEN s.LineType = 'Item' THEN s.ItemKey        ELSE NULL END)      AS ItemKey,
 		MAX(CASE WHEN s.LineType = 'Item' THEN s.[מוצר על]        ELSE NULL END)   AS [מוצר על],
@@ -790,7 +846,7 @@ AND TM.QOD_SHOLCH <> TM.QOD_MQBL   -- exclude internal docs (same source and des
 	WHERE s.SupplierWarehouse in (1144,1411,1367,1366,1289,1101,943)
     GROUP BY
         s.DeliveryNote, s.DeliveryDate, --s.ItemKey,
-        s.AccountKey, s.AgentKey,
+        s.AccountKey,
         s.ActionType, s.ActionTypeDesc,
         s.SupplierWarehouse, 
         s.AdjustmentFlag, s.QuantityCategory
@@ -819,7 +875,6 @@ AND TM.QOD_SHOLCH <> TM.QOD_MQBL   -- exclude internal docs (same source and des
 SELECT
 	cast(s.DeliveryNote as varchar)																							AS DeliveryNote,
 	s.LineType																												AS LineType,
-	s.TransactionType																										AS TransactionType,
 	s.QuantityCategory																										AS QuantityCategory,
 	s.ActionTypeDesc																										AS ActionTypeDesc,
 	PC.DocName																												AS Purchase_DocName,
@@ -831,7 +886,6 @@ SELECT
 	cast(s.PurchaseOrderID as varchar)																						AS PurchaseOrderID,
 	cast(PC.SupplierKey as varchar)																							AS SupplierKey,
 	cast(s.AccountKey as varchar)																							AS AccountKey,
-	cast(s.AgentKey as varchar)																								AS AgentKey,
 	cast(s.ItemKey as varchar)																								AS ItemKey,
 	cast(PC.boat as varchar)																								AS ShipID,
 	FORMAT(PC.ValueDate, 'yyyy-MM')																							AS [Year-Month],
@@ -857,8 +911,13 @@ SELECT
 	-- P_costs reports for that import elsewhere in the model, not a recalculation.
 	case when s.rn = 1
 	then ISNULL(ImportPC.Cif_price, PC.Cif_price) else 0 end																AS CIF_Purchase,
-	case when s.rn = 1
-	then ISNULL(ImportPC.[demurrage / Despatch], PC.[demurrage / Despatch]) else 0 end									AS [demurrage / Despatch],
+	CASE
+		WHEN s.rn = 1 THEN
+		CAST(ROUND(ISNULL(
+			ISNULL(ImportPC.DemurrageCosts, PC.DemurrageCosts)
+			/ NULLIF(ISNULL(ImportPC.orderquantity, PC.orderquantity) - ISNULL(cq.CIF_Qty, 0), 0)
+		, 0), 2) AS FLOAT)
+		ELSE 0 END																											AS [demurrage / Despatch],
 	CASE WHEN s.rn = 1 THEN PC.[Other_Expenses]     ELSE 0 END																AS [Other_Expenses],
 	CASE WHEN s.rn = 1 THEN PC.Shortage            ELSE 0 END																AS Shortage,
 	CASE
@@ -866,10 +925,14 @@ SELECT
 		CAST(ROUND( ISNULL(
 			ISNULL(ImportPC.DischargeCosts, PC.DischargeCosts)
 			/ NULLIF(ISNULL(ImportPC.orderquantity, PC.orderquantity) - ISNULL(cq.CIF_Qty, 0), 0)
-		, 0), 2) AS FLOAT) END 		AS DischargeCost,
+		, 0), 2) AS FLOAT) END 		AS DischargeCost_Base,
 	CASE
 		WHEN s.rn = 1 THEN
-		CAST(ROUND(ISNULL(ImportPC.Cif_price, PC.Cif_price) + ISNULL(ImportPC.[demurrage / Despatch], PC.[demurrage / Despatch]) +
+		CAST(ROUND(ISNULL(ImportPC.Cif_price, PC.Cif_price) +
+		ISNULL(
+			ISNULL(ImportPC.DemurrageCosts, PC.DemurrageCosts)
+			/ NULLIF(ISNULL(ImportPC.orderquantity, PC.orderquantity) - ISNULL(cq.CIF_Qty, 0), 0)
+		, 0) +
 		ISNULL(
 			ISNULL(ImportPC.DischargeCosts, PC.DischargeCosts)
 			/ NULLIF(ISNULL(ImportPC.orderquantity, PC.orderquantity) - ISNULL(cq.CIF_Qty, 0), 0)
@@ -877,17 +940,12 @@ SELECT
 		ELSE 0 END																											AS FOT_Purchase,
 	CAST(ROUND(CASE
 		WHEN s.SalesType = 'CIF' AND s.LineType = 'Item'
-		THEN (s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - ISNULL(ImportPC.Cif_price, PC.Cif_price)
-		WHEN s.SalesType IN ('FOT', 'FOT Premium') AND s.LineType = 'Item'
-		THEN (s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - (ISNULL(ImportPC.Cif_price, PC.Cif_price)+ ISNULL(ImportPC.[demurrage / Despatch], PC.[demurrage / Despatch]) + (ISNULL(ImportPC.DischargeCosts, PC.DischargeCosts)/ NULLIF(
-			ISNULL(ImportPC.orderquantity, PC.orderquantity) - ISNULL(cq.CIF_Qty, 0),0)))
-		ELSE 0 END, 2) AS FLOAT)																							AS Gain,
-	CAST(ROUND(CASE
-		WHEN s.SalesType = 'CIF' AND s.LineType = 'Item'
 		THEN ((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - ISNULL(ImportPC.Cif_price, PC.Cif_price)) * s.Quantity
 		WHEN s.SalesType IN ('FOT', 'FOT Premium') AND s.LineType = 'Item'
 		THEN ((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) -
-		(ISNULL(ImportPC.Cif_price, PC.Cif_price) + ISNULL(ImportPC.[demurrage / Despatch], PC.[demurrage / Despatch])+ (ISNULL(ImportPC.DischargeCosts, PC.DischargeCosts)/ NULLIF(ISNULL(ImportPC.orderquantity, PC.orderquantity) - ISNULL(cq.CIF_Qty, 0),0)))) * s.Quantity
+		(ISNULL(ImportPC.Cif_price, PC.Cif_price)
+			+ ISNULL(ISNULL(ImportPC.DemurrageCosts, PC.DemurrageCosts) / NULLIF(ISNULL(ImportPC.orderquantity, PC.orderquantity) - ISNULL(cq.CIF_Qty, 0), 0), 0)
+			+ (ISNULL(ImportPC.DischargeCosts, PC.DischargeCosts)/ NULLIF(ISNULL(ImportPC.orderquantity, PC.orderquantity) - ISNULL(cq.CIF_Qty, 0),0)))) * s.Quantity
 		ELSE 0 END, 2) AS FLOAT)																							AS TotalGain,
 		NULL																												AS AdditionalLineCost
 FROM (
@@ -912,7 +970,6 @@ UNION ALL
 SELECT
     CAST(s.DeliveryNote AS VARCHAR)																							AS DeliveryNote,
 	'Item'																													AS LineType,
-	s.TransactionType																										AS [TransactionType],
 	s.QuantityCategory																										AS [QuantityCategory],
     s.ActionTypeDesc																										AS [ActionTypeDesc],
     'Warehouse'																												AS Purchase_DocName,
@@ -929,7 +986,6 @@ SELECT
 	FORMAT(s.DeliveryDate, 'yyyyMM') + '_' + CAST(s.ItemKey AS VARCHAR)														AS PurchaseOrderID,
     CAST(s.SupplierWarehouse AS VARCHAR)																					AS SupplierKey,
 	CAST(s.AccountKey AS VARCHAR)																							AS AccountKey,
-    CAST(s.AgentKey AS VARCHAR)																								AS AgentKey,
     CAST(s.ItemKey AS VARCHAR)																								AS ItemKey,
     NULL																													AS ShipID,
 	FORMAT(s.DeliveryDate, 'yyyy-MM')																						AS [Year-Month],
@@ -948,11 +1004,8 @@ SELECT
     NULL																													AS [demurrage / Despatch],
     NULL																													AS [Other_Expenses],
     NULL																													AS Shortage,
-    NULL																													AS DischargeCost, 
+    NULL																													AS DischargeCost_Base,
     inv.WH_Price																											AS FOT_Purchase,
-    CASE WHEN s.AdjustmentFlag <> 1
-         THEN CAST(ROUND((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - (16 + inv.WH_Price), 2) AS FLOAT)
-         ELSE 0 END																											AS Gain,
     CASE WHEN s.AdjustmentFlag <> 1
          THEN CAST(ROUND((s.LineTotalNet_USD / NULLIF(s.Quantity, 0)) - (16 + inv.WH_Price), 2) AS FLOAT) * s.Quantity
          ELSE 0 END																											AS TotalGain,

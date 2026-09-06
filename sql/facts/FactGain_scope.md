@@ -38,25 +38,29 @@ demurrage / shortage / other. Both come from the same source join: `HOTSAOT_SHRO
 HS.QOD_SHROT = HST.QOD_SHROT` — `HST.QOD_SHROT` (via the `PNLKey` CASE) and `HST.PNL` (renamed
 `[PNL Code]`) respectively.
 
-## Discharge-cost divisor — the rule that's easy to get wrong
+## Discharge/demurrage divisor — the rule that's easy to get wrong
 
-`DischargeCosts` is a **raw sum** in every CTE that touches it (`totals`, `P_costs`) — it is *not*
-divided by quantity at the point it's summed. It only gets divided at the point of use, and the
-divisor is **not** total order quantity — it's `orderquantity - CIF_Qty` (order quantity minus the
-portion of that PO's quantity that was sold CIF). Reason: CIF-sold quantity doesn't bear discharge
-cost (it's priced to already include delivery), so it must be excluded from the per-unit discharge
-allocation, or FOT buyers would be overcharged for a cost CIF buyers already covered elsewhere.
+`DischargeCosts` and `DemurrageCosts` are **raw sums** in `P_costs` — they are *not* divided by
+quantity at the point they're summed. They only get divided at the point of use, and the divisor is
+**not** total order quantity — it's `orderquantity - CIF_Qty` (order quantity minus the portion of
+that PO's quantity that was sold CIF). Reason: CIF-sold quantity doesn't bear these costs (it's
+priced to already include delivery), so it must be excluded from the per-unit allocation, or FOT
+buyers would be overcharged for a cost CIF buyers already covered elsewhere.
 
 `CIF_Qty` itself is only known once `sales`/`base_link` exist (`CIF_Qty` CTE, built from `sales`
-lines flagged `qty_cif`), which is *after* `totals`/`P_costs` in the build order. **Any CTE that
-wants a per-unit discharge cost must carry the raw sum forward and divide only once `CIF_Qty` is
-available** — never pre-divide by plain order quantity inside `totals` or `totals_raw`. This is
-exactly the mistake corrected in `totals` (see `DischargeCostTotal`, a raw sum, not `DischargeCost`
-pre-divided).
+lines flagged `qty_cif`), which is *after* `totals`/`P_costs` in the build order. **Any expression
+that wants a per-unit discharge or demurrage cost must carry the raw sum forward and divide only
+once `CIF_Qty` is available** — never pre-divide by plain order quantity inside `P_costs`. Both
+`DischargeCosts` and `DemurrageCosts` follow this pattern; the final SELECT applies the
+`(orderquantity - CIF_Qty)` divisor to each, in the `[demurrage / Despatch]`/`DischargeCost` output
+columns and inline in `FOT_Purchase`, `Gain` and `TotalGain`.
 
-`demurrage / Despatch` and `Shortage`, by contrast, **are** divided by plain `orderquantity` at
-aggregation time in both `totals` and `P_costs` — no `CIF_Qty` exclusion for those two. Only
-discharge cost has the CIF-exclusion rule.
+`Shortage` and `Other_Expenses`, by contrast, **are** divided by plain `orderquantity` at
+aggregation time in `P_costs` — no `CIF_Qty` exclusion for those two.
+
+The same rule is mirrored in DAX on the purchase-expenses side: `factPurchaseExpenses[Cost per ton]`
+applies `[Order Qty] - [CIF Qty (for PO)]` as the divisor for PNL Code 2270 (discharge) and 1201
+(demurrage), and plain `[Order Qty]` for everything else.
 
 ## CTE-by-CTE
 

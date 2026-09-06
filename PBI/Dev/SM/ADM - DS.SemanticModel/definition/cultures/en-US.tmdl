@@ -48904,17 +48904,17 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "fact_gain.DischargeCost_new": {
+			    "fact_gain.DischargeCost": {
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "factGain",
-			          "ConceptualProperty": "DischargeCost new"
+			          "ConceptualProperty": "DischargeCost"
 			        }
 			      },
 			      "State": "Generated",
 			      "Terms": [
 			        {
-			          "DischargeCost new": {
+			          "DischargeCost": {
 			            "State": "Generated"
 			          }
 			        }
@@ -55342,7 +55342,7 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "fact_gain_has_DischargeCost_new": {
+			    "fact_gain_has_DischargeCost": {
 			      "Binding": {
 			        "ConceptualEntity": "factGain"
 			      },
@@ -55353,9 +55353,9 @@ cultureInfo en-US
 			            "Entity": "fact_gain"
 			          }
 			        },
-			        "fact_gain.DischargeCost_new": {
+			        "fact_gain.DischargeCost": {
 			          "Target": {
-			            "Entity": "fact_gain.DischargeCost_new"
+			            "Entity": "fact_gain.DischargeCost"
 			          }
 			        }
 			      },
@@ -55366,12 +55366,12 @@ cultureInfo en-US
 			              "Role": "fact_gain"
 			            },
 			            "Object": {
-			              "Role": "fact_gain.DischargeCost_new"
+			              "Role": "fact_gain.DischargeCost"
 			            }
 			          },
 			          "State": "Generated",
 			          "Weight": 0.99,
-			          "ID": "fact_gains_have_DischargeCost_new"
+			          "ID": "fact_gains_have_DischargeCost"
 			        }
 			      ]
 			    },

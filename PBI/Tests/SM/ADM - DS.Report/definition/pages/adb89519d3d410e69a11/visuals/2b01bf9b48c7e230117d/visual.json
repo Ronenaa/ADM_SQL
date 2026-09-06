@@ -3,11 +3,11 @@
   "name": "2b01bf9b48c7e230117d",
   "position": {
     "x": 0,
-    "y": 288.87537993920972,
-    "z": 1,
-    "height": 430.88145896656539,
-    "width": 1207.0516717325229,
-    "tabOrder": 1
+    "y": 169.59095025969944,
+    "z": 1000,
+    "height": 549.6563834309901,
+    "width": 1002.4036524278663,
+    "tabOrder": 1000
   },
   "visual": {
     "visualType": "tableEx",
@@ -35,35 +35,6 @@
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "factPurchaseExpenses"
-                    }
-                  },
-                  "Property": "DocType"
-                }
-              },
-              "queryRef": "factPurchaseExpenses.DocType",
-              "nativeQueryRef": "Type",
-              "displayName": "Type"
-            },
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "factPurchaseExpenses"
-                    }
-                  },
-                  "Property": "Details"
-                }
-              },
-              "queryRef": "factPurchaseExpenses.Details",
-              "nativeQueryRef": "Details"
-            },
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
                       "Entity": "dimPNL"
                     }
                   },
@@ -72,34 +43,6 @@
               },
               "queryRef": "dimPNL.PNL Description Purchase",
               "nativeQueryRef": "PNL Description Purchase"
-            },
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "factPurchaseExpenses"
-                    }
-                  },
-                  "Property": "ServiceDetail"
-                }
-              },
-              "queryRef": "factPurchaseExpenses.ServiceDetail",
-              "nativeQueryRef": "ServiceDetail"
-            },
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "dimSuppliers"
-                    }
-                  },
-                  "Property": "Supplier Name"
-                }
-              },
-              "queryRef": "dimSuppliers.Supplier Name",
-              "nativeQueryRef": "Supplier Name"
             },
             {
               "field": {
@@ -183,7 +126,7 @@
             "totals": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             },
@@ -1501,20 +1444,6 @@
         },
         {
           "properties": {
-            "alignment": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Center'"
-                }
-              }
-            }
-          },
-          "selector": {
-            "metadata": "factPurchaseExpenses.Details"
-          }
-        },
-        {
-          "properties": {
             "styleTotal": {
               "expr": {
                 "Literal": {
@@ -1539,34 +1468,6 @@
           },
           "selector": {
             "metadata": "Sum(factPurchaseExpenses.LineTotalBalanceNIS)"
-          }
-        },
-        {
-          "properties": {
-            "styleTotal": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "styleHeader": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "alignment": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Center'"
-                }
-              }
-            }
-          },
-          "selector": {
-            "metadata": "dimSuppliers.Supplier Name"
           }
         },
         {
@@ -1954,34 +1855,6 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "67.10121128837305D"
-                }
-              }
-            }
-          },
-          "selector": {
-            "metadata": "factPurchaseExpenses.DocType"
-          }
-        },
-        {
-          "properties": {
-            "value": {
-              "expr": {
-                "Literal": {
-                  "Value": "434.80969166324263D"
-                }
-              }
-            }
-          },
-          "selector": {
-            "metadata": "factPurchaseExpenses.Details"
-          }
-        },
-        {
-          "properties": {
-            "value": {
-              "expr": {
-                "Literal": {
                   "Value": "253.41003307890213D"
                 }
               }
@@ -1989,20 +1862,6 @@
           },
           "selector": {
             "metadata": "dimPNL.PNL Description Purchase"
-          }
-        },
-        {
-          "properties": {
-            "value": {
-              "expr": {
-                "Literal": {
-                  "Value": "339.3088124732864D"
-                }
-              }
-            }
-          },
-          "selector": {
-            "metadata": "dimSuppliers.Supplier Name"
           }
         },
         {
@@ -2024,20 +1883,6 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "227.11158668748547D"
-                }
-              }
-            }
-          },
-          "selector": {
-            "metadata": "factPurchaseExpenses.ServiceDetail"
-          }
-        },
-        {
-          "properties": {
-            "value": {
-              "expr": {
-                "Literal": {
                   "Value": "195.61761155783262D"
                 }
               }
@@ -2045,6 +1890,20 @@
           },
           "selector": {
             "metadata": "Sum(factPurchaseExpenses.LineTotalBalanceUSD)"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "186.27827505129846D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "factPurchaseExpenses.Cost per ton"
           }
         }
       ],
@@ -2409,7 +2268,7 @@
         "howCreated": "User"
       },
       {
-        "name": "39d8291d4a2ef5a11002",
+        "name": "05a64061ff9ad3cf52d0",
         "field": {
           "Column": {
             "Expression": {
@@ -2423,7 +2282,7 @@
         "type": "Categorical"
       },
       {
-        "name": "a94a1fa3c284da3003cf",
+        "name": "47d0189db2d85f0f2e80",
         "field": {
           "Column": {
             "Expression": {
@@ -2437,21 +2296,7 @@
         "type": "Categorical"
       },
       {
-        "name": "27d6c8437ffdb3f6fd4a",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "dimSuppliers"
-              }
-            },
-            "Property": "Supplier Name"
-          }
-        },
-        "type": "Categorical"
-      },
-      {
-        "name": "2519ab2f9b15a4beb15b",
+        "name": "ab9ae88e36475e7b32b6",
         "field": {
           "Aggregation": {
             "Expression": {
@@ -2470,7 +2315,7 @@
         "type": "Advanced"
       },
       {
-        "name": "1f7990e90cf2a71c2157",
+        "name": "308c356679d6ae409876",
         "field": {
           "Aggregation": {
             "Expression": {
@@ -2489,49 +2334,7 @@
         "type": "Advanced"
       },
       {
-        "name": "643c9d3613f67871aba2",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "factPurchaseExpenses"
-              }
-            },
-            "Property": "DocType"
-          }
-        },
-        "type": "Categorical"
-      },
-      {
-        "name": "d4b34a2fd9d9f940b106",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "factPurchaseExpenses"
-              }
-            },
-            "Property": "Details"
-          }
-        },
-        "type": "Categorical"
-      },
-      {
-        "name": "a4d23954d1c00943a522",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "factPurchaseExpenses"
-              }
-            },
-            "Property": "ServiceDetail"
-          }
-        },
-        "type": "Categorical"
-      },
-      {
-        "name": "c40a71ada4fdb5995699",
+        "name": "074d8291626d341cc1f9",
         "field": {
           "Measure": {
             "Expression": {

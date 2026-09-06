@@ -278,7 +278,7 @@ table factPurchaseExpenses
 			    VAR _balance = CALCULATE([Total_Balance_USD])
 			    VAR _divisor =
 			        IF(
-			            _pnlCode = 2270,
+			            _pnlCode = 2270 || _pnlCode = 1201,
 			            [Order Qty] - [CIF Qty (for PO)],
 			            [Order Qty]
 			        )
@@ -304,6 +304,28 @@ table factPurchaseExpenses
 		lineageTag: 3d7f5a1c-8e2b-4c9d-af6e-1b0c3d4e5f6a
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// עלות פריקה לטון — אותו חישוב כמו [Cost per ton], מסונן לקוד PNL 2270 בלבד
+	measure 'Discharge Cost per ton' =
+			
+			CALCULATE(
+			    [Cost per ton],
+			    REMOVEFILTERS(dimPNL),
+			    dimPNL[PNL Code] = 2270
+			)
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 1a4e8c2f-5b9d-4a3e-8f7c-2d6b0e4a9c53
+
+	/// עלות דמורג' לטון — אותו חישוב כמו [Cost per ton], מסונן לקוד PNL 1201 בלבד
+	measure 'Demurrage Cost per ton' =
+			
+			CALCULATE(
+			    [Cost per ton],
+			    REMOVEFILTERS(dimPNL),
+			    dimPNL[PNL Code] = 1201
+			)
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 2b5f9d3a-6c0e-4b4f-9a8d-3e7c1f5b0d64
 
 	column EntityID
 		dataType: string

@@ -49,7 +49,7 @@
                     [
                       {
                         "Literal": {
-                          "Value": "'20007571'"
+                          "Value": "'146834'"
                         }
                       }
                     ]
@@ -60,6 +60,21 @@
           ]
         },
         "howCreated": "User"
+      }
+    ]
+  },
+  "objects": {
+    "outspacePane": [
+      {
+        "properties": {
+          "width": {
+            "expr": {
+              "Literal": {
+                "Value": "308L"
+              }
+            }
+          }
+        }
       }
     ]
   }

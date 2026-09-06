@@ -264,6 +264,76 @@ table factPurchaseExpenses
 		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
 		lineageTag: f92a90ef-9800-4acd-931f-285b4aa7b4ba
 
+	measure 'Order Qty' =
+			
+			SUMX(
+			    VALUES(factPurchaseExpenses[OrderID]),
+			    CALCULATE(
+			        SUM(factPurchaseExpenses[OrderQuantity]),
+			        ALLEXCEPT(factPurchaseExpenses, factPurchaseExpenses[OrderID])
+			    )
+			)
+		lineageTag: a32a4cfa-3877-4b64-be5a-704863275488
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Cost per ton' =
+			
+			SUMX(
+			    VALUES(dimPNL[PNL Code]),
+			    VAR _pnlCode = dimPNL[PNL Code]
+			    VAR _balance = CALCULATE([Total_Balance_USD])
+			    VAR _divisor =
+			        IF(
+			            _pnlCode = 2270 || _pnlCode = 1201,
+			            [Order Qty] - [CIF Qty (for PO)],
+			            [Order Qty]
+			        )
+			    RETURN
+			    DIVIDE(_balance, _divisor, 0)
+			)
+		lineageTag: 026a9f77-937c-44bf-8479-5677ef886165
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// עלות פריקה לטון — אותו חישוב כמו [Cost per ton], מסונן לקוד PNL 2270 בלבד
+	measure 'Discharge Cost per ton' =
+
+			CALCULATE(
+			    [Cost per ton],
+			    REMOVEFILTERS(dimPNL),
+			    dimPNL[PNL Code] = 2270
+			)
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 1a4e8c2f-5b9d-4a3e-8f7c-2d6b0e4a9c53
+
+	/// עלות דמורג' לטון — אותו חישוב כמו [Cost per ton], מסונן לקוד PNL 1201 בלבד
+	measure 'Demurrage Cost per ton' =
+
+			CALCULATE(
+			    [Cost per ton],
+			    REMOVEFILTERS(dimPNL),
+			    dimPNL[PNL Code] = 1201
+			)
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 2b5f9d3a-6c0e-4b4f-9a8d-3e7c1f5b0d64
+
+	measure 'CIF Qty (for PO)' =
+
+			SUMX(
+			    VALUES(factPurchaseExpenses[PurchaseOrderID]),
+			    VAR _po = CONVERT(factPurchaseExpenses[PurchaseOrderID], STRING)
+			    RETURN
+			    CALCULATE(
+			        [CIF Qty (Sales)],
+			        REMOVEFILTERS(factGain),
+			        TREATAS({_po}, factGain[PurchaseOrderID])
+			    )
+			)
+		lineageTag: 3d7f5a1c-8e2b-4c9d-af6e-1b0c3d4e5f6a
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
 	column EntityID
 		dataType: string
 		lineageTag: 7e021a22-204a-48e5-be52-a6b3cbfe0a36
