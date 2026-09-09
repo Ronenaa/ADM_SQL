@@ -539,6 +539,3 @@ relationship ab9fd201-9454-5931-94b4-b9a332c76b8c
 	fromColumn: dimPeriods_Compare.Date
 	toColumn: dimDates.Date
 
-relationship 4e8b7c25-1f60-4a93-b82d-5c9e0a3f7b14
-	fromColumn: dimCIFQty.PurchaseOrderID
-	toColumn: dimPurchaseOrderNumber.PurchaseOrderID

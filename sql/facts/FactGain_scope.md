@@ -58,11 +58,11 @@ columns and inline in `FOT_Purchase`, `Gain` and `TotalGain`.
 `Shortage` and `Other_Expenses`, by contrast, **are** divided by plain `orderquantity` at
 aggregation time in `P_costs` — no `CIF_Qty` exclusion for those two.
 
-### The same divisor outside FactGain: `dimCIFQty`
+### The same divisor outside FactGain: `CIF_Qty` / `NetTonnage` on factPurchaseExpenses
 
 `factPurchaseExpenses` needs this divisor too (the `Cost per ton` / `Discharge Cost per ton` /
-`Demurrage Cost per ton` measures), but it **cannot compute it** — it has no `sales`/`base_link`
-CTE. The DAX used to recompute CIF quantity via `[CIF Qty (Sales)]`, and it silently disagreed:
+`Demurrage Cost per ton` measures). The DAX used to recompute CIF quantity via
+`[CIF Qty (Sales)]`, and it silently disagreed with this file:
 
 * it filtered on `factGain[Price Term] = "CIF"`, which is a `COALESCE` of `SalesType` and
   `QuantityCategory` (final SELECT), so it matched rows the strict `ActionType = 11` test behind
@@ -71,26 +71,45 @@ CTE. The DAX used to recompute CIF quantity via `[CIF Qty (Sales)]`, and it sile
 * it respected the date slicer, shrinking a divisor that must be whole-PO and date-unbounded.
 
 Result: the PNL breakdown showed $10.20/ton discharge where `factGain` showed $14.68 for the same
-PO. Fixed by [`sql/dimension/dimCIFQty.sql`](../dimension/dimCIFQty.sql) — a standalone query
-returning one row per PO, with `CurrencyConvertion` / `sales` / `base_link` / `CIF_Qty` copied
-**verbatim** from this file so the two cannot drift. It is imported as the `dimCIFQty` table and
-related to `dimPurchaseOrderNumber[PurchaseOrderID]` (the hub both facts already join, and the only
-type-compatible key — `factPurchaseExpenses[PurchaseOrderID]` is `int64`, the hub is `string`).
+PO. Fixed in [`factPurchaseExpenses.sql`](factPurchaseExpenses.sql), which now carries the
+`sales` / `base_link` / `CIF_Qty` CTEs copied **verbatim** from this file, wraps its three-branch
+UNION as `base_expenses`, and exposes two columns off an outer join on `PurchaseOrderID`:
 
-**If you change `sales`, `base_link` or `CIF_Qty` here, mirror it in `dimCIFQty.sql`.** That
-duplication is deliberate for now (the alternative was cloning ~570 lines of
-`purchase_orders`/`P_costs` to also derive `orderquantity`), but it is the one place this rule can
-still go out of sync. Rewiring this file to consume `dimCIFQty` instead of its inline CTE is the
-tidier end state and is not done yet.
+* `CIF_Qty` — CIF quantity for the whole PO;
+* `NetTonnage` — `OrderQuantity - CIF_Qty`, `NULL` when zero so a division yields BLANK rather
+  than a misleading number.
+
+`Cost per ton` then splits into the two divisor groups and adds them — PNL 2270/1201 over
+`MAX(NetTonnage)`, everything else over `[Order Qty]` — so it stays additive across expense, PNL
+and PO grain with no iteration.
+
+**If you change `sales`, `base_link` or `CIF_Qty` here, mirror it in `factPurchaseExpenses.sql`.**
+That duplication is deliberate (the alternative was cloning ~570 lines of
+`purchase_orders`/`P_costs`), but it is the one place this rule can still go out of sync. Note
+that file needs its own `DECLARE @CutoffDate` for the copied `sales` CTE — it previously used
+literal dates and had no such variable.
 
 Two DAX-side traps worth knowing, both already handled:
 
-* `CIF_Qty` is a **PO-level constant**. Aggregate it with `MAX` inside `SUMX(VALUES(PurchaseOrderID))`
-  — a plain `SUM` over expense rows multiplies it by the row count, the same trap `P_costs` handles
-  for Swap rows (`CASE WHEN dt.DocName = 'Swap' THEN MAX(orderquantity) ...`).
-* Never fetch it per row via `TREATAS` into `factGain`. At per-expense grain that is one filter
-  context and table scan per expense row per PNL code, and it fails outright with
-  *Resources Exceeded*.
+* `CIF_Qty` and `NetTonnage` are **PO-level constants** repeated on every expense row of that PO.
+  Read them with `MAX`, never `SUM` — a plain `SUM` multiplies by the row count, the same trap
+  `P_costs` handles for Swap rows (`CASE WHEN dt.DocName = 'Swap' THEN MAX(orderquantity) ...`).
+* Never fetch the divisor per row via `TREATAS` into `factGain`. At per-expense grain that is one
+  filter context and table scan per expense row per PNL code, and it fails outright with
+  *Resources Exceeded*. An earlier attempt did exactly this; the column approach replaced it.
+
+### Zero-price movements: `AdjustmentFlag` and `QuantityCategory` are the same test
+
+In the Delivery Note branch, both columns derive from `TM.MCHIR_ICH = 0`: a zero-price movement
+gets `AdjustmentFlag = '1'` **and** a `QuantityCategory` of `Shortage` / `Storage` / `Swap`
+(priced movements get `'0'` and `Sales`). So `QuantityCategory IN ('Shortage','Storage','Swap')`
+already implies `AdjustmentFlag = '1'`.
+
+Consequence: filtering on one of those categories *and* `AdjustmentFlag <> "1"` is a
+contradiction that always returns blank. `[TotalQtyAdjustment]` applies that flag filter, so
+measures like `Shortage Qty Adjustment`, `Storage Qty Adjustment`, `Exchange Qty Adjustment` and
+`Shortage qty non dates` must build on `[TotalQty]` instead — the category filter alone is
+sufficient. `Sales` is the only category compatible with `[TotalQtyAdjustment]`.
 
 The same rule is mirrored in DAX on the purchase-expenses side: `factPurchaseExpenses[Cost per ton]`
 applies `[Order Qty] - [CIF Qty (for PO)]` as the divisor for PNL Code 2270 (discharge) and 1201

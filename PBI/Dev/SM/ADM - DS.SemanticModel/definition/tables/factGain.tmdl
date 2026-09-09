@@ -164,11 +164,14 @@ table factGain
 		displayFolder: רכש
 		lineageTag: ba6301db-f40b-4c50-85b7-35c088cd7bbf
 
-	/// כמות הפחת
+	/// כמות הפחת. משתמש ב-[TotalQty] ולא ב-[TotalQtyAdjustment]: ב-FactGain.sql שתי העמודות
+	/// נקבעות מאותו תנאי (TM.MCHIR_ICH = 0) — תנועה במחיר אפס מקבלת גם AdjustmentFlag = '1'
+	/// וגם QuantityCategory של Shortage/Storage/Swap. לכן סינון על הקטגוריה יחד עם
+	/// AdjustmentFlag <> "1" הוא תנאי סותר שתמיד החזיר ריק.
 	measure 'Shortage Qty Adjustment' =
 			
 			CALCULATE(
-			    [TotalQtyAdjustment],
+			    [TotalQty],
 			    factGain[QuantityCategory] = "Shortage"
 			)
 		displayFolder: רכש
@@ -176,10 +179,12 @@ table factGain
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
+	/// כמות שהועברה לאחסון. ראה ההערה ב-[Shortage Qty Adjustment] לגבי [TotalQty] מול
+	/// [TotalQtyAdjustment] — סינון הקטגוריה כבר מגדיר תנועות במחיר אפס.
 	measure 'Storage Qty Adjustment' =
 			
 			CALCULATE(
-			    [TotalQtyAdjustment],
+			    [TotalQty],
 			    factGain[QuantityCategory] = "Storage",
 			    REMOVEFILTERS(dimDates)
 			)
@@ -199,10 +204,12 @@ table factGain
 		displayFolder: רכש
 		lineageTag: 5021ff8e-9e76-4307-9884-a063adb15913
 
+	/// כמות שהועברה בהחלפה (Swap). ראה ההערה ב-[Shortage Qty Adjustment] לגבי [TotalQty] מול
+	/// [TotalQtyAdjustment] — סינון הקטגוריה כבר מגדיר תנועות במחיר אפס.
 	measure 'Exchange Qty Adjustment' =
 			
 			CALCULATE(
-			    [TotalQtyAdjustment],
+			    [TotalQty],
 			    factGain[QuantityCategory] = "Swap",
 			    REMOVEFILTERS(dimDates)
 			)
@@ -316,10 +323,12 @@ table factGain
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
+	/// כמות הפחת ללא הקשר תאריכים. ראה ההערה ב-[Shortage Qty Adjustment] לגבי [TotalQty] מול
+	/// [TotalQtyAdjustment] — סינון הקטגוריה כבר מגדיר תנועות במחיר אפס.
 	measure 'Shortage qty non dates' = ```
 			
 			 CALCULATE(
-			    [TotalQtyAdjustment],
+			    [TotalQty],
 			    factGain[QuantityCategory] = "Shortage",
 			    REMOVEFILTERS(dimDates)
 			)
