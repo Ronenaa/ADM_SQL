@@ -88,10 +88,16 @@ table factGain
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	/// חישוב רווח לטון שנמכר
-	measure 'Gain per Ton new' =
-			DIVIDE(
+	measure 'Gain per Ton' =
+			
+			CALCULATE(
+			    DIVIDE(
 			    [Total Gain (Base)],
-			    [TotalQty]
+			    [TotalQty],
+			    0
+			    ),
+			    FILTER(factGain,
+			    factGain[QuantityCategory] = "Sales")
 			)
 		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
 		displayFolder: רווח
@@ -108,8 +114,7 @@ table factGain
 	measure 'AVG unit price sales non dates' =
 			
 			CALCULATE(
-			    AVERAGE(factGain[UnitNetPriceUSD]),
-			    factGain[LineType] = "Item",
+			    [AVG unit price sales],
 			    REMOVEFILTERS(dimDates)
 			)
 		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
@@ -343,7 +348,7 @@ table factGain
 	measure 'Gain per Ton non dates' =
 			
 			CALCULATE(
-			    [Gain per Ton new],
+			    [Gain per Ton],
 			    REMOVEFILTERS(dimDates)
 			)
 		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
@@ -520,6 +525,17 @@ table factGain
 		formatString: #,0.00
 		displayFolder: מכר
 		lineageTag: 946e5e18-7baf-4603-a811-5d8679957a9b
+
+	/// עלות דמורג' לטון מתוך ה-SQL — מקביל ל-[DischargeCost]. הערך כבר מחולק ב-(OrderQuantity - CIF_Qty) ב-FactGain.sql, ולכן אין לחלק אותו שוב.
+	measure DemurrageCost =
+			
+			CALCULATE(
+			    sum(factGain[demurrage / Despatch]),
+			    factGain[Qty_flag] = "1"
+			)
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: מדדי בסיס
+		lineageTag: 3f8c6a21-4d7e-4b95-8c02-6a1e9f4b7d38
 
 	column DeliveryNote
 		dataType: string

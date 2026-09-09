@@ -138,7 +138,7 @@ table factPurchaseExpenses
 			VAR _Boat =
 			    SELECTEDVALUE( 'dimBoats'[ShipDesc] )
 			VAR _Date =
-			    SELECTEDVALUE( 'factPurchaseExpenses'[SupplyDate] )
+			    SELECTEDVALUE( dimPurchaseOrderNumber[ValueDateMonth] )
 			RETURN
 			IF(
 			    NOT( ISBLANK( _Boat ) )
@@ -242,14 +242,7 @@ table factPurchaseExpenses
 
 		annotation PBI_FormatHint = {"currencyCulture":"en-IL"}
 
-	measure Total_Balance_USD =
-			
-			CALCULATE(
-			    SUM(factPurchaseExpenses[LineTotalBalanceUSD]),
-			    REMOVEFILTERS(dimSuppliers),
-			    REMOVEFILTERS(dimItems),
-			    KEEPFILTERS(dimPurchaseOrderNumber)
-			)
+	measure Total_Balance_USD = SUM(factPurchaseExpenses[LineTotalBalanceUSD])
 		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
 		lineageTag: 703730b5-c8b2-4b1e-986e-87b00fbc4c05
 
@@ -277,28 +270,55 @@ table factPurchaseExpenses
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
+	/// עלות לטון לפי קוד PNL — "תרומה" בגרעיניות של השורה, ולכן ניתנת לסכימה: הוצאה -> PNL -> הזמנה.
+	/// פריקה (2270) ודמורג' (1201) מתחלקים בטונאז' נטו (Order Qty בניכוי כמות CIF) לפי כלל העלות
+	/// לטון; שאר הקודים ב-Order Qty המלא. המחלק מחושב פעם אחת להקשר כולו ולא פעם לכל שורה —
+	/// גרסה קודמת עשתה חיפוש שורה-אחר-שורה מול factGain (TREATAS) והפילה את הטבלה בגרעיניות
+	/// של הוצאה בודדת ב-Resources Exceeded.
 	measure 'Cost per ton' =
 			
+			VAR _netTonnage = [Order Qty] - [CIF Qty (for PO)]
+			RETURN
 			SUMX(
 			    VALUES(dimPNL[PNL Code]),
 			    VAR _pnlCode = dimPNL[PNL Code]
-			    VAR _balance = CALCULATE([Total_Balance_USD])
 			    VAR _divisor =
 			        IF(
 			            _pnlCode = 2270 || _pnlCode = 1201,
-			            [Order Qty] - [CIF Qty (for PO)],
+			            _netTonnage,
 			            [Order Qty]
 			        )
 			    RETURN
-			    DIVIDE(_balance, _divisor, 0)
+			    DIVIDE(CALCULATE([Total_Balance_USD]), _divisor, 0)
 			)
 		lineageTag: 026a9f77-937c-44bf-8479-5677ef886165
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
+	/// כמות ה-CIF של ההזמנות שבהקשר, נקראת מ-dimCIFQty (מקור אמת אחד, אותו CTE שמייצר
+	/// את DischargeCost_Base ב-FactGain.sql). CIF_Qty הוא קבוע ברמת ההזמנה ולכן נצרף עם
+	/// SUMX על VALUES(PurchaseOrderID) — SUM ישר על שורות ההוצאה היה מכפיל אותו במספר השורות.
+	/// הגרסה הקודמת חישבה זאת מחדש דרך [CIF Qty (Sales)], שסינן על [Price Term] = "CIF"
+	/// (עמודת COALESCE) והושפע ממסנני תאריך — ולכן לא הסכים עם ה-SQL.
+	measure 'CIF Qty (for PO)' =
+
+			SUMX(
+			    VALUES(factPurchaseExpenses[PurchaseOrderID]),
+			    VAR _po = CONVERT(factPurchaseExpenses[PurchaseOrderID], STRING)
+			    RETURN
+			    CALCULATE(
+			        MAX(dimCIFQty[CIF_Qty]),
+			        REMOVEFILTERS(),
+			        dimCIFQty[PurchaseOrderID] = _po
+			    )
+			) + 0
+		lineageTag: 3d7f5a1c-8e2b-4c9d-af6e-1b0c3d4e5f6a
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
 	/// עלות פריקה לטון — אותו חישוב כמו [Cost per ton], מסונן לקוד PNL 2270 בלבד
 	measure 'Discharge Cost per ton' =
-
+			
 			CALCULATE(
 			    [Cost per ton],
 			    REMOVEFILTERS(dimPNL),
@@ -309,7 +329,7 @@ table factPurchaseExpenses
 
 	/// עלות דמורג' לטון — אותו חישוב כמו [Cost per ton], מסונן לקוד PNL 1201 בלבד
 	measure 'Demurrage Cost per ton' =
-
+			
 			CALCULATE(
 			    [Cost per ton],
 			    REMOVEFILTERS(dimPNL),
@@ -317,22 +337,6 @@ table factPurchaseExpenses
 			)
 		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
 		lineageTag: 2b5f9d3a-6c0e-4b4f-9a8d-3e7c1f5b0d64
-
-	measure 'CIF Qty (for PO)' =
-
-			SUMX(
-			    VALUES(factPurchaseExpenses[PurchaseOrderID]),
-			    VAR _po = CONVERT(factPurchaseExpenses[PurchaseOrderID], STRING)
-			    RETURN
-			    CALCULATE(
-			        [CIF Qty (Sales)],
-			        REMOVEFILTERS(factGain),
-			        TREATAS({_po}, factGain[PurchaseOrderID])
-			    )
-			)
-		lineageTag: 3d7f5a1c-8e2b-4c9d-af6e-1b0c3d4e5f6a
-
-		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	column EntityID
 		dataType: string
