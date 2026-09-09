@@ -3,10 +3,10 @@
   "name": "2b01bf9b48c7e230117d",
   "position": {
     "x": 0,
-    "y": 404.33212996389892,
+    "y": 404.3321299638989,
     "z": 1000,
     "height": 315.37906137184115,
-    "width": 530.25270758122747,
+    "width": 530.2527075812275,
     "tabOrder": 1000
   },
   "visual": {
@@ -92,11 +92,11 @@
                       "Entity": "factPurchaseExpenses"
                     }
                   },
-                  "Property": "Expense Cost per ton"
+                  "Property": "Cost per ton"
                 }
               },
-              "queryRef": "factPurchaseExpenses.Expense Cost per ton",
-              "nativeQueryRef": "Expense Cost per ton"
+              "queryRef": "factPurchaseExpenses.Cost per ton",
+              "nativeQueryRef": "Cost per ton"
             }
           ]
         }
@@ -1903,7 +1903,7 @@
             }
           },
           "selector": {
-            "metadata": "factPurchaseExpenses.Expense Cost per ton"
+            "metadata": "factPurchaseExpenses.Cost per ton"
           }
         }
       ],

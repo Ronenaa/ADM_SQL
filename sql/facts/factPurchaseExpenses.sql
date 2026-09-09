@@ -850,9 +850,29 @@ SELECT
     CAST(ISNULL(cq.CIF_Qty, 0) AS FLOAT)                                      AS CIF_Qty,
     -- טונאז' נטו: אם הכל נמכר CIF (או אין כמות) מוחזר NULL, כך שחלוקה
     -- ב-DAX תיתן BLANK ולא מספר מטעה.
-    CAST(NULLIF(ISNULL(oq.OrderQuantity, 0) - ISNULL(cq.CIF_Qty, 0), 0) AS FLOAT) AS NetTonnage
+    CAST(NULLIF(ISNULL(oq.OrderQuantity, 0) - ISNULL(cq.CIF_Qty, 0), 0) AS FLOAT) AS NetTonnage,
+
+    -- CostPerTon: עלות לטון של השורה הזו בלבד, מחושבת כאן ולא ב-DAX.
+    -- כל שורה מחולקת במחלק של ההזמנה: פריקה (PNL 2270) ודמורג' (PNL 1201)
+    -- בטונאז' נטו (OrderQuantity - CIF_Qty), כי טונות שנמכרו CIF לא נפרקו;
+    -- כל השאר בכמות ההזמנה המלאה.
+    -- כך המדד ב-DAX הוא SUM פשוט על העמודה, נכון בכל גרעיניות (שורת
+    -- הוצאה / ספק / קוד PNL / הזמנה), ולא תלוי בהקשר הסינון — בלי ALLEXCEPT
+    -- ובלי איטרטורים.
+    CAST(
+        CASE
+            WHEN pnl.PNL IN (2270, 1201)
+                THEN be.LineTotalBalanceUSD
+                     / NULLIF(ISNULL(oq.OrderQuantity, 0) - ISNULL(cq.CIF_Qty, 0), 0)
+            ELSE be.LineTotalBalanceUSD
+                 / NULLIF(oq.OrderQuantity, 0)
+        END
+    AS FLOAT)                                                                 AS CostPerTon
 FROM base_expenses be
 LEFT JOIN CIF_Qty cq
     ON CAST(cq.PurchaseOrderID AS VARCHAR(30)) = CAST(be.PurchaseOrderID AS VARCHAR(30))
 LEFT JOIN PO_OrderQty oq
     ON oq.PurchaseOrderID = CAST(be.PurchaseOrderID AS VARCHAR(30))
+-- קוד ה-PNL לכל שורה, מאותו מקור שממנו נבנית dimPNL — קובע איזה מחלק חל על השורה.
+LEFT JOIN HOTSAOT_SHROTIM_New pnl
+    ON pnl.QOD_SHROT = be.PNLKey

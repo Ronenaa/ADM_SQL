@@ -92,11 +92,11 @@
                       "Entity": "factPurchaseExpenses"
                     }
                   },
-                  "Property": "Expense Cost per ton"
+                  "Property": "Cost per ton"
                 }
               },
-              "queryRef": "factPurchaseExpenses.Expense Cost per ton",
-              "nativeQueryRef": "Expense Cost per ton"
+              "queryRef": "factPurchaseExpenses.Cost per ton",
+              "nativeQueryRef": "Cost per ton"
             }
           ]
         }
@@ -111,7 +111,7 @@
                     "Entity": "factPurchaseExpenses"
                   }
                 },
-                "Property": "Expense Cost per ton"
+                "Property": "Cost per ton"
               }
             },
             "direction": "Descending"
@@ -1903,7 +1903,7 @@
             }
           },
           "selector": {
-            "metadata": "factPurchaseExpenses.Expense Cost per ton"
+            "metadata": "factPurchaseExpenses.Cost per ton"
           }
         }
       ],
