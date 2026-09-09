@@ -242,7 +242,19 @@ table factPurchaseExpenses
 
 		annotation PBI_FormatHint = {"currencyCulture":"en-IL"}
 
-	measure Total_Balance_USD = SUM(factPurchaseExpenses[LineTotalBalanceUSD])
+	/// אותה תבנית כמו [Total_Net_USD] ו-[Total_Balance_NIS] — ובכוונה.
+	/// REMOVEFILTERS(dimItems) הכרחי: שורות הוצאה נושאות ItemKey של קוד השירות (סיומת 'S'),
+	/// לא של הסחורה, ולכן סינון פריט (למשל טבלה שמכילה dimItems) מסלק שורות הוצאה שלמות —
+	/// דמורג'/פריקה נעלמים והסכום יוצא נמוך. זה גם שובר את [Cost per ton], שבו המונה היה
+	/// מצטמצם לפי הפריט בעוד המחלק (NetTonnage) נשאר ברמת ההזמנה כולה.
+	measure Total_Balance_USD =
+			
+			CALCULATE(
+			    SUM(factPurchaseExpenses[LineTotalBalanceUSD]),
+			    REMOVEFILTERS(dimSuppliers),
+			    REMOVEFILTERS(dimItems),
+			    KEEPFILTERS(dimPurchaseOrderNumber)
+			)
 		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
 		lineageTag: 703730b5-c8b2-4b1e-986e-87b00fbc4c05
 
@@ -323,6 +335,105 @@ table factPurchaseExpenses
 			)
 		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
 		lineageTag: 2b5f9d3a-6c0e-4b4f-9a8d-3e7c1f5b0d64
+
+	/// סכום ההוצאות בדולר, בהתעלמות מסינון פריט — נקודת הכניסה לכל חישובי עלות לטון.
+	/// 
+	/// הכלל שמחייב את זה: שורות הוצאה נושאות ItemKey של קוד השירות (סיומת 'S') ולא של
+	/// הסחורה. לכן כל סינון פריט — למשל בחירת הזמנה בטבלה שמכילה dimItems, כשלהזמנה יש
+	/// כמה פריטים — מסלק שורות הוצאה שלמות (דמורג'/פריקה נעלמים, הסכום יוצא נמוך).
+	/// 
+	/// זהו המקום היחיד שמטפל בכך; שאר מדדי עלות לטון בונים על המדד הזה ואינם חוזרים על
+	/// ה-REMOVEFILTERS. נשמר סינון ההזמנה, הספק וקוד ה-PNL — הגרעיניות הלגיטימית של שורת הוצאה.
+	measure 'Expenses USD (no item filter)' =
+			
+			CALCULATE(
+			    SUM(factPurchaseExpenses[LineTotalBalanceUSD]),
+			    REMOVEFILTERS(dimItems),
+			    REMOVEFILTERS(dimItemsSimple)
+			)
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 5f1b8d70-2e94-4c31-a6b8-7d0c3f9e5a24
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// המחלק: תמיד ברמת ההזמנה, לעולם לא ברמת שורת הוצאה.
+	/// פריקה (2270) ודמורג' (1201) מתחלקים בטונאז' נטו (OrderQuantity - CIF_Qty), כי טונות
+	/// שנמכרו CIF לא נפרקו; שאר הקודים בכמות ההזמנה המלאה.
+	/// ALLEXCEPT משאיר את סינון ההזמנה ומנקה כל חיתוך מתחתיה (הוצאה/ספק/פריט/PNL) — בלי זה
+	/// המחלק יוצא ריק בטבלה בגרעיניות ExpenseOrderID וכל שורה מציגה 0.00.
+	measure 'PO Net Tonnage' =
+			
+			CALCULATE(
+			    MAX(factPurchaseExpenses[NetTonnage]),
+			    ALLEXCEPT(
+			        factPurchaseExpenses,
+			        factPurchaseExpenses[PurchaseOrderID],
+			        dimPurchaseOrderNumber
+			    )
+			)
+		formatString: #,0.00
+		lineageTag: 9e3f7b21-5c04-4a86-b7d9-1f2e8a6c0b53
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// כמות ההזמנה, באותו טיפול כמו [PO Net Tonnage] — המחלק של שאר קודי ה-PNL.
+	measure 'PO Order Qty' =
+			
+			CALCULATE(
+			    [Order Qty],
+			    ALLEXCEPT(
+			        factPurchaseExpenses,
+			        factPurchaseExpenses[PurchaseOrderID],
+			        dimPurchaseOrderNumber
+			    )
+			)
+		formatString: #,0.00
+		lineageTag: 0a4c8e16-7b39-4d52-8e0a-5c1f3b7d9a62
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// עלות לטון של קודי הפריקה/דמורג' בלבד (2270, 1201) — מחולק בטונאז' נטו.
+	measure 'Cost per ton (net tonnage codes)' =
+			
+			DIVIDE(
+			    CALCULATE(
+			        [Expenses USD (no item filter)],
+			        KEEPFILTERS(dimPNL[PNL Code] IN { 2270, 1201 })
+			    ),
+			    [PO Net Tonnage],
+			    0
+			)
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 6d2a4f81-3b57-4e09-8c1d-9a5e7b0f2c36
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// עלות לטון של כל שאר קודי ה-PNL — מחולק בכמות ההזמנה המלאה.
+	measure 'Cost per ton (order qty codes)' =
+			
+			DIVIDE(
+			    CALCULATE(
+			        [Expenses USD (no item filter)],
+			        KEEPFILTERS(NOT dimPNL[PNL Code] IN { 2270, 1201 })
+			    ),
+			    [PO Order Qty],
+			    0
+			)
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 7e3b5a92-4c68-4f1a-9d2e-0b6f8c1a3d47
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// עלות לטון לטבלת "List of Expenses" (גרעיניות ExpenseOrderID + ספק + PNL).
+	/// זהה ל-[Cost per ton] — הטיפול בסינון הפריט מרוכז בבסיס המשותף, ולכן אין צורך
+	/// בנוסחה נפרדת. נשמר כשם נפרד כדי שהטבלה תישאר ברורה ולמקרה שתידרש התאמה עתידית.
+	measure 'Expense Cost per ton' =
+			
+			[Cost per ton]
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 3c7a9e42-8b15-4d63-9f0c-2a6e4b8d1f57
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	column EntityID
 		dataType: string

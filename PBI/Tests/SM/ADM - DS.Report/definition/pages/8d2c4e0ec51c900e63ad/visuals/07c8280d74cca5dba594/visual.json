@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
-  "name": "2b01bf9b48c7e230117d",
+  "name": "07c8280d74cca5dba594",
   "position": {
-    "x": 0,
-    "y": 404.33212996389892,
-    "z": 1000,
-    "height": 315.37906137184115,
-    "width": 530.25270758122747,
-    "tabOrder": 1000
+    "x": 465.26315789473688,
+    "y": 301.0526315789474,
+    "z": 0,
+    "height": 404.21052631578948,
+    "width": 577.89473684210532,
+    "tabOrder": 0
   },
   "visual": {
     "visualType": "tableEx",
@@ -20,69 +20,15 @@
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "factPurchaseExpenses"
-                    }
-                  },
-                  "Property": "ExpenseOrderID"
-                }
-              },
-              "queryRef": "factPurchaseExpenses.ExpenseOrderID",
-              "nativeQueryRef": "Expense",
-              "displayName": "Expense"
-            },
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
                       "Entity": "dimPNL"
                     }
                   },
-                  "Property": "PNL Description Purchase"
+                  "Property": "Expense Group"
                 }
               },
-              "queryRef": "dimPNL.PNL Description Purchase",
-              "nativeQueryRef": "PNL Description Purchase"
-            },
-            {
-              "field": {
-                "Aggregation": {
-                  "Expression": {
-                    "Column": {
-                      "Expression": {
-                        "SourceRef": {
-                          "Entity": "factPurchaseExpenses"
-                        }
-                      },
-                      "Property": "LineTotalBalanceNIS"
-                    }
-                  },
-                  "Function": 0
-                }
-              },
-              "queryRef": "Sum(factPurchaseExpenses.LineTotalBalanceNIS)",
-              "nativeQueryRef": "Cost ILS",
-              "displayName": "Cost ILS"
-            },
-            {
-              "field": {
-                "Aggregation": {
-                  "Expression": {
-                    "Column": {
-                      "Expression": {
-                        "SourceRef": {
-                          "Entity": "factPurchaseExpenses"
-                        }
-                      },
-                      "Property": "LineTotalBalanceUSD"
-                    }
-                  },
-                  "Function": 0
-                }
-              },
-              "queryRef": "Sum(factPurchaseExpenses.LineTotalBalanceUSD)",
-              "nativeQueryRef": "Cost USD",
-              "displayName": "Cost USD"
+              "queryRef": "dimPNL.Expense Group",
+              "nativeQueryRef": "PNL Description",
+              "displayName": "PNL Description"
             },
             {
               "field": {
@@ -92,11 +38,12 @@
                       "Entity": "factPurchaseExpenses"
                     }
                   },
-                  "Property": "Expense Cost per ton"
+                  "Property": "Cost per ton"
                 }
               },
-              "queryRef": "factPurchaseExpenses.Expense Cost per ton",
-              "nativeQueryRef": "Expense Cost per ton"
+              "queryRef": "factPurchaseExpenses.Cost per ton",
+              "nativeQueryRef": "$/T",
+              "displayName": "$/T"
             }
           ]
         }
@@ -105,35 +52,118 @@
         "sort": [
           {
             "field": {
-              "Column": {
+              "Measure": {
                 "Expression": {
                   "SourceRef": {
                     "Entity": "factPurchaseExpenses"
                   }
                 },
-                "Property": "ExpenseOrderID"
+                "Property": "Cost per ton"
               }
             },
-            "direction": "Ascending"
+            "direction": "Descending"
           }
         ]
       }
     },
     "objects": {
-      "total": [
+      "grid": [
         {
           "properties": {
-            "totals": {
+            "outlineStyle": {
+              "expr": {
+                "Literal": {
+                  "Value": "8D"
+                }
+              }
+            },
+            "outlineColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "ThemeDataColor": {
+                      "ColorId": 2,
+                      "Percent": 0.2
+                    }
+                  }
+                }
+              }
+            },
+            "gridVertical": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "gridVerticalColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "ThemeDataColor": {
+                      "ColorId": 0,
+                      "Percent": 0
+                    }
+                  }
+                }
+              }
+            },
+            "gridHorizontal": {
               "expr": {
                 "Literal": {
                   "Value": "true"
                 }
               }
             },
+            "gridHorizontalColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#F2F8F8'"
+                    }
+                  }
+                }
+              }
+            },
+            "gridHorizontalWeight": {
+              "expr": {
+                "Literal": {
+                  "Value": "3D"
+                }
+              }
+            },
+            "rowPadding": {
+              "expr": {
+                "Literal": {
+                  "Value": "6D"
+                }
+              }
+            },
+            "textSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "16D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "columnHeaders": [
+        {
+          "properties": {
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Calibri'"
+                }
+              }
+            },
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "9D"
+                  "Value": "16D"
                 }
               }
             },
@@ -144,20 +174,13 @@
                 }
               }
             },
-            "underline": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            },
             "fontColor": {
               "solid": {
                 "color": {
                   "expr": {
                     "ThemeDataColor": {
-                      "ColorId": 1,
-                      "Percent": 0.4
+                      "ColorId": 2,
+                      "Percent": 0
                     }
                   }
                 }
@@ -167,10 +190,32 @@
               "solid": {
                 "color": {
                   "expr": {
-                    "Literal": {
-                      "Value": "'#E6E6E6'"
+                    "ThemeDataColor": {
+                      "ColorId": 0,
+                      "Percent": 0
                     }
                   }
+                }
+              }
+            },
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Center'"
+                }
+              }
+            },
+            "columnAdjustment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'growToFit'"
+                }
+              }
+            },
+            "wordWrap": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
                 }
               }
             }
@@ -201,18 +246,6 @@
                 }
               }
             },
-            "fontColorPrimary": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "ThemeDataColor": {
-                      "ColorId": 2,
-                      "Percent": 0
-                    }
-                  }
-                }
-              }
-            },
             "backColorPrimary": {
               "solid": {
                 "color": {
@@ -225,7 +258,19 @@
                 }
               }
             },
-            "fontColorSecondary": {
+            "backColorSecondary": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "ThemeDataColor": {
+                      "ColorId": 0,
+                      "Percent": 0
+                    }
+                  }
+                }
+              }
+            },
+            "fontColorPrimary": {
               "solid": {
                 "color": {
                   "expr": {
@@ -237,12 +282,12 @@
                 }
               }
             },
-            "backColorSecondary": {
+            "fontColorSecondary": {
               "solid": {
                 "color": {
                   "expr": {
                     "ThemeDataColor": {
-                      "ColorId": 0,
+                      "ColorId": 2,
                       "Percent": 0
                     }
                   }
@@ -1118,16 +1163,9 @@
           }
         }
       ],
-      "columnHeaders": [
+      "total": [
         {
           "properties": {
-            "fontFamily": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Calibri'"
-                }
-              }
-            },
             "fontSize": {
               "expr": {
                 "Literal": {
@@ -1139,6 +1177,13 @@
               "expr": {
                 "Literal": {
                   "Value": "true"
+                }
+              }
+            },
+            "underline": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             },
@@ -1158,32 +1203,10 @@
               "solid": {
                 "color": {
                   "expr": {
-                    "ThemeDataColor": {
-                      "ColorId": 0,
-                      "Percent": 0
+                    "Literal": {
+                      "Value": "'#E6E6E6'"
                     }
                   }
-                }
-              }
-            },
-            "alignment": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Center'"
-                }
-              }
-            },
-            "wordWrap": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "columnAdjustment": {
-              "expr": {
-                "Literal": {
-                  "Value": "'growToFit'"
                 }
               }
             }
@@ -1444,10 +1467,24 @@
         },
         {
           "properties": {
-            "styleTotal": {
+            "alignment": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
+                  "Value": "'Center'"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "factPurchaseExpenses.Details"
+          }
+        },
+        {
+          "properties": {
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Left'"
                 }
               }
             },
@@ -1458,10 +1495,10 @@
                 }
               }
             },
-            "alignment": {
+            "styleTotal": {
               "expr": {
                 "Literal": {
-                  "Value": "'Left'"
+                  "Value": "true"
                 }
               }
             }
@@ -1472,10 +1509,10 @@
         },
         {
           "properties": {
-            "styleTotal": {
+            "alignment": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
+                  "Value": "'Center'"
                 }
               }
             },
@@ -1486,16 +1523,83 @@
                 }
               }
             },
+            "styleTotal": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "dimSuppliers.Supplier Name"
+          }
+        },
+        {
+          "properties": {
             "alignment": {
               "expr": {
                 "Literal": {
                   "Value": "'Left'"
                 }
               }
+            },
+            "styleHeader": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "styleTotal": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
             }
           },
           "selector": {
             "metadata": "Sum(factPurchaseExpenses.LineTotalBalanceUSD)"
+          }
+        },
+        {
+          "properties": {
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FA2B2B'"
+                    }
+                  }
+                }
+              }
+            },
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Center'"
+                }
+              }
+            },
+            "styleTotal": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "styleValues": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "factPurchaseExpenses.Cost per ton"
           }
         }
       ],
@@ -1855,13 +1959,41 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "253.41003307890213D"
+                  "Value": "67.10121128837305D"
                 }
               }
             }
           },
           "selector": {
-            "metadata": "dimPNL.PNL Description Purchase"
+            "metadata": "factPurchaseExpenses.DocType"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "434.80969166324263D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "factPurchaseExpenses.Details"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "339.3088124732864D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "dimSuppliers.Supplier Name"
           }
         },
         {
@@ -1883,6 +2015,20 @@
             "value": {
               "expr": {
                 "Literal": {
+                  "Value": "227.11158668748547D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "factPurchaseExpenses.ServiceDetail"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
                   "Value": "195.61761155783262D"
                 }
               }
@@ -1897,96 +2043,27 @@
             "value": {
               "expr": {
                 "Literal": {
-                  "Value": "186.27827505129846D"
+                  "Value": "181.11162145547087D"
                 }
               }
             }
           },
           "selector": {
-            "metadata": "factPurchaseExpenses.Expense Cost per ton"
+            "metadata": "factPurchaseExpenses.Cost per ton"
           }
-        }
-      ],
-      "grid": [
+        },
         {
           "properties": {
-            "outlineStyle": {
+            "value": {
               "expr": {
                 "Literal": {
-                  "Value": "8D"
-                }
-              }
-            },
-            "outlineColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "ThemeDataColor": {
-                      "ColorId": 2,
-                      "Percent": 0.2
-                    }
-                  }
-                }
-              }
-            },
-            "gridVertical": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            },
-            "gridVerticalColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "ThemeDataColor": {
-                      "ColorId": 0,
-                      "Percent": 0
-                    }
-                  }
-                }
-              }
-            },
-            "gridHorizontal": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "gridHorizontalColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#F2F8F8'"
-                    }
-                  }
-                }
-              }
-            },
-            "gridHorizontalWeight": {
-              "expr": {
-                "Literal": {
-                  "Value": "3D"
-                }
-              }
-            },
-            "rowPadding": {
-              "expr": {
-                "Literal": {
-                  "Value": "6D"
-                }
-              }
-            },
-            "textSize": {
-              "expr": {
-                "Literal": {
-                  "Value": "16D"
+                  "Value": "368.8703696746806D"
                 }
               }
             }
+          },
+          "selector": {
+            "metadata": "dimPNL.Expense Group"
           }
         }
       ]
@@ -1995,13 +2072,6 @@
       "title": [
         {
           "properties": {
-            "text": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Order Summary'"
-                }
-              }
-            },
             "show": {
               "expr": {
                 "Literal": {
@@ -2114,6 +2184,19 @@
           }
         }
       ],
+      "dropShadow": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
       "visualTooltip": [
         {
           "properties": {
@@ -2152,189 +2235,13 @@
             }
           }
         }
-      ],
-      "subTitle": [
-        {
-          "properties": {
-            "text": {
-              "expr": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "dimDates"
-                    }
-                  },
-                  "Property": "MonthInCalenderShortName_Current"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "dropShadow": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
       ]
     }
   },
   "filterConfig": {
     "filters": [
       {
-        "name": "a5ff68ee0c333d388bbb",
-        "ordinal": 0,
-        "field": {
-          "Aggregation": {
-            "Expression": {
-              "Column": {
-                "Expression": {
-                  "SourceRef": {
-                    "Entity": "factPurchaseExpenses"
-                  }
-                },
-                "Property": "LineTotalNetUSD"
-              }
-            },
-            "Function": 0
-          }
-        },
-        "type": "Advanced",
-        "howCreated": "User"
-      },
-      {
-        "name": "c52c2970e032b9e077d1",
-        "ordinal": 1,
-        "field": {
-          "Aggregation": {
-            "Expression": {
-              "Column": {
-                "Expression": {
-                  "SourceRef": {
-                    "Entity": "factPurchaseExpenses"
-                  }
-                },
-                "Property": "OrderQuantity"
-              }
-            },
-            "Function": 0
-          }
-        },
-        "type": "Advanced",
-        "howCreated": "User"
-      },
-      {
-        "name": "5c79c1ade8e567cc9a6a",
-        "ordinal": 2,
-        "field": {
-          "Aggregation": {
-            "Expression": {
-              "Column": {
-                "Expression": {
-                  "SourceRef": {
-                    "Entity": "factPurchaseExpenses"
-                  }
-                },
-                "Property": "UnitNetPriceUSD"
-              }
-            },
-            "Function": 0
-          }
-        },
-        "type": "Advanced",
-        "howCreated": "User"
-      },
-      {
-        "name": "ce10100c057b11b83493",
-        "ordinal": 3,
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "dimItems"
-              }
-            },
-            "Property": "PNL Description"
-          }
-        },
-        "type": "Categorical",
-        "howCreated": "User"
-      },
-      {
-        "name": "05a64061ff9ad3cf52d0",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "factPurchaseExpenses"
-              }
-            },
-            "Property": "ExpenseOrderID"
-          }
-        },
-        "type": "Categorical"
-      },
-      {
-        "name": "47d0189db2d85f0f2e80",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "dimPNL"
-              }
-            },
-            "Property": "PNL Description Purchase"
-          }
-        },
-        "type": "Categorical"
-      },
-      {
-        "name": "ab9ae88e36475e7b32b6",
-        "field": {
-          "Aggregation": {
-            "Expression": {
-              "Column": {
-                "Expression": {
-                  "SourceRef": {
-                    "Entity": "factPurchaseExpenses"
-                  }
-                },
-                "Property": "LineTotalBalanceNIS"
-              }
-            },
-            "Function": 0
-          }
-        },
-        "type": "Advanced"
-      },
-      {
-        "name": "308c356679d6ae409876",
-        "field": {
-          "Aggregation": {
-            "Expression": {
-              "Column": {
-                "Expression": {
-                  "SourceRef": {
-                    "Entity": "factPurchaseExpenses"
-                  }
-                },
-                "Property": "LineTotalBalanceUSD"
-              }
-            },
-            "Function": 0
-          }
-        },
-        "type": "Advanced"
-      },
-      {
-        "name": "074d8291626d341cc1f9",
+        "name": "8ea153c62058bbaac037",
         "field": {
           "Measure": {
             "Expression": {
@@ -2346,8 +2253,21 @@
           }
         },
         "type": "Advanced"
+      },
+      {
+        "name": "7ae6c5aa760a90117701",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dimPNL"
+              }
+            },
+            "Property": "Expense Group"
+          }
+        },
+        "type": "Categorical"
       }
-    ],
-    "filterSortOrder": "Custom"
+    ]
   }
 }
