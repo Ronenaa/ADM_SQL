@@ -204,8 +204,8 @@ table factGain
 		displayFolder: רכש
 		lineageTag: 5021ff8e-9e76-4307-9884-a063adb15913
 
-	/// כמות שהועברה בהחלפה (Swap). ראה ההערה ב-[Shortage Qty Adjustment] לגבי [TotalQty] מול
-	/// [TotalQtyAdjustment] — סינון הקטגוריה כבר מגדיר תנועות במחיר אפס.
+	/// כמות שהועברה בהחלפה (Swap). ראה ההערה ב-[Shortage Qty Adjustment] לגבי [TotalQty]
+	/// מול [TotalQtyAdjustment] — סינון הקטגוריה כבר מגדיר תנועות במחיר אפס.
 	measure 'Exchange Qty Adjustment' =
 			
 			CALCULATE(
@@ -323,8 +323,8 @@ table factGain
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// כמות הפחת ללא הקשר תאריכים. ראה ההערה ב-[Shortage Qty Adjustment] לגבי [TotalQty] מול
-	/// [TotalQtyAdjustment] — סינון הקטגוריה כבר מגדיר תנועות במחיר אפס.
+	/// כמות הפחת ללא הקשר תאריכים. ראה ההערה ב-[Shortage Qty Adjustment] לגבי [TotalQty]
+	/// מול [TotalQtyAdjustment] — סינון הקטגוריה כבר מגדיר תנועות במחיר אפס.
 	measure 'Shortage qty non dates' = ```
 			
 			 CALCULATE(

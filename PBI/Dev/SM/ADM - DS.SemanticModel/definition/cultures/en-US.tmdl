@@ -47328,6 +47328,12 @@ cultureInfo en-US
 			          "total gain": {
 			            "State": "Generated"
 			          }
+			        },
+			        {
+			          "gain": {
+			            "State": "Generated",
+			            "Weight": 0.97
+			          }
 			        }
 			      ]
 			    },
@@ -47407,6 +47413,12 @@ cultureInfo en-US
 			        {
 			          "total gain per ton": {
 			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "gain": {
+			            "State": "Generated",
+			            "Weight": 0.97
 			          }
 			        }
 			      ]
@@ -48278,6 +48290,12 @@ cultureInfo en-US
 			            "State": "Generated",
 			            "Weight": 0.99
 			          }
+			        },
+			        {
+			          "gain": {
+			            "State": "Generated",
+			            "Weight": 0.97
+			          }
 			        }
 			      ]
 			    },
@@ -48483,25 +48501,24 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "fact_gain.agent_key": {
+			    "fact_purchase_expense.demurrage_cost_per_ton": {
 			      "Definition": {
 			        "Binding": {
-			          "ConceptualEntity": "factGain",
-			          "ConceptualProperty": "AgentKey"
+			          "ConceptualEntity": "factPurchaseExpenses",
+			          "ConceptualProperty": "Demurrage Cost per ton"
 			        }
 			      },
 			      "State": "Generated",
 			      "Terms": [
 			        {
-			          "agent key": {
+			          "demurrage cost per ton": {
 			            "State": "Generated"
 			          }
 			        },
 			        {
-			          "AgentKey": {
-			            "Type": "Noun",
+			          "cost": {
 			            "State": "Generated",
-			            "Weight": 0.99
+			            "Weight": 0.97
 			          }
 			        }
 			      ]
@@ -48716,31 +48733,25 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "fact_gain.discharge_cost": {
+			    "fact_purchase_expense.CIF_qty": {
 			      "Definition": {
 			        "Binding": {
-			          "ConceptualEntity": "factGain",
-			          "ConceptualProperty": "DischargeCost"
+			          "ConceptualEntity": "factPurchaseExpenses",
+			          "ConceptualProperty": "CIF_Qty"
 			        }
 			      },
 			      "State": "Generated",
 			      "Terms": [
 			        {
-			          "discharge cost": {
+			          "CIF qty": {
 			            "State": "Generated"
 			          }
 			        },
 			        {
-			          "DischargeCost": {
+			          "CIF_Qty": {
 			            "Type": "Noun",
 			            "State": "Generated",
 			            "Weight": 0.99
-			          }
-			        },
-			        {
-			          "cost": {
-			            "State": "Generated",
-			            "Weight": 0.97
 			          }
 			        }
 			      ]
@@ -48774,18 +48785,24 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "fact_gain.gain": {
+			    "fact_purchase_expense.discharge_cost_per_ton": {
 			      "Definition": {
 			        "Binding": {
-			          "ConceptualEntity": "factGain",
-			          "ConceptualProperty": "Gain"
+			          "ConceptualEntity": "factPurchaseExpenses",
+			          "ConceptualProperty": "Discharge Cost per ton"
 			        }
 			      },
 			      "State": "Generated",
 			      "Terms": [
 			        {
-			          "gain": {
+			          "discharge cost per ton": {
 			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "cost": {
+			            "State": "Generated",
+			            "Weight": 0.97
 			          }
 			        }
 			      ]
@@ -48809,6 +48826,12 @@ cultureInfo en-US
 			            "Type": "Noun",
 			            "State": "Generated",
 			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "gain": {
+			            "State": "Generated",
+			            "Weight": 0.97
 			          }
 			        }
 			      ]
@@ -48896,7 +48919,7 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "fact_gain.DischargeCost": {
+			    "fact_gain.discharge_cost": {
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "factGain",
@@ -48906,8 +48929,21 @@ cultureInfo en-US
 			      "State": "Generated",
 			      "Terms": [
 			        {
-			          "DischargeCost": {
+			          "discharge cost": {
 			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "DischargeCost": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "cost": {
+			            "State": "Generated",
+			            "Weight": 0.97
 			          }
 			        }
 			      ]
@@ -48991,7 +49027,7 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "fact_gain.gain_per_ton_new": {
+			    "fact_gain.gain_per_ton": {
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "factGain",
@@ -49001,8 +49037,14 @@ cultureInfo en-US
 			      "State": "Generated",
 			      "Terms": [
 			        {
-			          "gain per ton new": {
+			          "gain per ton": {
 			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "gain": {
+			            "State": "Generated",
+			            "Weight": 0.97
 			          }
 			        }
 			      ]
@@ -49403,6 +49445,12 @@ cultureInfo en-US
 			        {
 			          "supplier name gain": {
 			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "gain": {
+			            "State": "Generated",
+			            "Weight": 0.97
 			          }
 			        },
 			        {
@@ -49963,25 +50011,31 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "fact_gain.transaction_type": {
+			    "fact_purchase_expense.net_tonnage": {
 			      "Definition": {
 			        "Binding": {
-			          "ConceptualEntity": "factGain",
-			          "ConceptualProperty": "TransactionType"
+			          "ConceptualEntity": "factPurchaseExpenses",
+			          "ConceptualProperty": "NetTonnage"
 			        }
 			      },
 			      "State": "Generated",
 			      "Terms": [
 			        {
-			          "transaction type": {
+			          "net tonnage": {
 			            "State": "Generated"
 			          }
 			        },
 			        {
-			          "TransactionType": {
+			          "NetTonnage": {
 			            "Type": "Noun",
 			            "State": "Generated",
 			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "tonnage": {
+			            "State": "Generated",
+			            "Weight": 0.97
 			          }
 			        }
 			      ]
@@ -51333,11 +51387,358 @@ cultureInfo en-US
 			            "State": "Generated",
 			            "Weight": 0.97
 			          }
+			        },
+			        {
+			          "$/T": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "dim_PNL.expense_group": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "dimPNL",
+			          "ConceptualProperty": "Expense Group"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "expense group": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "PNL Description": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "dim_PNL.PNL_sort": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "dimPNL",
+			          "ConceptualProperty": "PNL Sort"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "PNL sort": {
+			            "State": "Generated"
+			          }
+			        }
+			      ]
+			    },
+			    "dim_sub_purchase_order_number.delivery_date": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "dimSubPurchaseOrderNumber",
+			          "ConceptualProperty": "DeliveryDate"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "delivery date": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "DeliveryDate": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "date": {
+			            "State": "Generated",
+			            "Weight": 0.7
+			          }
+			        }
+			      ],
+			      "SemanticType": "Time"
+			    },
+			    "dim_sub_purchase_order_number.delivery_month": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "dimSubPurchaseOrderNumber",
+			          "ConceptualProperty": "DeliveryMonth"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "delivery month": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "DeliveryMonth": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        }
+			      ]
+			    },
+			    "fact_gain.discharge_cost_base": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factGain",
+			          "ConceptualProperty": "DischargeCost_Base"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "discharge cost base": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "DischargeCost_Base": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "base": {
+			            "State": "Generated",
+			            "Weight": 0.97
+			          }
+			        },
+			        {
+			          "cost base": {
+			            "State": "Generated",
+			            "Weight": 0.97
+			          }
+			        }
+			      ]
+			    },
+			    "fact_gain.demurrage_cost": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factGain",
+			          "ConceptualProperty": "DemurrageCost"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "demurrage cost": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "DemurrageCost": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "cost": {
+			            "State": "Generated",
+			            "Weight": 0.97
+			          }
 			        }
 			      ]
 			    }
 			  },
 			  "Relationships": {
+			    "fact_gain_has_wh_flag": {
+			      "Binding": {
+			        "ConceptualEntity": "factGain"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_gain": {
+			          "Target": {
+			            "Entity": "fact_gain"
+			          }
+			        },
+			        "fact_gain.wh_flag": {
+			          "Target": {
+			            "Entity": "fact_gain.wh_flag"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_gain"
+			            },
+			            "Object": {
+			              "Role": "fact_gain.wh_flag"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_gains_have_wh_flags"
+			        }
+			      ]
+			    },
+			    "dim_warehouse_has_area": {
+			      "Binding": {
+			        "ConceptualEntity": "dimWarehouses"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "dim_warehouse": {
+			          "Target": {
+			            "Entity": "dim_warehouse"
+			          }
+			        },
+			        "dim_warehouse.area": {
+			          "Target": {
+			            "Entity": "dim_warehouse.area"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "dim_warehouse"
+			            },
+			            "Object": {
+			              "Role": "dim_warehouse.area"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "dim_warehouses_have_areas"
+			        },
+			        {
+			          "DynamicAdjective": {
+			            "Subject": {
+			              "Role": "dim_warehouse"
+			            },
+			            "Adjective": {
+			              "Role": "dim_warehouse.area"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "areas_describe_dim_warehouses"
+			        }
+			      ]
+			    },
+			    "top_month_has_top_months_value": {
+			      "Binding": {
+			        "ConceptualEntity": "Top Months"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "top_month": {
+			          "Target": {
+			            "Entity": "top_month"
+			          }
+			        },
+			        "top_month.top_months_value": {
+			          "Target": {
+			            "Entity": "top_month.top_months_value"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "top_month"
+			            },
+			            "Object": {
+			              "Role": "top_month.top_months_value"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "top_months_have_top_months_value"
+			        }
+			      ]
+			    },
+			    "top_month_has_top_month": {
+			      "Binding": {
+			        "ConceptualEntity": "Top Months"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "top_month": {
+			          "Target": {
+			            "Entity": "top_month"
+			          }
+			        },
+			        "top_month.top_month": {
+			          "Target": {
+			            "Entity": "top_month.top_month"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "top_month"
+			            },
+			            "Object": {
+			              "Role": "top_month.top_month"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "top_months_have_top_months"
+			        }
+			      ]
+			    },
+			    "fact_sale_has_fact_order_qty_num": {
+			      "Binding": {
+			        "ConceptualEntity": "factSales"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_sale": {
+			          "Target": {
+			            "Entity": "fact_sale"
+			          }
+			        },
+			        "fact_order.qty_num": {
+			          "Target": {
+			            "Entity": "fact_order.qty_num"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_sale"
+			            },
+			            "Object": {
+			              "Role": "fact_order.qty_num"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_sales_have_qty_num"
+			        }
+			      ]
+			    },
 			    "fact_order_has_qty_num": {
 			      "Binding": {
 			        "ConceptualEntity": "factOrders"
@@ -53621,20 +54022,20 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "fact_gain_has_transaction_type": {
+			    "fact_purchase_expense_has_net_tonnage": {
 			      "Binding": {
-			        "ConceptualEntity": "factGain"
+			        "ConceptualEntity": "factPurchaseExpenses"
 			      },
 			      "State": "Generated",
 			      "Roles": {
-			        "fact_gain": {
+			        "fact_purchase_expense": {
 			          "Target": {
-			            "Entity": "fact_gain"
+			            "Entity": "fact_purchase_expense"
 			          }
 			        },
-			        "fact_gain.transaction_type": {
+			        "fact_purchase_expense.net_tonnage": {
 			          "Target": {
-			            "Entity": "fact_gain.transaction_type"
+			            "Entity": "fact_purchase_expense.net_tonnage"
 			          }
 			        }
 			      },
@@ -53642,15 +54043,15 @@ cultureInfo en-US
 			        {
 			          "Attribute": {
 			            "Subject": {
-			              "Role": "fact_gain"
+			              "Role": "fact_purchase_expense"
 			            },
 			            "Object": {
-			              "Role": "fact_gain.transaction_type"
+			              "Role": "fact_purchase_expense.net_tonnage"
 			            }
 			          },
 			          "State": "Generated",
 			          "Weight": 0.99,
-			          "ID": "fact_gains_have_transaction_types"
+			          "ID": "fact_purchase_expenses_have_net_tonnages"
 			        }
 			      ]
 			    },
@@ -55352,7 +55753,7 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "fact_gain_has_gain_per_ton_new": {
+			    "fact_gain_has_gain_per_ton": {
 			      "Binding": {
 			        "ConceptualEntity": "factGain"
 			      },
@@ -55363,9 +55764,9 @@ cultureInfo en-US
 			            "Entity": "fact_gain"
 			          }
 			        },
-			        "fact_gain.gain_per_ton_new": {
+			        "fact_gain.gain_per_ton": {
 			          "Target": {
-			            "Entity": "fact_gain.gain_per_ton_new"
+			            "Entity": "fact_gain.gain_per_ton"
 			          }
 			        }
 			      },
@@ -55376,12 +55777,12 @@ cultureInfo en-US
 			              "Role": "fact_gain"
 			            },
 			            "Object": {
-			              "Role": "fact_gain.gain_per_ton_new"
+			              "Role": "fact_gain.gain_per_ton"
 			            }
 			          },
 			          "State": "Generated",
 			          "Weight": 0.99,
-			          "ID": "fact_gains_have_gain_per_ton_new"
+			          "ID": "fact_gains_have_gain_per_ton"
 			        }
 			      ]
 			    },
@@ -55511,7 +55912,7 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "fact_gain_has_DischargeCost": {
+			    "fact_gain_has_discharge_cost": {
 			      "Binding": {
 			        "ConceptualEntity": "factGain"
 			      },
@@ -55522,9 +55923,9 @@ cultureInfo en-US
 			            "Entity": "fact_gain"
 			          }
 			        },
-			        "fact_gain.DischargeCost": {
+			        "fact_gain.discharge_cost": {
 			          "Target": {
-			            "Entity": "fact_gain.DischargeCost"
+			            "Entity": "fact_gain.discharge_cost"
 			          }
 			        }
 			      },
@@ -55535,12 +55936,39 @@ cultureInfo en-US
 			              "Role": "fact_gain"
 			            },
 			            "Object": {
-			              "Role": "fact_gain.DischargeCost"
+			              "Role": "fact_gain.discharge_cost"
 			            }
 			          },
 			          "State": "Generated",
 			          "Weight": 0.99,
-			          "ID": "fact_gains_have_DischargeCost"
+			          "ID": "fact_gains_have_discharge_cost"
+			        },
+			        {
+			          "Adjective": {
+			            "Subject": {
+			              "Role": "fact_gain"
+			            },
+			            "Adjectives": [
+			              {
+			                "expensive": {
+			                  "State": "Generated"
+			                }
+			              }
+			            ],
+			            "Antonyms": [
+			              {
+			                "cheap": {
+			                  "State": "Generated"
+			                }
+			              }
+			            ],
+			            "Measurement": {
+			              "Role": "fact_gain.discharge_cost"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "discharge_cost_indicates_how_expensive_fact_gains_are"
 			        }
 			      ]
 			    },
@@ -55670,20 +56098,20 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "fact_gain_has_gain": {
+			    "fact_purchase_expense_has_discharge_cost_per_ton": {
 			      "Binding": {
-			        "ConceptualEntity": "factGain"
+			        "ConceptualEntity": "factPurchaseExpenses"
 			      },
 			      "State": "Generated",
 			      "Roles": {
-			        "fact_gain": {
+			        "fact_purchase_expense": {
 			          "Target": {
-			            "Entity": "fact_gain"
+			            "Entity": "fact_purchase_expense"
 			          }
 			        },
-			        "fact_gain.gain": {
+			        "fact_purchase_expense.discharge_cost_per_ton": {
 			          "Target": {
-			            "Entity": "fact_gain.gain"
+			            "Entity": "fact_purchase_expense.discharge_cost_per_ton"
 			          }
 			        }
 			      },
@@ -55691,15 +56119,42 @@ cultureInfo en-US
 			        {
 			          "Attribute": {
 			            "Subject": {
-			              "Role": "fact_gain"
+			              "Role": "fact_purchase_expense"
 			            },
 			            "Object": {
-			              "Role": "fact_gain.gain"
+			              "Role": "fact_purchase_expense.discharge_cost_per_ton"
 			            }
 			          },
 			          "State": "Generated",
 			          "Weight": 0.99,
-			          "ID": "fact_gains_have_gains"
+			          "ID": "fact_purchase_expenses_have_discharge_cost_per_ton"
+			        },
+			        {
+			          "Adjective": {
+			            "Subject": {
+			              "Role": "fact_purchase_expense"
+			            },
+			            "Adjectives": [
+			              {
+			                "expensive": {
+			                  "State": "Generated"
+			                }
+			              }
+			            ],
+			            "Antonyms": [
+			              {
+			                "cheap": {
+			                  "State": "Generated"
+			                }
+			              }
+			            ],
+			            "Measurement": {
+			              "Role": "fact_purchase_expense.discharge_cost_per_ton"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "discharge_cost_per_ton_indicates_how_expensive_fact_purchase_expenses_are"
 			        }
 			      ]
 			    },
@@ -55736,20 +56191,20 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "fact_gain_has_discharge_cost": {
+			    "fact_purchase_expense_has_CIF_qty": {
 			      "Binding": {
-			        "ConceptualEntity": "factGain"
+			        "ConceptualEntity": "factPurchaseExpenses"
 			      },
 			      "State": "Generated",
 			      "Roles": {
-			        "fact_gain": {
+			        "fact_purchase_expense": {
 			          "Target": {
-			            "Entity": "fact_gain"
+			            "Entity": "fact_purchase_expense"
 			          }
 			        },
-			        "fact_gain.discharge_cost": {
+			        "fact_purchase_expense.CIF_qty": {
 			          "Target": {
-			            "Entity": "fact_gain.discharge_cost"
+			            "Entity": "fact_purchase_expense.CIF_qty"
 			          }
 			        }
 			      },
@@ -55757,42 +56212,15 @@ cultureInfo en-US
 			        {
 			          "Attribute": {
 			            "Subject": {
-			              "Role": "fact_gain"
+			              "Role": "fact_purchase_expense"
 			            },
 			            "Object": {
-			              "Role": "fact_gain.discharge_cost"
+			              "Role": "fact_purchase_expense.CIF_qty"
 			            }
 			          },
 			          "State": "Generated",
 			          "Weight": 0.99,
-			          "ID": "fact_gains_have_discharge_costs"
-			        },
-			        {
-			          "Adjective": {
-			            "Subject": {
-			              "Role": "fact_gain"
-			            },
-			            "Adjectives": [
-			              {
-			                "expensive": {
-			                  "State": "Generated"
-			                }
-			              }
-			            ],
-			            "Antonyms": [
-			              {
-			                "cheap": {
-			                  "State": "Generated"
-			                }
-			              }
-			            ],
-			            "Measurement": {
-			              "Role": "fact_gain.discharge_cost"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "discharge_cost_indicates_how_expensive_fact_gains_are"
+			          "ID": "fact_purchase_expenses_have_CIF_qties"
 			        }
 			      ]
 			    },
@@ -55994,20 +56422,20 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "fact_gain_has_agent_key": {
+			    "fact_purchase_expense_has_demurrage_cost_per_ton": {
 			      "Binding": {
-			        "ConceptualEntity": "factGain"
+			        "ConceptualEntity": "factPurchaseExpenses"
 			      },
 			      "State": "Generated",
 			      "Roles": {
-			        "fact_gain": {
+			        "fact_purchase_expense": {
 			          "Target": {
-			            "Entity": "fact_gain"
+			            "Entity": "fact_purchase_expense"
 			          }
 			        },
-			        "fact_gain.agent_key": {
+			        "fact_purchase_expense.demurrage_cost_per_ton": {
 			          "Target": {
-			            "Entity": "fact_gain.agent_key"
+			            "Entity": "fact_purchase_expense.demurrage_cost_per_ton"
 			          }
 			        }
 			      },
@@ -56015,15 +56443,42 @@ cultureInfo en-US
 			        {
 			          "Attribute": {
 			            "Subject": {
-			              "Role": "fact_gain"
+			              "Role": "fact_purchase_expense"
 			            },
 			            "Object": {
-			              "Role": "fact_gain.agent_key"
+			              "Role": "fact_purchase_expense.demurrage_cost_per_ton"
 			            }
 			          },
 			          "State": "Generated",
 			          "Weight": 0.99,
-			          "ID": "fact_gains_have_agent_keys"
+			          "ID": "fact_purchase_expenses_have_demurrage_cost_per_ton"
+			        },
+			        {
+			          "Adjective": {
+			            "Subject": {
+			              "Role": "fact_purchase_expense"
+			            },
+			            "Adjectives": [
+			              {
+			                "expensive": {
+			                  "State": "Generated"
+			                }
+			              }
+			            ],
+			            "Antonyms": [
+			              {
+			                "cheap": {
+			                  "State": "Generated"
+			                }
+			              }
+			            ],
+			            "Measurement": {
+			              "Role": "fact_purchase_expense.demurrage_cost_per_ton"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "demurrage_cost_per_ton_indicates_how_expensive_fact_purchase_expenses_are"
 			        }
 			      ]
 			    },
@@ -61969,15 +62424,15 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "fact_purchase_expense_has_boat__MonthYear_show": {
+			    "dim_purchase_order_number_has_fact_purchase_expense_boat__MonthYear_show": {
 			      "Binding": {
-			        "ConceptualEntity": "factPurchaseExpenses"
+			        "ConceptualEntity": "dimPurchaseOrderNumber"
 			      },
 			      "State": "Generated",
 			      "Roles": {
-			        "fact_purchase_expense": {
+			        "dim_purchase_order_number": {
 			          "Target": {
-			            "Entity": "fact_purchase_expense"
+			            "Entity": "dim_purchase_order_number"
 			          }
 			        },
 			        "fact_purchase_expense.boat__MonthYear_show": {
@@ -61990,7 +62445,7 @@ cultureInfo en-US
 			        {
 			          "Attribute": {
 			            "Subject": {
-			              "Role": "fact_purchase_expense"
+			              "Role": "dim_purchase_order_number"
 			            },
 			            "Object": {
 			              "Role": "fact_purchase_expense.boat__MonthYear_show"
@@ -61998,7 +62453,7 @@ cultureInfo en-US
 			          },
 			          "State": "Generated",
 			          "Weight": 0.99,
-			          "ID": "fact_purchase_expenses_have_boat__MonthYear_show"
+			          "ID": "dim_purchase_order_numbers_have_boat__MonthYear_show"
 			        }
 			      ]
 			    },
@@ -142295,53 +142750,67 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "dim_warehouse_is_area": {
+			    "fact_gain_is_expensive15": {
 			      "Binding": {
-			        "ConceptualEntity": "dimWarehouses"
+			        "ConceptualEntity": "factGain"
 			      },
 			      "State": "Generated",
 			      "Roles": {
-			        "dim_warehouse": {
+			        "fact_gain": {
 			          "Target": {
-			            "Entity": "dim_warehouse"
+			            "Entity": "fact_gain"
 			          }
 			        },
-			        "dim_warehouse.area": {
+			        "fact_gain.demurrage_cost": {
 			          "Target": {
-			            "Entity": "dim_warehouse.area"
+			            "Entity": "fact_gain.demurrage_cost"
 			          }
 			        }
 			      },
 			      "Phrasings": [
 			        {
-			          "DynamicAdjective": {
+			          "Adjective": {
 			            "Subject": {
-			              "Role": "dim_warehouse"
+			              "Role": "fact_gain"
 			            },
-			            "Adjective": {
-			              "Role": "dim_warehouse.area"
+			            "Adjectives": [
+			              {
+			                "expensive": {
+			                  "State": "Generated"
+			                }
+			              }
+			            ],
+			            "Antonyms": [
+			              {
+			                "cheap": {
+			                  "State": "Generated"
+			                }
+			              }
+			            ],
+			            "Measurement": {
+			              "Role": "fact_gain.demurrage_cost"
 			            }
 			          },
 			          "State": "Generated",
 			          "Weight": 0.99,
-			          "ID": "areas_describe_dim_warehouses"
+			          "ID": "demurrage_cost_indicates_how_expensive_fact_gains_are"
 			        },
 			        {
 			          "Attribute": {
 			            "Subject": {
-			              "Role": "dim_warehouse"
+			              "Role": "fact_gain"
 			            },
 			            "Object": {
-			              "Role": "dim_warehouse.area"
+			              "Role": "fact_gain.demurrage_cost"
 			            }
 			          },
 			          "State": "Generated",
 			          "Weight": 0.99,
-			          "ID": "dim_warehouses_have_areas"
+			          "ID": "fact_gains_have_demurrage_cost"
 			        }
 			      ]
 			    },
-			    "fact_purchase_expense_is_expensive3": {
+			    "fact_purchase_expense_is_expensive5": {
 			      "Binding": {
 			        "ConceptualEntity": "factPurchaseExpenses"
 			      },
@@ -142430,138 +142899,6 @@ cultureInfo en-US
 			          "State": "Generated",
 			          "Weight": 0.75,
 			          "ID": "target_slicers_slice"
-			        }
-			      ]
-			    },
-			    "fact_sale_has_fact_order_qty_num": {
-			      "Binding": {
-			        "ConceptualEntity": "factSales"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "fact_sale": {
-			          "Target": {
-			            "Entity": "fact_sale"
-			          }
-			        },
-			        "fact_order.qty_num": {
-			          "Target": {
-			            "Entity": "fact_order.qty_num"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "fact_sale"
-			            },
-			            "Object": {
-			              "Role": "fact_order.qty_num"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "fact_sales_have_qty_num"
-			        }
-			      ]
-			    },
-			    "top_month_has_top_month": {
-			      "Binding": {
-			        "ConceptualEntity": "Top Months"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "top_month": {
-			          "Target": {
-			            "Entity": "top_month"
-			          }
-			        },
-			        "top_month.top_month": {
-			          "Target": {
-			            "Entity": "top_month.top_month"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "top_month"
-			            },
-			            "Object": {
-			              "Role": "top_month.top_month"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "top_months_have_top_months"
-			        }
-			      ]
-			    },
-			    "top_month_has_top_months_value": {
-			      "Binding": {
-			        "ConceptualEntity": "Top Months"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "top_month": {
-			          "Target": {
-			            "Entity": "top_month"
-			          }
-			        },
-			        "top_month.top_months_value": {
-			          "Target": {
-			            "Entity": "top_month.top_months_value"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "top_month"
-			            },
-			            "Object": {
-			              "Role": "top_month.top_months_value"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "top_months_have_top_months_value"
-			        }
-			      ]
-			    },
-			    "fact_gain_has_wh_flag": {
-			      "Binding": {
-			        "ConceptualEntity": "factGain"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "fact_gain": {
-			          "Target": {
-			            "Entity": "fact_gain"
-			          }
-			        },
-			        "fact_gain.wh_flag": {
-			          "Target": {
-			            "Entity": "fact_gain.wh_flag"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "fact_gain"
-			            },
-			            "Object": {
-			              "Role": "fact_gain.wh_flag"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "fact_gains_have_wh_flags"
 			        }
 			      ]
 			    },
@@ -142826,6 +143163,171 @@ cultureInfo en-US
 			          "State": "Generated",
 			          "Weight": 0.99,
 			          "ID": "fact_purchase_expenses_have_order_qty"
+			        }
+			      ]
+			    },
+			    "dim_PNL_has_expense_group": {
+			      "Binding": {
+			        "ConceptualEntity": "dimPNL"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "dim_PNL": {
+			          "Target": {
+			            "Entity": "dim_PNL"
+			          }
+			        },
+			        "dim_PNL.expense_group": {
+			          "Target": {
+			            "Entity": "dim_PNL.expense_group"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "dim_PNL"
+			            },
+			            "Object": {
+			              "Role": "dim_PNL.expense_group"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "dim_PNLs_have_expense_groups"
+			        }
+			      ]
+			    },
+			    "dim_PNL_has_PNL_sort": {
+			      "Binding": {
+			        "ConceptualEntity": "dimPNL"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "dim_PNL": {
+			          "Target": {
+			            "Entity": "dim_PNL"
+			          }
+			        },
+			        "dim_PNL.PNL_sort": {
+			          "Target": {
+			            "Entity": "dim_PNL.PNL_sort"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "dim_PNL"
+			            },
+			            "Object": {
+			              "Role": "dim_PNL.PNL_sort"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "dim_PNLs_have_PNL_sorts"
+			        }
+			      ]
+			    },
+			    "dim_sub_purchase_order_number_has_delivery_date": {
+			      "Binding": {
+			        "ConceptualEntity": "dimSubPurchaseOrderNumber"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "dim_sub_purchase_order_number": {
+			          "Target": {
+			            "Entity": "dim_sub_purchase_order_number"
+			          }
+			        },
+			        "dim_sub_purchase_order_number.delivery_date": {
+			          "Target": {
+			            "Entity": "dim_sub_purchase_order_number.delivery_date"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "dim_sub_purchase_order_number"
+			            },
+			            "Object": {
+			              "Role": "dim_sub_purchase_order_number.delivery_date"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "dim_sub_purchase_order_numbers_have_delivery_dates"
+			        }
+			      ]
+			    },
+			    "dim_sub_purchase_order_number_has_delivery_month": {
+			      "Binding": {
+			        "ConceptualEntity": "dimSubPurchaseOrderNumber"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "dim_sub_purchase_order_number": {
+			          "Target": {
+			            "Entity": "dim_sub_purchase_order_number"
+			          }
+			        },
+			        "dim_sub_purchase_order_number.delivery_month": {
+			          "Target": {
+			            "Entity": "dim_sub_purchase_order_number.delivery_month"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "dim_sub_purchase_order_number"
+			            },
+			            "Object": {
+			              "Role": "dim_sub_purchase_order_number.delivery_month"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "dim_sub_purchase_order_numbers_have_delivery_months"
+			        }
+			      ]
+			    },
+			    "fact_gain_has_discharge_cost_base": {
+			      "Binding": {
+			        "ConceptualEntity": "factGain"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_gain": {
+			          "Target": {
+			            "Entity": "fact_gain"
+			          }
+			        },
+			        "fact_gain.discharge_cost_base": {
+			          "Target": {
+			            "Entity": "fact_gain.discharge_cost_base"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_gain"
+			            },
+			            "Object": {
+			              "Role": "fact_gain.discharge_cost_base"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_gains_have_discharge_cost_bases"
 			        }
 			      ]
 			    },

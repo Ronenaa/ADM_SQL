@@ -285,11 +285,16 @@ table factPurchaseExpenses
 	/// עלות לטון. מחושב ב-SQL לכל שורת הוצאה (עמודת CostPerTon): עלות השורה
 	/// מחולקת במחלק של ההזמנה — פריקה (2270) ודמורג' (1201) בטונאז' נטו
 	/// (OrderQuantity - CIF_Qty), שאר הקודים בכמות ההזמנה.
-	///
+	/// 
 	/// מכיוון שהחישוב נעשה בשורה עצמה, SUM פשוט נכון בכל גרעיניות: שורת הוצאה,
 	/// ספק, קוד PNL או הזמנה — והשורות מסתכמות. אין תלות בהקשר הסינון, ולכן
 	/// גם בחירת הזמנה מטבלה אחרת (שגוררת סינון פריט) לא משנה את התוצאה.
-	measure 'Cost per ton' = SUM(factPurchaseExpenses[CostPerTon])
+	measure 'Cost per ton' =
+			
+			CALCULATE(
+			    SUM(factPurchaseExpenses[CostPerTon]),
+			    REMOVEFILTERS(dimItems)
+			)
 		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
 		lineageTag: 026a9f77-937c-44bf-8479-5677ef886165
 
@@ -741,10 +746,10 @@ table factPurchaseExpenses
 	/// וחוזר זהה בכל שורות ההוצאה — לקרוא עם MAX, לא SUM.
 	column CIF_Qty
 		dataType: double
+		isHidden
 		lineageTag: 6a1f3b84-2d59-4e77-8c03-b1d5e94a7f26
 		summarizeBy: none
 		sourceColumn: CIF_Qty
-		isHidden
 
 		annotation SummarizationSetBy = Automatic
 
@@ -754,10 +759,10 @@ table factPurchaseExpenses
 	/// NULL כאשר כל ההזמנה נמכרה CIF, כך שחלוקה תיתן BLANK. קבוע ברמת ההזמנה — MAX, לא SUM.
 	column NetTonnage
 		dataType: double
+		isHidden
 		lineageTag: 7b2a4c95-3e6f-4a18-9d14-c2e6fa5b8037
 		summarizeBy: none
 		sourceColumn: NetTonnage
-		isHidden
 
 		annotation SummarizationSetBy = Automatic
 
@@ -767,10 +772,10 @@ table factPurchaseExpenses
 	/// ניתנת לסכימה (SUM) בכל גרעיניות, בניגוד ל-NetTonnage שהוא קבוע להזמנה.
 	column CostPerTon
 		dataType: double
+		isHidden
 		lineageTag: 4b8d1f60-7a25-4e93-8c1b-0d6f2a9e5b38
 		summarizeBy: sum
 		sourceColumn: CostPerTon
-		isHidden
 
 		annotation SummarizationSetBy = Automatic
 
