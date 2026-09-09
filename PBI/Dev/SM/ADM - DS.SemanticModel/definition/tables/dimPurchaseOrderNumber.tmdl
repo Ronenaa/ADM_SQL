@@ -56,7 +56,7 @@ table dimPurchaseOrderNumber
 	column OrderSupplierKey
 		dataType: int64
 		formatString: 0
-		lineageTag: 5e1a9c3d-6b4f-4a2e-8d7c-1f3b5a9e0c2d
+		lineageTag: 1b7d6f8e-3a2c-4f5e-9b1a-6c8d2e4f7a9b
 		summarizeBy: none
 		sourceColumn: OrderSupplierKey
 
@@ -64,7 +64,7 @@ table dimPurchaseOrderNumber
 
 	column SupplierName
 		dataType: string
-		lineageTag: 6f2b0d4e-7c5a-4b3f-9e8d-2a4c6b0f1d3e
+		lineageTag: 2c8e7a9f-4b3d-5a6f-ac2b-7d9e3f5a8b0c
 		summarizeBy: none
 		sourceColumn: SupplierName
 

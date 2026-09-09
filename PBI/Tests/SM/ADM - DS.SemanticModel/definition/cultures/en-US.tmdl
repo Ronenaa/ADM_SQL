@@ -48995,7 +48995,7 @@ cultureInfo en-US
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "factGain",
-			          "ConceptualProperty": "Gain per Ton new"
+			          "ConceptualProperty": "Gain per Ton"
 			        }
 			      },
 			      "State": "Generated",

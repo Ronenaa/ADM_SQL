@@ -42,8 +42,6 @@ table dimSubPurchaseOrderNumber
 
 		annotation SummarizationSetBy = Automatic
 
-		annotation UnderlyingDateTimeDataType = Date
-
 	column DeliveryMonth
 		dataType: string
 		lineageTag: 9d5b2a7c-3e8f-4d1b-8a6c-2f7e1b5d8c04

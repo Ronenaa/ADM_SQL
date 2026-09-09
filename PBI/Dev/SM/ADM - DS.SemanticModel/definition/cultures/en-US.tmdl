@@ -16234,12 +16234,6 @@ cultureInfo en-US
 			            "State": "Generated",
 			            "Weight": 0.99
 			          }
-			        },
-			        {
-			          "expense": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
 			        }
 			      ]
 			    },
@@ -16610,12 +16604,6 @@ cultureInfo en-US
 			            "Type": "Noun",
 			            "State": "Generated",
 			            "Weight": 0.99
-			          }
-			        },
-			        {
-			          "expense": {
-			            "State": "Generated",
-			            "Weight": 0.97
 			          }
 			        },
 			        {
@@ -17133,6 +17121,16 @@ cultureInfo en-US
 			          "expense order": {
 			            "State": "Generated",
 			            "Weight": 0.97
+			          }
+			        },
+			        {
+			          "Expense": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
 			          }
 			        }
 			      ]
@@ -28679,12 +28677,6 @@ cultureInfo en-US
 			        {
 			          "total warehouse withdrawal expense": {
 			            "State": "Generated"
-			          }
-			        },
-			        {
-			          "expense": {
-			            "State": "Generated",
-			            "Weight": 0.97
 			          }
 			        },
 			        {
@@ -48853,7 +48845,7 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "fact_gain.ragPurchase_qty": {
+			    "fact_gain.purchase_qty": {
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "factGain",
@@ -49003,7 +48995,7 @@ cultureInfo en-US
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "factGain",
-			          "ConceptualProperty": "Gain per Ton new"
+			          "ConceptualProperty": "Gain per Ton"
 			        }
 			      },
 			      "State": "Generated",
@@ -49671,12 +49663,6 @@ cultureInfo en-US
 			            "Type": "Noun",
 			            "State": "Generated",
 			            "Weight": 0.99
-			          }
-			        },
-			        {
-			          "expense": {
-			            "State": "Generated",
-			            "Weight": 0.97
 			          }
 			        }
 			      ]
@@ -51265,9 +51251,225 @@ cultureInfo en-US
 			          }
 			        }
 			      ]
+			    },
+			    "dim_purchase_order_number.order_supplier_key": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "dimPurchaseOrderNumber",
+			          "ConceptualProperty": "OrderSupplierKey"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "order supplier key": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "OrderSupplierKey": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        }
+			      ]
+			    },
+			    "dim_purchase_order_number.supplier_name": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "dimPurchaseOrderNumber",
+			          "ConceptualProperty": "SupplierName"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "supplier name": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "SupplierName": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        }
+			      ]
+			    },
+			    "fact_purchase_expense.order_qty": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factPurchaseExpenses",
+			          "ConceptualProperty": "Order Qty"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "order qty": {
+			            "State": "Generated"
+			          }
+			        }
+			      ]
+			    },
+			    "fact_purchase_expense.cost_per_ton": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factPurchaseExpenses",
+			          "ConceptualProperty": "Cost per ton"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "cost per ton": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "cost": {
+			            "State": "Generated",
+			            "Weight": 0.97
+			          }
+			        }
+			      ]
 			    }
 			  },
 			  "Relationships": {
+			    "fact_order_has_qty_num": {
+			      "Binding": {
+			        "ConceptualEntity": "factOrders"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_order": {
+			          "Target": {
+			            "Entity": "fact_order"
+			          }
+			        },
+			        "fact_order.qty_num": {
+			          "Target": {
+			            "Entity": "fact_order.qty_num"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_order"
+			            },
+			            "Object": {
+			              "Role": "fact_order.qty_num"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_orders_have_qty_num"
+			        }
+			      ]
+			    },
+			    "OrderSupplyExecution_parameter_has_fact_order_qty_num": {
+			      "Binding": {
+			        "ConceptualEntity": "OrderSupplyExecution Parameter"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "OrderSupplyExecution_parameter": {
+			          "Target": {
+			            "Entity": "OrderSupplyExecution_parameter"
+			          }
+			        },
+			        "fact_order.qty_num": {
+			          "Target": {
+			            "Entity": "fact_order.qty_num"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "OrderSupplyExecution_parameter"
+			            },
+			            "Object": {
+			              "Role": "fact_order.qty_num"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "OrderSupplyExecution_parameters_have_qty_num"
+			        }
+			      ]
+			    },
+			    "fact_order_has_gap_next_month__no_booking": {
+			      "Binding": {
+			        "ConceptualEntity": "factOrders"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_order": {
+			          "Target": {
+			            "Entity": "fact_order"
+			          }
+			        },
+			        "fact_order.gap_next_month__no_booking": {
+			          "Target": {
+			            "Entity": "fact_order.gap_next_month__no_booking"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_order"
+			            },
+			            "Object": {
+			              "Role": "fact_order.gap_next_month__no_booking"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_orders_have_gap_next_month__no_booking"
+			        }
+			      ]
+			    },
+			    "fact_order_has_gap_next_month_vs_norm": {
+			      "Binding": {
+			        "ConceptualEntity": "factOrders"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_order": {
+			          "Target": {
+			            "Entity": "fact_order"
+			          }
+			        },
+			        "fact_order.gap_next_month_vs_norm": {
+			          "Target": {
+			            "Entity": "fact_order.gap_next_month_vs_norm"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_order"
+			            },
+			            "Object": {
+			              "Role": "fact_order.gap_next_month_vs_norm"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_orders_have_gap_next_month_vs_norm"
+			        }
+			      ]
+			    },
 			    "fact_order_has_norm_avg": {
 			      "Binding": {
 			        "ConceptualEntity": "factOrders"
@@ -53716,39 +53918,6 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "fact_gain_has_warehouse_charged_qty": {
-			      "Binding": {
-			        "ConceptualEntity": "factGain"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "fact_gain": {
-			          "Target": {
-			            "Entity": "fact_gain"
-			          }
-			        },
-			        "fact_gain.warehouse_charged_qty": {
-			          "Target": {
-			            "Entity": "fact_gain.warehouse_charged_qty"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "fact_gain"
-			            },
-			            "Object": {
-			              "Role": "fact_gain.warehouse_charged_qty"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "fact_gains_have_warehouse_charged_qty"
-			        }
-			      ]
-			    },
 			    "fact_gain_has_other_costs_per_order": {
 			      "Binding": {
 			        "ConceptualEntity": "factGain"
@@ -55435,7 +55604,7 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "fact_gain_has_ragPurchase_qty": {
+			    "fact_gain_has_purchase_qty": {
 			      "Binding": {
 			        "ConceptualEntity": "factGain"
 			      },
@@ -55446,9 +55615,9 @@ cultureInfo en-US
 			            "Entity": "fact_gain"
 			          }
 			        },
-			        "fact_gain.ragPurchase_qty": {
+			        "fact_gain.purchase_qty": {
 			          "Target": {
-			            "Entity": "fact_gain.ragPurchase_qty"
+			            "Entity": "fact_gain.purchase_qty"
 			          }
 			        }
 			      },
@@ -55459,12 +55628,12 @@ cultureInfo en-US
 			              "Role": "fact_gain"
 			            },
 			            "Object": {
-			              "Role": "fact_gain.ragPurchase_qty"
+			              "Role": "fact_gain.purchase_qty"
 			            }
 			          },
 			          "State": "Generated",
 			          "Weight": 0.99,
-			          "ID": "fact_gains_have_ragPurchase_qty"
+			          "ID": "fact_gains_have_Purchase_qty"
 			        }
 			      ]
 			    },
@@ -142172,6 +142341,66 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
+			    "fact_purchase_expense_is_expensive3": {
+			      "Binding": {
+			        "ConceptualEntity": "factPurchaseExpenses"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_purchase_expense": {
+			          "Target": {
+			            "Entity": "fact_purchase_expense"
+			          }
+			        },
+			        "fact_purchase_expense.cost_per_ton": {
+			          "Target": {
+			            "Entity": "fact_purchase_expense.cost_per_ton"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Adjective": {
+			            "Subject": {
+			              "Role": "fact_purchase_expense"
+			            },
+			            "Adjectives": [
+			              {
+			                "expensive": {
+			                  "State": "Generated"
+			                }
+			              }
+			            ],
+			            "Antonyms": [
+			              {
+			                "cheap": {
+			                  "State": "Generated"
+			                }
+			              }
+			            ],
+			            "Measurement": {
+			              "Role": "fact_purchase_expense.cost_per_ton"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "cost_per_ton_indicates_how_expensive_fact_purchase_expenses_are"
+			        },
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_purchase_expense"
+			            },
+			            "Object": {
+			              "Role": "fact_purchase_expense.cost_per_ton"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_purchase_expenses_have_cost_per_ton"
+			        }
+			      ]
+			    },
 			    "target_slicer_slice": {
 			      "Binding": {
 			        "ConceptualEntity": "TargetSlicer"
@@ -142201,138 +142430,6 @@ cultureInfo en-US
 			          "State": "Generated",
 			          "Weight": 0.75,
 			          "ID": "target_slicers_slice"
-			        }
-			      ]
-			    },
-			    "fact_order_has_gap_next_month_vs_norm": {
-			      "Binding": {
-			        "ConceptualEntity": "factOrders"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "fact_order": {
-			          "Target": {
-			            "Entity": "fact_order"
-			          }
-			        },
-			        "fact_order.gap_next_month_vs_norm": {
-			          "Target": {
-			            "Entity": "fact_order.gap_next_month_vs_norm"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "fact_order"
-			            },
-			            "Object": {
-			              "Role": "fact_order.gap_next_month_vs_norm"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "fact_orders_have_gap_next_month_vs_norm"
-			        }
-			      ]
-			    },
-			    "fact_order_has_gap_next_month__no_booking": {
-			      "Binding": {
-			        "ConceptualEntity": "factOrders"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "fact_order": {
-			          "Target": {
-			            "Entity": "fact_order"
-			          }
-			        },
-			        "fact_order.gap_next_month__no_booking": {
-			          "Target": {
-			            "Entity": "fact_order.gap_next_month__no_booking"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "fact_order"
-			            },
-			            "Object": {
-			              "Role": "fact_order.gap_next_month__no_booking"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "fact_orders_have_gap_next_month__no_booking"
-			        }
-			      ]
-			    },
-			    "OrderSupplyExecution_parameter_has_fact_order_qty_num": {
-			      "Binding": {
-			        "ConceptualEntity": "OrderSupplyExecution Parameter"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "OrderSupplyExecution_parameter": {
-			          "Target": {
-			            "Entity": "OrderSupplyExecution_parameter"
-			          }
-			        },
-			        "fact_order.qty_num": {
-			          "Target": {
-			            "Entity": "fact_order.qty_num"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "OrderSupplyExecution_parameter"
-			            },
-			            "Object": {
-			              "Role": "fact_order.qty_num"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "OrderSupplyExecution_parameters_have_qty_num"
-			        }
-			      ]
-			    },
-			    "fact_order_has_qty_num": {
-			      "Binding": {
-			        "ConceptualEntity": "factOrders"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "fact_order": {
-			          "Target": {
-			            "Entity": "fact_order"
-			          }
-			        },
-			        "fact_order.qty_num": {
-			          "Target": {
-			            "Entity": "fact_order.qty_num"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "fact_order"
-			            },
-			            "Object": {
-			              "Role": "fact_order.qty_num"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "fact_orders_have_qty_num"
 			        }
 			      ]
 			    },
@@ -142630,6 +142727,105 @@ cultureInfo en-US
 			          "State": "Generated",
 			          "Weight": 0.99,
 			          "ID": "fact_gains_have_total_qty_storage"
+			        }
+			      ]
+			    },
+			    "dim_purchase_order_number_has_order_supplier_key": {
+			      "Binding": {
+			        "ConceptualEntity": "dimPurchaseOrderNumber"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "dim_purchase_order_number": {
+			          "Target": {
+			            "Entity": "dim_purchase_order_number"
+			          }
+			        },
+			        "dim_purchase_order_number.order_supplier_key": {
+			          "Target": {
+			            "Entity": "dim_purchase_order_number.order_supplier_key"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "dim_purchase_order_number"
+			            },
+			            "Object": {
+			              "Role": "dim_purchase_order_number.order_supplier_key"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "dim_purchase_order_numbers_have_order_supplier_keys"
+			        }
+			      ]
+			    },
+			    "dim_purchase_order_number_has_supplier_name": {
+			      "Binding": {
+			        "ConceptualEntity": "dimPurchaseOrderNumber"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "dim_purchase_order_number": {
+			          "Target": {
+			            "Entity": "dim_purchase_order_number"
+			          }
+			        },
+			        "dim_purchase_order_number.supplier_name": {
+			          "Target": {
+			            "Entity": "dim_purchase_order_number.supplier_name"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "dim_purchase_order_number"
+			            },
+			            "Object": {
+			              "Role": "dim_purchase_order_number.supplier_name"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "dim_purchase_order_numbers_have_supplier_names"
+			        }
+			      ]
+			    },
+			    "fact_purchase_expense_has_order_qty": {
+			      "Binding": {
+			        "ConceptualEntity": "factPurchaseExpenses"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_purchase_expense": {
+			          "Target": {
+			            "Entity": "fact_purchase_expense"
+			          }
+			        },
+			        "fact_purchase_expense.order_qty": {
+			          "Target": {
+			            "Entity": "fact_purchase_expense.order_qty"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_purchase_expense"
+			            },
+			            "Object": {
+			              "Role": "fact_purchase_expense.order_qty"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_purchase_expenses_have_order_qty"
 			        }
 			      ]
 			    },
