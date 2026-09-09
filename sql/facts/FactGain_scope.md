@@ -58,6 +58,40 @@ columns and inline in `FOT_Purchase`, `Gain` and `TotalGain`.
 `Shortage` and `Other_Expenses`, by contrast, **are** divided by plain `orderquantity` at
 aggregation time in `P_costs` — no `CIF_Qty` exclusion for those two.
 
+### The same divisor outside FactGain: `dimCIFQty`
+
+`factPurchaseExpenses` needs this divisor too (the `Cost per ton` / `Discharge Cost per ton` /
+`Demurrage Cost per ton` measures), but it **cannot compute it** — it has no `sales`/`base_link`
+CTE. The DAX used to recompute CIF quantity via `[CIF Qty (Sales)]`, and it silently disagreed:
+
+* it filtered on `factGain[Price Term] = "CIF"`, which is a `COALESCE` of `SalesType` and
+  `QuantityCategory` (final SELECT), so it matched rows the strict `ActionType = 11` test behind
+  `qty_cif` never counts;
+* it summed `factGain[Quantity]` (item-line quantity) instead of `qty_cif`;
+* it respected the date slicer, shrinking a divisor that must be whole-PO and date-unbounded.
+
+Result: the PNL breakdown showed $10.20/ton discharge where `factGain` showed $14.68 for the same
+PO. Fixed by [`sql/dimension/dimCIFQty.sql`](../dimension/dimCIFQty.sql) — a standalone query
+returning one row per PO, with `CurrencyConvertion` / `sales` / `base_link` / `CIF_Qty` copied
+**verbatim** from this file so the two cannot drift. It is imported as the `dimCIFQty` table and
+related to `dimPurchaseOrderNumber[PurchaseOrderID]` (the hub both facts already join, and the only
+type-compatible key — `factPurchaseExpenses[PurchaseOrderID]` is `int64`, the hub is `string`).
+
+**If you change `sales`, `base_link` or `CIF_Qty` here, mirror it in `dimCIFQty.sql`.** That
+duplication is deliberate for now (the alternative was cloning ~570 lines of
+`purchase_orders`/`P_costs` to also derive `orderquantity`), but it is the one place this rule can
+still go out of sync. Rewiring this file to consume `dimCIFQty` instead of its inline CTE is the
+tidier end state and is not done yet.
+
+Two DAX-side traps worth knowing, both already handled:
+
+* `CIF_Qty` is a **PO-level constant**. Aggregate it with `MAX` inside `SUMX(VALUES(PurchaseOrderID))`
+  — a plain `SUM` over expense rows multiplies it by the row count, the same trap `P_costs` handles
+  for Swap rows (`CASE WHEN dt.DocName = 'Swap' THEN MAX(orderquantity) ...`).
+* Never fetch it per row via `TREATAS` into `factGain`. At per-expense grain that is one filter
+  context and table scan per expense row per PNL code, and it fails outright with
+  *Resources Exceeded*.
+
 The same rule is mirrored in DAX on the purchase-expenses side: `factPurchaseExpenses[Cost per ton]`
 applies `[Order Qty] - [CIF Qty (for PO)]` as the divisor for PNL Code 2270 (discharge) and 1201
 (demurrage), and plain `[Order Qty]` for everything else.
