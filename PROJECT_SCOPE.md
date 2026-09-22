@@ -17,8 +17,8 @@ self-contained PBIP reports).
 ```
 ADM_SQL/
 ├── PROJECT_SCOPE.md          this file
+├── FactGain_scope.md         FactGain CTE-by-CTE working notes (moved from sql/facts/, see below)
 ├── sql/
-│   ├── facts/                 fact-table queries (sales, gain, purchasing, inventory, ...)
 │   └── dimension/              dimension/lookup queries
 ├── SM/
 │   └── ADM - DS.*/            Power BI semantic model project (PBIP + TMDL) and its bound report
@@ -29,25 +29,19 @@ ADM_SQL/
 
 ---
 
-## 3. `sql/facts/`
+## 3. Fact-table queries
 
-| File | Purpose |
-|---|---|
-| `FactGain.sql` | **Active / production.** Profit/gain per sales line. See CTE chain & change log below. |
-| `FactGain_BU.sql` | **Backup.** Holds the last *committed* version of `FactGain.sql` from before the most recent push — see [Backup convention](#backup-convention) below. |
-| `factSales.sql` | All sales — invoices (CHSHBONIOT) + open delivery notes (TEODOT_MSHLOCH). Includes WarehouseFlag, ActionType, QuantityCategory. Date range: 2018 → current year. |
-| `factInventory.sql` | Inventory snapshot — quantity, avg price, FOT and CF prices per item/supplier/month. |
-| `factInventoryActivity.sql` | Inventory movement activity. |
-| `factInventoryAllocation.sql` | Inventory allocation records. |
-| `factOrders.sql` | Purchase orders. |
-| `factOrdersStepTest.sql` | Scratch/step-through test query for purchase-order logic. |
-| `factPurchaseOrder.sql` | Purchase order header/line data. |
-| `factPurchaseExpenses.sql` | Expenses linked to purchase orders. |
-| `factPurchaseIncome.sql` | Purchase income records. |
-| `factCollection.sql` | Collections / receivables. |
-| `factDailyPrices.sql` | Daily price data. |
-| `FactLimits.sql` | Credit / quantity limits. |
-| `factTargets.sql` | Sales targets. |
+There used to be a `sql/facts/` folder mirroring each fact table's query as a standalone `.sql`
+file. It was removed: Power BI never read from it (each table's real query is the literal SQL
+string embedded in that table's `partition ... = m` block in its `.tmdl` file), and keeping a
+hand-synced copy in two places was a recurring source of drift — e.g. `factOrders.sql` had gone
+stale and silently held an unrelated query. **The `.tmdl` partition is now the single source of
+truth for every fact table's SQL.** To read or test a table's query, open its `.tmdl` file's
+`partition` block, or copy the query out to a scratch `.sql` file for ad-hoc testing (e.g. via
+`scratch_query.ps1`) and discard it afterward rather than committing it back to a mirror folder.
+
+`FactGain_scope.md` (CTE-by-CTE design rationale for the Gain query) was kept and moved to the
+repo root, since it's working documentation, not a SQL mirror — see [FactGain_scope.md](FactGain_scope.md).
 
 ## 4. `sql/dimension/`
 
@@ -79,12 +73,14 @@ CurrencyConvertion
                                                Branch 2 (Warehouse, cost from inv)
 ```
 
-### Backup convention
+### Backup convention (historical)
 
-Before pushing a change to `FactGain.sql`, first overwrite `FactGain_BU.sql` with the **currently
-committed** version of `FactGain.sql` (`git show HEAD:sql/facts/FactGain.sql`), so that `_BU`
-always holds the version that was live immediately before the incoming change — a one-step-back
-safety copy, not a fixed historical snapshot.
+`FactGain.sql`/`FactGain_BU.sql` no longer exist as standalone files (see [Fact-table
+queries](#3-fact-table-queries) above) — `factGain.tmdl`'s partition is now the only copy of this
+query, and git history is the backup. This section is kept for context on the old workflow: before
+pushing a change to `FactGain.sql`, the convention was to first overwrite `FactGain_BU.sql` with
+the currently committed version of `FactGain.sql`, so `_BU` held the version live immediately
+before the incoming change — a one-step-back safety copy, not a fixed historical snapshot.
 
 ## 6. FactGain — Change Log
 
@@ -179,9 +175,9 @@ Inline comments in the CTE mark the original values.
 `SM/ADM - DS.pbip` is a Power BI project in PBIP/TMDL format, containing:
 - `ADM - DS.SemanticModel/` — the data model itself: table definitions (`definition/tables/*.tmdl`,
   ~90 tables), relationships, roles (RLS: `Agent`, `Managment`), expressions (Power Query M
-  source), and culture/translation files. **`factGain.tmdl`** is the Power BI-side counterpart
-  table to `sql/facts/FactGain.sql` — when the SQL changes, the model table typically needs a
-  matching update.
+  source), and culture/translation files. **`factGain.tmdl`**'s partition holds the Gain query
+  directly (see [Fact-table queries](#3-fact-table-queries)) — its CTE-by-CTE design rationale is
+  in [FactGain_scope.md](FactGain_scope.md).
 - `ADM - DS.Report/` — the report bound to this semantic model.
 
 **Convention: make semantic-model changes (tables, measures, relationships, roles, etc.) through

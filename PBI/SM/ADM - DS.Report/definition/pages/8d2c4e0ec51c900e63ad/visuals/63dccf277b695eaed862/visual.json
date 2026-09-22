@@ -1,0 +1,910 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
+  "name": "63dccf277b695eaed862",
+  "position": {
+    "x": 29.767441860465116,
+    "y": 423.613595706619,
+    "z": 11501,
+    "height": 296.5295169946333,
+    "width": 1214.7406082289804,
+    "tabOrder": 4
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factOrders"
+                    }
+                  },
+                  "Property": "OrderID"
+                }
+              },
+              "queryRef": "factOrders.OrderID",
+              "nativeQueryRef": "Order",
+              "displayName": "Order"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factOrders"
+                    }
+                  },
+                  "Property": "Date"
+                }
+              },
+              "queryRef": "factOrders.Date",
+              "nativeQueryRef": "OrderDate",
+              "displayName": "OrderDate"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dimCustomers"
+                    }
+                  },
+                  "Property": "שם לקוח אב"
+                }
+              },
+              "queryRef": "dimCustomers.שם לקוח אב",
+              "nativeQueryRef": "Customer",
+              "displayName": "Customer"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dimItemsSimple"
+                    }
+                  },
+                  "Property": "Product"
+                }
+              },
+              "queryRef": "dimItemsSimple.Product",
+              "nativeQueryRef": "Product"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factOrders"
+                    }
+                  },
+                  "Property": "Total Quantity Supply Date"
+                }
+              },
+              "queryRef": "factOrders.Total Quantity Supply Date",
+              "nativeQueryRef": "Qty",
+              "displayName": "Qty"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factOrders"
+                    }
+                  },
+                  "Property": "Open Orders Quantity By Supply Date"
+                }
+              },
+              "queryRef": "factOrders.Open Orders Quantity By Supply Date",
+              "nativeQueryRef": "Remain",
+              "displayName": "Remain"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factOrders"
+                    }
+                  },
+                  "Property": "AVG Price Supply Date Switch"
+                }
+              },
+              "queryRef": "factOrders.AVG Price Supply Date Switch",
+              "nativeQueryRef": "Price",
+              "displayName": "Price"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factOrders"
+                    }
+                  },
+                  "Property": "Avg Price Supply Date Margin"
+                }
+              },
+              "queryRef": "factOrders.Avg Price Supply Date Margin",
+              "nativeQueryRef": "Influence",
+              "displayName": "Influence"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factOrders"
+                    }
+                  },
+                  "Property": "תאריך אספקה"
+                }
+              },
+              "queryRef": "factOrders.תאריך אספקה",
+              "nativeQueryRef": "Supply Date",
+              "displayName": "Supply Date"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dimOrderStatus"
+                    }
+                  },
+                  "Property": "Desc"
+                }
+              },
+              "queryRef": "dimOrderStatus.Desc",
+              "nativeQueryRef": "Status",
+              "displayName": "Status"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dimSuppliers"
+                    }
+                  },
+                  "Property": "Supplier Name"
+                }
+              },
+              "queryRef": "dimSuppliers.Supplier Name",
+              "nativeQueryRef": "Delivered From",
+              "displayName": "Delivered From"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dimTransactionType"
+                    }
+                  },
+                  "Property": "Desc"
+                }
+              },
+              "queryRef": "dimTransactionType.Desc",
+              "nativeQueryRef": "Transaction Type",
+              "displayName": "Transaction Type"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "factOrders"
+                  }
+                },
+                "Property": "AVG Price Supply Date Switch"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ]
+      }
+    },
+    "objects": {
+      "total": [
+        {
+          "properties": {
+            "totals": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "values": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "12D"
+                }
+              }
+            },
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Calibri'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "columnHeaders": [
+        {
+          "properties": {
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Calibri'"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "12D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "columnFormatting": [
+        {
+          "properties": {
+            "styleTotal": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "labelPrecision": {
+              "expr": {
+                "Literal": {
+                  "Value": "0L"
+                }
+              }
+            },
+            "dataBars": {
+              "positiveColor": {
+                "solid": {
+                  "color": {
+                    "expr": {
+                      "Literal": {
+                        "Value": "'maxColor'"
+                      }
+                    }
+                  }
+                }
+              },
+              "negativeColor": {
+                "solid": {
+                  "color": {
+                    "expr": {
+                      "Literal": {
+                        "Value": "'minColor'"
+                      }
+                    }
+                  }
+                }
+              },
+              "axisColor": {
+                "solid": {
+                  "color": {
+                    "expr": {
+                      "Literal": {
+                        "Value": "'foreground'"
+                      }
+                    }
+                  }
+                }
+              },
+              "reverseDirection": {
+                "expr": {
+                  "Literal": {
+                    "Value": "false"
+                  }
+                }
+              },
+              "hideText": {
+                "expr": {
+                  "Literal": {
+                    "Value": "false"
+                  }
+                }
+              },
+              "totalMatchingOption": {
+                "expr": {
+                  "Literal": {
+                    "Value": "1L"
+                  }
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "factOrders.Total Quantity Supply Date"
+          }
+        },
+        {
+          "properties": {
+            "styleTotal": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "labelPrecision": {
+              "expr": {
+                "Literal": {
+                  "Value": "0L"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "factOrders.AVG Price Supply Date Switch"
+          }
+        },
+        {
+          "properties": {
+            "labelPrecision": {
+              "expr": {
+                "Literal": {
+                  "Value": "0L"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "factOrders.Open Orders Quantity By Supply Date"
+          }
+        }
+      ],
+      "columnWidth": [
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "211.80087294015289D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "dimCustomers.שם לקוח אב"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "138.56654861207932D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "dimItemsSimple.Product"
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "ThemeDataColor": {
+                      "ColorId": 2,
+                      "Percent": 0
+                    }
+                  }
+                }
+              }
+            },
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'center'"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "18D"
+                }
+              }
+            },
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Sales'"
+                }
+              }
+            },
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Calibri'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "background": [
+        {
+          "properties": {
+            "transparency": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            },
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "ThemeDataColor": {
+                      "ColorId": 2,
+                      "Percent": 0
+                    }
+                  }
+                }
+              }
+            },
+            "radius": {
+              "expr": {
+                "Literal": {
+                  "Value": "1D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "visualTooltip": [
+        {
+          "properties": {
+            "titleFontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            },
+            "valueFontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "stylePreset": [
+        {
+          "properties": {
+            "name": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Minimal'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "Filterf99383d33637d4211e74",
+        "ordinal": 0,
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dimCustomers"
+              }
+            },
+            "Property": "שם לקוח אב"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "Filter93789e0360c060172953",
+        "ordinal": 1,
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "factOrders"
+              }
+            },
+            "Property": "Pricing_TotalDiff_SupplyDate"
+          }
+        },
+        "type": "Advanced",
+        "howCreated": "User"
+      },
+      {
+        "name": "Filter4194b2bec9cac9401701",
+        "ordinal": 2,
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "factOrders"
+              }
+            },
+            "Property": "Date"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "Filterf5d38735ed940565a120",
+        "ordinal": 3,
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "factOrders"
+              }
+            },
+            "Property": "OrderID"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "Filter30bd323eee2692bd025b",
+        "ordinal": 4,
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dimItemsSimple"
+              }
+            },
+            "Property": "Product"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "Filter6d80343fbaac4066ea01",
+        "ordinal": 5,
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dimItemsSimple"
+              }
+            },
+            "Property": "מקט"
+          }
+        },
+        "type": "Advanced",
+        "howCreated": "User"
+      },
+      {
+        "name": "Filter48a34260173a720a1e47",
+        "ordinal": 6,
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "factOrders"
+              }
+            },
+            "Property": "Quantity"
+          }
+        },
+        "type": "Advanced",
+        "howCreated": "User"
+      },
+      {
+        "name": "Filter956929ec565ad9e98062",
+        "ordinal": 7,
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "factOrders"
+              }
+            },
+            "Property": "תאריך אספקה"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "Filterc380f786834e8c209ee9",
+        "ordinal": 8,
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dimDates"
+              }
+            },
+            "Property": "ShowLast2Years"
+          }
+        },
+        "type": "Categorical",
+        "howCreated": "User"
+      },
+      {
+        "name": "Filter19d1f77948ca07246c6b",
+        "ordinal": 9,
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "factOrders"
+              }
+            },
+            "Property": "Pricing_TotalTargetLine_SupplyDate"
+          }
+        },
+        "type": "Advanced",
+        "howCreated": "User"
+      },
+      {
+        "name": "Filterf312888ec07373860a06",
+        "ordinal": 10,
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "factOrders"
+              }
+            },
+            "Property": "Pricing_TotalTargetLine_SupplyDate"
+          }
+        },
+        "type": "Advanced",
+        "howCreated": "User"
+      },
+      {
+        "name": "Filterbbe8f920b5013570640d",
+        "ordinal": 11,
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "factOrders"
+              }
+            },
+            "Property": "Total Sales USD Supply Date"
+          }
+        },
+        "type": "Advanced",
+        "howCreated": "User"
+      },
+      {
+        "name": "Filter3a79ba39038de5097656",
+        "ordinal": 12,
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "factOrders"
+              }
+            },
+            "Property": "Avg Unit Price By Supply Date"
+          }
+        },
+        "type": "Advanced",
+        "howCreated": "User"
+      },
+      {
+        "name": "Filtere14a93ce830298328061",
+        "ordinal": 13,
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "factOrders"
+              }
+            },
+            "Property": "Total Quantity Supply Date"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "Filtere03fbbf52e9d009b04eb",
+        "ordinal": 14,
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dimSuppliers"
+              }
+            },
+            "Property": "Supplier Name"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "Filtera9ae143aec00b7a0994d",
+        "ordinal": 15,
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "factOrders"
+              }
+            },
+            "Property": "AVG Price Switch"
+          }
+        },
+        "type": "Advanced",
+        "howCreated": "User"
+      },
+      {
+        "name": "Filter00660a074a42ff0b7bf9",
+        "ordinal": 16,
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "factOrders"
+              }
+            },
+            "Property": "AVG Price Supply Date Switch"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "Filter0138229e81555b2cb091",
+        "ordinal": 17,
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dimOrderStatus"
+              }
+            },
+            "Property": "Desc"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "Filter189af9f009f2acb25165",
+        "ordinal": 18,
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dimTransactionType"
+              }
+            },
+            "Property": "Desc"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "Filter21bff01624b6f9316b3e",
+        "ordinal": 19,
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "factOrders"
+              }
+            },
+            "Property": "Open Orders Quantity By Supply Date"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "54e9f404a37543400826",
+        "ordinal": 20,
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "factOrders"
+              }
+            },
+            "Property": "Switch Measures Show"
+          }
+        },
+        "type": "Advanced",
+        "howCreated": "User"
+      },
+      {
+        "name": "522ce343e047134ede00",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "factOrders"
+              }
+            },
+            "Property": "Avg Price Supply Date Margin"
+          }
+        },
+        "type": "Advanced"
+      }
+    ],
+    "filterSortOrder": "Custom"
+  }
+}
