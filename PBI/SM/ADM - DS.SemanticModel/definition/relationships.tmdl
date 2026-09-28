@@ -539,3 +539,16 @@ relationship ab9fd201-9454-5931-94b4-b9a332c76b8c
 	fromColumn: dimPeriods_Compare.Date
 	toColumn: dimDates.Date
 
+relationship fe55670a-72e2-4792-99f8-b1fc5865920e
+	fromColumn: factLastQtySteps.Step
+	toColumn: dimQtyStep.Step
+
+relationship 4be785bf-b8e5-4ed5-9284-54ea748af354
+	fromColumn: factLastQtySteps.Article
+	toColumn: dimArticle.Article
+
+relationship 0123813b-0a13-432f-a4e4-309f323d8375
+	crossFilteringBehavior: bothDirections
+	fromColumn: dimItemsSimple.Article_Description
+	toColumn: dimArticle.Article
+

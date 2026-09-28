@@ -7,8 +7,8 @@
 ## 1. Project Purpose
 
 ADM is a data-warehouse / BI project. This repository holds the SQL that builds the fact and
-dimension queries feeding a Power BI **semantic model** (`SM/`) and a set of standalone Power BI
-**reports** (`Reports/`). The SQL layer is the source of truth for the data; the semantic model
+dimension queries feeding a Power BI **semantic model** (`PBI/SM/`) and a set of standalone Power BI
+**reports** (`PBI/Reports/`). The SQL layer is the source of truth for the data; the semantic model
 exposes it for analysis, and the reports consume the semantic model (or, in some cases, ship as
 self-contained PBIP reports).
 
@@ -18,41 +18,42 @@ self-contained PBIP reports).
 ADM_SQL/
 ├── PROJECT_SCOPE.md          this file
 ├── FactGain_scope.md         FactGain CTE-by-CTE working notes (moved from sql/facts/, see below)
-├── sql/
-│   └── dimension/              dimension/lookup queries
-├── SM/
-│   └── ADM - DS.*/            Power BI semantic model project (PBIP + TMDL) and its bound report
-└── Reports/
-    ├── Sales.*/                standalone Power BI report
-    └── Purchase Expenses.*/    standalone Power BI report (new)
+├── scratch_query.ps1         ad-hoc runner for testing any .sql file against the live DB
+└── PBI/
+    ├── SM/
+    │   └── ADM - DS.*/        Power BI semantic model project (PBIP + TMDL) and its bound report
+    └── Reports/
+        ├── Sales.*/            standalone Power BI report
+        └── Purchase Expenses.*/  standalone Power BI report (new)
 ```
 
 ---
 
-## 3. Fact-table queries
+## 3. SQL queries — no standalone mirror folder
 
-There used to be a `sql/facts/` folder mirroring each fact table's query as a standalone `.sql`
-file. It was removed: Power BI never read from it (each table's real query is the literal SQL
-string embedded in that table's `partition ... = m` block in its `.tmdl` file), and keeping a
-hand-synced copy in two places was a recurring source of drift — e.g. `factOrders.sql` had gone
-stale and silently held an unrelated query. **The `.tmdl` partition is now the single source of
-truth for every fact table's SQL.** To read or test a table's query, open its `.tmdl` file's
-`partition` block, or copy the query out to a scratch `.sql` file for ad-hoc testing (e.g. via
-`scratch_query.ps1`) and discard it afterward rather than committing it back to a mirror folder.
+There used to be a `sql/facts/` and `sql/dimension/` folder mirroring each fact/dimension table's
+query as a standalone `.sql` file. Both were removed: Power BI never read from them (each table's
+real query is the literal SQL string embedded in that table's `partition ... = m` block in its
+`.tmdl` file), and keeping a hand-synced copy in two places was a recurring source of drift — e.g.
+`factOrders.sql` had gone stale and silently held an unrelated query. **The `.tmdl` partition is
+now the single source of truth for every table's SQL.** To read or test a table's query, open its
+`.tmdl` file's `partition` block, or copy the query out to a scratch `.sql` file for ad-hoc testing
+(e.g. via `scratch_query.ps1`) and discard it afterward rather than committing it back to a mirror
+folder.
+
+### Exception: `sql/factLastQtySteps/`
+
+One folder does exist under `sql/`, added for `factLastQtySteps`. Its query is ~570 lines (it
+embeds the whole factOrders base as a CTE, then a window-function step ladder) and is effectively
+unreadable and undiffable as an escaped one-line M string. The folder holds a readable copy of the
+query, the generated `.m`, and two QA scripts.
+
+**This does not change the rule above.** The `.tmdl` partition is still the live source; the `.sql`
+is a reference copy and the two must be kept in sync, exactly as `factGain` / `factPurchaseExpenses`
+already duplicate their shared CTEs. See [sql/factLastQtySteps/README.md](sql/factLastQtySteps/README.md).
 
 `FactGain_scope.md` (CTE-by-CTE design rationale for the Gain query) was kept and moved to the
 repo root, since it's working documentation, not a SQL mirror — see [FactGain_scope.md](FactGain_scope.md).
-
-## 4. `sql/dimension/`
-
-| File | Purpose |
-|---|---|
-| `dimActionType.sql` | Action type lookup (FOT, CIF, Exchange, etc.). |
-| `dimItems.sql` | Items/products dimension. |
-| `dimItemsSimple.sql` | Simplified items/products dimension. |
-| `dimPurchaseOrderNumber.sql` | Purchase order number dimension. |
-| `dimSubPurchaseOrderID.sql` | Sub purchase order ID dimension. |
-| `dimWarehouses.sql` | Warehouses dimension. |
 
 ---
 
@@ -170,23 +171,23 @@ Inline comments in the CTE mark the original values.
 
 ---
 
-## 7. Power BI Semantic Model (`SM/`)
+## 7. Power BI Semantic Model (`PBI/SM/`)
 
-`SM/ADM - DS.pbip` is a Power BI project in PBIP/TMDL format, containing:
+`PBI/SM/ADM - DS.pbip` is a Power BI project in PBIP/TMDL format, containing:
 - `ADM - DS.SemanticModel/` — the data model itself: table definitions (`definition/tables/*.tmdl`,
   ~90 tables), relationships, roles (RLS: `Agent`, `Managment`), expressions (Power Query M
   source), and culture/translation files. **`factGain.tmdl`**'s partition holds the Gain query
-  directly (see [Fact-table queries](#3-fact-table-queries)) — its CTE-by-CTE design rationale is
-  in [FactGain_scope.md](FactGain_scope.md).
+  directly (see [SQL queries](#3-sql-queries--no-standalone-mirror-folder)) — its CTE-by-CTE design
+  rationale is in [FactGain_scope.md](FactGain_scope.md).
 - `ADM - DS.Report/` — the report bound to this semantic model.
 
 **Convention: make semantic-model changes (tables, measures, relationships, roles, etc.) through
 the `powerbi-modeling-mcp` tools rather than hand-editing `.tmdl` files directly.** This keeps the
 model internally consistent and avoids malformed TMDL from manual edits.
 
-## 8. Reports (`Reports/`)
+## 8. Reports (`PBI/Reports/`)
 
-Standalone Power BI reports, separate from the `SM/` semantic-model bundle:
+Standalone Power BI reports, separate from the `PBI/SM/` semantic-model bundle:
 
 | Report | Status |
 |---|---|

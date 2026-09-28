@@ -32,7 +32,7 @@ queryGroup 'RFM Model'
 
 annotation __PBI_TimeIntelligenceEnabled = 0
 
-annotation PBI_QueryOrder = ["dimCustomers","dimItems","factOrders","dimDates","factCollection","Late Extension","AR_MeasuerSelectionTable","SwitchTable_LYvsLYYTD","dimEntities","dimBoats","factInventory","factGain","factPurchaseOrder","factPurchaseExpenses","dimWarehouses","HolidayPivot","HolidayNOTPivot","Sub_DimDates","dimHolidays","LastRefresh","dimPeriods_Compare","factTargets","VAT_MeasureSelctionTable","Inventory_MeasureSelctionTable","EntityID","CreatePeriodTable","CreatedimPeriodTable","CalcWorkingDays","dimHolidayYear","dimHolidayYear_Compare","REF_RFM_SELECTION","ParallelPeriodTBL","Period_ParametersTBL","TargetsIndicators_MeasuerSelectionTable","factSales","SubItemsMapping","factDailyPrices","FactLimits","dimSuppliers","dimPNL","SwitchMeasure","SQL Address","hlp_ExpensesMatrixTableFileds","ValuePriceMeasure","OrderVSExecutionVSSupply","dimItemsSimple","Sub_DimDates_QA","LazyCustomerTable","QtyPrice Table","DimSpotOrder","dimOrderStatus","factInventoryActivity","PriceType","factInventoryAllocation","tblInventoryFilter","dimSuppliersCompare","dimTransactionType","dimOrderNumber","dimInvoiceDeliveryNumber","dimDates_SupplyDelivered","AgentRLS","dimDates_StockExchange","dimSubPurchaseOrderNumber","dimSuppliersPurchase","factPurchaseIncome","dimActionType","dimPurchaseOrderNumber"]
+annotation PBI_QueryOrder = ["dimCustomers","dimItems","factOrders","dimDates","factCollection","Late Extension","AR_MeasuerSelectionTable","SwitchTable_LYvsLYYTD","dimEntities","dimBoats","factInventory","factGain","factPurchaseOrder","factPurchaseExpenses","dimWarehouses","HolidayPivot","HolidayNOTPivot","Sub_DimDates","dimHolidays","LastRefresh","dimPeriods_Compare","factTargets","VAT_MeasureSelctionTable","Inventory_MeasureSelctionTable","EntityID","CreatePeriodTable","CreatedimPeriodTable","CalcWorkingDays","dimHolidayYear","dimHolidayYear_Compare","REF_RFM_SELECTION","ParallelPeriodTBL","Period_ParametersTBL","TargetsIndicators_MeasuerSelectionTable","factSales","SubItemsMapping","factDailyPrices","FactLimits","dimSuppliers","dimPNL","SwitchMeasure","SQL Address","hlp_ExpensesMatrixTableFileds","ValuePriceMeasure","OrderVSExecutionVSSupply","dimItemsSimple","Sub_DimDates_QA","LazyCustomerTable","QtyPrice Table","DimSpotOrder","dimOrderStatus","factInventoryActivity","PriceType","factInventoryAllocation","tblInventoryFilter","dimSuppliersCompare","dimTransactionType","dimOrderNumber","dimInvoiceDeliveryNumber","dimDates_SupplyDelivered","AgentRLS","dimDates_StockExchange","dimSubPurchaseOrderNumber","dimSuppliersPurchase","factPurchaseIncome","dimActionType","dimPurchaseOrderNumber","dimQtyStep","factLastQtySteps","dimArticle"]
 
 annotation __TEdtr = 1
 
@@ -139,6 +139,9 @@ ref table SortOptions
 ref table CustomerScore
 ref table FilterExecution
 ref table 'Top Months'
+ref table dimQtyStep
+ref table factLastQtySteps
+ref table dimArticle
 
 ref role Managment
 ref role Agent

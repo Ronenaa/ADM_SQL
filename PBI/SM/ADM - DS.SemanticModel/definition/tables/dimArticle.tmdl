@@ -1,0 +1,20 @@
+table dimArticle
+	lineageTag: ee6e03cd-fd32-4804-82e1-b1304420d78b
+
+	column Article
+		dataType: string
+		lineageTag: a51bc6b7-26e9-4008-aa53-ac4ddb1b8594
+		summarizeBy: none
+		sourceColumn: Article
+
+	partition dimArticle = m
+		mode: import
+		queryGroup: Dim
+		source =
+				let
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="SELECT DISTINCT CASE WHEN A.ART_DESC IS NULL OR A.ART_DESC = '' THEN 'Other' ELSE A.ART_DESC END AS Article#(lf)FROM MOTSRIM M#(lf)LEFT JOIN (SELECT * FROM [dbo].[TRGOM_ANGLIT] WHERE SOG_PRIT_SOCN_BNQ_TM_SH_CHBRH = NCHAR(1508)) T#(lf)       ON M.QOD_MOTSR = T.QOD#(lf)LEFT JOIN (SELECT DISTINCT [TARO_ANGLIT_2_ART],[ART_DESC] FROM [dbo].[TRGOM_ANGLIT]#(lf)           WHERE SOG_PRIT_SOCN_BNQ_TM_SH_CHBRH = NCHAR(1508) AND ART_DESC<>'' AND TARO_ANGLIT_3_PNL_HCNSH = 8052) A#(lf)       ON A.TARO_ANGLIT_2_ART = T.TARO_ANGLIT_2_ART"])
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+

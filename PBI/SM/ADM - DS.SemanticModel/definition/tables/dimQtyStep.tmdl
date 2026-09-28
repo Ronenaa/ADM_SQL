@@ -1,0 +1,36 @@
+table dimQtyStep
+	lineageTag: 58518e54-ba10-44dc-95ee-9a79d254fb79
+
+	column Step
+		dataType: int64
+		formatString: #,0
+		lineageTag: 866d91ec-d985-41de-84cf-698f8060835b
+		summarizeBy: none
+		sourceColumn: Step
+
+	column StepLabel
+		dataType: string
+		lineageTag: a7b489c0-0dc3-495d-877d-e2813addc5e7
+		summarizeBy: none
+		sourceColumn: StepLabel
+		sortByColumn: StepOrder
+
+	column StepOrder
+		dataType: int64
+		isHidden
+		lineageTag: fbea0571-e8ee-4afb-92b1-635f7d1be628
+		summarizeBy: none
+		sourceColumn: StepOrder
+
+	partition dimQtyStep = m
+		mode: import
+		queryGroup: Dim
+		source =
+				let
+				    Source = Table.FromRecords(List.Transform({1..20}, each [Step = _ * 500, StepLabel = "Last " & Text.Format("#,0", {_ * 500}), StepOrder = _])),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Step", Int64.Type}, {"StepLabel", type text}, {"StepOrder", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+
