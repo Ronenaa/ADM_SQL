@@ -1,0 +1,239 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
+  "name": "793f17c06bc2cd977760",
+  "position": {
+    "x": 0,
+    "y": 210.55762081784388,
+    "z": 2000,
+    "height": 174.86988847583643,
+    "width": 1222.8996282527883
+  },
+  "visual": {
+    "visualType": "pivotTable",
+    "query": {
+      "queryState": {
+        "Columns": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dimDates"
+                    }
+                  },
+                  "Property": "MonthInCalendarName"
+                }
+              },
+              "queryRef": "dimDates.MonthInCalendarName",
+              "nativeQueryRef": "MonthInCalendarName",
+              "active": true
+            }
+          ]
+        },
+        "Rows": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SwitchMeasure"
+                    }
+                  },
+                  "Property": "Measure"
+                }
+              },
+              "queryRef": "SwitchMeasure.Measure",
+              "nativeQueryRef": "Measure",
+              "active": true
+            }
+          ]
+        },
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factOrders"
+                    }
+                  },
+                  "Property": "Switch Measures Show - Basis"
+                }
+              },
+              "queryRef": "factOrders.Switch Measures Show - Basis",
+              "nativeQueryRef": "qty",
+              "displayName": "qty"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factPurchaseOrder"
+                    }
+                  },
+                  "Property": "Avg Cost Price Supply Date - Risk Plan Flat Value"
+                }
+              },
+              "queryRef": "factPurchaseOrder.Avg Cost Price Supply Date - Risk Plan Flat Value",
+              "nativeQueryRef": "price",
+              "displayName": "price"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "204ddaa02230c607265b",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dimDates"
+              }
+            },
+            "Property": "MonthInCalendarName"
+          }
+        },
+        "type": "Categorical",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "d",
+              "Entity": "dimDates",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "d"
+                          }
+                        },
+                        "Property": "MonthInCalendarName"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Sep 2026'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Oct 2026'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Nov 2026'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Dec 2026'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Jan 2027'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Feb 2027'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Mar 2027'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Apr 2027'"
+                        }
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "61ab31d6b205b0440037",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "SwitchMeasure"
+              }
+            },
+            "Property": "Measure"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "d2a7bb2282d13e25b7d7",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "factOrders"
+              }
+            },
+            "Property": "Switch Measures Show - Basis"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "facda18a4bd287982d8b",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "factPurchaseOrder"
+              }
+            },
+            "Property": "Avg Cost Price Supply Date - Risk Plan Flat Value"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
+  }
+}

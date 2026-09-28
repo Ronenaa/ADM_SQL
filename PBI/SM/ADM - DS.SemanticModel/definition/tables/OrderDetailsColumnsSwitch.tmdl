@@ -16,7 +16,6 @@ table OrderDetailsColumnsSwitch
 		lineageTag: 76938589-d1be-4aae-a4aa-5bcff07e5a98
 		summarizeBy: none
 		sourceColumn: [Value2]
-		sortByColumn: 'OrderDetailsColumnsSwitch Order'
 
 		extendedProperty ParameterMetadata =
 				{

@@ -1,0 +1,209 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
+  "name": "c9533a7fa78aba507307",
+  "position": {
+    "x": 0,
+    "y": 560.94527363184079,
+    "z": 2002,
+    "height": 175.37313432835819,
+    "width": 1222.636815920398
+  },
+  "visual": {
+    "visualType": "pivotTable",
+    "query": {
+      "queryState": {
+        "Columns": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dimDates"
+                    }
+                  },
+                  "Property": "MonthInCalendarName"
+                }
+              },
+              "queryRef": "dimDates.MonthInCalendarName",
+              "nativeQueryRef": "MonthInCalendarName",
+              "active": true
+            }
+          ]
+        },
+        "Rows": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SwitchMeasure"
+                    }
+                  },
+                  "Property": "Measure"
+                }
+              },
+              "queryRef": "SwitchMeasure.Measure",
+              "nativeQueryRef": "Measure",
+              "active": true
+            }
+          ]
+        },
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factPurchaseOrder"
+                    }
+                  },
+                  "Property": "Total Purchase Cost SWITCH Flat Value"
+                }
+              },
+              "queryRef": "factPurchaseOrder.Total Purchase Cost SWITCH Flat Value",
+              "nativeQueryRef": "Total Purchase Cost SWITCH Flat Value"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "204ddaa02230c607265b",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dimDates"
+              }
+            },
+            "Property": "MonthInCalendarName"
+          }
+        },
+        "type": "Categorical",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "d",
+              "Entity": "dimDates",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "d"
+                          }
+                        },
+                        "Property": "MonthInCalendarName"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Sep 2026'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Oct 2026'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Nov 2026'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Dec 2026'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Jan 2027'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Feb 2027'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Mar 2027'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Apr 2027'"
+                        }
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "60f14675b0ee4eb26346",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "SwitchMeasure"
+              }
+            },
+            "Property": "Measure"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "aa1cc2870ed8a7d00564",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "factPurchaseOrder"
+              }
+            },
+            "Property": "Total Purchase Cost SWITCH Flat Value"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
+  }
+}

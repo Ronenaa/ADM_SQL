@@ -1,0 +1,239 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
+  "name": "2aaf82fb3e4e4b2ade22",
+  "position": {
+    "x": 0,
+    "y": 45.204460966542754,
+    "z": 1000,
+    "height": 174.86988847583643,
+    "width": 1222.8996282527883
+  },
+  "visual": {
+    "visualType": "pivotTable",
+    "query": {
+      "queryState": {
+        "Columns": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dimDates"
+                    }
+                  },
+                  "Property": "MonthInCalendarName"
+                }
+              },
+              "queryRef": "dimDates.MonthInCalendarName",
+              "nativeQueryRef": "MonthInCalendarName",
+              "active": true
+            }
+          ]
+        },
+        "Rows": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SwitchMeasure"
+                    }
+                  },
+                  "Property": "Measure"
+                }
+              },
+              "queryRef": "SwitchMeasure.Measure",
+              "nativeQueryRef": "Measure",
+              "active": true
+            }
+          ]
+        },
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factOrders"
+                    }
+                  },
+                  "Property": "Switch Measures Show - Basis"
+                }
+              },
+              "queryRef": "factOrders.Switch Measures Show - Basis",
+              "nativeQueryRef": "qty",
+              "displayName": "qty"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "factOrders"
+                    }
+                  },
+                  "Property": "Switch Measures Price - Flat Value"
+                }
+              },
+              "queryRef": "factOrders.Switch Measures Price - Flat Value",
+              "nativeQueryRef": "price",
+              "displayName": "price"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "204ddaa02230c607265b",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dimDates"
+              }
+            },
+            "Property": "MonthInCalendarName"
+          }
+        },
+        "type": "Categorical",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "d",
+              "Entity": "dimDates",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "d"
+                          }
+                        },
+                        "Property": "MonthInCalendarName"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Sep 2026'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Oct 2026'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Nov 2026'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Dec 2026'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Jan 2027'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Feb 2027'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Mar 2027'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Apr 2027'"
+                        }
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "15b8f9270068db614063",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "factOrders"
+              }
+            },
+            "Property": "Switch Measures Price - Flat Value"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "3d7612c27e900829ca60",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "SwitchMeasure"
+              }
+            },
+            "Property": "Measure"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "cf1d6ab940887958a0e3",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "factOrders"
+              }
+            },
+            "Property": "Switch Measures Show - Basis"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
+  }
+}

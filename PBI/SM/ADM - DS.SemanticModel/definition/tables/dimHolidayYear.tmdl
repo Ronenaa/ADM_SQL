@@ -51,5 +51,5 @@ table dimHolidayYear
 
 	annotation PBI_QueryRelationships = {"columnCount":2,"keyColumnNames":[],"queryRelationships":[],"columnIdentities":["Section1/dimHolidayYear/Changed Type.{שנה,0}","Section1/dimHolidayYear/Added Custom.{Selected Year,45}"],"ColumnCount":2,"KeyColumnNames":[],"ColumnIdentities":["Section1/dimHolidayYear/Changed Type.{שנה,0}","Section1/dimHolidayYear/Added Custom.{Selected Year,45}"],"RelationshipInfo":[]}
 
-	annotation PBI_ResultType = Exception
+	annotation PBI_ResultType = Table
 

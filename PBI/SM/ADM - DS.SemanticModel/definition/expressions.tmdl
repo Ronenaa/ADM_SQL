@@ -130,6 +130,7 @@ expression SubItemsMapping =
 
 expression 'SQL Address' = "213.8.5.61" meta [IsParameterQuery=true, List={"213.8.5.61", "127.0.0.1"}, DefaultValue="213.8.5.61", Type="Text", IsParameterQueryRequired=true]
 	lineageTag: 80a716ee-3318-4046-9090-516f1b5d3365
+	queryGroup: Parameters
 
 	annotation PBI_ResultType = Text
 
