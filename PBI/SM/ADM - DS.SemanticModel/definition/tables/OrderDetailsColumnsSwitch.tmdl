@@ -5,7 +5,6 @@ table OrderDetailsColumnsSwitch
 		lineageTag: e85d7905-4fa5-4763-875a-ec4c64518ad1
 		summarizeBy: none
 		sourceColumn: [Value1]
-		sortByColumn: 'OrderDetailsColumnsSwitch Order'
 
 		relatedColumnDetails
 			groupByColumn: 'OrderDetailsColumnsSwitch Fields'

@@ -5,7 +5,6 @@ table AVG_LY_Target_Parameter
 		lineageTag: e71f5a20-df2b-4315-a36b-bcacdab83cc3
 		summarizeBy: none
 		sourceColumn: [Value1]
-		sortByColumn: 'AVG_LY_Target_Parameter Order'
 
 		relatedColumnDetails
 			groupByColumn: 'AVG_LY_Target_Parameter Fields'

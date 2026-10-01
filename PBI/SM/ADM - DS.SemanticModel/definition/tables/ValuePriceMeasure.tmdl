@@ -1,4 +1,5 @@
 table ValuePriceMeasure
+	excludeFromModelRefresh
 	lineageTag: 9f667633-1037-4a9e-9590-6eeead7f90ce
 
 	column ID

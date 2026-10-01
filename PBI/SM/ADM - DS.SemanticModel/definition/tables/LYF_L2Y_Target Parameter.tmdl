@@ -5,7 +5,6 @@ table 'LYF_L2Y_Target Parameter'
 		lineageTag: 1e6d4822-28b4-4a42-bb38-86ee9fc61a28
 		summarizeBy: none
 		sourceColumn: [Value1]
-		sortByColumn: 'LYF_L2Y_Target Parameter Order'
 
 		relatedColumnDetails
 			groupByColumn: 'LYF_L2Y_Target Parameter Fields'
@@ -16,7 +15,6 @@ table 'LYF_L2Y_Target Parameter'
 		lineageTag: 8206597c-5799-4664-ab9d-25fce5d40969
 		summarizeBy: none
 		sourceColumn: [Value2]
-		sortByColumn: 'LYF_L2Y_Target Parameter Order'
 
 		extendedProperty ParameterMetadata =
 				{

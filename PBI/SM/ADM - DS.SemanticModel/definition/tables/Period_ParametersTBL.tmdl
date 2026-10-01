@@ -1,4 +1,5 @@
 table Period_ParametersTBL
+	excludeFromModelRefresh
 	lineageTag: 56bd1811-0ba0-4252-93cf-02f211079d19
 
 	column ID
@@ -50,4 +51,6 @@ table Period_ParametersTBL
 	annotation PBI_QueryRelationships = {"columnCount":3,"keyColumnNames":[],"queryRelationships":[],"columnIdentities":["Section1/Period_ParametersTBL/Changed Type.{ID,0}","Section1/Period_ParametersTBL/Source.{בחר תקופה,1}","Section1/Period_ParametersTBL/Changed Type.{Period,2}"],"ColumnCount":3,"KeyColumnNames":[],"ColumnIdentities":["Section1/Period_ParametersTBL/Changed Type.{ID,0}","Section1/Period_ParametersTBL/Source.{בחר תקופה,1}","Section1/Period_ParametersTBL/Changed Type.{Period,2}"],"RelationshipInfo":[]}
 
 	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
 

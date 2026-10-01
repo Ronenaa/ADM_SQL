@@ -5032,8 +5032,88 @@
       "showExtraHeaderInfo": true,
       "hideKeyFieldsWhenCollapsed": false,
       "tablesLocked": false
+    },
+    {
+      "ordinal": 32,
+      "scrollPosition": {
+        "x": 28.888888888888889,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 902.6969214478404,
+            "y": 14.023625468394471
+          },
+          "nodeIndex": "factLastQtySteps",
+          "nodeLineageTag": "62a21308-f62b-40c3-9690-9c0d6e1d6561",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1179.1391778625314,
+            "y": 383.66691631732266
+          },
+          "nodeIndex": "dimQtyStep",
+          "nodeLineageTag": "58518e54-ba10-44dc-95ee-9a79d254fb79",
+          "size": {
+            "height": 152,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 618.45964824049133,
+            "y": 79.42365202393151
+          },
+          "nodeIndex": "dimArticle",
+          "nodeLineageTag": "ee6e03cd-fd32-4804-82e1-b1304420d78b",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 52.222222222222229,
+            "y": 296.66666666666669
+          },
+          "nodeIndex": "factOrders",
+          "nodeLineageTag": "f7ecc82d-6f20-4d90-831e-79279651da87",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 314.20565537484049,
+            "y": 0
+          },
+          "nodeIndex": "dimItemsSimple",
+          "nodeLineageTag": "6fddc33b-eabd-4633-b7ce-e0e5e01b90e2",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "Layout 24",
+      "zoomValue": 90,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": true,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
     }
   ],
-  "selectedDiagram": "Layout 19",
+  "selectedDiagram": "Layout 24",
   "defaultDiagram": "All tables"
 }

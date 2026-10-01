@@ -1,4 +1,5 @@
 table OrderVSExecutionVSSupply
+	excludeFromModelRefresh
 	lineageTag: ab612b9a-2ab9-40ea-a165-d603a81a1d6f
 
 	column ID
@@ -35,4 +36,6 @@ table OrderVSExecutionVSSupply
 				    #"Changed Type"
 
 	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
 

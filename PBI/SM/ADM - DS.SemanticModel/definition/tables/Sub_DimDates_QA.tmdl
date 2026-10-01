@@ -334,3 +334,5 @@ table Sub_DimDates_QA
 
 	annotation PBI_ResultType = Table
 
+	annotation PBI_NavigationStepName = Navigation
+

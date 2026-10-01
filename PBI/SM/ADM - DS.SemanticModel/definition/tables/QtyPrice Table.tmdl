@@ -1,4 +1,5 @@
 table 'QtyPrice Table'
+	excludeFromModelRefresh
 	lineageTag: e62a07b0-5ecc-41c3-b672-c2fac7f76c08
 
 	column ID

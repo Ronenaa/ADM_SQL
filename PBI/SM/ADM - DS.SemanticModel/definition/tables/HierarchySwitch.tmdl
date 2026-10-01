@@ -5,7 +5,6 @@ table HierarchySwitch
 		lineageTag: 85b45265-ed0b-4245-9e39-39f2306898be
 		summarizeBy: none
 		sourceColumn: [Value1]
-		sortByColumn: 'HierarchySwitch Order'
 
 		relatedColumnDetails
 			groupByColumn: 'HierarchySwitch Fields'
@@ -16,7 +15,6 @@ table HierarchySwitch
 		lineageTag: b7f78c26-ffea-4aaf-a4d5-df2c72a0c940
 		summarizeBy: none
 		sourceColumn: [Value2]
-		sortByColumn: 'HierarchySwitch Order'
 
 		extendedProperty ParameterMetadata =
 				{

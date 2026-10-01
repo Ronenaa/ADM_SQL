@@ -1,4 +1,5 @@
 table AR_MeasuerSelectionTable
+	excludeFromModelRefresh
 	lineageTag: fedf73e3-2060-441a-aad2-5e87d38b7c7e
 
 	measure AR_ChosenMeasure = MAX(AR_MeasuerSelectionTable[ID])
@@ -60,4 +61,6 @@ table AR_MeasuerSelectionTable
 	annotation LinkedQueryName = AR_MeasuerSelectionTable
 
 	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
 

@@ -1,4 +1,5 @@
 table hlp_ExpensesMatrixTableFileds
+	excludeFromModelRefresh
 	lineageTag: ebefc730-3377-4ece-9600-e7b295a77669
 
 	column Filed

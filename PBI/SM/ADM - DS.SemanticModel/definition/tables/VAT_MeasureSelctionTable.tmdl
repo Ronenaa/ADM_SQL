@@ -1,4 +1,5 @@
 table VAT_MeasureSelctionTable
+	excludeFromModelRefresh
 	lineageTag: e67a8d4a-4b47-4ba2-b495-3ee0d73d960f
 
 	column 'ID ANALYSIS'
@@ -48,4 +49,6 @@ table VAT_MeasureSelctionTable
 	annotation LinkedQueryName = VAT_MeasureSelctionTable
 
 	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
 

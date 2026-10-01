@@ -1,4 +1,5 @@
 table SwitchTable_LYvsLYYTD
+	excludeFromModelRefresh
 	lineageTag: ccfd0a4d-8b96-4e26-8b33-6a7208faf828
 
 	column ID

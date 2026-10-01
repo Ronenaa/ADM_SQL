@@ -5,7 +5,6 @@ table ALLorOPEN
 		lineageTag: 353147d6-eccd-43ef-9442-4321bdd3a310
 		summarizeBy: none
 		sourceColumn: [Value1]
-		sortByColumn: 'ALLorOPEN Order'
 
 		relatedColumnDetails
 			groupByColumn: 'ALLorOPEN Fields'

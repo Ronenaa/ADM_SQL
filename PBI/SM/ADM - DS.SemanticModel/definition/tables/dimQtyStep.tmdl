@@ -27,10 +27,21 @@ table dimQtyStep
 		queryGroup: Dim
 		source =
 				let
-				    Source = Table.FromRecords(List.Transform({1..20}, each [Step = _ * 500, StepLabel = "Last " & Text.Format("#,0", {_ * 500}), StepOrder = _])),
+				    Source = Table.FromRecords(
+				List.Transform(
+				{1..20},
+				each [
+				Step = _ * 500,
+				StepLabel = "Last " & Number.ToText(_ * 500, "#,0"),
+				StepOrder = _
+				]
+				)
+				),
 				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Step", Int64.Type}, {"StepLabel", type text}, {"StepOrder", Int64.Type}})
 				in
 				    #"Changed Type"
 
 	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
 

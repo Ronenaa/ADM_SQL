@@ -24,6 +24,12 @@ cultureInfo en-US
 			            "State": "Generated",
 			            "Weight": 0.99
 			          }
+			        },
+			        {
+			          "customer": {
+			            "State": "Generated",
+			            "Weight": 0.97
+			          }
 			        }
 			      ]
 			    },
@@ -17359,6 +17365,12 @@ cultureInfo en-US
 			          }
 			        },
 			        {
+			          "customer": {
+			            "State": "Generated",
+			            "Weight": 0.97
+			          }
+			        },
+			        {
 			          "child customer": {
 			            "State": "Generated",
 			            "Weight": 0.97
@@ -22271,6 +22283,9 @@ cultureInfo en-US
 			        }
 			      },
 			      "State": "Generated",
+			      "Visibility": {
+			        "Value": "Hidden"
+			      },
 			      "Terms": [
 			        {
 			          "article description": {
@@ -30162,6 +30177,12 @@ cultureInfo en-US
 			            "Type": "Noun",
 			            "State": "Generated",
 			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "customer": {
+			            "State": "Generated",
+			            "Weight": 0.97
 			          }
 			        },
 			        {
@@ -38533,12 +38554,6 @@ cultureInfo en-US
 			          }
 			        },
 			        {
-			          "value FOTUSD": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
-			        },
-			        {
 			          "flat value FOTUSD": {
 			            "State": "Generated",
 			            "Weight": 0.97
@@ -39349,12 +39364,6 @@ cultureInfo en-US
 			        },
 			        {
 			          "FOTUSD": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
-			        },
-			        {
-			          "value FOTUSD": {
 			            "State": "Generated",
 			            "Weight": 0.97
 			          }
@@ -45107,6 +45116,12 @@ cultureInfo en-US
 			            "Type": "Noun",
 			            "State": "Generated",
 			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "customer": {
+			            "State": "Generated",
+			            "Weight": 0.97
 			          }
 			        },
 			        {
@@ -51901,9 +51916,863 @@ cultureInfo en-US
 			          }
 			        }
 			      ]
+			    },
+			    "dim_qty_step": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "dimQtyStep"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "dim qty step": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "dimQtyStep": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        }
+			      ]
+			    },
+			    "dim_qty_step.step": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "dimQtyStep",
+			          "ConceptualProperty": "Step"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "step": {
+			            "State": "Generated"
+			          }
+			        }
+			      ]
+			    },
+			    "dim_qty_step.step_label": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "dimQtyStep",
+			          "ConceptualProperty": "StepLabel"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "step label": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "StepLabel": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "label": {
+			            "State": "Generated",
+			            "Weight": 0.97
+			          }
+			        }
+			      ]
+			    },
+			    "dim_qty_step.step_order": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "dimQtyStep",
+			          "ConceptualProperty": "StepOrder"
+			        }
+			      },
+			      "State": "Generated",
+			      "Visibility": {
+			        "Value": "Hidden"
+			      },
+			      "Terms": [
+			        {
+			          "step order": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "StepOrder": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "order": {
+			            "State": "Generated",
+			            "Weight": 0.97
+			          }
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factLastQtySteps"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "fact last qty step": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "factLastQtySteps": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step.article": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factLastQtySteps",
+			          "ConceptualProperty": "Article"
+			        }
+			      },
+			      "State": "Generated",
+			      "Visibility": {
+			        "Value": "Hidden"
+			      },
+			      "Terms": [
+			        {
+			          "article": {
+			            "State": "Generated"
+			          }
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step.step": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factLastQtySteps",
+			          "ConceptualProperty": "Step"
+			        }
+			      },
+			      "State": "Generated",
+			      "Visibility": {
+			        "Value": "Hidden"
+			      },
+			      "Terms": [
+			        {
+			          "step": {
+			            "State": "Generated"
+			          }
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step.value_order_USD": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factLastQtySteps",
+			          "ConceptualProperty": "ValueOrderUSD"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "value order USD": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "ValueOrderUSD": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "USD": {
+			            "State": "Generated",
+			            "Weight": 0.97
+			          }
+			        },
+			        {
+			          "order USD": {
+			            "State": "Generated",
+			            "Weight": 0.97
+			          }
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step.value_CIFUSD": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factLastQtySteps",
+			          "ConceptualProperty": "ValueCIFUSD"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "value CIFUSD": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "ValueCIFUSD": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "CIFUSD": {
+			            "State": "Generated",
+			            "Weight": 0.97
+			          }
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step.value_FOTUSD": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factLastQtySteps",
+			          "ConceptualProperty": "ValueFOTUSD"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "value FOTUSD": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "ValueFOTUSD": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "FOTUSD": {
+			            "State": "Generated",
+			            "Weight": 0.97
+			          }
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step.boundary_order_ID": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factLastQtySteps",
+			          "ConceptualProperty": "BoundaryOrderID"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "boundary order ID": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "BoundaryOrderID": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "order": {
+			            "State": "Generated",
+			            "Weight": 0.97
+			          }
+			        },
+			        {
+			          "boundary order": {
+			            "State": "Generated",
+			            "Weight": 0.97
+			          }
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step.boundary_order_date": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factLastQtySteps",
+			          "ConceptualProperty": "BoundaryOrderDate"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "boundary order date": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "BoundaryOrderDate": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step.boundary_qty_taken": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factLastQtySteps",
+			          "ConceptualProperty": "BoundaryQtyTaken"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "boundary qty taken": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "BoundaryQtyTaken": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step.row_insert_datetime": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factLastQtySteps",
+			          "ConceptualProperty": "RowInsertDatetime"
+			        }
+			      },
+			      "State": "Generated",
+			      "Visibility": {
+			        "Value": "Hidden"
+			      },
+			      "Terms": [
+			        {
+			          "row insert datetime": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "RowInsertDatetime": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "date": {
+			            "State": "Generated",
+			            "Weight": 0.7
+			          }
+			        }
+			      ],
+			      "SemanticType": "Time"
+			    },
+			    "fact_last_qty_step.qty": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factLastQtySteps",
+			          "ConceptualProperty": "Qty"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "qty": {
+			            "State": "Generated"
+			          }
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step.boundary_order_create_time": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factLastQtySteps",
+			          "ConceptualProperty": "BoundaryOrderCreateTime"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "boundary order create time": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "BoundaryOrderCreateTime": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "date": {
+			            "State": "Generated",
+			            "Weight": 0.7
+			          }
+			        }
+			      ],
+			      "SemanticType": "Time"
+			    },
+			    "fact_last_qty_step.step_status": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factLastQtySteps",
+			          "ConceptualProperty": "StepStatus"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "step status": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "StepStatus": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step.step_label": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factLastQtySteps",
+			          "ConceptualProperty": "StepLabel"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "step label": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "StepLabel": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "label": {
+			            "State": "Generated",
+			            "Weight": 0.97
+			          }
+			        },
+			        {
+			          "MTons": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step.total_last_qty_quantity": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factLastQtySteps",
+			          "ConceptualProperty": "Total Last Qty Quantity"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "total last qty quantity": {
+			            "State": "Generated"
+			          }
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step.total_last_qty_value": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factLastQtySteps",
+			          "ConceptualProperty": "Total Last Qty Value"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "total last qty value": {
+			            "State": "Generated"
+			          }
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step.AVG_last_qty_price": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factLastQtySteps",
+			          "ConceptualProperty": "AVG Last Qty Price"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "AVG last qty price": {
+			            "State": "Generated"
+			          }
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step.AVG_last_qty_price__risk_plan": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factLastQtySteps",
+			          "ConceptualProperty": "AVG Last Qty Price - Risk Plan"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "AVG last qty price - risk plan": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "AVG last qty price risk plan": {
+			            "State": "Generated",
+			            "Weight": 0.97
+			          }
+			        },
+			        {
+			          "AV Price": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step.last_qty_tail_anchor": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factLastQtySteps",
+			          "ConceptualProperty": "Last Qty Tail Anchor"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "last qty tail anchor": {
+			            "State": "Generated"
+			          }
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step.last_qty_step_note": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "factLastQtySteps",
+			          "ConceptualProperty": "Last Qty Step Note"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "last qty step note": {
+			            "State": "Generated"
+			          }
+			        }
+			      ]
+			    },
+			    "dim_article": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "dimArticle"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "dim article": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "dimArticle": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        }
+			      ]
+			    },
+			    "dim_article.article": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "dimArticle",
+			          "ConceptualProperty": "Article"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "article": {
+			            "State": "Generated"
+			          }
+			        }
+			      ]
 			    }
 			  },
 			  "Relationships": {
+			    "fact_order_has_dim_customer": {
+			      "Binding": {
+			        "ConceptualEntity": "factOrders"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_order": {
+			          "Target": {
+			            "Entity": "fact_order"
+			          }
+			        },
+			        "dim_customer": {
+			          "Target": {
+			            "Entity": "dim_customer"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_order"
+			            },
+			            "Object": {
+			              "Role": "dim_customer"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_orders_have_dim_customers"
+			        },
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "dim_customer"
+			            },
+			            "Object": {
+			              "Role": "fact_order"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "dim_customers_have_fact_orders"
+			        }
+			      ]
+			    },
+			    "dim_holiday_has_dim_date": {
+			      "Binding": {
+			        "ConceptualEntity": "dimHolidays"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "dim_holiday": {
+			          "Target": {
+			            "Entity": "dim_holiday"
+			          }
+			        },
+			        "dim_date": {
+			          "Target": {
+			            "Entity": "dim_date"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "dim_holiday"
+			            },
+			            "Object": {
+			              "Role": "dim_date"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "dim_holidays_have_dim_dates"
+			        },
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "dim_date"
+			            },
+			            "Object": {
+			              "Role": "dim_holiday"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "dim_dates_have_dim_holidays"
+			        }
+			      ]
+			    },
+			    "fact_collection_has_dim_date": {
+			      "Binding": {
+			        "ConceptualEntity": "factCollection"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_collection": {
+			          "Target": {
+			            "Entity": "fact_collection"
+			          }
+			        },
+			        "dim_date": {
+			          "Target": {
+			            "Entity": "dim_date"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_collection"
+			            },
+			            "Object": {
+			              "Role": "dim_date"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_collections_have_dim_dates"
+			        },
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "dim_date"
+			            },
+			            "Object": {
+			              "Role": "fact_collection"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "dim_dates_have_fact_collections"
+			        }
+			      ]
+			    },
+			    "fact_collection_has_sub_dim_date": {
+			      "Binding": {
+			        "ConceptualEntity": "factCollection"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_collection": {
+			          "Target": {
+			            "Entity": "fact_collection"
+			          }
+			        },
+			        "sub_dim_date": {
+			          "Target": {
+			            "Entity": "sub_dim_date"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_collection"
+			            },
+			            "Object": {
+			              "Role": "sub_dim_date"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_collections_have_sub_dim_dates"
+			        },
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "sub_dim_date"
+			            },
+			            "Object": {
+			              "Role": "fact_collection"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "sub_dim_dates_have_fact_collections"
+			        }
+			      ]
+			    },
+			    "fact_collection_has_dim_customer": {
+			      "Binding": {
+			        "ConceptualEntity": "factCollection"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_collection": {
+			          "Target": {
+			            "Entity": "fact_collection"
+			          }
+			        },
+			        "dim_customer": {
+			          "Target": {
+			            "Entity": "dim_customer"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_collection"
+			            },
+			            "Object": {
+			              "Role": "dim_customer"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_collections_have_dim_customers"
+			        },
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "dim_customer"
+			            },
+			            "Object": {
+			              "Role": "fact_collection"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "dim_customers_have_fact_collections"
+			        }
+			      ]
+			    },
 			    "dim_customer_has_agent_RL": {
 			      "Binding": {
 			        "ConceptualEntity": "dimCustomers"
@@ -51947,6 +52816,765 @@ cultureInfo en-US
 			          "State": "Generated",
 			          "Weight": 0.99,
 			          "ID": "agent_RLs_have_dim_customers"
+			        }
+			      ]
+			    },
+			    "dim_article_has_article": {
+			      "Binding": {
+			        "ConceptualEntity": "dimArticle"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "dim_article": {
+			          "Target": {
+			            "Entity": "dim_article"
+			          }
+			        },
+			        "dim_article.article": {
+			          "Target": {
+			            "Entity": "dim_article.article"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "dim_article"
+			            },
+			            "Object": {
+			              "Role": "dim_article.article"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "dim_articles_have_articles"
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step_has_last_qty_step_note": {
+			      "Binding": {
+			        "ConceptualEntity": "factLastQtySteps"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_last_qty_step": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step"
+			          }
+			        },
+			        "fact_last_qty_step.last_qty_step_note": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step.last_qty_step_note"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_last_qty_step"
+			            },
+			            "Object": {
+			              "Role": "fact_last_qty_step.last_qty_step_note"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_last_qty_steps_have_last_qty_step_note"
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step_has_last_qty_tail_anchor": {
+			      "Binding": {
+			        "ConceptualEntity": "factLastQtySteps"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_last_qty_step": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step"
+			          }
+			        },
+			        "fact_last_qty_step.last_qty_tail_anchor": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step.last_qty_tail_anchor"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_last_qty_step"
+			            },
+			            "Object": {
+			              "Role": "fact_last_qty_step.last_qty_tail_anchor"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_last_qty_steps_have_last_qty_tail_anchor"
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step_has_AVG_last_qty_price__risk_plan": {
+			      "Binding": {
+			        "ConceptualEntity": "factLastQtySteps"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_last_qty_step": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step"
+			          }
+			        },
+			        "fact_last_qty_step.AVG_last_qty_price__risk_plan": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step.AVG_last_qty_price__risk_plan"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_last_qty_step"
+			            },
+			            "Object": {
+			              "Role": "fact_last_qty_step.AVG_last_qty_price__risk_plan"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_last_qty_steps_have_AVG_last_qty_price__risk_plan"
+			        }
+			      ]
+			    },
+			    "dim_article_has_fact_last_qty_step_AVG_last_qty_price__risk_plan": {
+			      "Binding": {
+			        "ConceptualEntity": "dimArticle"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "dim_article": {
+			          "Target": {
+			            "Entity": "dim_article"
+			          }
+			        },
+			        "fact_last_qty_step.AVG_last_qty_price__risk_plan": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step.AVG_last_qty_price__risk_plan"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "dim_article"
+			            },
+			            "Object": {
+			              "Role": "fact_last_qty_step.AVG_last_qty_price__risk_plan"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "dim_articles_have_AVG_last_qty_price__risk_plan"
+			        }
+			      ]
+			    },
+			    "price_type_has_fact_last_qty_step_AVG_last_qty_price__risk_plan": {
+			      "Binding": {
+			        "ConceptualEntity": "PriceType"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "price_type": {
+			          "Target": {
+			            "Entity": "price_type"
+			          }
+			        },
+			        "fact_last_qty_step.AVG_last_qty_price__risk_plan": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step.AVG_last_qty_price__risk_plan"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "price_type"
+			            },
+			            "Object": {
+			              "Role": "fact_last_qty_step.AVG_last_qty_price__risk_plan"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "price_types_have_AVG_last_qty_price__risk_plan"
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step_has_AVG_last_qty_price": {
+			      "Binding": {
+			        "ConceptualEntity": "factLastQtySteps"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_last_qty_step": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step"
+			          }
+			        },
+			        "fact_last_qty_step.AVG_last_qty_price": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step.AVG_last_qty_price"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_last_qty_step"
+			            },
+			            "Object": {
+			              "Role": "fact_last_qty_step.AVG_last_qty_price"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_last_qty_steps_have_AVG_last_qty_price"
+			        }
+			      ]
+			    },
+			    "price_type_has_fact_last_qty_step_AVG_last_qty_price": {
+			      "Binding": {
+			        "ConceptualEntity": "PriceType"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "price_type": {
+			          "Target": {
+			            "Entity": "price_type"
+			          }
+			        },
+			        "fact_last_qty_step.AVG_last_qty_price": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step.AVG_last_qty_price"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "price_type"
+			            },
+			            "Object": {
+			              "Role": "fact_last_qty_step.AVG_last_qty_price"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "price_types_have_AVG_last_qty_price"
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step_has_total_last_qty_value": {
+			      "Binding": {
+			        "ConceptualEntity": "factLastQtySteps"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_last_qty_step": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step"
+			          }
+			        },
+			        "fact_last_qty_step.total_last_qty_value": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step.total_last_qty_value"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_last_qty_step"
+			            },
+			            "Object": {
+			              "Role": "fact_last_qty_step.total_last_qty_value"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_last_qty_steps_have_total_last_qty_value"
+			        }
+			      ]
+			    },
+			    "price_type_has_fact_last_qty_step_total_last_qty_value": {
+			      "Binding": {
+			        "ConceptualEntity": "PriceType"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "price_type": {
+			          "Target": {
+			            "Entity": "price_type"
+			          }
+			        },
+			        "fact_last_qty_step.total_last_qty_value": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step.total_last_qty_value"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "price_type"
+			            },
+			            "Object": {
+			              "Role": "fact_last_qty_step.total_last_qty_value"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "price_types_have_total_last_qty_value"
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step_has_total_last_qty_quantity": {
+			      "Binding": {
+			        "ConceptualEntity": "factLastQtySteps"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_last_qty_step": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step"
+			          }
+			        },
+			        "fact_last_qty_step.total_last_qty_quantity": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step.total_last_qty_quantity"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_last_qty_step"
+			            },
+			            "Object": {
+			              "Role": "fact_last_qty_step.total_last_qty_quantity"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_last_qty_steps_have_total_last_qty_quantity"
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step_has_step_label": {
+			      "Binding": {
+			        "ConceptualEntity": "factLastQtySteps"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_last_qty_step": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step"
+			          }
+			        },
+			        "fact_last_qty_step.step_label": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step.step_label"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_last_qty_step"
+			            },
+			            "Object": {
+			              "Role": "fact_last_qty_step.step_label"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_last_qty_steps_have_step_labels"
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step_has_step_status": {
+			      "Binding": {
+			        "ConceptualEntity": "factLastQtySteps"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_last_qty_step": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step"
+			          }
+			        },
+			        "fact_last_qty_step.step_status": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step.step_status"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_last_qty_step"
+			            },
+			            "Object": {
+			              "Role": "fact_last_qty_step.step_status"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_last_qty_steps_have_step_statuses"
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step_has_boundary_order_create_time": {
+			      "Binding": {
+			        "ConceptualEntity": "factLastQtySteps"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_last_qty_step": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step"
+			          }
+			        },
+			        "fact_last_qty_step.boundary_order_create_time": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step.boundary_order_create_time"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_last_qty_step"
+			            },
+			            "Object": {
+			              "Role": "fact_last_qty_step.boundary_order_create_time"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_last_qty_steps_have_boundary_order_create_time"
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step_has_qty": {
+			      "Binding": {
+			        "ConceptualEntity": "factLastQtySteps"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_last_qty_step": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step"
+			          }
+			        },
+			        "fact_last_qty_step.qty": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step.qty"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_last_qty_step"
+			            },
+			            "Object": {
+			              "Role": "fact_last_qty_step.qty"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_last_qty_steps_have_qties"
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step_has_boundary_qty_taken": {
+			      "Binding": {
+			        "ConceptualEntity": "factLastQtySteps"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_last_qty_step": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step"
+			          }
+			        },
+			        "fact_last_qty_step.boundary_qty_taken": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step.boundary_qty_taken"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_last_qty_step"
+			            },
+			            "Object": {
+			              "Role": "fact_last_qty_step.boundary_qty_taken"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_last_qty_steps_have_boundary_qty_taken"
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step_has_boundary_order_date": {
+			      "Binding": {
+			        "ConceptualEntity": "factLastQtySteps"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_last_qty_step": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step"
+			          }
+			        },
+			        "fact_last_qty_step.boundary_order_date": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step.boundary_order_date"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_last_qty_step"
+			            },
+			            "Object": {
+			              "Role": "fact_last_qty_step.boundary_order_date"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_last_qty_steps_have_boundary_order_dates"
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step_has_boundary_order_ID": {
+			      "Binding": {
+			        "ConceptualEntity": "factLastQtySteps"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_last_qty_step": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step"
+			          }
+			        },
+			        "fact_last_qty_step.boundary_order_ID": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step.boundary_order_ID"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_last_qty_step"
+			            },
+			            "Object": {
+			              "Role": "fact_last_qty_step.boundary_order_ID"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_last_qty_steps_have_boundary_order_ID"
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step_has_value_FOTUSD": {
+			      "Binding": {
+			        "ConceptualEntity": "factLastQtySteps"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_last_qty_step": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step"
+			          }
+			        },
+			        "fact_last_qty_step.value_FOTUSD": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step.value_FOTUSD"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_last_qty_step"
+			            },
+			            "Object": {
+			              "Role": "fact_last_qty_step.value_FOTUSD"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_last_qty_steps_have_value_FOTUSDs"
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step_has_value_CIFUSD": {
+			      "Binding": {
+			        "ConceptualEntity": "factLastQtySteps"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_last_qty_step": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step"
+			          }
+			        },
+			        "fact_last_qty_step.value_CIFUSD": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step.value_CIFUSD"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_last_qty_step"
+			            },
+			            "Object": {
+			              "Role": "fact_last_qty_step.value_CIFUSD"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_last_qty_steps_have_value_CIFUSDs"
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step_has_value_order_USD": {
+			      "Binding": {
+			        "ConceptualEntity": "factLastQtySteps"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_last_qty_step": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step"
+			          }
+			        },
+			        "fact_last_qty_step.value_order_USD": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step.value_order_USD"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_last_qty_step"
+			            },
+			            "Object": {
+			              "Role": "fact_last_qty_step.value_order_USD"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_last_qty_steps_have_value_order_USD"
+			        }
+			      ]
+			    },
+			    "dim_qty_step_has_step_label": {
+			      "Binding": {
+			        "ConceptualEntity": "dimQtyStep"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "dim_qty_step": {
+			          "Target": {
+			            "Entity": "dim_qty_step"
+			          }
+			        },
+			        "dim_qty_step.step_label": {
+			          "Target": {
+			            "Entity": "dim_qty_step.step_label"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "dim_qty_step"
+			            },
+			            "Object": {
+			              "Role": "dim_qty_step.step_label"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "dim_qty_steps_have_step_labels"
+			        }
+			      ]
+			    },
+			    "dim_qty_step_has_step": {
+			      "Binding": {
+			        "ConceptualEntity": "dimQtyStep"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "dim_qty_step": {
+			          "Target": {
+			            "Entity": "dim_qty_step"
+			          }
+			        },
+			        "dim_qty_step.step": {
+			          "Target": {
+			            "Entity": "dim_qty_step.step"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "dim_qty_step"
+			            },
+			            "Object": {
+			              "Role": "dim_qty_step.step"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "dim_qty_steps_have_steps"
 			        }
 			      ]
 			    },
@@ -76872,6 +78500,33 @@ cultureInfo en-US
 			          "State": "Generated",
 			          "Weight": 0.99,
 			          "ID": "fact_purchase_orders_have_total_purchase_cost_flat_value_by_supply_date"
+			        },
+			        {
+			          "Adjective": {
+			            "Subject": {
+			              "Role": "fact_purchase_order"
+			            },
+			            "Adjectives": [
+			              {
+			                "expensive": {
+			                  "State": "Generated"
+			                }
+			              }
+			            ],
+			            "Antonyms": [
+			              {
+			                "cheap": {
+			                  "State": "Generated"
+			                }
+			              }
+			            ],
+			            "Measurement": {
+			              "Role": "fact_purchase_order.total_purchase_cost_flat_value_by_supply_date"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "total_purchase_cost_flat_value_by_supply_date_indicates_how_expensive_fact_purchase_orders_are"
 			        }
 			      ]
 			    },
@@ -76905,6 +78560,33 @@ cultureInfo en-US
 			          "State": "Generated",
 			          "Weight": 0.99,
 			          "ID": "price_types_have_total_purchase_cost_flat_value_by_supply_date"
+			        },
+			        {
+			          "Adjective": {
+			            "Subject": {
+			              "Role": "price_type"
+			            },
+			            "Adjectives": [
+			              {
+			                "expensive": {
+			                  "State": "Generated"
+			                }
+			              }
+			            ],
+			            "Antonyms": [
+			              {
+			                "cheap": {
+			                  "State": "Generated"
+			                }
+			              }
+			            ],
+			            "Measurement": {
+			              "Role": "fact_purchase_order.total_purchase_cost_flat_value_by_supply_date"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "total_purchase_cost_flat_value_by_supply_date_indicates_how_expensive_price_types_are"
 			        }
 			      ]
 			    },
@@ -90651,33 +92333,6 @@ cultureInfo en-US
 			          "State": "Generated",
 			          "Weight": 0.99,
 			          "ID": "fact_orders_have_AVG_price_supply_date_switch"
-			        },
-			        {
-			          "Adjective": {
-			            "Subject": {
-			              "Role": "fact_order"
-			            },
-			            "Adjectives": [
-			              {
-			                "expensive": {
-			                  "State": "Generated"
-			                }
-			              }
-			            ],
-			            "Antonyms": [
-			              {
-			                "cheap": {
-			                  "State": "Generated"
-			                }
-			              }
-			            ],
-			            "Measurement": {
-			              "Role": "fact_order.AVG_price_supply_date_switch"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "AVG_price_supply_date_switch_indicates_how_expensive_fact_orders_are"
 			        }
 			      ]
 			    },
@@ -90711,33 +92366,6 @@ cultureInfo en-US
 			          "State": "Generated",
 			          "Weight": 0.99,
 			          "ID": "VAT_measure_selction_tables_have_AVG_price_supply_date_switch"
-			        },
-			        {
-			          "Adjective": {
-			            "Subject": {
-			              "Role": "VAT_measure_selction_table"
-			            },
-			            "Adjectives": [
-			              {
-			                "expensive": {
-			                  "State": "Generated"
-			                }
-			              }
-			            ],
-			            "Antonyms": [
-			              {
-			                "cheap": {
-			                  "State": "Generated"
-			                }
-			              }
-			            ],
-			            "Measurement": {
-			              "Role": "fact_order.AVG_price_supply_date_switch"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "AVG_price_supply_date_switch_indicates_how_expensive_VAT_measure_selction_tables_are"
 			        }
 			      ]
 			    },
@@ -90771,33 +92399,6 @@ cultureInfo en-US
 			          "State": "Generated",
 			          "Weight": 0.99,
 			          "ID": "price_types_have_AVG_price_supply_date_switch"
-			        },
-			        {
-			          "Adjective": {
-			            "Subject": {
-			              "Role": "price_type"
-			            },
-			            "Adjectives": [
-			              {
-			                "expensive": {
-			                  "State": "Generated"
-			                }
-			              }
-			            ],
-			            "Antonyms": [
-			              {
-			                "cheap": {
-			                  "State": "Generated"
-			                }
-			              }
-			            ],
-			            "Measurement": {
-			              "Role": "fact_order.AVG_price_supply_date_switch"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "AVG_price_supply_date_switch_indicates_how_expensive_price_types_are"
 			        }
 			      ]
 			    },
@@ -102205,39 +103806,6 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "dim_items_simple_has_article_description": {
-			      "Binding": {
-			        "ConceptualEntity": "dimItemsSimple"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "dim_items_simple": {
-			          "Target": {
-			            "Entity": "dim_items_simple"
-			          }
-			        },
-			        "dim_items_simple.article_description": {
-			          "Target": {
-			            "Entity": "dim_items_simple.article_description"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "dim_items_simple"
-			            },
-			            "Object": {
-			              "Role": "dim_items_simple.article_description"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "dim_items_simples_have_article_descriptions"
-			        }
-			      ]
-			    },
 			    "dim_item_has_article_description": {
 			      "Binding": {
 			        "ConceptualEntity": "dimItems"
@@ -108024,37 +109592,6 @@ cultureInfo en-US
 			          "State": "Generated",
 			          "Weight": 0.99,
 			          "ID": "dim_suppliers_have_supplier_names"
-			        },
-			        {
-			          "Verb": {
-			            "Verbs": [
-			              {
-			                "Deliver": {
-			                  "State": "Generated"
-			                }
-			              }
-			            ],
-			            "Object": {
-			              "Role": "dim_supplier"
-			            },
-			            "PrepositionalPhrases": [
-			              {
-			                "Prepositions": [
-			                  {
-			                    "From": {
-			                      "State": "Generated"
-			                    }
-			                  }
-			                ],
-			                "Object": {
-			                  "Role": "dim_supplier.supplier_name"
-			                }
-			              }
-			            ]
-			          },
-			          "State": "Generated",
-			          "Weight": 0.95,
-			          "ID": "dim_suppliers_are_Delivered_From_supplier_names"
 			        }
 			      ]
 			    },
@@ -143470,48 +145007,6 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "fact_order_is_Supplied_on_תאריך_אספקה": {
-			      "Binding": {
-			        "ConceptualEntity": "factOrders"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "fact_order": {
-			          "Target": {
-			            "Entity": "fact_order"
-			          }
-			        },
-			        "fact_order.תאריך_אספקה": {
-			          "Target": {
-			            "Entity": "fact_order.תאריך_אספקה"
-			          }
-			        }
-			      },
-			      "SemanticSlots": {
-			        "When": {
-			          "Role": "fact_order.תאריך_אספקה"
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Verb": {
-			            "Verbs": [
-			              {
-			                "Supply": {
-			                  "State": "Generated"
-			                }
-			              }
-			            ],
-			            "Object": {
-			              "Role": "fact_order"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.9,
-			          "ID": "fact_orders_are_Supplied_on_תאריך_אספקה"
-			        }
-			      ]
-			    },
 			    "fact_collection_is_invoiced_on_invoice_date": {
 			      "Binding": {
 			        "ConceptualEntity": "factCollection"
@@ -143793,236 +145288,6 @@ cultureInfo en-US
 			          "State": "Generated",
 			          "Weight": 0.75,
 			          "ID": "target_slicers_slice"
-			        }
-			      ]
-			    },
-			    "fact_collection_has_dim_customer": {
-			      "Binding": {
-			        "ConceptualEntity": "factCollection"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "fact_collection": {
-			          "Target": {
-			            "Entity": "fact_collection"
-			          }
-			        },
-			        "dim_customer": {
-			          "Target": {
-			            "Entity": "dim_customer"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "fact_collection"
-			            },
-			            "Object": {
-			              "Role": "dim_customer"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "fact_collections_have_dim_customers"
-			        },
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "dim_customer"
-			            },
-			            "Object": {
-			              "Role": "fact_collection"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "dim_customers_have_fact_collections"
-			        }
-			      ]
-			    },
-			    "fact_collection_has_sub_dim_date": {
-			      "Binding": {
-			        "ConceptualEntity": "factCollection"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "fact_collection": {
-			          "Target": {
-			            "Entity": "fact_collection"
-			          }
-			        },
-			        "sub_dim_date": {
-			          "Target": {
-			            "Entity": "sub_dim_date"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "fact_collection"
-			            },
-			            "Object": {
-			              "Role": "sub_dim_date"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "fact_collections_have_sub_dim_dates"
-			        },
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "sub_dim_date"
-			            },
-			            "Object": {
-			              "Role": "fact_collection"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "sub_dim_dates_have_fact_collections"
-			        }
-			      ]
-			    },
-			    "fact_collection_has_dim_date": {
-			      "Binding": {
-			        "ConceptualEntity": "factCollection"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "fact_collection": {
-			          "Target": {
-			            "Entity": "fact_collection"
-			          }
-			        },
-			        "dim_date": {
-			          "Target": {
-			            "Entity": "dim_date"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "fact_collection"
-			            },
-			            "Object": {
-			              "Role": "dim_date"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "fact_collections_have_dim_dates"
-			        },
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "dim_date"
-			            },
-			            "Object": {
-			              "Role": "fact_collection"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "dim_dates_have_fact_collections"
-			        }
-			      ]
-			    },
-			    "dim_holiday_has_dim_date": {
-			      "Binding": {
-			        "ConceptualEntity": "dimHolidays"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "dim_holiday": {
-			          "Target": {
-			            "Entity": "dim_holiday"
-			          }
-			        },
-			        "dim_date": {
-			          "Target": {
-			            "Entity": "dim_date"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "dim_holiday"
-			            },
-			            "Object": {
-			              "Role": "dim_date"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "dim_holidays_have_dim_dates"
-			        },
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "dim_date"
-			            },
-			            "Object": {
-			              "Role": "dim_holiday"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "dim_dates_have_dim_holidays"
-			        }
-			      ]
-			    },
-			    "fact_order_has_dim_customer": {
-			      "Binding": {
-			        "ConceptualEntity": "factOrders"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "fact_order": {
-			          "Target": {
-			            "Entity": "fact_order"
-			          }
-			        },
-			        "dim_customer": {
-			          "Target": {
-			            "Entity": "dim_customer"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "fact_order"
-			            },
-			            "Object": {
-			              "Role": "dim_customer"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "fact_orders_have_dim_customers"
-			        },
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "dim_customer"
-			            },
-			            "Object": {
-			              "Role": "fact_order"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "dim_customers_have_fact_orders"
 			        }
 			      ]
 			    },
@@ -147206,6 +148471,59 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
+			    "dim_items_simple_has_dim_article": {
+			      "Binding": {
+			        "ConceptualEntity": "dimItemsSimple"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "dim_items_simple": {
+			          "Target": {
+			            "Entity": "dim_items_simple"
+			          }
+			        },
+			        "dim_article": {
+			          "Target": {
+			            "Entity": "dim_article"
+			          },
+			          "Nouns": [
+			            {
+			              "article description": {
+			                "State": "Generated"
+			              }
+			            }
+			          ]
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "dim_items_simple"
+			            },
+			            "Object": {
+			              "Role": "dim_article"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "dim_items_simples_have_dim_articles"
+			        },
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "dim_article"
+			            },
+			            "Object": {
+			              "Role": "dim_items_simple"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "dim_articles_have_dim_items_simples"
+			        }
+			      ]
+			    },
 			    "OrderSupplyExecution_parameter_has_order_VS_execution_VS_supply": {
 			      "Binding": {
 			        "ConceptualEntity": "OrderSupplyExecution Parameter"
@@ -148400,6 +149718,98 @@ cultureInfo en-US
 			          "State": "Generated",
 			          "Weight": 0.99,
 			          "ID": "dim_warehouses_have_fact_gains"
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step_has_dim_qty_step": {
+			      "Binding": {
+			        "ConceptualEntity": "factLastQtySteps"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_last_qty_step": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step"
+			          }
+			        },
+			        "dim_qty_step": {
+			          "Target": {
+			            "Entity": "dim_qty_step"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_last_qty_step"
+			            },
+			            "Object": {
+			              "Role": "dim_qty_step"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_last_qty_steps_have_dim_qty_steps"
+			        },
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "dim_qty_step"
+			            },
+			            "Object": {
+			              "Role": "fact_last_qty_step"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "dim_qty_steps_have_fact_last_qty_steps"
+			        }
+			      ]
+			    },
+			    "fact_last_qty_step_has_dim_article": {
+			      "Binding": {
+			        "ConceptualEntity": "factLastQtySteps"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "fact_last_qty_step": {
+			          "Target": {
+			            "Entity": "fact_last_qty_step"
+			          }
+			        },
+			        "dim_article": {
+			          "Target": {
+			            "Entity": "dim_article"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "fact_last_qty_step"
+			            },
+			            "Object": {
+			              "Role": "dim_article"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "fact_last_qty_steps_have_dim_articles"
+			        },
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "dim_article"
+			            },
+			            "Object": {
+			              "Role": "fact_last_qty_step"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "dim_articles_have_fact_last_qty_steps"
 			        }
 			      ]
 			    }

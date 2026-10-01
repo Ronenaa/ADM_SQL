@@ -1,4 +1,5 @@
 table REF_RFM_SELECTION
+	excludeFromModelRefresh
 	lineageTag: b9fdf9d7-0438-43a9-a316-60756296874d
 
 	column Index
@@ -49,4 +50,6 @@ table REF_RFM_SELECTION
 	annotation LinkedQueryName = REF_RFM_SELECTION
 
 	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
 

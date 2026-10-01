@@ -1,4 +1,5 @@
 table Inventory_MeasureSelctionTable
+	excludeFromModelRefresh
 	lineageTag: 5078141e-54f9-42db-a948-8bf442ca8598
 
 	measure '1 Month QTY Avg' =
@@ -208,4 +209,6 @@ table Inventory_MeasureSelctionTable
 	annotation LinkedQueryName = Inventory_MeasureSelctionTable
 
 	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
 
