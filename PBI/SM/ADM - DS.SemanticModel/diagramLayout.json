@@ -5036,27 +5036,14 @@
     {
       "ordinal": 32,
       "scrollPosition": {
-        "x": 28.888888888888889,
+        "x": 0,
         "y": 0
       },
       "nodes": [
         {
           "location": {
-            "x": 902.6969214478404,
-            "y": 14.023625468394471
-          },
-          "nodeIndex": "factLastQtySteps",
-          "nodeLineageTag": "62a21308-f62b-40c3-9690-9c0d6e1d6561",
-          "size": {
-            "height": 300,
-            "width": 234
-          },
-          "zIndex": 0
-        },
-        {
-          "location": {
-            "x": 1179.1391778625314,
-            "y": 383.66691631732266
+            "x": 1012.4725111958649,
+            "y": 162.55580520621157
           },
           "nodeIndex": "dimQtyStep",
           "nodeLineageTag": "58518e54-ba10-44dc-95ee-9a79d254fb79",

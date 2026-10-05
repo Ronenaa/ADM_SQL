@@ -5,8 +5,10 @@ table dimQtyStep
 		dataType: int64
 		formatString: #,0
 		lineageTag: 866d91ec-d985-41de-84cf-698f8060835b
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: Step
+
+		annotation SummarizationSetBy = Automatic
 
 	column StepLabel
 		dataType: string
@@ -19,8 +21,10 @@ table dimQtyStep
 		dataType: int64
 		isHidden
 		lineageTag: fbea0571-e8ee-4afb-92b1-635f7d1be628
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: StepOrder
+
+		annotation SummarizationSetBy = Automatic
 
 	partition dimQtyStep = m
 		mode: import

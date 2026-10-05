@@ -47,3 +47,45 @@ Runtime ~25s. Expect 261 rows (13 articles x 20 steps).
 - The `#am` / `#raw` / `#ob` temp tables are required for performance, not
   cosmetic: without them the query times out past 180s. See the comments
   inline.
+
+## DAX twin on factOrders (`Last Qty Steps (Orders)`)
+
+Same ladder, computed by measures over `factOrders`, so selecting a step in the
+matrix can filter the orders table (`[In Last Qty Step] = 1` visual filter).
+
+- **SQL helper:** the factOrders partition adds `LQ_RunQtyBefore` — Order-view
+  priced units sold in the same Article *after* this order (same ORDER BY as
+  here). Blank for rows outside the tail (unpriced, or no Article). The
+  article map is a CTE copy of `#am`; the full factOrders query still runs in ~1 min.
+- **Measures:** `AVG Last Qty Price - Risk Plan (Orders)` (bind this),
+  `Total Last Qty Value/Quantity (Orders)`, `Last Qty Tail Anchor (Orders)`,
+  `Last Qty Step Note (Orders)`, `In Last Qty Step`. The step comes from the
+  disconnected `dimQtyStep`; only Article and PriceType filters are honoured.
+  Single article per evaluation (the Risk Plan wrapper defaults to Corn), so no
+  iterators.
+- **One tail for all three views (by design).** Tail positions are fixed by the
+  Order-view quantity, and PriceType only switches the value column. Here, each
+  view had its own tail and skipped rows missing that view's price. QA on
+  2026-10-05 (SQL emulation vs this table, 247 Article×Step rows): Order view
+  identical on every row (Qty, value, boundary order). CIF/FOT identical except
+  FW CIF (up to −$8.4/t, steps 4,500+) and Oils CIF (−$3.8) / FOT (−$10.7 at 500).
+
+## Short average price (card next to the step matrix)
+
+The same tail, but N = the short instead of a 500-unit step. The short is
+`-[Remain - Risk Plan]` when Remain is negative. Example: Remain total = (2,270),
+so the card shows the average price of the last 2,270 units.
+
+- **Measures (factOrders, same folder):** `Short Qty (Orders)` (hidden helper),
+  `Short AVG Last Qty Price (Orders)` (core, single article),
+  `Short AVG Last Qty Price - Risk Plan (Orders)` (bind this one; Corn default
+  matches `[Switch Measures Show]`), `Short Last Qty Title (Orders)` (dynamic
+  card title: "Short Avg - last X t", or "No Short").
+- **Card (Sales report, Product Risk Analysis):** visual `5c0a7d2e9f1b3a4c6d8e`,
+  right of the step matrix. It carries the same `Show Next 6 Months = true`
+  visual filter as the Stock/Purchase/Sales/Remain matrix, so the short equals that
+  matrix's Remain **Total** column. Transaction Type / Customer slicers affect the
+  short (via Remain) but not the tail prices, as with the steps.
+- If the article's priced history is shorter than the short, the whole history
+  is averaged and the title adds "(only Y sold)".
+- Blank price with title "No Short" when Remain >= 0.

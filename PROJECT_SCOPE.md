@@ -52,6 +52,18 @@ query, the generated `.m`, and two QA scripts.
 is a reference copy and the two must be kept in sync, exactly as `factGain` / `factPurchaseExpenses`
 already duplicate their shared CTEs. See [sql/factLastQtySteps/README.md](sql/factLastQtySteps/README.md).
 
+**DAX twin on factOrders (2026-10-05).** The same step ladder also exists as measures on
+`factOrders` (display folder `Last Qty Steps (Orders)`), so the step matrix can filter the orders
+table on the Product Risk Analysis page. The factOrders partition carries one helper column,
+`LQ_RunQtyBefore` (running Order-view priced quantity per Article, newest first), and the
+measures read `dimQtyStep` (disconnected from factOrders) for the step. Details and the one known
+difference from the SQL table are in the README above.
+
+**Short average price (2026-10-05).** A card next to the step matrix ("Recent Orders" panel) shows
+the average price of the last N units sold, where N is the short: the negative Remain total
+of the Stock/Purchase/Sales/Remain matrix. Same tail logic as the steps, with N in place of the
+`dimQtyStep` step. Measures and card details are in the README.
+
 `FactGain_scope.md` (CTE-by-CTE design rationale for the Gain query) was kept and moved to the
 repo root, since it's working documentation, not a SQL mirror — see [FactGain_scope.md](FactGain_scope.md).
 
