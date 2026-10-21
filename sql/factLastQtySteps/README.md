@@ -57,18 +57,26 @@ matrix can filter the orders table (`[In Last Qty Step] = 1` visual filter).
   priced units sold in the same Article *after* this order (same ORDER BY as
   here). Blank for rows outside the tail (unpriced, or no Article). The
   article map is a CTE copy of `#am`; the full factOrders query still runs in ~1 min.
+- **Per-view tail:** the three SQL columns above feed the measures; `[LQO Tail Total Qty]`,
+  `[Total Last Qty Value (Orders)]`, `[Last Qty Tail Anchor (Orders)]`, `[In Last Qty Step]`
+  and `[Short AVG Last Qty Price (Orders)]` each `SWITCH` on `MIN(PriceType[ID])` (2 = CIF, 3 = FOT, else Order).
 - **Measures:** `AVG Last Qty Price - Risk Plan (Orders)` (bind this),
   `Total Last Qty Value/Quantity (Orders)`, `Last Qty Tail Anchor (Orders)`,
   `Last Qty Step Note (Orders)`, `In Last Qty Step`. The step comes from the
   disconnected `dimQtyStep`; only Article and PriceType filters are honoured.
   Single article per evaluation (the Risk Plan wrapper defaults to Corn), so no
   iterators.
-- **One tail for all three views (by design).** Tail positions are fixed by the
-  Order-view quantity, and PriceType only switches the value column. Here, each
-  view had its own tail and skipped rows missing that view's price. QA on
-  2026-10-05 (SQL emulation vs this table, 247 Article×Step rows): Order view
-  identical on every row (Qty, value, boundary order). CIF/FOT identical except
-  FW CIF (up to −$8.4/t, steps 4,500+) and Oils CIF (−$3.8) / FOT (−$10.7 at 500).
+- **One tail per price view (changed 2026-10-21).** Each view has its own tail
+  position column on factOrders: `LQ_RunQtyBefore` (Order, `PricedQuantity`),
+  `LQ_RunQtyBeforeCF` (`PricedQuantityCF`), `LQ_RunQtyBeforeFOT`
+  (`PricedQuantityFOT`). An order with a blank/zero price in the selected view is
+  skipped in that view: no tail position, nothing in numerator or denominator —
+  the same rule as this table. The measures pick the column from `PriceType[ID]`.
+  Before this change all three views shared the Order-view tail, so an order with
+  no CIF price (e.g. 147756, 38 t) sat in the tail at value 0 and dragged the CIF
+  average down (CGFP last 500: $310 instead of ~$335). QA on 2026-10-05
+  (before the change) had shown CIF/FOT differing from this table only for
+  FW CIF and Oils CIF/FOT — those gaps were this same effect.
 
 ## Short average price (card next to the step matrix)
 

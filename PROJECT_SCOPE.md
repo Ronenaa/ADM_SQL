@@ -64,6 +64,55 @@ the average price of the last N units sold, where N is the short: the negative R
 of the Stock/Purchase/Sales/Remain matrix. Same tail logic as the steps, with N in place of the
 `dimQtyStep` step. Measures and card details are in the README.
 
+### Rule: expense tables are read with `WITH (NOLOCK)` in fact and dim queries (2026-10-18)
+
+In fact and dimension table queries, every reference (`FROM` / `JOIN`) to an expense table - `HOTSAOT_COTROT`,
+`HOTSAOT_SHOROT`, `HOTSAOT_SHROTIM_New` (the tables the client's writers lock, see the lock incident
+below) - carries `WITH (NOLOCK)`. All other tables are read normally. (Briefly all 13 fact tables got
+NOLOCK on every table the same day; narrowed to the expense tables at the user's request.) Applies to
+**every new fact/dim table and every query change**: write the query, then run
+
+```
+python sql/add_nolock.py            # all fact*.tmdl and dim*.tmdl (+ syncs the reference copies)
+python sql/add_nolock.py --check    # report only
+python sql/add_nolock.py --strip    # first remove every WITH (NOLOCK), then re-add the expense-table ones
+```
+
+Today it touches `factGain` (7 references), `factPurchaseExpenses` (8), `dimItems` (2),
+`dimItemsSimple` (1), `dimPNL` (1), `dimPurchaseOrderNumber` (3) and `dimSubPurchaseOrderNumber` (2);
+no other table reads an expense table. To cover more tables edit `EXPENSE_TABLES` in the script.
+
+The script edits the `.tmdl` partitions in place (CRLF kept, idempotent, round-trip checked). It
+skips CTE names, `#temp` tables, subqueries, table functions and `sys.*`, and syncs
+`fix/factGain|factPurchaseExpenses__fixed.sql` and `sql/factLastQtySteps/`. Versus the previous commit
+the only change is the added hints. Syntax checked on STG with `SET PARSEONLY ON`.
+
+- `fix/build_materialized.py` rebuilds those two queries from commit `96f01d2`, which has no
+  hints - **re-run `add_nolock.py` after it**.
+- The incident files (`queries/*`, `02_measure_all.sql`, `03b_*`) were left as generated, so the
+  before/current timings stay comparable.
+- NOLOCK allows dirty reads; accepted for these reads.
+
+### Exception: `sql/incident_2026-10/` (lock incident investigation)
+
+Added 2026-10-12 after the client KILLed a blocking `BIX` session on the live server (expense
+tables `HOTSAOT_*`, 4 times in ~1.5 weeks). Holds SSMS-ready scripts for the investigation:
+environment check (`01`), before/current timing of the 5 queries that touch the expense tables or
+`tblOrderPriceS` (`02`), a lock simulation on STG (`03a`–`03d`), and a blocking monitor
+to hand to the client's DBA (`03c`, needs VIEW SERVER STATE, which BIX lacks). `queries/*.sql`,
+`02_measure_all.sql` and `03b_reader_*.sql` are **generated** by `extract_queries.py` from the TMDL
+partitions (current) and commit `5b60782` (before the Aug-30 changes), with every query inlined so
+no SQLCMD mode is needed: regenerate, don't hand-edit.
+Write scripts guard on `@@SERVERNAME = ADM-SQL2020\ADMNEW` (STG). Note: `SQL Address` in the model
+(213.8.5.61) is STG; the published model is pointed at the client's live server, so STG numbers
+are relative only. Plan and results tables: [sql/incident_2026-10/README.md](sql/incident_2026-10/README.md).
+
+`fix/` holds the fix for `factGain` and `factPurchaseExpenses`: CTEs referenced more than once are
+materialized into temp tables, no CTE body changed (`build_materialized.py` → `*__fixed.sql` →
+`apply_to_tmdl.py`). STG: factGain 270s → ~100s, factPurchaseExpenses 295s → ~54s. Both queries
+have **pre-existing** non-deterministic `ROW_NUMBER` ties (factGain `inv`; factPurchaseExpenses
+`final`, month-level `Purchase_Date`) that need a business tie-break rule — see the README.
+
 `FactGain_scope.md` (CTE-by-CTE design rationale for the Gain query) was kept and moved to the
 repo root, since it's working documentation, not a SQL mirror — see [FactGain_scope.md](FactGain_scope.md).
 
@@ -97,7 +146,22 @@ before the incoming change — a one-step-back safety copy, not a fixed historic
 
 ## 6. FactGain — Change Log
 
-### 10. Removed temporary `test` wrapper CTE (latest)
+### 13. Last Qty Steps (Orders): CIF/FOT tail skips unpriced orders (2026-10-21 — committed; needs model refresh + publish)
+An order with no CIF price (e.g. 147756, 38 t) was in the shared Order-view tail at value 0, so "Last 500" CIF read ~$310 instead of ~$335. `factOrders` SQL now adds `LQ_RunQtyBeforeCF` / `LQ_RunQtyBeforeFOT` (tail positions over `PricedQuantityCF` / `PricedQuantityFOT`); the Last Qty Steps (Orders) measures `SWITCH` on `PriceType[ID]` to use the view's own column. Order view is unchanged (verified: 149,120 before = after for Corn step 500). Details in `sql/factLastQtySteps/README.md`. The generated mirrors `sql/incident_2026-10/queries/factOrders__*.sql` and `02_measure_all.sql` were not regenerated.
+
+### 11. Heavy CTEs materialized into temp tables (2026-10-12)
+Lock-incident fix (see `sql/incident_2026-10/`). SQL Server re-runs a CTE at every reference, and
+`purchase_orders` (with the whole `totals` → `exchange_movements` → `exchange_priced` chain and the
+non-sargable `CONCAT` join to `PurchaseOrderLines`) was referenced by `po_doctype`,
+`Swap_WinningMatch` and `P_costs`, with `P_costs` joined twice in the final SELECT. The query is now
+four statements: `#exchange_movements`, `#purchase_orders`, `#P_costs`, then the final result
+(`SET NOCOUNT ON`, temp tables dropped up front). **No CTE body changed.** The partition is
+generated by `sql/incident_2026-10/fix/build_materialized.py` (from commit `96f01d2`) and
+`apply_to_tmdl.py`. STG: 270s → ~100s. QA vs the CTE version: same 105,427 rows; differences only
+float noise and 411 Warehouse rows from a **pre-existing** non-deterministic tie in `inv`
+(`month_rn` orders by `[Date]` only; 14 item-months have same-day rows with different prices).
+
+### 10. Removed temporary `test` wrapper CTE
 Dropped the ad-hoc `,test as ( ... )` CTE and trailing `SELECT * FROM test` that had been added to
 isolate/debug the two-branch union during development. The query now again ends directly on the
 Branch 1 / Branch 2 `UNION ALL` — no logic change, debugging cleanup only.

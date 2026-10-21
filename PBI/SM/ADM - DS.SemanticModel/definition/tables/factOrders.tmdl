@@ -5881,19 +5881,36 @@ table factOrders
 		displayFolder: Last Qty Steps (Orders)
 		lineageTag: 91716ec9-d079-4bdc-8949-5ae7f37e5a8d
 
-	/// עזר: סך הכמות המתומחרת בכל ההיסטוריה של המוצר (לפי מחיר הזמנה), בלי סינונים מלבד המוצר.
-	/// Helper: the article's entire priced history (Order view), ignoring every filter except Article. Single article only.
+	/// עזר: סך הכמות המתומחרת בכל ההיסטוריה של המוצר, לפי סוג המחיר שנבחר (הזמנה/CIF/FOT), בלי סינונים מלבד המוצר.
+	/// Helper: the article's entire priced history in the selected price view (Order/CIF/FOT, each with its own priced quantity), ignoring every filter except Article. Single article only.
 	measure 'LQO Tail Total Qty' =
 			VAR _art = SELECTEDVALUE(dimArticle[Article])
+			VAR _pt  = MIN(PriceType[ID])
 			RETURN
 			IF(
 			    NOT ISBLANK(_art),
-			    CALCULATE(
-			        SUM(factOrders[PricedQuantity]),
-			        REMOVEFILTERS(factOrders),
-			        dimItemsSimple[Article_Description] = _art,
-			        NOT ISBLANK(factOrders[LQ_RunQtyBefore])
-			    )
+				SWITCH(_pt,
+					2,
+					CALCULATE(
+					    SUM(factOrders[PricedQuantityCF]),
+					    REMOVEFILTERS(factOrders),
+					    dimItemsSimple[Article_Description] = _art,
+					    NOT ISBLANK(factOrders[LQ_RunQtyBeforeCF])
+					),
+					3,
+					CALCULATE(
+					    SUM(factOrders[PricedQuantityFOT]),
+					    REMOVEFILTERS(factOrders),
+					    dimItemsSimple[Article_Description] = _art,
+					    NOT ISBLANK(factOrders[LQ_RunQtyBeforeFOT])
+					),
+					CALCULATE(
+					    SUM(factOrders[PricedQuantity]),
+					    REMOVEFILTERS(factOrders),
+					    dimItemsSimple[Article_Description] = _art,
+					    NOT ISBLANK(factOrders[LQ_RunQtyBefore])
+					)
+				)
 			)
 		formatString: #,0.##
 		isHidden
@@ -5916,55 +5933,130 @@ table factOrders
 		lineageTag: 274b3df1-b8f1-40ca-9031-5716c8755bfd
 
 	/// סך הערך בדולר של N הטונות האחרונים שנמכרו מהמוצר: הזמנות שנכללות במלואן, ועוד החלק היחסי של הזמנת הגבול. מתעלם מכל הסינונים חוץ ממוצר וסוג מחיר.
-	/// Total USD value of the last N priced units of the article (N = dimQtyStep), for the selected price view. Built from factOrders: whole orders inside the tail plus the pro-rated share of the boundary order. Tail positions come from factOrders[LQ_RunQtyBefore] (Order view), so the same orders are used for Order/CIF/FOT. Ignores every filter except Article and PriceType. Single article only.
+	/// Total USD value of the last N priced units of the article (N = dimQtyStep), for the selected price view. Built from factOrders: whole orders inside the tail plus the pro-rated share of the boundary order. Tail positions come from the view's own column (LQ_RunQtyBefore / ...CF / ...FOT), so orders without a price in that view are not in its tail. Ignores every filter except Article and PriceType. Single article only.
 	measure 'Total Last Qty Value (Orders)' =
 			VAR _step = SELECTEDVALUE(dimQtyStep[Step])
 			VAR _art  = SELECTEDVALUE(dimArticle[Article])
+			VAR _pt   = MIN(PriceType[ID])
 			RETURN
 			IF(
 			    NOT ISBLANK([Total Last Qty Quantity (Orders)]),
-			    VAR _full =
-			        CALCULATE(
-			            [LQO Value],
-			            REMOVEFILTERS(factOrders),
-			            dimItemsSimple[Article_Description] = _art,
-			            NOT ISBLANK(factOrders[LQ_RunQtyBefore])
-			                && factOrders[LQ_RunQtyBefore] + factOrders[PricedQuantity] < _step
-			        )
-			    -- boundary order: the one the step cuts through (one row per article)
-			    VAR _bRun =
-			        CALCULATE(
-			            MAX(factOrders[LQ_RunQtyBefore]),
-			            REMOVEFILTERS(factOrders),
-			            dimItemsSimple[Article_Description] = _art,
-			            NOT ISBLANK(factOrders[LQ_RunQtyBefore])
-			                && factOrders[LQ_RunQtyBefore] < _step
-			                && factOrders[LQ_RunQtyBefore] + factOrders[PricedQuantity] >= _step
-			        )
-			    -- strict == so BLANK (rows outside the tail) never matches a 0 position
-			    VAR _bVal =
-			        CALCULATE(
-			            [LQO Value],
-			            REMOVEFILTERS(factOrders),
-			            dimItemsSimple[Article_Description] = _art,
-			            factOrders[LQ_RunQtyBefore] == _bRun
-			        )
-			    VAR _bQty =
-			        CALCULATE(
-			            SUM(factOrders[PricedQuantity]),
-			            REMOVEFILTERS(factOrders),
-			            dimItemsSimple[Article_Description] = _art,
-			            factOrders[LQ_RunQtyBefore] == _bRun
-			        )
-			    RETURN
-			        _full + IF(NOT ISBLANK(_bRun), DIVIDE((_step - _bRun) * _bVal, _bQty))
+				SWITCH(_pt,
+					2,
+					VAR _full =
+					    CALCULATE(
+					        [LQO Value],
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        NOT ISBLANK(factOrders[LQ_RunQtyBeforeCF])
+					            && factOrders[LQ_RunQtyBeforeCF] + factOrders[PricedQuantityCF] < _step
+					    )
+					-- boundary order: the one the cut-off goes through (one row per article and view)
+					VAR _bRun =
+					    CALCULATE(
+					        MAX(factOrders[LQ_RunQtyBeforeCF]),
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        NOT ISBLANK(factOrders[LQ_RunQtyBeforeCF])
+					            && factOrders[LQ_RunQtyBeforeCF] < _step
+					            && factOrders[LQ_RunQtyBeforeCF] + factOrders[PricedQuantityCF] >= _step
+					    )
+					-- strict == so BLANK (rows outside the tail) never matches a 0 position
+					VAR _bVal =
+					    CALCULATE(
+					        [LQO Value],
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        factOrders[LQ_RunQtyBeforeCF] == _bRun
+					    )
+					VAR _bQty =
+					    CALCULATE(
+					        SUM(factOrders[PricedQuantityCF]),
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        factOrders[LQ_RunQtyBeforeCF] == _bRun
+					    )
+					RETURN
+					    _full + IF(NOT ISBLANK(_bRun), DIVIDE((_step - _bRun) * _bVal, _bQty)),
+					3,
+					VAR _full =
+					    CALCULATE(
+					        [LQO Value],
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        NOT ISBLANK(factOrders[LQ_RunQtyBeforeFOT])
+					            && factOrders[LQ_RunQtyBeforeFOT] + factOrders[PricedQuantityFOT] < _step
+					    )
+					-- boundary order: the one the cut-off goes through (one row per article and view)
+					VAR _bRun =
+					    CALCULATE(
+					        MAX(factOrders[LQ_RunQtyBeforeFOT]),
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        NOT ISBLANK(factOrders[LQ_RunQtyBeforeFOT])
+					            && factOrders[LQ_RunQtyBeforeFOT] < _step
+					            && factOrders[LQ_RunQtyBeforeFOT] + factOrders[PricedQuantityFOT] >= _step
+					    )
+					-- strict == so BLANK (rows outside the tail) never matches a 0 position
+					VAR _bVal =
+					    CALCULATE(
+					        [LQO Value],
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        factOrders[LQ_RunQtyBeforeFOT] == _bRun
+					    )
+					VAR _bQty =
+					    CALCULATE(
+					        SUM(factOrders[PricedQuantityFOT]),
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        factOrders[LQ_RunQtyBeforeFOT] == _bRun
+					    )
+					RETURN
+					    _full + IF(NOT ISBLANK(_bRun), DIVIDE((_step - _bRun) * _bVal, _bQty)),
+					VAR _full =
+					    CALCULATE(
+					        [LQO Value],
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        NOT ISBLANK(factOrders[LQ_RunQtyBefore])
+					            && factOrders[LQ_RunQtyBefore] + factOrders[PricedQuantity] < _step
+					    )
+					-- boundary order: the one the cut-off goes through (one row per article and view)
+					VAR _bRun =
+					    CALCULATE(
+					        MAX(factOrders[LQ_RunQtyBefore]),
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        NOT ISBLANK(factOrders[LQ_RunQtyBefore])
+					            && factOrders[LQ_RunQtyBefore] < _step
+					            && factOrders[LQ_RunQtyBefore] + factOrders[PricedQuantity] >= _step
+					    )
+					-- strict == so BLANK (rows outside the tail) never matches a 0 position
+					VAR _bVal =
+					    CALCULATE(
+					        [LQO Value],
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        factOrders[LQ_RunQtyBefore] == _bRun
+					    )
+					VAR _bQty =
+					    CALCULATE(
+					        SUM(factOrders[PricedQuantity]),
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        factOrders[LQ_RunQtyBefore] == _bRun
+					    )
+					RETURN
+					    _full + IF(NOT ISBLANK(_bRun), DIVIDE((_step - _bRun) * _bVal, _bQty))
+				)
 			)
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Last Qty Steps (Orders)
 		lineageTag: 0dceb2a8-778f-429e-bb4b-59b752b27cb9
 
-	/// מחיר ממוצע משוקלל לטון של N הטונות האחרונים שנמכרו מהמוצר, לפי סוג המחיר שנבחר (הזמנה/CIF/FOT). אותן הזמנות משמשות לכל סוגי המחיר, והזמנה בלי מחיר CIF/FOT נספרת עם ערך 0, ולכן המחיר יכול לצאת נמוך כשחסרים מחירים.
-	/// Quantity-weighted average price of the last N units sold, from factOrders. One tail for all three price views: rows without a CIF/FOT price stay in the tail with 0 value in that view, so CIF/FOT can read lower than factLastQtySteps where prices are missing (FW CIF, Oils CIF/FOT as of the last check).
+	/// מחיר ממוצע משוקלל לטון של N הטונות האחרונים שנמכרו, לפי סוג המחיר שנבחר (הזמנה/CIF/FOT). לכל סוג מחיר רצף משלו: הזמנה בלי מחיר CIF/FOT (ריק או 0) מדולגת לגמרי - לא תופסת כמות ברצף ולא נכללת בממוצע.
+	/// Quantity-weighted average price of the last N units sold, from factOrders. Each price view has its own tail (LQ_RunQtyBefore / ...CF / ...FOT): an order with a blank or zero CIF/FOT price is skipped in that view - it takes no tail position and is in neither numerator nor denominator - like factLastQtySteps.
 	measure 'AVG Last Qty Price (Orders)' = DIVIDE([Total Last Qty Value (Orders)], [Total Last Qty Quantity (Orders)])
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Last Qty Steps (Orders)
@@ -5993,17 +6085,38 @@ table factOrders
 	measure 'Last Qty Tail Anchor (Orders)' =
 			VAR _step = SELECTEDVALUE(dimQtyStep[Step])
 			VAR _art  = SELECTEDVALUE(dimArticle[Article])
+			VAR _pt   = MIN(PriceType[ID])
 			RETURN
 			IF(
 			    NOT ISBLANK(_step) && NOT ISBLANK(_art),
-			    CALCULATE(
-			        MIN(factOrders[Date]),
-			        REMOVEFILTERS(factOrders),
-			        dimItemsSimple[Article_Description] = _art,
-			        NOT ISBLANK(factOrders[LQ_RunQtyBefore])
-			            && factOrders[LQ_RunQtyBefore] < _step
-			            && factOrders[LQ_RunQtyBefore] + factOrders[PricedQuantity] >= _step
-			    )
+				SWITCH(_pt,
+					2,
+					CALCULATE(
+					    MIN(factOrders[Date]),
+					    REMOVEFILTERS(factOrders),
+					    dimItemsSimple[Article_Description] = _art,
+					    NOT ISBLANK(factOrders[LQ_RunQtyBeforeCF])
+					        && factOrders[LQ_RunQtyBeforeCF] < _step
+					        && factOrders[LQ_RunQtyBeforeCF] + factOrders[PricedQuantityCF] >= _step
+					),
+					3,
+					CALCULATE(
+					    MIN(factOrders[Date]),
+					    REMOVEFILTERS(factOrders),
+					    dimItemsSimple[Article_Description] = _art,
+					    NOT ISBLANK(factOrders[LQ_RunQtyBeforeFOT])
+					        && factOrders[LQ_RunQtyBeforeFOT] < _step
+					        && factOrders[LQ_RunQtyBeforeFOT] + factOrders[PricedQuantityFOT] >= _step
+					),
+					CALCULATE(
+					    MIN(factOrders[Date]),
+					    REMOVEFILTERS(factOrders),
+					    dimItemsSimple[Article_Description] = _art,
+					    NOT ISBLANK(factOrders[LQ_RunQtyBefore])
+					        && factOrders[LQ_RunQtyBefore] < _step
+					        && factOrders[LQ_RunQtyBefore] + factOrders[PricedQuantity] >= _step
+					)
+				)
 			)
 		formatString: dd/mm/yyyy
 		displayFolder: Last Qty Steps (Orders)
@@ -6024,7 +6137,13 @@ table factOrders
 	measure 'In Last Qty Step' =
 			VAR _step = SELECTEDVALUE(dimQtyStep[Step])
 			VAR _art  = CALCULATE(SELECTEDVALUE(dimArticle[Article], "Corn"), ALLSELECTED())
-			VAR _run  = MIN(factOrders[LQ_RunQtyBefore])
+			VAR _pt   = MIN(PriceType[ID])
+			-- tail position in the selected price view: an order with no CIF/FOT price has none and is not in that view's tail
+			VAR _run  =
+			    SWITCH(_pt,
+			        2, MIN(factOrders[LQ_RunQtyBeforeCF]),
+			        3, MIN(factOrders[LQ_RunQtyBeforeFOT]),
+			           MIN(factOrders[LQ_RunQtyBefore]))
 			RETURN
 			IF(
 			    ISBLANK(_step),
@@ -6050,51 +6169,125 @@ table factOrders
 		displayFolder: Last Qty Steps (Orders)
 		lineageTag: 61083fe9-1335-409d-8e55-09de1c7b03da
 
-	/// מחיר ממוצע משוקלל לטון של N הטונות האחרונים שנמכרו מהמוצר, כאשר N היא כמות החוסר (Remain שלילי). אותו זנב הזמנות כמו בשלבי Last Qty, לפי סוג המחיר שנבחר. ריק כשאין חוסר. מוצר יחיד בלבד.
-	/// Quantity-weighted average price of the last N priced units sold of the article, where N = [Short Qty (Orders)] (the negative Remain). Same tail as the Last Qty Steps measures (factOrders[LQ_RunQtyBefore], Order-view positions, pro-rated boundary order) with N in place of the dimQtyStep step. If the article's whole priced history is shorter than N, averages the whole history. Blank when there is no short. Single article only.
+	/// מחיר ממוצע משוקלל לטון של N הטונות האחרונים שנמכרו מהמוצר, כאשר N היא כמות החוסר (Remain שלילי). אותו זנב הזמנות כמו בשלבי Last Qty (רצף נפרד לכל סוג מחיר, הזמנה בלי מחיר מדולגת). ריק כשאין חוסר. מוצר יחיד בלבד.
+	/// Quantity-weighted average price of the last N priced units sold of the article, where N = [Short Qty (Orders)] (the negative Remain). Same tail as the Last Qty Steps measures (the selected view's own LQ_RunQtyBefore* column, orders without a price in that view skipped, pro-rated boundary order) with N in place of the dimQtyStep step. If the article's whole priced history is shorter than N, averages the whole history. Blank when there is no short. Single article only.
 	measure 'Short AVG Last Qty Price (Orders)' =
 			VAR _n   = [Short Qty (Orders)]
 			VAR _art = SELECTEDVALUE(dimArticle[Article])
 			VAR _tot = [LQO Tail Total Qty]
+			VAR _pt  = MIN(PriceType[ID])
 			RETURN
 			IF(
 			    NOT ISBLANK(_n) && NOT ISBLANK(_art) && NOT ISBLANK(_tot),
-			    VAR _full =
-			        CALCULATE(
-			            [LQO Value],
-			            REMOVEFILTERS(factOrders),
-			            dimItemsSimple[Article_Description] = _art,
-			            NOT ISBLANK(factOrders[LQ_RunQtyBefore])
-			                && factOrders[LQ_RunQtyBefore] + factOrders[PricedQuantity] < _n
-			        )
-			    -- boundary order: the one N cuts through (one row per article)
-			    VAR _bRun =
-			        CALCULATE(
-			            MAX(factOrders[LQ_RunQtyBefore]),
-			            REMOVEFILTERS(factOrders),
-			            dimItemsSimple[Article_Description] = _art,
-			            NOT ISBLANK(factOrders[LQ_RunQtyBefore])
-			                && factOrders[LQ_RunQtyBefore] < _n
-			                && factOrders[LQ_RunQtyBefore] + factOrders[PricedQuantity] >= _n
-			        )
-			    -- strict == so BLANK (rows outside the tail) never matches a 0 position
-			    VAR _bVal =
-			        CALCULATE(
-			            [LQO Value],
-			            REMOVEFILTERS(factOrders),
-			            dimItemsSimple[Article_Description] = _art,
-			            factOrders[LQ_RunQtyBefore] == _bRun
-			        )
-			    VAR _bQty =
-			        CALCULATE(
-			            SUM(factOrders[PricedQuantity]),
-			            REMOVEFILTERS(factOrders),
-			            dimItemsSimple[Article_Description] = _art,
-			            factOrders[LQ_RunQtyBefore] == _bRun
-			        )
-			    VAR _val = _full + IF(NOT ISBLANK(_bRun), DIVIDE((_n - _bRun) * _bVal, _bQty))
-			    RETURN
-			        DIVIDE(_val, MIN(_n, _tot))
+				SWITCH(_pt,
+					2,
+					VAR _full =
+					    CALCULATE(
+					        [LQO Value],
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        NOT ISBLANK(factOrders[LQ_RunQtyBeforeCF])
+					            && factOrders[LQ_RunQtyBeforeCF] + factOrders[PricedQuantityCF] < _n
+					    )
+					-- boundary order: the one the cut-off goes through (one row per article and view)
+					VAR _bRun =
+					    CALCULATE(
+					        MAX(factOrders[LQ_RunQtyBeforeCF]),
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        NOT ISBLANK(factOrders[LQ_RunQtyBeforeCF])
+					            && factOrders[LQ_RunQtyBeforeCF] < _n
+					            && factOrders[LQ_RunQtyBeforeCF] + factOrders[PricedQuantityCF] >= _n
+					    )
+					-- strict == so BLANK (rows outside the tail) never matches a 0 position
+					VAR _bVal =
+					    CALCULATE(
+					        [LQO Value],
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        factOrders[LQ_RunQtyBeforeCF] == _bRun
+					    )
+					VAR _bQty =
+					    CALCULATE(
+					        SUM(factOrders[PricedQuantityCF]),
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        factOrders[LQ_RunQtyBeforeCF] == _bRun
+					    )
+					RETURN
+					    DIVIDE(_full + IF(NOT ISBLANK(_bRun), DIVIDE((_n - _bRun) * _bVal, _bQty)), MIN(_n, _tot)),
+					3,
+					VAR _full =
+					    CALCULATE(
+					        [LQO Value],
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        NOT ISBLANK(factOrders[LQ_RunQtyBeforeFOT])
+					            && factOrders[LQ_RunQtyBeforeFOT] + factOrders[PricedQuantityFOT] < _n
+					    )
+					-- boundary order: the one the cut-off goes through (one row per article and view)
+					VAR _bRun =
+					    CALCULATE(
+					        MAX(factOrders[LQ_RunQtyBeforeFOT]),
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        NOT ISBLANK(factOrders[LQ_RunQtyBeforeFOT])
+					            && factOrders[LQ_RunQtyBeforeFOT] < _n
+					            && factOrders[LQ_RunQtyBeforeFOT] + factOrders[PricedQuantityFOT] >= _n
+					    )
+					-- strict == so BLANK (rows outside the tail) never matches a 0 position
+					VAR _bVal =
+					    CALCULATE(
+					        [LQO Value],
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        factOrders[LQ_RunQtyBeforeFOT] == _bRun
+					    )
+					VAR _bQty =
+					    CALCULATE(
+					        SUM(factOrders[PricedQuantityFOT]),
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        factOrders[LQ_RunQtyBeforeFOT] == _bRun
+					    )
+					RETURN
+					    DIVIDE(_full + IF(NOT ISBLANK(_bRun), DIVIDE((_n - _bRun) * _bVal, _bQty)), MIN(_n, _tot)),
+					VAR _full =
+					    CALCULATE(
+					        [LQO Value],
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        NOT ISBLANK(factOrders[LQ_RunQtyBefore])
+					            && factOrders[LQ_RunQtyBefore] + factOrders[PricedQuantity] < _n
+					    )
+					-- boundary order: the one the cut-off goes through (one row per article and view)
+					VAR _bRun =
+					    CALCULATE(
+					        MAX(factOrders[LQ_RunQtyBefore]),
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        NOT ISBLANK(factOrders[LQ_RunQtyBefore])
+					            && factOrders[LQ_RunQtyBefore] < _n
+					            && factOrders[LQ_RunQtyBefore] + factOrders[PricedQuantity] >= _n
+					    )
+					-- strict == so BLANK (rows outside the tail) never matches a 0 position
+					VAR _bVal =
+					    CALCULATE(
+					        [LQO Value],
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        factOrders[LQ_RunQtyBefore] == _bRun
+					    )
+					VAR _bQty =
+					    CALCULATE(
+					        SUM(factOrders[PricedQuantity]),
+					        REMOVEFILTERS(factOrders),
+					        dimItemsSimple[Article_Description] = _art,
+					        factOrders[LQ_RunQtyBefore] == _bRun
+					    )
+					RETURN
+					    DIVIDE(_full + IF(NOT ISBLANK(_bRun), DIVIDE((_n - _bRun) * _bVal, _bQty)), MIN(_n, _tot))
+				)
 			)
 		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
 		displayFolder: Last Qty Steps (Orders)
@@ -7097,12 +7290,32 @@ table factOrders
 		summarizeBy: none
 		sourceColumn: LQ_RunQtyBefore
 
+	/// מקום ההזמנה ברצף של תצוגת CIF: הכמות המתומחרת ב-CIF שנמכרה מאותו מוצר אחרי ההזמנה הזו. הזמנה בלי מחיר CIF (ריק או 0) לא תופסת מקום ואינה נכללת. ריק להזמנות מחוץ לרצף. מחושב ב-SQL.
+	/// Tail position for the CIF price view: CIF-priced units (PricedQuantityCF) sold in the same Article after this order. An order with no CIF price (blank/zero) takes no position and is left out of the CIF tail. Blank for rows outside the tail. Computed in SQL.
+	column LQ_RunQtyBeforeCF
+		dataType: double
+		isHidden
+		formatString: #,0.##
+		lineageTag: a3c1f5d2-6b7e-4f08-9d14-2e5b8c7a1f30
+		summarizeBy: none
+		sourceColumn: LQ_RunQtyBeforeCF
+
+	/// מקום ההזמנה ברצף של תצוגת FOT: הכמות המתומחרת ב-FOT שנמכרה מאותו מוצר אחרי ההזמנה הזו. הזמנה בלי מחיר FOT (ריק או 0) לא תופסת מקום ואינה נכללת. ריק להזמנות מחוץ לרצף. מחושב ב-SQL.
+	/// Tail position for the FOT price view: FOT-priced units (PricedQuantityFOT) sold in the same Article after this order. An order with no FOT price (blank/zero) takes no position and is left out of the FOT tail. Blank for rows outside the tail. Computed in SQL.
+	column LQ_RunQtyBeforeFOT
+		dataType: double
+		isHidden
+		formatString: #,0.##
+		lineageTag: b4d2a6e3-7c8f-4a19-8e25-3f6c9d8b2a41
+		summarizeBy: none
+		sourceColumn: LQ_RunQtyBeforeFOT
+
 	partition factOrders = m
 		mode: import
 		queryGroup: 'fact Tables'
 		source =
 				let
-				    Source = Sql.Database(#"SQL Address", "MT", [Query="------ active in prod 21-1-25#(lf)-------------- מחירון יומי להשוואה-----------------#(lf)With LastCreation as (#(lf)Select OrderId,MAX(CreateDate) AS LastCreation#(lf)From tblOrderPriceS#(lf)Group By OrderID#(lf))#(lf)#(lf),LastVersion as (#(lf)Select o.OrderId,Max(DayVersion) as LastVersion#(lf)From tblOrderPriceS o#(lf)Inner Join LastCreation LC#(lf)#(tab)ON o.OrderID=LC.OrderID AND o.CreateDate=LC.LastCreation#(lf)Group By o.OrderID#(lf))#(lf)#(lf),OrderPrices as (#(lf)Select O.*#(lf)from tblOrderPriceS o#(lf)Inner Join LastCreation LC#(lf)#(tab)ON o.OrderID=LC.OrderID And o.CreateDate=LC.LastCreation#(lf)Inner Join LastVersion LV#(lf)#(tab)ON o.OrderID=LV.OrderID AND o.DayVersion = LV.LastVersion#(lf)Where 1=1#(lf)),#(lf)#(lf)BasisContract as (#(lf)Select a.POSO_SOID as ID,#(lf)ISNULL(SUM(b.TotalSuccessfullyClosed),0) as TotalContracts#(lf)FRom [dbo].[SaleOrder2PurchaseOrderLines] a#(lf)LEFT JOIN [dbo].[viewStockExchangeOrders] b#(lf)#(tab)ON a.POSO_POID = b.SEO_PurchaseOrderID AND a.POSO_POLID = b.SEO_PurchaseOrderLine#(lf)Where 1=1#(lf)and POSO_isActive = 1#(lf)and LEFT(POSO_POID,1) = 9#(lf)Group BY a.POSO_SOID#(lf))#(lf)#(lf),SMPE_1 as (#(lf)select * #(lf),ROW_NUMBER() OVER (PARTITION BY SMPE_ProductID,SMPE_Year,SMPE_Month ORDER BY SMPE_CreateDate DESC,SMPE_DueDate DESC) as rownum#(lf)from [dbo].[StockMarketProductEOM]#(lf))#(lf)#(lf),SMPE as (#(lf)select * from SMPE_1 where  rownum = 1#(lf))#(lf)#(lf),SalesOrder2Purchase as (#(lf)select * from [dbo].[SaleOrder2PurchaseOrderLines]#(lf)where POSO_IsActive = '1'#(lf)--and POSO_SOID = 128444 --131989#(lf)and POSO_HasRolloverBeenMade = 0#(lf)and LEFT(POSO_POID,2) = 90   ---- Temp Order Only#(lf))#(lf)#(lf)--,TRGOM_ANGLIT_ as(#(lf)--SELECT #(lf)--#(tab)#(tab)T.*, #(lf)--#(tab)#(tab)S_IN.PNL_Desc as PNL_Desc_Sales , #(lf)--#(tab)#(tab)P_OUT.PNL_Desc as PNL_Desc_Purchase#(lf)--FROM [dbo].[TRGOM_ANGLIT] T#(lf)--#(tab)LEFT JOIN (SELECT * FROM tblPnlList where PNL_Type = 'IN') S_IN#(lf)--#(tab)#(tab)ON#(tab)T.TARO_ANGLIT_3_PNL_HCNSH = S_IN.PNL_ID#(lf)--#(tab)LEFT JOIN (SELECT * FROM tblPnlList where PNL_Type = 'OUT') P_OUT#(lf)--#(tab)#(tab)ON#(tab)T.TARO_ANGLIT_4_PNL_HOTSAH = P_OUT.PNL_ID#(lf)--WHERE SOG_PRIT_SOCN_BNQ_TM_SH_CHBRH = N'פ'#(lf)--)#(lf)#(lf)--,items as(#(lf)--SELECT  CAST( CONVERT(BIGINT, CONVERT(VARCHAR, M.QOD_MOTSR)) as varchar) AS 'ItemKey'#(lf)--,Case #(lf)--#(tab)#(tab)#(tab)#(tab)WHEN A.ART_DESC is NULL OR A.ART_DESC = ''#(lf)--#(tab)#(tab)#(tab)#(tab)#(tab)THEN 'Other'#(lf)--#(tab)#(tab)#(tab)#(tab)ELSE A.ART_DESC#(lf)--#(tab)#(tab)#(tab)END AS 'Article_Description'#(lf)--  FROM MOTSRIM M#(lf)--  LEFT JOIN TRGOM_ANGLIT_ T on M.QOD_MOTSR = T.QOD#(lf)--  LEFT JOIN (SELECT distinct [TARO_ANGLIT_2_ART],[ART_DESC]#(lf)--#(tab)#(tab)#(tab)FROM [dbo].[TRGOM_ANGLIT]#(lf)--#(tab)#(tab)#(tab)WHERE SOG_PRIT_SOCN_BNQ_TM_SH_CHBRH = N'פ' and ART_DESC<>'' and TARO_ANGLIT_3_PNL_HCNSH = 8052) A#(lf)--#(tab)#(tab)#(tab)ON A.TARO_ANGLIT_2_ART = T.TARO_ANGLIT_2_ART#(lf)#(tab)#(tab)#(tab)--)#(lf)#(lf)--------------------הזמנות------------------#(lf)#(lf),Orders as (#(lf)SELECT #(lf)#(lf)'1' as 'EntityID'#(lf)        ,CAST(HZ.MSPR_HZMNH AS VARCHAR) AS 'OrderID'#(lf)#(tab)#(tab),1 AS 'OrderLineNumber'#(lf)#(tab)#(tab),'Orders' AS 'DocName'#(lf)#(tab)#(tab),CAST(CONVERT(INT, CONVERT(VARCHAR,HZ.QOD_MQBL))as varchar) AS 'AccountKey' -- customer from invoices in case you need just invoices #(lf)#(tab)#(tab),TRY_CAST(SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2) AS date) as 'תאריך אספקה'#(lf)        ,TRY_CAST(SUBSTRING(HZ.T_HZMNH,1,4) + '-' + SUBSTRING(HZ.T_HZMNH,5,2) + '-' + SUBSTRING(HZ.T_HZMNH,7,2) AS date) as 'Date'#(lf)#(tab)#(tab),HZ.OrderCreateTime AS 'OrderCreateTime'#(lf)#(tab)#(tab),null AS 'Time'#(lf)#(tab)#(tab),cast(CONVERT(INT, CONVERT(VARCHAR,HZ.AISH_MCIROT)) as varchar) AS 'AgentKey' #(lf)#(tab)#(tab),cast(CONVERT(INT, CONVERT(VARCHAR,HZ.MOTSR_MOZMN)) as varchar)+ '-' + cast(CONVERT(INT, CONVERT(VARCHAR,HZ.MOTSR_MOZMN)) as varchar) AS 'ItemKey'#(lf)#(tab)#(tab)--,it.Article_Description#(lf)#(tab)#(tab)--,CAST('1' as varchar) + CAST(CONVERT(INT, CONVERT(VARCHAR, i.BRANCH)) as varchar) AS 'BranchKey'#(lf)#(tab)#(tab),null AS 'EmployeeKey'#(lf)#(tab)#(tab),null AS 'חבר מועדון'#(lf)#(tab)#(tab)--,(1 - (1 - ii.[T$PERCENT] / 100) * (1 - i.[T$PERCENT] / 100)) AS 'DiscountPercent' -- the DiscountPercent for the invoice and invoice line#(lf)#(tab)#(tab),null AS 'DiscountPercent'#(lf)#(tab)#(tab) --,(1 - (1 - ii.[T$PERCENT] / 100) * (1 - i.[T$PERCENT] / 100)) * ii.TQUANT / 1000 * ROUND(ii.PRICE, 2) * ii.IEXCHANGE AS 'LineTotalDiscount' -- the discount from gross price to the net#(lf)#(tab)#(tab),NULL AS 'LineTotalDiscount'#(lf)#(tab)#(tab)--,ROUND(ii.PRICE, 2) * ii.IEXCHANGE AS 'UnitGrossPrice'#(lf)#(tab)#(tab),NULL AS 'UnitGrossPrice'#(lf)#(tab)#(tab)--,ROUND(ii.PRICE * (1 - ii.[T$PERCENT] / 100) * (1 - i.[T$PERCENT] / 100), 2) * ii.IEXCHANGE AS 'UnitNetPrice'#(lf)#(tab)#(tab),CASE#(lf)#(tab)         WHEN HZ.MTBE = '$' THEN MCHIR_ICH#(lf)#(tab)#(tab)   --THEN CAST(HZ.MCHIR_ICH AS decimal (12,4))#(lf)#(tab)         ELSE CAST(HZ.MCHIR_ICH *(1/SM.NEW_SHER)  AS decimal (12,4))#(lf)         END AS 'UnitNetPriceUSD'#(lf)#(tab)#(tab),HZ.CMOT_MOZMNT AS 'Quantity'#(lf)#(tab)#(tab),HZ.CMOT_SHSOPQH AS 'QuantitySupply'#(lf)#(tab)#(tab),HZ.CMOT_MOZMNT - HZ.CMOT_SHSOPQH AS 'QuantityLeft'#(lf)#(tab)#(tab),NULL AS 'LineTotalCost'#(lf)#(tab)#(tab),CASE#(lf)#(tab)         WHEN HZ.MTBE = '$'#(lf)#(tab)#(tab)     THEN CAST((HZ.MCHIR_ICH)*CMOT_MOZMNT AS decimal (12,4))#(lf)#(tab)         ELSE CAST(HZ.MCHIR_ICH*HZ.CMOT_MOZMNT*(1/SM.NEW_SHER) AS decimal (12,4))#(lf)         END AS 'LineTotalNetUSD'#(lf)#(tab)#(tab),CASE#(lf)#(tab)         WHEN HZ.MTBE = '$'#(lf)#(tab)#(tab)     THEN CAST((HZ.MCHIR_ICH)*(HZ.CMOT_MOZMNT - HZ.CMOT_SHSOPQH) AS decimal (12,4))#(lf)#(tab)         ELSE CAST(HZ.MCHIR_ICH*(HZ.CMOT_MOZMNT - HZ.CMOT_SHSOPQH)*(1/SM.NEW_SHER) AS decimal (12,4))#(lf)         END AS 'LineTotalBalanceUSD'#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(lf)#(tab)#(tab),CASE#(lf)#(tab)         WHEN HZ.MTBE = '$'#(lf)#(tab)#(tab)     THEN CAST(HZ.MCHIR_ICH*SM.NEW_SHER AS decimal (12,4))#(lf)#(tab)         ELSE CAST(HZ.MCHIR_ICH AS decimal (12,4))#(lf)         END AS 'UnitNetPriceNIS'#(lf)#(tab)    ,CASE#(lf)#(tab)         WHEN HZ.MTBE = '$'#(lf)#(tab)#(tab)     THEN CAST((HZ.MCHIR_ICH*SM.NEW_SHER)*CMOT_MOZMNT AS decimal (12,4))#(lf)#(tab)         ELSE CAST(HZ.MCHIR_ICH*HZ.CMOT_MOZMNT AS decimal (12,4))#(lf)         END AS 'LineTotalNetNIS'#(lf)#(lf)#(tab)#(tab) ,Case#(lf)#(tab)#(tab)#(tab)WHEN OP.CFPremium >0#(lf)#(tab)#(tab)#(tab)#(tab)THEN 1#(lf)#(tab)#(tab)#(tab)ELSE 0#(lf)#(tab)#(tab)END AS 'PremiumFlag'#(lf)#(tab)#(tab),CONVERT(INT, CONVERT(VARCHAR,SUBSTRING(HZ.T_ASPQH,1,4) + SUBSTRING(HZ.T_ASPQH,5,2))) AS YearMonth#(lf)#(tab)#(tab)----#(lf)#(tab)#(tab),HZ.OrderStatus AS 'סטטוס'#(lf)#(tab)#(tab),NULL AS 'ChargeFlag'  #(lf)#(tab)#(tab),NULL AS 'סטטוס ליקוט כותרת'#(lf)#(tab)    ,NULL AS 'סטטוס ליקוט שורה'#(lf)#(tab)#(tab),NULL AS 'דגל סטורנו'#(lf)#(tab)#(tab)#(lf)#(tab)#(tab),CASE#(lf)#(tab)#(tab)#(tab)WHEN DATEDIFF(dd,#(lf)#(tab)#(tab)#(tab)CAST(SUBSTRING(HZ.T_HZMNH,1,4) + '-' + SUBSTRING(HZ.T_HZMNH,5,2) + '-' + SUBSTRING(HZ.T_HZMNH,7,2) as Date)#(lf)#(tab)#(tab)#(tab),CAST(SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2) AS Date)) > 60#(lf)#(tab)#(tab)#(tab)#(tab)THEN 1#(lf)#(tab)#(tab)#(tab)ELSE 2#(lf)#(tab)#(tab)END as 'SpotFlag'#(lf)#(tab)#(tab),CASE#(lf)#(tab)#(tab)#(tab)WHEN DATEDIFF(dd,#(lf)#(tab)#(tab)#(tab)CAST(SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2) AS Date)#(lf)#(tab)#(tab)#(tab),GETDATE()) > 80 AND HZ.OrderStatus in (1,2)#(lf)#(tab)#(tab)#(tab)#(tab)THEN 1#(lf)#(tab)#(tab)#(tab)ELSE 0#(lf)#(tab)#(tab)END as 'OldFlag'#(lf)#(tab)#(tab),QOD_SHOLCH as 'SupplierWarehouse'#(lf)#(tab)#(tab),OP.ActionType AS 'TransactionType'#(lf)#(tab)#(tab),t.PO_Family as 'Family'#(lf)#(tab)#(tab),CASE #(lf)#(tab)#(tab)#(tab)WHEN HZ.OrderStatus = 4 or HZ.OrderStatus = 5#(lf)#(tab)#(tab)#(tab)#(tab)THEN NULL#(lf)#(tab)#(tab)#(tab)WHEN t.PO_Family = 2#(lf)#(tab)#(tab)#(tab)#(tab)THEN CASE#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)WHEN isNULL(ROUND(OP.OriginalQty/OP.QtyTonePerContract,0),0) > 0 #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)THEN ((ROUND(OP.OriginalQty/OP.QtyTonePerContract,0)-ISNULL(bc.Totalcontracts,0))/ROUND(OP.OriginalQty/OP.QtyTonePerContract,0))*HZ.CMOT_MOZMNT ---- כמות שלא תומחרה =כמות הזמנה כפול(סך הכל חוזים אפשריים - חוזים שנחתמו חלקי סך כל החוזים האפשריים#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)ELSE POB.Balance#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)END#(lf)#(tab)#(tab)#(tab)WHEN t.PO_Family = 1#(lf)#(tab)#(tab)#(tab)#(tab)Then Null#(lf)#(tab)#(tab)#(tab)ELSE NULL#(lf)#(tab)#(tab)END AS BasisQTY#(lf)#(tab)#(tab),CASE #(lf)#(tab)#(tab)#(tab)WHEN POB.Balance IS NULL THEN HZ.CMOT_MOZMNT#(lf)#(tab)#(tab)#(tab)WHEN HZ.OrderStatus = 4 or HZ.OrderStatus = 5#(lf)#(tab)#(tab)#(tab)#(tab)Then POB.Balance#(lf)#(tab)#(tab)#(tab)WHEN t.PO_Family = 2#(lf)#(tab)#(tab)#(tab)#(tab)THEN CASE#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)WHEN isNULL(ROUND(OP.OriginalQty/OP.QtyTonePerContract,0),0) > 0 #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)THEN (ISNULL(bc.Totalcontracts,0)/ROUND(OP.OriginalQty/OP.QtyTonePerContract,0))*HZ.CMOT_MOZMNT ---- כמות שתומחרה =כמות הזמנה כפול חוזים שנחתמו חלקי סך כל החוזים האפשריים#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)ELSE NULL#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)END#(lf)#(tab)#(tab)#(tab)WHEN t.PO_Family = 1#(lf)#(tab)#(tab)#(tab)#(tab)Then POB.Balance#(lf)#(tab)#(tab)#(tab)ELSE  POB.Balance#(lf)#(tab)#(tab)END AS FlatQTY#(lf)#(tab)#(tab)--,bc.TotalContracts as ContractSigned#(lf)#(tab)#(tab),POL_StockExchangeDate#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(lf)#(tab)#(tab),sf.PF_GeneralFactor#(lf)#(tab)#(tab),POL_PremiumPrice#(lf)#(tab)#(tab),POL_StockMarketPrice#(lf)#(tab)#(tab),smp.SMP_Symbol#(lf)#(tab)#(tab),CAST (smpe.SMPE_TempPrice as float) as SMPE_TempPrice#(lf)#(tab)#(tab),ACT.TAOR_AOPTSIH as OrderType#(lf)#(tab)#(tab),POL.POL_StockMarketTempPriceForNoneClosed as MarketTempPrice#(lf)#(tab)#(tab),POL_FinalPriceForClosedContract#(tab)#(tab)#(tab)as FinalPriceClosedContract#(lf)#(lf)#(tab)#(tab),OP.CFFlat#(lf)#(tab)#(tab),OP.CFFLAT_CC#(lf)#(tab)#(tab),OP.CFFLAT_NCC#(lf)#(tab)#(tab),OP.FotPrice#(lf)#(tab)#(tab),OP.FOT_CC#(lf)#(tab)#(tab),OP.FOT_NCC#(lf)#(tab)#(tab),OP.OriginalQty#(lf)#(tab)#(tab),OP.DollarRate#(lf)#(tab)#(tab),POL.POL_StockMarketTempPriceForNoneClosed#(lf)#(tab)#(tab)--,CASE#(lf)#(tab)#(tab)--#(tab)when POL_FinalPriceForClosedContract is not null or OP.CFPremium = 0 then sum(HZ.CMOT_MOZMNT) over (partition by it.Article_Description order by HZ.OrderCreateTime desc)#(lf)#(tab)#(tab)--#(tab)else 0#(lf)#(tab)#(tab)--END as 'Recent Orders Step Count'#(lf)#(tab)#(tab),GETDATE() AS RowInsertDatetime#(lf)FROM [HZMNOT] HZ#(lf)LEFT JOIN (#(lf)           SELECT *, #(lf)                    CASE#(lf)                    #(tab)WHEN sher = 0#(lf)                    #(tab)THEN FIRST_VALUE(sher) OVER (PARTITION BY value_partition ORDER BY Tarikh) #(lf)                    #(tab)ELSE sher#(lf)                    END AS new_sher#(lf)            FROM (#(lf)                     SELECT *#(lf)#(tab)#(tab)#(tab)#(tab)#(tab) ,SUM(CASE WHEN sher=0 THEN 0 ELSE 1 END) OVER (ORDER BY tarikh ) AS value_partition#(lf)                     FROM SHERI_MTBE) m#(lf)           #(lf)           ) SM #(lf)ON SM.TARIKH=HZ.T_HZMNH#(lf)Left Join OrderPrices OP#(lf)#(tab)ON op.OrderID = Hz.MSPR_HZMNH#(lf)LEFT JOIN PurchaseOrderTypes t#(lf)#(tab)ON t.PO_TypeID = OP.ActionType#(lf)Left Join BasisContract bc#(lf)#(tab)ON op.OrderID = bc.ID#(lf)----#(lf)left join SalesOrder2Purchase sol#(lf)#(tab)on HZ.MSPR_HZMNH = sol.POSO_SOID#(lf)left join PurchaseOrderLines POL#(lf)#(tab)on sol.POSO_POID = pol.POL_OrderID and sol.POSO_POLID = pol.POL_LineID#(lf)left join ProductStockMarketFactors sf#(lf)#(tab)on pol.POL_ProductID = sf.PF_ProductID and POL.POL_FactorCode = sf.PF_FactorID #(lf)left join StockMarketProduct smp#(lf)#(tab)on POL.POL_ProductID = smp.SMP_ProductID AND MONTH(POL.POL_StockExchangeDate) = smp.SMP_MonthID#(lf)left join SMPE as smpe --(select * from SMPE where  rownum = 1) smpe#(lf)#(tab)on POL.POL_ProductID = smpe.SMPE_ProductID AND YEAR(POL.POL_StockExchangeDate) = smpe.SMPE_Year AND MONTH(POL.POL_StockExchangeDate) = smpe.SMPE_Month#(lf)Left Join viewPurchaseOrderBalance POB#(lf)#(tab)ON POL.POL_OrderID = POB.POID AND POL.POL_LineID = POB.POLineID#(lf)LEFT JOIN TBLT_PEOLOT_HZMNH_T_MSHLOCH ACT#(lf)#(tab)ON HZ.actionType = ACT.MS_AOPTSIH#(lf)--LEFT JOIN items it#(lf)--#(tab)ON it.ItemKey = HZ.MOTSR_MOZMN#(lf)WHERE Cast(SUBSTRING(T_HZMNH,1,4) as int) >=2018 and Cast(SUBSTRING(T_HZMNH,1,4) as int) <= Year(Getdate())#(lf)AND HZ.OrderStatus<>3#(lf)AND HZ.ActionType IN (1,11,12,14)--NOT IN (2,6,7,10/*,11*/)#(lf)#(lf)--AND HZ.MSPR_HZMNH IN ('139761')--,'136892','136030','136532','137242', '135805')--'135671'-- '136227' --'133900'#(lf)--AND SUBSTRING(HZ.T_ASPQH,1,4) = 2025 AND SUBSTRING(HZ.T_ASPQH,5,2) = 01#(lf))#(lf)#(lf)#(lf),ordersBase as (#(lf)SELECT#(tab)o.*#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(lf)#(tab)#(tab),CASE #(lf)#(tab)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN o.FlatQTY * FinalPriceClosedContract#(lf)#(tab)#(tab)#(tab)ELSE LineTotalBalanceUSD#(lf)#(tab)#(tab) END#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS LineTotalFlatBalanceUSD#(lf)#(tab)#(tab),CASE #(lf)#(tab)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN o.FlatQTY * FinalPriceClosedContract#(lf)#(tab)#(tab)#(tab)ELSE LineTotalNetUSD#(lf)#(tab)#(tab) END#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS LineTotalFlatUSD#(lf)#(tab)#(tab),CASE #(lf)#(tab)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN o.BasisQTY * MarketTempPrice#(lf)#(tab)#(tab)#(tab)ELSE 0#(lf)#(tab)#(tab) END#(lf)#(tab)#(tab) +#(lf)#(tab)#(tab)CASE #(lf)#(tab)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN o.FlatQTY * FinalPriceClosedContract#(lf)#(tab)#(tab)#(tab)ELSE LineTotalNetUSD#(lf)#(tab)#(tab) END#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS LineTotalFlatValueUSD#(lf)#(lf)    ,CASE #(lf)        WHEN o.PremiumFlag = 1 THEN o.CFFLAT_CC #(lf)        ELSE o.CFFlat #(lf)    END AS UnitPriceCF,#(lf)    #(lf)    -- Calculate LineTotalCF_USD using PremiumFlag and FlatQTY (or OriginalQty)#(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 THEN o.CFFLAT_CC * o.FlatQTY #(lf)        ELSE o.CFFlat * o.OriginalQty #(lf)    END AS LineTotalCF_USD,#(lf)    #(lf)    -- Calculate LineTotalCF_NIS (apply DollarRate to the above)#(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 THEN o.CFFLAT_CC * o.FlatQTY * o.DollarRate #(lf)        ELSE o.CFFlat * o.DollarRate * o.OriginalQty #(lf)    END AS LineTotalCF_NIS,#(lf)    #(lf)    -- Calculate UnitPriceFOT based on the PremiumFlag#(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 THEN o.FOT_CC #(lf)        ELSE o.FotPrice #(lf)    END AS UnitPriceFOT,#(lf)    #(lf)    -- Calculate LineTotalFOT_USD using PremiumFlag and FlatQTY (or OriginalQty)#(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 THEN o.FOT_CC * o.FlatQTY #(lf)        ELSE o.FotPrice * o.OriginalQty #(lf)    END AS LineTotalFOT_USD,#(lf)    #(lf)    -- Calculate LineTotalFOT_NIS (apply DollarRate to the above)#(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 THEN o.FOT_CC * o.FlatQTY * o.DollarRate #(lf)        ELSE o.FotPrice * o.DollarRate * o.OriginalQty #(lf)    END AS LineTotalFOT_NIS,#(lf)    #(lf)    -- Use BasisQTY to compute the flat value balance in USD#(lf)    CASE#(lf)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN (o.POL_StockMarketTempPriceForNoneClosed * o.BasisQTY)+(o.FlatQTY * FinalPriceClosedContract) #(lf)#(tab)#(tab)ELSE LineTotalBalanceUSD#(lf)#(tab)#(tab)END AS LineTotalFlatValueBalanceUSD,#(lf)    #(lf)    -- Calculate MarketTempPriceCFF_USD and its related total using BasisQTY#(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 THEN o.CFFLAT_NCC #(lf)        ELSE NULL #(lf)    END AS MarketTempPriceCFF_USD,#(lf)    #(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 THEN (o.CFFLAT_NCC * o.BasisQTY) + (o.FlatQTY * o.CFFLAT_NCC)#(lf)        ELSE QuantityLeft*o.CFFlat #(lf)    END AS LineTotalFlatValueBalanceCFFUSD,#(lf)#(tab)CASE #(lf)        WHEN o.PremiumFlag = 1 THEN (o.FlatQTY * o.CFFLAT_NCC)#(lf)        ELSE QuantityLeft*o.CFFlat #(lf)    END AS LineTotalFlatBalanceCFFUSD,#(lf)    #(lf)    -- Calculate MarketTempPriceFOT_USD and its related total using BasisQTY#(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 THEN o.FOT_NCC #(lf)        ELSE NULL #(lf)    END AS MarketTempPriceFOT_USD,#(lf)    #(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 THEN  (o.FOT_NCC * o.BasisQTY) + (o.FlatQTY * o.FOT_NCC)--(o.FOT_NCC * o.BasisQTY)--#(lf)        ELSE QuantityLeft*o.FotPrice #(lf)    END AS LineTotalFlatValueBalanceFOTUSD,#(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 THEN (o.FOT_NCC * o.FlatQTY)#(lf)        ELSE QuantityLeft*o.FotPrice #(lf)    END AS LineTotalFlatBalanceFOTUSD,#(lf)#(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 #(lf)             THEN (o.CFFLAT_NCC * o.BasisQTY) + (o.CFFLAT_CC * o.FlatQTY)#(lf)        ELSE (o.CFFlat * o.OriginalQty)#(lf)    END AS LineTotalFlatValueCFFUSD,#(lf)    #(lf)    -- Combined calculation for FOT pricing#(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 #(lf)             THEN (o.FOT_NCC * o.BasisQTY) + (o.FOT_CC * o.FlatQTY)#(lf)        ELSE (o.FotPrice * o.OriginalQty)#(lf)    END AS LineTotalFlatValueFOTUSD,#(lf)#(lf)#(tab)-- Priced quantity: zeroed on rows whose paired price hasn't landed yet, so averages aren't diluted by unpriced rows#(lf)#(tab)CASE#(lf)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN CASE WHEN ISNULL(FinalPriceClosedContract,0) = 0 THEN 0 ELSE o.Quantity END#(lf)#(tab)#(tab)ELSE CASE WHEN ISNULL(o.UnitNetPriceUSD,0) = 0 THEN 0 ELSE o.Quantity END#(lf)#(tab)END AS PricedQuantity,#(lf)#(tab)CASE#(lf)#(tab)#(tab)WHEN o.PremiumFlag = 1 AND ISNULL(MarketTempPrice,0) <> 0 THEN o.BasisQTY#(lf)#(tab)#(tab)ELSE 0#(lf)#(tab)END AS PricedBasisQTY,#(lf)#(tab)CASE#(lf)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN CASE WHEN ISNULL(FinalPriceClosedContract,0) = 0 THEN 0 ELSE o.FlatQTY END#(lf)#(tab)#(tab)ELSE CASE WHEN ISNULL(o.UnitNetPriceUSD,0) = 0 THEN 0 ELSE o.FlatQTY END#(lf)#(tab)END AS PricedFlatQTY,#(lf)#(tab)-- CF-specific priced quantity: a row can have a valid Order/FOT price but a blank/zero CF price, so CF averages need their own zero-check#(lf)#(tab)CASE#(lf)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN CASE WHEN ISNULL(o.CFFLAT_CC,0) = 0 THEN 0 ELSE o.Quantity END#(lf)#(tab)#(tab)ELSE CASE WHEN ISNULL(o.CFFlat,0) = 0 THEN 0 ELSE o.Quantity END#(lf)#(tab)END AS PricedQuantityCF,#(lf)#(tab)-- FOT-specific priced quantity: same idea for the FOT price view#(lf)#(tab)CASE#(lf)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN CASE WHEN ISNULL(o.FOT_CC,0) = 0 THEN 0 ELSE o.Quantity END#(lf)#(tab)#(tab)ELSE CASE WHEN ISNULL(o.FotPrice,0) = 0 THEN 0 ELSE o.Quantity END#(lf)#(tab)END AS PricedQuantityFOT,#(lf)#(tab)-- Combined open-quantity (Basis+Flat as QuantityLeft on non-premium rows) zeroed per price type, to match LineTotalFlatValueBalanceCFFUSD/FOTUSD's own grain#(lf)#(tab)CASE#(lf)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN CASE WHEN ISNULL(o.CFFLAT_NCC,0) = 0 THEN 0 ELSE o.BasisQTY+o.FlatQTY END#(lf)#(tab)#(tab)ELSE CASE WHEN ISNULL(o.CFFlat,0) = 0 THEN 0 ELSE o.QuantityLeft END#(lf)#(tab)END AS PricedOpenQtyCF,#(lf)#(tab)CASE#(lf)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN CASE WHEN ISNULL(o.FOT_NCC,0) = 0 THEN 0 ELSE o.BasisQTY+o.FlatQTY END#(lf)#(tab)#(tab)ELSE CASE WHEN ISNULL(o.FotPrice,0) = 0 THEN 0 ELSE o.QuantityLeft END#(lf)#(tab)END AS PricedOpenQtyFOT,#(lf)#(lf)#(tab)CASE#(lf)#(tab)#(tab)WHEN o.[סטטוס] = 1 then 'Open Order'#(lf)#(tab)#(tab)else null#(lf)#(tab)END AS 'Open_Slicer'#(lf)/*#(tab)#(tab),CASE#(lf)#(tab)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN o.LineTotalFlatValueBalanceCFFUSD + LineTotalCF_USD#(lf)#(tab)#(tab)#(tab)ELSE LineTotalCF_USD END#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS LineTotalFlatValueCFFUSD#(lf)#(tab)#(tab),CASE#(lf)#(tab)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN o.LineTotalFlatValueBalanceFOTUSD + LineTotalCF_USD#(lf)#(tab)#(tab)#(tab)ELSE LineTotalCF_USD END#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS LineTotalFlatValueFOTUSD#(lf)*/#(lf)#(lf)FROM Orders o#(lf)where 1=1#(lf)--and ItemKey = '42-42'#(lf)--order by OrderCreateTime desc#(lf)#(lf))#(lf)#(lf)/* Article map for the Last Qty Steps tail (same mapping as dimItemsSimple / factLastQtySteps #am) */#(lf),LQ_ArticleMap as (#(lf)  SELECT cast(CONVERT(INT, CONVERT(VARCHAR,M.QOD_MOTSR)) as varchar)+ '-' + cast(CONVERT(INT, CONVERT(VARCHAR,M.QOD_MOTSR)) as varchar) AS ItemKey#(lf)        ,A.ART_DESC AS Article#(lf)  FROM MOTSRIM M#(lf)  JOIN (SELECT * FROM [dbo].[TRGOM_ANGLIT]#(lf)        WHERE SOG_PRIT_SOCN_BNQ_TM_SH_CHBRH = NCHAR(1508)) T#(lf)       ON M.QOD_MOTSR = T.QOD#(lf)  JOIN (SELECT distinct [TARO_ANGLIT_2_ART],[ART_DESC] FROM [dbo].[TRGOM_ANGLIT]#(lf)        WHERE SOG_PRIT_SOCN_BNQ_TM_SH_CHBRH = NCHAR(1508) and ART_DESC<>'' and TARO_ANGLIT_3_PNL_HCNSH = 8052) A#(lf)       ON A.TARO_ANGLIT_2_ART = T.TARO_ANGLIT_2_ART#(lf))#(lf)#(lf)/* LQ_RunQtyBefore: Order-view priced units sold in the same Article AFTER this order#(lf)   (newest first: OrderCreateTime DESC, OrderID DESC), i.e. the tail position this#(lf)   order starts at. NULL for rows outside the tail (unpriced, or no Article).#(lf)   Drives the Last Qty Steps (Orders) measures; same ordering as factLastQtySteps. */#(lf)SELECT ob.*,#(lf)       CASE WHEN am.Article IS NOT NULL AND ISNULL(ob.PricedQuantity,0) > 0 AND ob.LineTotalFlatValueUSD IS NOT NULL THEN#(lf)            ISNULL(SUM(ob.PricedQuantity)#(lf)                   OVER (PARTITION BY am.Article,#(lf)                                      CASE WHEN ISNULL(ob.PricedQuantity,0) > 0 AND ob.LineTotalFlatValueUSD IS NOT NULL THEN 1 ELSE 0 END#(lf)                         ORDER BY ob.OrderCreateTime DESC, ob.OrderID DESC#(lf)                         ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING), 0)#(lf)       END AS LQ_RunQtyBefore#(lf)FROM ordersBase ob#(lf)LEFT JOIN LQ_ArticleMap am ON am.ItemKey = ob.ItemKey"])
+				    Source = Sql.Database(#"SQL Address", "MT", [Query="------ active in prod 21-1-25#(lf)-------------- מחירון יומי להשוואה-----------------#(lf)With LastCreation as (#(lf)Select OrderId,MAX(CreateDate) AS LastCreation#(lf)From tblOrderPriceS#(lf)Group By OrderID#(lf))#(lf)#(lf),LastVersion as (#(lf)Select o.OrderId,Max(DayVersion) as LastVersion#(lf)From tblOrderPriceS o#(lf)Inner Join LastCreation LC#(lf)#(tab)ON o.OrderID=LC.OrderID AND o.CreateDate=LC.LastCreation#(lf)Group By o.OrderID#(lf))#(lf)#(lf),OrderPrices as (#(lf)Select O.*#(lf)from tblOrderPriceS o#(lf)Inner Join LastCreation LC#(lf)#(tab)ON o.OrderID=LC.OrderID And o.CreateDate=LC.LastCreation#(lf)Inner Join LastVersion LV#(lf)#(tab)ON o.OrderID=LV.OrderID AND o.DayVersion = LV.LastVersion#(lf)Where 1=1#(lf)),#(lf)#(lf)BasisContract as (#(lf)Select a.POSO_SOID as ID,#(lf)ISNULL(SUM(b.TotalSuccessfullyClosed),0) as TotalContracts#(lf)FRom [dbo].[SaleOrder2PurchaseOrderLines] a#(lf)LEFT JOIN [dbo].[viewStockExchangeOrders] b#(lf)#(tab)ON a.POSO_POID = b.SEO_PurchaseOrderID AND a.POSO_POLID = b.SEO_PurchaseOrderLine#(lf)Where 1=1#(lf)and POSO_isActive = 1#(lf)and LEFT(POSO_POID,1) = 9#(lf)Group BY a.POSO_SOID#(lf))#(lf)#(lf),SMPE_1 as (#(lf)select * #(lf),ROW_NUMBER() OVER (PARTITION BY SMPE_ProductID,SMPE_Year,SMPE_Month ORDER BY SMPE_CreateDate DESC,SMPE_DueDate DESC) as rownum#(lf)from [dbo].[StockMarketProductEOM]#(lf))#(lf)#(lf),SMPE as (#(lf)select * from SMPE_1 where  rownum = 1#(lf))#(lf)#(lf),SalesOrder2Purchase as (#(lf)select * from [dbo].[SaleOrder2PurchaseOrderLines]#(lf)where POSO_IsActive = '1'#(lf)--and POSO_SOID = 128444 --131989#(lf)and POSO_HasRolloverBeenMade = 0#(lf)and LEFT(POSO_POID,2) = 90   ---- Temp Order Only#(lf))#(lf)#(lf)--,TRGOM_ANGLIT_ as(#(lf)--SELECT #(lf)--#(tab)#(tab)T.*, #(lf)--#(tab)#(tab)S_IN.PNL_Desc as PNL_Desc_Sales , #(lf)--#(tab)#(tab)P_OUT.PNL_Desc as PNL_Desc_Purchase#(lf)--FROM [dbo].[TRGOM_ANGLIT] T#(lf)--#(tab)LEFT JOIN (SELECT * FROM tblPnlList where PNL_Type = 'IN') S_IN#(lf)--#(tab)#(tab)ON#(tab)T.TARO_ANGLIT_3_PNL_HCNSH = S_IN.PNL_ID#(lf)--#(tab)LEFT JOIN (SELECT * FROM tblPnlList where PNL_Type = 'OUT') P_OUT#(lf)--#(tab)#(tab)ON#(tab)T.TARO_ANGLIT_4_PNL_HOTSAH = P_OUT.PNL_ID#(lf)--WHERE SOG_PRIT_SOCN_BNQ_TM_SH_CHBRH = N'פ'#(lf)--)#(lf)#(lf)--,items as(#(lf)--SELECT  CAST( CONVERT(BIGINT, CONVERT(VARCHAR, M.QOD_MOTSR)) as varchar) AS 'ItemKey'#(lf)--,Case #(lf)--#(tab)#(tab)#(tab)#(tab)WHEN A.ART_DESC is NULL OR A.ART_DESC = ''#(lf)--#(tab)#(tab)#(tab)#(tab)#(tab)THEN 'Other'#(lf)--#(tab)#(tab)#(tab)#(tab)ELSE A.ART_DESC#(lf)--#(tab)#(tab)#(tab)END AS 'Article_Description'#(lf)--  FROM MOTSRIM M#(lf)--  LEFT JOIN TRGOM_ANGLIT_ T on M.QOD_MOTSR = T.QOD#(lf)--  LEFT JOIN (SELECT distinct [TARO_ANGLIT_2_ART],[ART_DESC]#(lf)--#(tab)#(tab)#(tab)FROM [dbo].[TRGOM_ANGLIT]#(lf)--#(tab)#(tab)#(tab)WHERE SOG_PRIT_SOCN_BNQ_TM_SH_CHBRH = N'פ' and ART_DESC<>'' and TARO_ANGLIT_3_PNL_HCNSH = 8052) A#(lf)--#(tab)#(tab)#(tab)ON A.TARO_ANGLIT_2_ART = T.TARO_ANGLIT_2_ART#(lf)#(tab)#(tab)#(tab)--)#(lf)#(lf)--------------------הזמנות------------------#(lf)#(lf),Orders as (#(lf)SELECT #(lf)#(lf)'1' as 'EntityID'#(lf)        ,CAST(HZ.MSPR_HZMNH AS VARCHAR) AS 'OrderID'#(lf)#(tab)#(tab),1 AS 'OrderLineNumber'#(lf)#(tab)#(tab),'Orders' AS 'DocName'#(lf)#(tab)#(tab),CAST(CONVERT(INT, CONVERT(VARCHAR,HZ.QOD_MQBL))as varchar) AS 'AccountKey' -- customer from invoices in case you need just invoices #(lf)#(tab)#(tab),TRY_CAST(SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2) AS date) as 'תאריך אספקה'#(lf)        ,TRY_CAST(SUBSTRING(HZ.T_HZMNH,1,4) + '-' + SUBSTRING(HZ.T_HZMNH,5,2) + '-' + SUBSTRING(HZ.T_HZMNH,7,2) AS date) as 'Date'#(lf)#(tab)#(tab),HZ.OrderCreateTime AS 'OrderCreateTime'#(lf)#(tab)#(tab),null AS 'Time'#(lf)#(tab)#(tab),cast(CONVERT(INT, CONVERT(VARCHAR,HZ.AISH_MCIROT)) as varchar) AS 'AgentKey' #(lf)#(tab)#(tab),cast(CONVERT(INT, CONVERT(VARCHAR,HZ.MOTSR_MOZMN)) as varchar)+ '-' + cast(CONVERT(INT, CONVERT(VARCHAR,HZ.MOTSR_MOZMN)) as varchar) AS 'ItemKey'#(lf)#(tab)#(tab)--,it.Article_Description#(lf)#(tab)#(tab)--,CAST('1' as varchar) + CAST(CONVERT(INT, CONVERT(VARCHAR, i.BRANCH)) as varchar) AS 'BranchKey'#(lf)#(tab)#(tab),null AS 'EmployeeKey'#(lf)#(tab)#(tab),null AS 'חבר מועדון'#(lf)#(tab)#(tab)--,(1 - (1 - ii.[T$PERCENT] / 100) * (1 - i.[T$PERCENT] / 100)) AS 'DiscountPercent' -- the DiscountPercent for the invoice and invoice line#(lf)#(tab)#(tab),null AS 'DiscountPercent'#(lf)#(tab)#(tab) --,(1 - (1 - ii.[T$PERCENT] / 100) * (1 - i.[T$PERCENT] / 100)) * ii.TQUANT / 1000 * ROUND(ii.PRICE, 2) * ii.IEXCHANGE AS 'LineTotalDiscount' -- the discount from gross price to the net#(lf)#(tab)#(tab),NULL AS 'LineTotalDiscount'#(lf)#(tab)#(tab)--,ROUND(ii.PRICE, 2) * ii.IEXCHANGE AS 'UnitGrossPrice'#(lf)#(tab)#(tab),NULL AS 'UnitGrossPrice'#(lf)#(tab)#(tab)--,ROUND(ii.PRICE * (1 - ii.[T$PERCENT] / 100) * (1 - i.[T$PERCENT] / 100), 2) * ii.IEXCHANGE AS 'UnitNetPrice'#(lf)#(tab)#(tab),CASE#(lf)#(tab)         WHEN HZ.MTBE = '$' THEN MCHIR_ICH#(lf)#(tab)#(tab)   --THEN CAST(HZ.MCHIR_ICH AS decimal (12,4))#(lf)#(tab)         ELSE CAST(HZ.MCHIR_ICH *(1/SM.NEW_SHER)  AS decimal (12,4))#(lf)         END AS 'UnitNetPriceUSD'#(lf)#(tab)#(tab),HZ.CMOT_MOZMNT AS 'Quantity'#(lf)#(tab)#(tab),HZ.CMOT_SHSOPQH AS 'QuantitySupply'#(lf)#(tab)#(tab),HZ.CMOT_MOZMNT - HZ.CMOT_SHSOPQH AS 'QuantityLeft'#(lf)#(tab)#(tab),NULL AS 'LineTotalCost'#(lf)#(tab)#(tab),CASE#(lf)#(tab)         WHEN HZ.MTBE = '$'#(lf)#(tab)#(tab)     THEN CAST((HZ.MCHIR_ICH)*CMOT_MOZMNT AS decimal (12,4))#(lf)#(tab)         ELSE CAST(HZ.MCHIR_ICH*HZ.CMOT_MOZMNT*(1/SM.NEW_SHER) AS decimal (12,4))#(lf)         END AS 'LineTotalNetUSD'#(lf)#(tab)#(tab),CASE#(lf)#(tab)         WHEN HZ.MTBE = '$'#(lf)#(tab)#(tab)     THEN CAST((HZ.MCHIR_ICH)*(HZ.CMOT_MOZMNT - HZ.CMOT_SHSOPQH) AS decimal (12,4))#(lf)#(tab)         ELSE CAST(HZ.MCHIR_ICH*(HZ.CMOT_MOZMNT - HZ.CMOT_SHSOPQH)*(1/SM.NEW_SHER) AS decimal (12,4))#(lf)         END AS 'LineTotalBalanceUSD'#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(lf)#(tab)#(tab),CASE#(lf)#(tab)         WHEN HZ.MTBE = '$'#(lf)#(tab)#(tab)     THEN CAST(HZ.MCHIR_ICH*SM.NEW_SHER AS decimal (12,4))#(lf)#(tab)         ELSE CAST(HZ.MCHIR_ICH AS decimal (12,4))#(lf)         END AS 'UnitNetPriceNIS'#(lf)#(tab)    ,CASE#(lf)#(tab)         WHEN HZ.MTBE = '$'#(lf)#(tab)#(tab)     THEN CAST((HZ.MCHIR_ICH*SM.NEW_SHER)*CMOT_MOZMNT AS decimal (12,4))#(lf)#(tab)         ELSE CAST(HZ.MCHIR_ICH*HZ.CMOT_MOZMNT AS decimal (12,4))#(lf)         END AS 'LineTotalNetNIS'#(lf)#(lf)#(tab)#(tab) ,Case#(lf)#(tab)#(tab)#(tab)WHEN OP.CFPremium >0#(lf)#(tab)#(tab)#(tab)#(tab)THEN 1#(lf)#(tab)#(tab)#(tab)ELSE 0#(lf)#(tab)#(tab)END AS 'PremiumFlag'#(lf)#(tab)#(tab),CONVERT(INT, CONVERT(VARCHAR,SUBSTRING(HZ.T_ASPQH,1,4) + SUBSTRING(HZ.T_ASPQH,5,2))) AS YearMonth#(lf)#(tab)#(tab)----#(lf)#(tab)#(tab),HZ.OrderStatus AS 'סטטוס'#(lf)#(tab)#(tab),NULL AS 'ChargeFlag'  #(lf)#(tab)#(tab),NULL AS 'סטטוס ליקוט כותרת'#(lf)#(tab)    ,NULL AS 'סטטוס ליקוט שורה'#(lf)#(tab)#(tab),NULL AS 'דגל סטורנו'#(lf)#(tab)#(tab)#(lf)#(tab)#(tab),CASE#(lf)#(tab)#(tab)#(tab)WHEN DATEDIFF(dd,#(lf)#(tab)#(tab)#(tab)CAST(SUBSTRING(HZ.T_HZMNH,1,4) + '-' + SUBSTRING(HZ.T_HZMNH,5,2) + '-' + SUBSTRING(HZ.T_HZMNH,7,2) as Date)#(lf)#(tab)#(tab)#(tab),CAST(SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2) AS Date)) > 60#(lf)#(tab)#(tab)#(tab)#(tab)THEN 1#(lf)#(tab)#(tab)#(tab)ELSE 2#(lf)#(tab)#(tab)END as 'SpotFlag'#(lf)#(tab)#(tab),CASE#(lf)#(tab)#(tab)#(tab)WHEN DATEDIFF(dd,#(lf)#(tab)#(tab)#(tab)CAST(SUBSTRING(HZ.T_ASPQH,1,4) + '-' + SUBSTRING(HZ.T_ASPQH,5,2) + '-' + SUBSTRING(HZ.T_ASPQH,7,2) AS Date)#(lf)#(tab)#(tab)#(tab),GETDATE()) > 80 AND HZ.OrderStatus in (1,2)#(lf)#(tab)#(tab)#(tab)#(tab)THEN 1#(lf)#(tab)#(tab)#(tab)ELSE 0#(lf)#(tab)#(tab)END as 'OldFlag'#(lf)#(tab)#(tab),QOD_SHOLCH as 'SupplierWarehouse'#(lf)#(tab)#(tab),OP.ActionType AS 'TransactionType'#(lf)#(tab)#(tab),t.PO_Family as 'Family'#(lf)#(tab)#(tab),CASE #(lf)#(tab)#(tab)#(tab)WHEN HZ.OrderStatus = 4 or HZ.OrderStatus = 5#(lf)#(tab)#(tab)#(tab)#(tab)THEN NULL#(lf)#(tab)#(tab)#(tab)WHEN t.PO_Family = 2#(lf)#(tab)#(tab)#(tab)#(tab)THEN CASE#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)WHEN isNULL(ROUND(OP.OriginalQty/OP.QtyTonePerContract,0),0) > 0 #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)THEN ((ROUND(OP.OriginalQty/OP.QtyTonePerContract,0)-ISNULL(bc.Totalcontracts,0))/ROUND(OP.OriginalQty/OP.QtyTonePerContract,0))*HZ.CMOT_MOZMNT ---- כמות שלא תומחרה =כמות הזמנה כפול(סך הכל חוזים אפשריים - חוזים שנחתמו חלקי סך כל החוזים האפשריים#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)ELSE POB.Balance#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)END#(lf)#(tab)#(tab)#(tab)WHEN t.PO_Family = 1#(lf)#(tab)#(tab)#(tab)#(tab)Then Null#(lf)#(tab)#(tab)#(tab)ELSE NULL#(lf)#(tab)#(tab)END AS BasisQTY#(lf)#(tab)#(tab),CASE #(lf)#(tab)#(tab)#(tab)WHEN POB.Balance IS NULL THEN HZ.CMOT_MOZMNT#(lf)#(tab)#(tab)#(tab)WHEN HZ.OrderStatus = 4 or HZ.OrderStatus = 5#(lf)#(tab)#(tab)#(tab)#(tab)Then POB.Balance#(lf)#(tab)#(tab)#(tab)WHEN t.PO_Family = 2#(lf)#(tab)#(tab)#(tab)#(tab)THEN CASE#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)WHEN isNULL(ROUND(OP.OriginalQty/OP.QtyTonePerContract,0),0) > 0 #(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)THEN (ISNULL(bc.Totalcontracts,0)/ROUND(OP.OriginalQty/OP.QtyTonePerContract,0))*HZ.CMOT_MOZMNT ---- כמות שתומחרה =כמות הזמנה כפול חוזים שנחתמו חלקי סך כל החוזים האפשריים#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)ELSE NULL#(lf)#(tab)#(tab)#(tab)#(tab)#(tab)END#(lf)#(tab)#(tab)#(tab)WHEN t.PO_Family = 1#(lf)#(tab)#(tab)#(tab)#(tab)Then POB.Balance#(lf)#(tab)#(tab)#(tab)ELSE  POB.Balance#(lf)#(tab)#(tab)END AS FlatQTY#(lf)#(tab)#(tab)--,bc.TotalContracts as ContractSigned#(lf)#(tab)#(tab),POL_StockExchangeDate#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(lf)#(tab)#(tab),sf.PF_GeneralFactor#(lf)#(tab)#(tab),POL_PremiumPrice#(lf)#(tab)#(tab),POL_StockMarketPrice#(lf)#(tab)#(tab),smp.SMP_Symbol#(lf)#(tab)#(tab),CAST (smpe.SMPE_TempPrice as float) as SMPE_TempPrice#(lf)#(tab)#(tab),ACT.TAOR_AOPTSIH as OrderType#(lf)#(tab)#(tab),POL.POL_StockMarketTempPriceForNoneClosed as MarketTempPrice#(lf)#(tab)#(tab),POL_FinalPriceForClosedContract#(tab)#(tab)#(tab)as FinalPriceClosedContract#(lf)#(lf)#(tab)#(tab),OP.CFFlat#(lf)#(tab)#(tab),OP.CFFLAT_CC#(lf)#(tab)#(tab),OP.CFFLAT_NCC#(lf)#(tab)#(tab),OP.FotPrice#(lf)#(tab)#(tab),OP.FOT_CC#(lf)#(tab)#(tab),OP.FOT_NCC#(lf)#(tab)#(tab),OP.OriginalQty#(lf)#(tab)#(tab),OP.DollarRate#(lf)#(tab)#(tab),POL.POL_StockMarketTempPriceForNoneClosed#(lf)#(tab)#(tab)--,CASE#(lf)#(tab)#(tab)--#(tab)when POL_FinalPriceForClosedContract is not null or OP.CFPremium = 0 then sum(HZ.CMOT_MOZMNT) over (partition by it.Article_Description order by HZ.OrderCreateTime desc)#(lf)#(tab)#(tab)--#(tab)else 0#(lf)#(tab)#(tab)--END as 'Recent Orders Step Count'#(lf)#(tab)#(tab),GETDATE() AS RowInsertDatetime#(lf)FROM [HZMNOT] HZ#(lf)LEFT JOIN (#(lf)           SELECT *, #(lf)                    CASE#(lf)                    #(tab)WHEN sher = 0#(lf)                    #(tab)THEN FIRST_VALUE(sher) OVER (PARTITION BY value_partition ORDER BY Tarikh) #(lf)                    #(tab)ELSE sher#(lf)                    END AS new_sher#(lf)            FROM (#(lf)                     SELECT *#(lf)#(tab)#(tab)#(tab)#(tab)#(tab) ,SUM(CASE WHEN sher=0 THEN 0 ELSE 1 END) OVER (ORDER BY tarikh ) AS value_partition#(lf)                     FROM SHERI_MTBE) m#(lf)           #(lf)           ) SM #(lf)ON SM.TARIKH=HZ.T_HZMNH#(lf)Left Join OrderPrices OP#(lf)#(tab)ON op.OrderID = Hz.MSPR_HZMNH#(lf)LEFT JOIN PurchaseOrderTypes t#(lf)#(tab)ON t.PO_TypeID = OP.ActionType#(lf)Left Join BasisContract bc#(lf)#(tab)ON op.OrderID = bc.ID#(lf)----#(lf)left join SalesOrder2Purchase sol#(lf)#(tab)on HZ.MSPR_HZMNH = sol.POSO_SOID#(lf)left join PurchaseOrderLines POL#(lf)#(tab)on sol.POSO_POID = pol.POL_OrderID and sol.POSO_POLID = pol.POL_LineID#(lf)left join ProductStockMarketFactors sf#(lf)#(tab)on pol.POL_ProductID = sf.PF_ProductID and POL.POL_FactorCode = sf.PF_FactorID #(lf)left join StockMarketProduct smp#(lf)#(tab)on POL.POL_ProductID = smp.SMP_ProductID AND MONTH(POL.POL_StockExchangeDate) = smp.SMP_MonthID#(lf)left join SMPE as smpe --(select * from SMPE where  rownum = 1) smpe#(lf)#(tab)on POL.POL_ProductID = smpe.SMPE_ProductID AND YEAR(POL.POL_StockExchangeDate) = smpe.SMPE_Year AND MONTH(POL.POL_StockExchangeDate) = smpe.SMPE_Month#(lf)Left Join viewPurchaseOrderBalance POB#(lf)#(tab)ON POL.POL_OrderID = POB.POID AND POL.POL_LineID = POB.POLineID#(lf)LEFT JOIN TBLT_PEOLOT_HZMNH_T_MSHLOCH ACT#(lf)#(tab)ON HZ.actionType = ACT.MS_AOPTSIH#(lf)--LEFT JOIN items it#(lf)--#(tab)ON it.ItemKey = HZ.MOTSR_MOZMN#(lf)WHERE Cast(SUBSTRING(T_HZMNH,1,4) as int) >=2018 and Cast(SUBSTRING(T_HZMNH,1,4) as int) <= Year(Getdate())#(lf)AND HZ.OrderStatus<>3#(lf)AND HZ.ActionType IN (1,11,12,14)--NOT IN (2,6,7,10/*,11*/)#(lf)#(lf)--AND HZ.MSPR_HZMNH IN ('139761')--,'136892','136030','136532','137242', '135805')--'135671'-- '136227' --'133900'#(lf)--AND SUBSTRING(HZ.T_ASPQH,1,4) = 2025 AND SUBSTRING(HZ.T_ASPQH,5,2) = 01#(lf))#(lf)#(lf)#(lf),ordersBase as (#(lf)SELECT#(tab)o.*#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(lf)#(tab)#(tab),CASE #(lf)#(tab)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN o.FlatQTY * FinalPriceClosedContract#(lf)#(tab)#(tab)#(tab)ELSE LineTotalBalanceUSD#(lf)#(tab)#(tab) END#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS LineTotalFlatBalanceUSD#(lf)#(tab)#(tab),CASE #(lf)#(tab)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN o.FlatQTY * FinalPriceClosedContract#(lf)#(tab)#(tab)#(tab)ELSE LineTotalNetUSD#(lf)#(tab)#(tab) END#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS LineTotalFlatUSD#(lf)#(tab)#(tab),CASE #(lf)#(tab)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN o.BasisQTY * MarketTempPrice#(lf)#(tab)#(tab)#(tab)ELSE 0#(lf)#(tab)#(tab) END#(lf)#(tab)#(tab) +#(lf)#(tab)#(tab)CASE #(lf)#(tab)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN o.FlatQTY * FinalPriceClosedContract#(lf)#(tab)#(tab)#(tab)ELSE LineTotalNetUSD#(lf)#(tab)#(tab) END#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS LineTotalFlatValueUSD#(lf)#(lf)    ,CASE #(lf)        WHEN o.PremiumFlag = 1 THEN o.CFFLAT_CC #(lf)        ELSE o.CFFlat #(lf)    END AS UnitPriceCF,#(lf)    #(lf)    -- Calculate LineTotalCF_USD using PremiumFlag and FlatQTY (or OriginalQty)#(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 THEN o.CFFLAT_CC * o.FlatQTY #(lf)        ELSE o.CFFlat * o.OriginalQty #(lf)    END AS LineTotalCF_USD,#(lf)    #(lf)    -- Calculate LineTotalCF_NIS (apply DollarRate to the above)#(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 THEN o.CFFLAT_CC * o.FlatQTY * o.DollarRate #(lf)        ELSE o.CFFlat * o.DollarRate * o.OriginalQty #(lf)    END AS LineTotalCF_NIS,#(lf)    #(lf)    -- Calculate UnitPriceFOT based on the PremiumFlag#(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 THEN o.FOT_CC #(lf)        ELSE o.FotPrice #(lf)    END AS UnitPriceFOT,#(lf)    #(lf)    -- Calculate LineTotalFOT_USD using PremiumFlag and FlatQTY (or OriginalQty)#(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 THEN o.FOT_CC * o.FlatQTY #(lf)        ELSE o.FotPrice * o.OriginalQty #(lf)    END AS LineTotalFOT_USD,#(lf)    #(lf)    -- Calculate LineTotalFOT_NIS (apply DollarRate to the above)#(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 THEN o.FOT_CC * o.FlatQTY * o.DollarRate #(lf)        ELSE o.FotPrice * o.DollarRate * o.OriginalQty #(lf)    END AS LineTotalFOT_NIS,#(lf)    #(lf)    -- Use BasisQTY to compute the flat value balance in USD#(lf)    CASE#(lf)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN (o.POL_StockMarketTempPriceForNoneClosed * o.BasisQTY)+(o.FlatQTY * FinalPriceClosedContract) #(lf)#(tab)#(tab)ELSE LineTotalBalanceUSD#(lf)#(tab)#(tab)END AS LineTotalFlatValueBalanceUSD,#(lf)    #(lf)    -- Calculate MarketTempPriceCFF_USD and its related total using BasisQTY#(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 THEN o.CFFLAT_NCC #(lf)        ELSE NULL #(lf)    END AS MarketTempPriceCFF_USD,#(lf)    #(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 THEN (o.CFFLAT_NCC * o.BasisQTY) + (o.FlatQTY * o.CFFLAT_NCC)#(lf)        ELSE QuantityLeft*o.CFFlat #(lf)    END AS LineTotalFlatValueBalanceCFFUSD,#(lf)#(tab)CASE #(lf)        WHEN o.PremiumFlag = 1 THEN (o.FlatQTY * o.CFFLAT_NCC)#(lf)        ELSE QuantityLeft*o.CFFlat #(lf)    END AS LineTotalFlatBalanceCFFUSD,#(lf)    #(lf)    -- Calculate MarketTempPriceFOT_USD and its related total using BasisQTY#(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 THEN o.FOT_NCC #(lf)        ELSE NULL #(lf)    END AS MarketTempPriceFOT_USD,#(lf)    #(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 THEN  (o.FOT_NCC * o.BasisQTY) + (o.FlatQTY * o.FOT_NCC)--(o.FOT_NCC * o.BasisQTY)--#(lf)        ELSE QuantityLeft*o.FotPrice #(lf)    END AS LineTotalFlatValueBalanceFOTUSD,#(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 THEN (o.FOT_NCC * o.FlatQTY)#(lf)        ELSE QuantityLeft*o.FotPrice #(lf)    END AS LineTotalFlatBalanceFOTUSD,#(lf)#(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 #(lf)             THEN (o.CFFLAT_NCC * o.BasisQTY) + (o.CFFLAT_CC * o.FlatQTY)#(lf)        ELSE (o.CFFlat * o.OriginalQty)#(lf)    END AS LineTotalFlatValueCFFUSD,#(lf)    #(lf)    -- Combined calculation for FOT pricing#(lf)    CASE #(lf)        WHEN o.PremiumFlag = 1 #(lf)             THEN (o.FOT_NCC * o.BasisQTY) + (o.FOT_CC * o.FlatQTY)#(lf)        ELSE (o.FotPrice * o.OriginalQty)#(lf)    END AS LineTotalFlatValueFOTUSD,#(lf)#(lf)#(tab)-- Priced quantity: zeroed on rows whose paired price hasn't landed yet, so averages aren't diluted by unpriced rows#(lf)#(tab)CASE#(lf)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN CASE WHEN ISNULL(FinalPriceClosedContract,0) = 0 THEN 0 ELSE o.Quantity END#(lf)#(tab)#(tab)ELSE CASE WHEN ISNULL(o.UnitNetPriceUSD,0) = 0 THEN 0 ELSE o.Quantity END#(lf)#(tab)END AS PricedQuantity,#(lf)#(tab)CASE#(lf)#(tab)#(tab)WHEN o.PremiumFlag = 1 AND ISNULL(MarketTempPrice,0) <> 0 THEN o.BasisQTY#(lf)#(tab)#(tab)ELSE 0#(lf)#(tab)END AS PricedBasisQTY,#(lf)#(tab)CASE#(lf)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN CASE WHEN ISNULL(FinalPriceClosedContract,0) = 0 THEN 0 ELSE o.FlatQTY END#(lf)#(tab)#(tab)ELSE CASE WHEN ISNULL(o.UnitNetPriceUSD,0) = 0 THEN 0 ELSE o.FlatQTY END#(lf)#(tab)END AS PricedFlatQTY,#(lf)#(tab)-- CF-specific priced quantity: a row can have a valid Order/FOT price but a blank/zero CF price, so CF averages need their own zero-check#(lf)#(tab)CASE#(lf)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN CASE WHEN ISNULL(o.CFFLAT_CC,0) = 0 THEN 0 ELSE o.Quantity END#(lf)#(tab)#(tab)ELSE CASE WHEN ISNULL(o.CFFlat,0) = 0 THEN 0 ELSE o.Quantity END#(lf)#(tab)END AS PricedQuantityCF,#(lf)#(tab)-- FOT-specific priced quantity: same idea for the FOT price view#(lf)#(tab)CASE#(lf)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN CASE WHEN ISNULL(o.FOT_CC,0) = 0 THEN 0 ELSE o.Quantity END#(lf)#(tab)#(tab)ELSE CASE WHEN ISNULL(o.FotPrice,0) = 0 THEN 0 ELSE o.Quantity END#(lf)#(tab)END AS PricedQuantityFOT,#(lf)#(tab)-- Combined open-quantity (Basis+Flat as QuantityLeft on non-premium rows) zeroed per price type, to match LineTotalFlatValueBalanceCFFUSD/FOTUSD's own grain#(lf)#(tab)CASE#(lf)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN CASE WHEN ISNULL(o.CFFLAT_NCC,0) = 0 THEN 0 ELSE o.BasisQTY+o.FlatQTY END#(lf)#(tab)#(tab)ELSE CASE WHEN ISNULL(o.CFFlat,0) = 0 THEN 0 ELSE o.QuantityLeft END#(lf)#(tab)END AS PricedOpenQtyCF,#(lf)#(tab)CASE#(lf)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN CASE WHEN ISNULL(o.FOT_NCC,0) = 0 THEN 0 ELSE o.BasisQTY+o.FlatQTY END#(lf)#(tab)#(tab)ELSE CASE WHEN ISNULL(o.FotPrice,0) = 0 THEN 0 ELSE o.QuantityLeft END#(lf)#(tab)END AS PricedOpenQtyFOT,#(lf)#(lf)#(tab)CASE#(lf)#(tab)#(tab)WHEN o.[סטטוס] = 1 then 'Open Order'#(lf)#(tab)#(tab)else null#(lf)#(tab)END AS 'Open_Slicer'#(lf)/*#(tab)#(tab),CASE#(lf)#(tab)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN o.LineTotalFlatValueBalanceCFFUSD + LineTotalCF_USD#(lf)#(tab)#(tab)#(tab)ELSE LineTotalCF_USD END#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS LineTotalFlatValueCFFUSD#(lf)#(tab)#(tab),CASE#(lf)#(tab)#(tab)#(tab)WHEN o.PremiumFlag = 1 THEN o.LineTotalFlatValueBalanceFOTUSD + LineTotalCF_USD#(lf)#(tab)#(tab)#(tab)ELSE LineTotalCF_USD END#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)#(tab)AS LineTotalFlatValueFOTUSD#(lf)*/#(lf)#(lf)FROM Orders o#(lf)where 1=1#(lf)--and ItemKey = '42-42'#(lf)--order by OrderCreateTime desc#(lf)#(lf))#(lf)#(lf)/* Article map for the Last Qty Steps tail (same mapping as dimItemsSimple / factLastQtySteps #am) */#(lf),LQ_ArticleMap as (#(lf)  SELECT cast(CONVERT(INT, CONVERT(VARCHAR,M.QOD_MOTSR)) as varchar)+ '-' + cast(CONVERT(INT, CONVERT(VARCHAR,M.QOD_MOTSR)) as varchar) AS ItemKey#(lf)        ,A.ART_DESC AS Article#(lf)  FROM MOTSRIM M#(lf)  JOIN (SELECT * FROM [dbo].[TRGOM_ANGLIT]#(lf)        WHERE SOG_PRIT_SOCN_BNQ_TM_SH_CHBRH = NCHAR(1508)) T#(lf)       ON M.QOD_MOTSR = T.QOD#(lf)  JOIN (SELECT distinct [TARO_ANGLIT_2_ART],[ART_DESC] FROM [dbo].[TRGOM_ANGLIT]#(lf)        WHERE SOG_PRIT_SOCN_BNQ_TM_SH_CHBRH = NCHAR(1508) and ART_DESC<>'' and TARO_ANGLIT_3_PNL_HCNSH = 8052) A#(lf)       ON A.TARO_ANGLIT_2_ART = T.TARO_ANGLIT_2_ART#(lf))#(lf)#(lf)/* LQ_RunQtyBefore*: priced units sold in the same Article AFTER this order#(lf)   (newest first: OrderCreateTime DESC, OrderID DESC), i.e. the tail position this#(lf)   order starts at. NULL for rows outside the tail (unpriced, or no Article).#(lf)   Three views, each with its OWN tail: LQ_RunQtyBefore = Order view (PricedQuantity),#(lf)   ...CF = CIF view (PricedQuantityCF), ...FOT = FOT view (PricedQuantityFOT).#(lf)   A row with no price in a view (blank/zero) is skipped in that view: it takes no tail#(lf)   position and adds nothing to the average. Drives the Last Qty Steps (Orders) measures;#(lf)   same ordering as factLastQtySteps. */#(lf)SELECT ob.*,#(lf)       CASE WHEN am.Article IS NOT NULL AND ISNULL(ob.PricedQuantity,0) > 0 AND ob.LineTotalFlatValueUSD IS NOT NULL THEN#(lf)            ISNULL(SUM(ob.PricedQuantity)#(lf)                   OVER (PARTITION BY am.Article,#(lf)                                      CASE WHEN ISNULL(ob.PricedQuantity,0) > 0 AND ob.LineTotalFlatValueUSD IS NOT NULL THEN 1 ELSE 0 END#(lf)                         ORDER BY ob.OrderCreateTime DESC, ob.OrderID DESC#(lf)                         ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING), 0)#(lf)       END AS LQ_RunQtyBefore,#(lf)       CASE WHEN am.Article IS NOT NULL AND ISNULL(ob.PricedQuantityCF,0) > 0 AND ob.LineTotalFlatValueCFFUSD IS NOT NULL THEN#(lf)            ISNULL(SUM(ob.PricedQuantityCF)#(lf)                   OVER (PARTITION BY am.Article,#(lf)                                      CASE WHEN ISNULL(ob.PricedQuantityCF,0) > 0 AND ob.LineTotalFlatValueCFFUSD IS NOT NULL THEN 1 ELSE 0 END#(lf)                         ORDER BY ob.OrderCreateTime DESC, ob.OrderID DESC#(lf)                         ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING), 0)#(lf)       END AS LQ_RunQtyBeforeCF,#(lf)       CASE WHEN am.Article IS NOT NULL AND ISNULL(ob.PricedQuantityFOT,0) > 0 AND ob.LineTotalFlatValueFOTUSD IS NOT NULL THEN#(lf)            ISNULL(SUM(ob.PricedQuantityFOT)#(lf)                   OVER (PARTITION BY am.Article,#(lf)                                      CASE WHEN ISNULL(ob.PricedQuantityFOT,0) > 0 AND ob.LineTotalFlatValueFOTUSD IS NOT NULL THEN 1 ELSE 0 END#(lf)                         ORDER BY ob.OrderCreateTime DESC, ob.OrderID DESC#(lf)                         ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING), 0)#(lf)       END AS LQ_RunQtyBeforeFOT#(lf)FROM ordersBase ob#(lf)LEFT JOIN LQ_ArticleMap am ON am.ItemKey = ob.ItemKey"])
 				in
 				    Source
 
