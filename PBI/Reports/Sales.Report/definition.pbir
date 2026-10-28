@@ -3,7 +3,7 @@
   "version": "4.0",
   "datasetReference": {
     "byConnection": {
-      "connectionString": "Data Source=\"powerbi://api.powerbi.com/v1.0/myorg/ADM - Tests\";initial catalog=\"ADM - DS\";access mode=readonly;integrated security=ClaimsToken;semanticmodelid=2de1594d-0715-4d48-813d-6f713d3c30f0"
+      "connectionString": "Data Source=\"powerbi://api.powerbi.com/v1.0/myorg/ADM - Dev\";initial catalog=\"ADM - DS\";access mode=readonly;integrated security=ClaimsToken;semanticmodelid=36d2ab96-9e4d-492f-bcce-00d48698673e"
     }
   }
 }

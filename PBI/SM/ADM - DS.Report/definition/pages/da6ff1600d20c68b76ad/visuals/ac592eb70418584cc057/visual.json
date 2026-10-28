@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "ac592eb70418584cc057",
   "position": {
-    "x": 0,
-    "y": 0,
+    "x": 1005.0377833753148,
+    "y": 41.5617128463476,
     "z": 0,
-    "height": 33.308550185873607,
-    "width": 274.79553903345726
+    "height": 90.6801007556675,
+    "width": 274.55919395465992
   },
   "visual": {
     "visualType": "slicer",
@@ -80,7 +80,7 @@
                           [
                             {
                               "Literal": {
-                                "Value": "'Corn'"
+                                "Value": "'SBM'"
                               }
                             }
                           ]

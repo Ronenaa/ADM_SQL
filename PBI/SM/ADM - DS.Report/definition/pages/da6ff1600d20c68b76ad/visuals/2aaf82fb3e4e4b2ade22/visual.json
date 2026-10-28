@@ -1,5 +1,5 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "2aaf82fb3e4e4b2ade22",
   "position": {
     "x": 0,
@@ -60,27 +60,11 @@
                       "Entity": "factOrders"
                     }
                   },
-                  "Property": "Switch Measures Show - Basis"
+                  "Property": "Switch Measures Price"
                 }
               },
-              "queryRef": "factOrders.Switch Measures Show - Basis",
-              "nativeQueryRef": "qty",
-              "displayName": "qty"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "factOrders"
-                    }
-                  },
-                  "Property": "Switch Measures Price - Flat Value"
-                }
-              },
-              "queryRef": "factOrders.Switch Measures Price - Flat Value",
-              "nativeQueryRef": "price",
-              "displayName": "price"
+              "queryRef": "factOrders.Switch Measures Price",
+              "nativeQueryRef": "Switch Measures Price"
             }
           ]
         }
@@ -193,20 +177,6 @@
         }
       },
       {
-        "name": "15b8f9270068db614063",
-        "field": {
-          "Measure": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "factOrders"
-              }
-            },
-            "Property": "Switch Measures Price - Flat Value"
-          }
-        },
-        "type": "Advanced"
-      },
-      {
         "name": "3d7612c27e900829ca60",
         "field": {
           "Column": {
@@ -219,20 +189,6 @@
           }
         },
         "type": "Categorical"
-      },
-      {
-        "name": "cf1d6ab940887958a0e3",
-        "field": {
-          "Measure": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "factOrders"
-              }
-            },
-            "Property": "Switch Measures Show - Basis"
-          }
-        },
-        "type": "Advanced"
       }
     ]
   }

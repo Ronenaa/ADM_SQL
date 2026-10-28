@@ -149,6 +149,9 @@ before the incoming change — a one-step-back safety copy, not a fixed historic
 ### 13. Last Qty Steps (Orders): CIF/FOT tail skips unpriced orders (2026-10-21 — committed; needs model refresh + publish)
 An order with no CIF price (e.g. 147756, 38 t) was in the shared Order-view tail at value 0, so "Last 500" CIF read ~$310 instead of ~$335. `factOrders` SQL now adds `LQ_RunQtyBeforeCF` / `LQ_RunQtyBeforeFOT` (tail positions over `PricedQuantityCF` / `PricedQuantityFOT`); the Last Qty Steps (Orders) measures `SWITCH` on `PriceType[ID]` to use the view's own column. Order view is unchanged (verified: 149,120 before = after for Corn step 500). Details in `sql/factLastQtySteps/README.md`. The generated mirrors `sql/incident_2026-10/queries/factOrders__*.sql` and `02_measure_all.sql` were not regenerated.
 
+### 12. Swap source must be a real ship purchase (2026-10-21, PREPARED — not committed, pending client approval)
+Internal swap POs such as 20007741 (`2000%`, supplier 146, NIS, no ship) were treated as 'P' purchases and could win `exchange_priced` as a swap's source, instead of the last real ship (e.g. 20007011, MARO MARO). Fix: `exchange_p_orders` now keeps only orders that join `PurchaseOrderLines → ShipsArrivals → ShipList` (same join as `ship_sub`). Swaps whose only candidates have no ship now get no price. Edited `fix/factGain__fixed.sql` directly and pushed to the TMDL with `apply_to_tmdl.py` — re-running `build_materialized.py` regenerates from commit 96f01d2 and would drop it. The diagnostic queries used to find the cause were temporary and removed. Verify on STG: swap row's `MatchedImportPO` for 20007741-style cases is now the ship-backed order.
+
 ### 11. Heavy CTEs materialized into temp tables (2026-10-12)
 Lock-incident fix (see `sql/incident_2026-10/`). SQL Server re-runs a CTE at every reference, and
 `purchase_orders` (with the whole `totals` → `exchange_movements` → `exchange_priced` chain and the
@@ -260,6 +263,21 @@ Inline comments in the CTE mark the original values.
 **Convention: make semantic-model changes (tables, measures, relationships, roles, etc.) through
 the `powerbi-modeling-mcp` tools rather than hand-editing `.tmdl` files directly.** This keeps the
 model internally consistent and avoids malformed TMDL from manual edits.
+
+### factOrders — Avg CF/FOT Price numerator fix (2026-10-28, edited in TMDL, not yet published)
+`AVG Price Switch`/`AVG Price Supply Date Switch` (PriceType 1/2/3 = Order/CF/FOT) disagreed between
+price types: Order matched across both switch chains, but CF and FOT didn't. Cause: `Avg Unit Price`
+(Order, PriceType 1) already uses the Basis-split-aware `Total Sales Flat + FlatValue Switch`
+(`LineTotalFlatValueCFFUSD`/`FOTUSD`) for its CF/FOT legs too, but the standalone `Avg CF Price` /
+`Avg FOT Price` measures (and their "By Supply Date" twins) still divided by the older
+`Total Sales CF`/`Total Sales FOT` (`LineTotalCF_USD`/`LineTotalFOT_USD`), which don't apply the
+PremiumFlag FlatQTY/BasisQTY split. Fixed `Avg CF Price`/`Avg FOT Price` to use
+`Total Sales CF FlatValue`/`Total Sales FOT FlatValue` instead (already-existing measures reading
+the Basis-aware columns), and made the "By Supply Date" versions wrap `[Avg CF Price]`/`[Avg FOT Price]`
+under `CALCULATE(...,USERELATIONSHIP(...))` rather than recomputing the divide — same pattern as
+`Avg Unit Price By Supply Date`. Two other unused measures (`Avg CF/FOT Price FlatValue By Supply Date`)
+have the same latent bug (denominator `[Total Quantity]` instead of priced quantity) but aren't
+referenced anywhere, so left alone. Not yet tested on STG/Prod or published.
 
 ## 8. Reports (`PBI/Reports/`)
 

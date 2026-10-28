@@ -69,15 +69,15 @@ totals_raw AS (
                     1 / CASE WHEN HC.SHER_MTBE = 0 THEN 1 ELSE HC.SHER_MTBE END
                  )
         END AS LineTotalNetUSD
-    FROM HOTSAOT_COTROT HC
-    LEFT JOIN HOTSAOT_SHOROT HS
+    FROM HOTSAOT_COTROT HC WITH (NOLOCK)
+    LEFT JOIN HOTSAOT_SHOROT HS WITH (NOLOCK)
         ON HC.NOMRTOR = HS.NOMRTOR
     LEFT JOIN PurchaseOrderLines POL
         ON CONCAT(
                CAST(CONVERT(BIGINT, POL.POL_OrderID) AS VARCHAR(20)),
                CAST(POL.POL_LineID AS VARCHAR(10))
            ) = CAST(HS.MS_MSMKH_QSHOR AS VARCHAR(30))
-    LEFT JOIN HOTSAOT_SHROTIM_New HST
+    LEFT JOIN HOTSAOT_SHROTIM_New HST WITH (NOLOCK)
         ON HS.QOD_SHROT = HST.QOD_SHROT
     LEFT JOIN CurrencyConvertion SM
         ON SM.TARIKH = HC.T_ERKH
@@ -186,7 +186,10 @@ SELECT *,
 --------------------------------------------------------------- the below part should be a view is the database ----------------------------------------------------
 ,
 exchange_p_orders AS (
-    -- P-type movements only: the original purchases that exchanges are matched against
+    -- P-type movements only: the original purchases that exchanges are matched against.
+    -- Only orders that arrived on a real ship are candidates (same ShipsArrivals -> ShipList join as
+    -- ship_sub in exchange_priced). A '2000%' order with no ship (e.g. 20007741, an internal swap order
+    -- priced in NIS) is not an import and must never supply the swap's last-import price.
     SELECT
         DeliveredFrom,
         DeliveredFromName,
@@ -201,6 +204,14 @@ exchange_p_orders AS (
         MAX(OrderQuantity)     AS max_OrderQuantity
     FROM #exchange_movements
     WHERE Order_Type = 'P'
+      AND CAST(PurchaseOrderID AS VARCHAR(30)) IN (
+            SELECT CONCAT(
+                       CAST(CONVERT(BIGINT, POL.POL_OrderID) AS VARCHAR(20)),
+                       CAST(POL.POL_LineID AS VARCHAR(10)))
+            FROM PurchaseOrderLines POL
+            JOIN ShipsArrivals sa ON POL.POL_ShipArrivalID = sa.SA_ID
+            JOIN ShipList      sl ON sa.SA_ShipID          = sl.ShipID
+      )
     GROUP BY
         DeliveredFrom, DeliveredFromName,
         PurchaseOrderID, ItemKey,
@@ -343,7 +354,7 @@ LEFT JOIN (select DISTINCT
 		ON CCS.HZMNT_RCSH = POL.POL_SQL_POID
 LEFT JOIN MOTSRIM M
 	ON CCS.QOD_MOTSR = M.QOD_MOTSR
-LEFT JOIN HOTSAOT_SHROTIM_New HST 
+LEFT JOIN HOTSAOT_SHROTIM_New HST WITH (NOLOCK) 
 	ON M.ServiceCode = HST.QOD_SHROT
 	where CAST(SUBSTRING(CCS.T_CHSHBONIT,1,4) + '-' + SUBSTRING(CCS.T_CHSHBONIT,5,2) + '-' + SUBSTRING(CCS.T_CHSHBONIT,7,2) AS DATE) >= @CutoffDate
 
@@ -436,15 +447,15 @@ SELECT
 		END												as DocType
 		,SM.NEW_SHER
 		,NULL											AS MatchedImportPO  -- only Swap rows have this
-FROM HOTSAOT_COTROT HC
-LEFT JOIN HOTSAOT_SHOROT HS ON HC.NOMRTOR = HS.NOMRTOR
+FROM HOTSAOT_COTROT HC WITH (NOLOCK)
+LEFT JOIN HOTSAOT_SHOROT HS WITH (NOLOCK) ON HC.NOMRTOR = HS.NOMRTOR
 LEFT JOIN PurchaseOrderLines POL ON CONCAT(
 										CAST(CONVERT(BIGINT, POL.POL_OrderID) AS VARCHAR(20)),
 										CAST(POL.POL_LineID AS VARCHAR(10))
 									)	
 										= CAST(HS.MS_MSMKH_QSHOR AS VARCHAR(30))
 LEFT JOIN HZMNOT HZ ON (HS.MS_MSMKH_QSHOR = HZ.MSPR_HZMNH)
-LEFT JOIN HOTSAOT_SHROTIM_New HST ON HS.QOD_SHROT = HST.QOD_SHROT
+LEFT JOIN HOTSAOT_SHROTIM_New HST WITH (NOLOCK) ON HS.QOD_SHROT = HST.QOD_SHROT
 LEFT JOIN ShipsArrivals sa ON POL.POL_ShipArrivalID = sa.SA_ID
 LEFT JOIN ShipList sl ON sa.SA_ShipID = sl.ShipID
 LEFT JOIN PurchaseOrder PO ON POL.POL_OrderID = PO.PO_OrderID
