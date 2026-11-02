@@ -3976,11 +3976,17 @@ table factOrders
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	measure 'AVG Sales Price Flat By Supply Date' =
-			
-			
-			CALCULATE([AVG Sales Price Flat]
-			,USERELATIONSHIP(dimDates[Date],factOrders[תאריך אספקה])
-			,USERELATIONSHIP(Sub_DimDates[Date],factOrders[תאריך אספקה])
+			CALCULATE(
+			    DIVIDE(
+			        [Total Sales Flat Switch],
+			        SWITCH(MIN(PriceType[ID]),
+			            2, [Total Priced Quantity CF],
+			            3, [Total Priced Quantity FOT],
+			            [Total Priced Quantity Flat]
+			        )
+			    ),
+			    USERELATIONSHIP(dimDates[Date],factOrders[תאריך אספקה]),
+			    USERELATIONSHIP(Sub_DimDates[Date],factOrders[תאריך אספקה])
 			)
 		lineageTag: 6ff3ef0b-7bf2-486e-8bea-6c1e6906ec8a
 

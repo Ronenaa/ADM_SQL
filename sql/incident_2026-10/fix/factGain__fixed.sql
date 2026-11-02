@@ -179,7 +179,10 @@ SELECT *,
 --------------------------------------------------------------- the below part should be a view is the database ----------------------------------------------------
 ,
 exchange_p_orders AS (
-    -- P-type movements only: the original purchases that exchanges are matched against
+    -- P-type movements only: the original purchases that exchanges are matched against.
+    -- Only orders that arrived on a real ship are candidates (same ShipsArrivals -> ShipList join as
+    -- ship_sub in exchange_priced). A '2000%' order with no ship (e.g. 20007741, an internal swap order
+    -- priced in NIS) is not an import and must never supply the swap's last-import price.
     SELECT
         DeliveredFrom,
         DeliveredFromName,
@@ -194,6 +197,14 @@ exchange_p_orders AS (
         MAX(OrderQuantity)     AS max_OrderQuantity
     FROM #exchange_movements
     WHERE Order_Type = 'P'
+      AND CAST(PurchaseOrderID AS VARCHAR(30)) IN (
+            SELECT CONCAT(
+                       CAST(CONVERT(BIGINT, POL.POL_OrderID) AS VARCHAR(20)),
+                       CAST(POL.POL_LineID AS VARCHAR(10)))
+            FROM PurchaseOrderLines POL
+            JOIN ShipsArrivals sa ON POL.POL_ShipArrivalID = sa.SA_ID
+            JOIN ShipList      sl ON sa.SA_ShipID          = sl.ShipID
+      )
     GROUP BY
         DeliveredFrom, DeliveredFromName,
         PurchaseOrderID, ItemKey,
